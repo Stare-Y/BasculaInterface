@@ -22,7 +22,7 @@ namespace BasculaInterface
 
             if (MauiProgram.NeedManualAsk)
             {
-                _pollingTimer = new(1000);
+                _pollingTimer = new(500);
                 _pollingTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
                 _pollingTimer.AutoReset = true;
             }
