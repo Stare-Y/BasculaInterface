@@ -2,6 +2,6 @@
   "BasculaPort": "COM1",
   "BasculaBauds": 9600,
   "PrinterName": "CutePDF Writer",
-  "NeedManualAsk": true,
+  "NeedManualAsk": false,
   "AskChar": "P"
 }

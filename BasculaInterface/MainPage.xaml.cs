@@ -76,11 +76,15 @@ namespace BasculaInterface
                 {
                     double currentWeight = ParseScreenWeight(readData);
 
-                    PesoLabel.Text = $"{currentWeight - Tara} kg";
+                    DiferenciaLabel.Text = $"{Math.Abs(Tara - currentWeight):0.00} kg";
+
+
+                    PesoLabel.Text = currentWeight.ToString("0.00 kg");
                 }
                 else
                 {
-                    PesoLabel.Text = readData;
+                    double currentWeight = ParseScreenWeight(readData);
+                    PesoLabel.Text = currentWeight.ToString("0.00 kg");
                 }
             });
         }
@@ -89,7 +93,7 @@ namespace BasculaInterface
         {
             Tara = ParseScreenWeight(PesoLabel.Text);
 
-            TaraLabel.Text = Tara.ToString("0.000 kg");
+            TaraLabel.Text = Tara.ToString("0.00 kg");
         }
 
         private double ParseScreenWeight(string value)
@@ -107,24 +111,32 @@ namespace BasculaInterface
 
         private void OnImprimirClicked(object sender, EventArgs e)
         {
+            string fechaHora = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 #if WINDOWS
             PrintDocument document = new();
             document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
 
             document.PrintPage += (sender, e) =>
             {
-                System.Drawing.Font font = new ("Courier New", 10);
-                e.Graphics.DrawString($"COOPERATIVA PEDRO EZQUEDA\nTara: {Tara}\nPeso: {PesoLabel.Text}\nDiferencia: {ParseScreenWeight(PesoLabel.Text)}", font, Brushes.Black, 10, 10);
+                System.Drawing.Font font = new ("Courier New", 16);
+                e.Graphics.DrawString(
+                    $"COOPERATIVA PEDRO EZQUEDA\n" +
+                    $"Fecha: {fechaHora}\n" +
+                    $"Tara: {Tara:0.00} kg\n" +
+                    $"Neto: {PesoLabel.Text}\n" +
+                    $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg", font, Brushes.Black, 10, 10);
             };
 
-            document.Print();
+            Task.Run(() => document.Print());
+
 #endif
         }
 
         private void OnCeroClicked(object sender, EventArgs e)
         {
             Tara = 0;
-            TaraLabel.Text = "0.000 kg";
+            TaraLabel.Text = "0.00 kg";
+            DiferenciaLabel.Text = "0.00 kg";
         }
     }
 

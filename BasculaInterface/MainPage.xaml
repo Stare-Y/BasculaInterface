@@ -29,7 +29,7 @@
                HasShadow="True"
                BorderColor="White">
             <Label x:Name="PesoLabel"
-                   Text="0.000 kg"
+                   Text="0.00 kg"
                    FontSize="144"
                    TextColor="Black"
                    HorizontalTextAlignment="Center"
@@ -47,7 +47,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Label x:Name="TaraLabel"
-                       Text="0.000 kg"
+                       Text="0.00 kg"
                        FontSize="72"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
@@ -76,7 +76,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Label x:Name="DiferenciaLabel"
-                       Text="0.000 kg"
+                       Text="0.00 kg"
                        FontSize="72"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
