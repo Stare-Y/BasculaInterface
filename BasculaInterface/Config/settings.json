@@ -1,0 +1,7 @@
+{
+  "BasculaPort": "COM1",
+  "BasculaBauds": 9600,
+  "PrinterName": "CutePDF Writer",
+  "NeedManualAsk": true,
+  "AskChar": "P"
+}
