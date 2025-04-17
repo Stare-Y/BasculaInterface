@@ -1,6 +1,9 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Printing;
+using System.Globalization;
 using System.IO.Ports;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 namespace BasculaInterface
@@ -10,6 +13,8 @@ namespace BasculaInterface
         private readonly SerialPort _bascula;
 
         private System.Timers.Timer _pollingTimer;
+
+        private int _lecturasFalsas = 0;
 
         public double Tara { get; set; }
 
@@ -22,7 +27,7 @@ namespace BasculaInterface
 
             if (MauiProgram.NeedManualAsk)
             {
-                _pollingTimer = new(500);
+                _pollingTimer = new(MauiProgram.TimerElapse);
                 _pollingTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
                 _pollingTimer.AutoReset = true;
             }
@@ -68,6 +73,7 @@ namespace BasculaInterface
             SerialPort sp = (SerialPort)sender;
             string readData = sp.ReadExisting();
 
+            Debug.WriteLine($"Lectura del puerto {MauiProgram.PortName}: {readData}");
 
 
             MainThread.BeginInvokeOnMainThread(() =>
@@ -98,15 +104,25 @@ namespace BasculaInterface
 
         private double ParseScreenWeight(string value)
         {
-            string clearedString = value.Replace("kg", "", StringComparison.OrdinalIgnoreCase).Trim();
+            var match = Regex.Match(value, @"-?\d+(\.\d+)?");
 
-            if (double.TryParse(clearedString, System.Globalization.NumberStyles.Any,
-                        System.Globalization.CultureInfo.InvariantCulture, out double peso))
+            if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
             {
-                return peso;
+                _lecturasFalsas = 0;
+                return result;
             }
+            else
+            {
+                if (++_lecturasFalsas > 5)
+                {
+                    _lecturasFalsas = 0;
+                    return 0;
+                }
 
-            return 0;
+                Debug.WriteLine($"Conteo de lectura falsa: {_lecturasFalsas}");
+
+                return ParseScreenWeight(PesoLabel.Text);
+            }
         }
 
         private void OnImprimirClicked(object sender, EventArgs e)
@@ -130,6 +146,25 @@ namespace BasculaInterface
             Task.Run(() => document.Print());
 
 #endif
+            EscribirLog($"Tara: {Tara:0.00} kg | " +
+                    $"Neto: {PesoLabel.Text} | " +
+                    $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg");
+        }
+
+        private void EscribirLog(string mensaje)
+        {
+            string logDir = Path.Combine(AppContext.BaseDirectory, "logs");
+            string logPath = Path.Combine(logDir, "log.txt");
+
+            // Crear carpeta si no existe
+            if (!Directory.Exists(logDir))
+                Directory.CreateDirectory(logDir);
+
+            // Abrir, escribir y cerrar el archivo inmediatamente
+            using (StreamWriter writer = new StreamWriter(logPath, append: true))
+            {
+                writer.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {mensaje}");
+            }
         }
 
         private void OnCeroClicked(object sender, EventArgs e)

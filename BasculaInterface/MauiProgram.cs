@@ -10,6 +10,7 @@ public static class MauiProgram
     public static string PrinterName = null!;
     public static bool NeedManualAsk = false;
     public static string AskChar = "P";
+    public static int TimerElapse = 750;
     public static MauiApp CreateMauiApp()
 	{
         LoadSettings();
@@ -52,6 +53,10 @@ public static class MauiProgram
         PrinterName = data["PrinterName"].GetString();
         NeedManualAsk = data["NeedManualAsk"].GetBoolean();
         if (NeedManualAsk)
+        {
             AskChar = data["AskChar"].GetString();
+            TimerElapse = data["TimerElapse"].GetInt32();
+        }
+
     }
 }
