@@ -127,7 +127,7 @@ namespace BasculaInterface
 
         private void OnImprimirClicked(object sender, EventArgs e)
         {
-            string fechaHora = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string fechaHora = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
 #if WINDOWS
             PrintDocument document = new();
             document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
@@ -163,7 +163,7 @@ namespace BasculaInterface
             // Abrir, escribir y cerrar el archivo inmediatamente
             using (StreamWriter writer = new StreamWriter(logPath, append: true))
             {
-                writer.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {mensaje}");
+                writer.WriteLine($"[{DateTime.Now:dd-MM-yyyy HH:mm:ss}] {mensaje}");
             }
         }
 
