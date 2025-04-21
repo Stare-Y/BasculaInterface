@@ -127,20 +127,23 @@ namespace BasculaInterface
 
         private void OnImprimirClicked(object sender, EventArgs e)
         {
-            string fechaHora = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+            string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
 #if WINDOWS
             PrintDocument document = new();
             document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
 
+            string template = MauiProgram.PrintTemplate;
+            string ticket = template
+                .Replace("{fechaHora}", fechaHora)
+                .Replace("{tara}", Tara.ToString("0.00"))
+                .Replace("{neto}", PesoLabel.Text)
+                .Replace("{bruto}", Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara).ToString("0.00"));
+
+
             document.PrintPage += (sender, e) =>
             {
-                System.Drawing.Font font = new ("Courier New", 16);
-                e.Graphics.DrawString(
-                    $"COOPERATIVA PEDRO EZQUEDA\n" +
-                    $"Fecha: {fechaHora}\n" +
-                    $"Tara: {Tara:0.00} kg\n" +
-                    $"Neto: {PesoLabel.Text}\n" +
-                    $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg", font, Brushes.Black, 10, 10);
+                System.Drawing.Font font = new ("Courier New", MauiProgram.PrintFontSize);
+                e.Graphics.DrawString(ticket    , font, Brushes.Black, 10, 10);
             };
 
             Task.Run(() => document.Print());

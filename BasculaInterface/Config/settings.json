@@ -1,8 +1,10 @@
 {
-  "BasculaPort": "COM3",
+  "BasculaPort": "COM1",
   "BasculaBauds": 9600,
-  "PrinterName": "CutePDF Writer",
-  "NeedManualAsk": true,
+  "PrinterName": "POS-80C",
+  "NeedManualAsk": false,
   "TimerElapse": 750,
-  "AskChar": "P"
+  "AskChar": "P",
+  "PrintTemplate": "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n",
+  "PrintFontSize": 16
 }

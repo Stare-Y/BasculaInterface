@@ -11,6 +11,8 @@ public static class MauiProgram
     public static bool NeedManualAsk = false;
     public static string AskChar = "P";
     public static int TimerElapse = 750;
+    public static string PrintTemplate = null!;
+    public static int PrintFontSize;
     public static MauiApp CreateMauiApp()
 	{
         LoadSettings();
@@ -58,5 +60,8 @@ public static class MauiProgram
             TimerElapse = data["TimerElapse"].GetInt32();
         }
 
+        PrintTemplate = data["PrintTemplate"].GetString();
+
+        PrintFontSize = data["PrintFontSize"].GetInt32();
     }
 }
