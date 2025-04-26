@@ -4,6 +4,7 @@ using System.Drawing.Printing;
 using System.Globalization;
 using System.IO.Ports;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace BasculaInterface
@@ -125,9 +126,11 @@ namespace BasculaInterface
             }
         }
 
-        private void OnImprimirClicked(object sender, EventArgs e)
+        private async void OnImprimirClicked(object sender, EventArgs e)
         {
-            string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
+            try
+            {
+                string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
 #if WINDOWS
             PrintDocument document = new();
             document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
@@ -149,9 +152,15 @@ namespace BasculaInterface
             Task.Run(() => document.Print());
 
 #endif
-            EscribirLog($"Tara: {Tara:0.00} kg | " +
-                    $"Neto: {PesoLabel.Text} | " +
-                    $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg");
+                EscribirLog($"Tara: {Tara:0.00} kg | " +
+                        $"Neto: {PesoLabel.Text} | " +
+                        $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg");
+            }
+            catch(Exception ex)
+            {
+                await DisplayAlert("Error", ex.Message, "OK");
+            }
+            
         }
 
         private void EscribirLog(string mensaje)
