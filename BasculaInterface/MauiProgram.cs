@@ -6,9 +6,10 @@ namespace BasculaInterface;
 
 public static class MauiProgram
 {
-    public static string BasculaSocketUrl { get; set; } = "http://localhost:5284/basculaSocket";
-    //service provider
+    public static string BasculaSocketUrl { get; set; } = "http://localhost:5284/";
     public static IServiceProvider ServiceProvider { get; set; } = null!;
+    public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
+
     public static MauiApp CreateMauiApp()
 	{
         LoadSettings();
@@ -36,10 +37,11 @@ public static class MauiProgram
 
     private static void LoadSettings()
     {
+#if WINDOWS
         string settingsFile = Path.Combine(AppContext.BaseDirectory, "Config/settings.json");
         if (!File.Exists(settingsFile))
         {
-            throw new InvalidDataException("El archivo settings.json no existe");
+            return;
         }
 
         string jsonContent = File.ReadAllText(settingsFile);
@@ -51,7 +53,17 @@ public static class MauiProgram
 
         var url = data["BasculaSocketUrl"].GetString();
 
+        var template = data["PrintTemplate"].GetString();
+
         if (url is not null)
             BasculaSocketUrl = url;
+
+        if (template is not null)
+            PrintTemplate = template;
+#else
+#if DEBUG
+        BasculaSocketUrl = "http://10.0.2.2:5284/";
+#endif
+#endif
     }
 }

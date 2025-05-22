@@ -1,4 +1,5 @@
-using BasculaTerminalApi;
+using BasculaTerminalApi.Config;
+using BasculaTerminalApi.Controllers;
 using BasculaTerminalApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,14 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<BasculaService>();
+builder.Services.AddSingleton<PrintSettings>(sp =>
+{
+    var printService = new PrintSettings();
+    printService.ReadSettings();
+    return printService;
+});
+
+builder.Services.AddScoped<PrintService>();
 
 var app = builder.Build();
 

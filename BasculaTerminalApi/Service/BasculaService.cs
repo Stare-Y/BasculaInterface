@@ -2,6 +2,7 @@
 using System.IO.Ports;
 using System.Text.RegularExpressions;
 using System.Timers;
+using BasculaTerminalApi.Config;
 using BasculaTerminalApi.Events;
 
 namespace BasculaTerminalApi.Service
@@ -10,25 +11,28 @@ namespace BasculaTerminalApi.Service
     {
         private SerialPort _bascula = null!;
 
-        private System.Timers.Timer _pollingTimer;
+        private System.Timers.Timer _pollingTimer = null!;
 
         private int _lecturasFalsas = 0;
 
-        //event to notify when a new weight is received
-        public event EventHandler<OnBasculaReadEventArgs> OnBasculaRead;
+        private string _askChar = string.Empty;
 
-        public BasculaService()
+        //event to notify when a new weight is received
+        public event EventHandler<OnBasculaReadEventArgs>? OnBasculaRead;
+
+        public BasculaService(PrintSettings printSettings)
         {
-            _bascula = new SerialPort("COM1", 9600, Parity.None, 8, StopBits.One);
+            _bascula = new SerialPort(printSettings.BasculaPort, printSettings.BasculaBauds, Parity.None, 8, StopBits.One);
 
             _bascula.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-            if (true)
+            if (printSettings.NeedManualAsk)
             {
                 _pollingTimer = new(750);
                 _pollingTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
                 _pollingTimer.AutoReset = true;
                 _pollingTimer.Start();
+                _askChar = printSettings.AskChar;
             }
 
             _bascula.Open();

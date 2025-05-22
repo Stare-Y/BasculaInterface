@@ -1,4 +1,6 @@
-﻿using BasculaInterface.ViewModels.Base;
+﻿using System.Text;
+using System.Text.Json;
+using BasculaInterface.ViewModels.Base;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BasculaInterface.ViewModels
@@ -65,6 +67,8 @@ namespace BasculaInterface.ViewModels
 
         event Action<double>? OnWeightReceived;
 
+        private HttpClient _httpClient = new HttpClient();
+
         public BasculaViewModel() { }
 
         public async Task ConnectSocket(string socketUrl)
@@ -72,8 +76,10 @@ namespace BasculaInterface.ViewModels
             try
             {
                 _basculaSocketHub = new HubConnectionBuilder()
-                .WithUrl(socketUrl)
+                .WithUrl(socketUrl + "basculaSocket")
                 .Build();
+
+                _httpClient.BaseAddress = new Uri(socketUrl);
 
                 _basculaSocketHub.On<double>("ReceiveNumber", data =>
                 {
@@ -90,16 +96,38 @@ namespace BasculaInterface.ViewModels
             }
             catch (Exception ex)
             {
-                Estado = "Error: " + ex.Message;
+                Estado = "Error Conectando a Bascula: " + ex.Message;
             }
         }
 
         private void UpdateWeight(double data)
         {
             if (TaraValue != 0)
-                Diferencia = (TaraValue - data).ToString("0.00");
+                Diferencia = Math.Abs(TaraValue - data).ToString("0.00");
 
             Peso = data.ToString("0.00");
+        }
+
+        public async Task PrintTicketAsync(string text)
+        {
+            try
+            {
+                var jsonString = JsonSerializer.Serialize(text);
+                var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("api/print", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    Estado = "Ticket enviado a la impresora";
+                }
+                else
+                {
+                    Estado = "Error al enviar el ultimo ticket: " + response.ReasonPhrase;
+                }
+            }
+            catch (Exception ex)
+            {
+                Estado = "Error: " + ex.Message;
+            }
         }
 
         public async Task DisconnectSocket()
@@ -110,6 +138,9 @@ namespace BasculaInterface.ViewModels
                     return;
                 await _basculaSocketHub.StopAsync() ;
                 await _basculaSocketHub.DisposeAsync();
+
+                _httpClient.Dispose();
+
                 Estado = "Desconectado";
             }
             catch (Exception ex)

@@ -2,7 +2,7 @@
 using BasculaTerminalApi.Service;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BasculaTerminalApi
+namespace BasculaTerminalApi.Controllers
 {
     public class SerialPortHub : Hub
     {

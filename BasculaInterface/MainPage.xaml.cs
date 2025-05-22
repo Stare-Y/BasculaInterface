@@ -44,39 +44,21 @@ namespace BasculaInterface
 
         private async void OnImprimirClicked(object sender, EventArgs e)
         {
-            try
-            {
-                string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
-
-//#if WINDOWS
-//            PrintDocument document = new();
-//            document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
-
-//            string template = MauiProgram.PrintTemplate;
-//            string ticket = template
-//                .Replace("{fechaHora}", fechaHora)
-//                .Replace("{tara}", _viewModel.Tara)
-//                .Replace("{neto}", _viewModel.Peso)
-//                .Replace("{bruto}", _viewModel.Diferencia);
-
-
-//            document.PrintPage += (sender, e) =>
-//            {
-//                System.Drawing.Font font = new ("Courier New", MauiProgram.PrintFontSize);
-//                e.Graphics.DrawString(ticket    , font, Brushes.Black, 10, 10);
-//            };
-
-//            Task.Run(() => document.Print());
-//#endif
-                EscribirLog($"Tara: {_viewModel.Tara} kg | " +
-                        $"Neto: {_viewModel.Peso} | " +
-                        $"Diferencia: {_viewModel.Diferencia} kg");
-            }
-            catch(Exception ex)
-            {
-                await DisplayAlert("Error", ex.Message, "OK");
-            }
             
+            string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
+
+            string template = MauiProgram.PrintTemplate;
+            string ticket = template
+                .Replace("{fechaHora}", fechaHora)
+                .Replace("{tara}", _viewModel.Tara)
+                .Replace("{neto}", _viewModel.Peso)
+                .Replace("{bruto}", _viewModel.Diferencia);
+
+            await _viewModel.PrintTicketAsync(ticket);
+
+            EscribirLog($"Tara: {_viewModel.Tara} kg | " +
+                    $"Neto: {_viewModel.Peso} | " +
+                    $"Diferencia: {_viewModel.Diferencia} kg");
         }
 
         private void EscribirLog(string mensaje)

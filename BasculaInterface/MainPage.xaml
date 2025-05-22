@@ -7,6 +7,7 @@
         <vm:BasculaViewModel/>
     </ContentPage.BindingContext>
 
+
     <Grid Padding="20" RowSpacing="20" ColumnSpacing="20">
         <!-- Definimos filas y columnas -->
         <Grid.RowDefinitions>
@@ -18,6 +19,7 @@
             <!-- Botones -->
             <RowDefinition Height="1*"/>
             <!-- Botón imprimir -->
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -131,6 +133,8 @@
                 CornerRadius="10"
                 Clicked="OnImprimirClicked"
                 Margin="0,10,0,0" />
+
+        <Label Text="{Binding Estado}" Grid.Row="4"/>
     </Grid>
 
 </ContentPage>
