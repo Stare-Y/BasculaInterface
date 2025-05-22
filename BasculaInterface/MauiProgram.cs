@@ -1,23 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BasculaInterface.ViewModels;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace BasculaInterface;
 
 public static class MauiProgram
 {
-    public static string PortName = null!;
-    public static int PortBaud = 9600;
-    public static string PrinterName = null!;
-    public static bool NeedManualAsk = false;
-    public static string AskChar = "P";
-    public static int TimerElapse = 750;
-    public static string PrintTemplate = null!;
-    public static int PrintFontSize;
+    public static string BasculaSocketUrl { get; set; } = "http://localhost:5284/basculaSocket";
+    //service provider
+    public static IServiceProvider ServiceProvider { get; set; } = null!;
     public static MauiApp CreateMauiApp()
 	{
         LoadSettings();
 
-		var builder = MauiApp.CreateBuilder();
+        var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
 			.ConfigureFonts(fonts =>
@@ -30,7 +26,12 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		return builder.Build();
+        builder.Services.AddTransient<BasculaViewModel>();
+
+        //build service provider
+        ServiceProvider = builder.Services.BuildServiceProvider();
+
+        return builder.Build();
 	}
 
     private static void LoadSettings()
@@ -48,20 +49,9 @@ public static class MauiProgram
         if (data is null)
             throw new InvalidDataException("El archivo settings.json parece ser nulo");
 
-        PortName = data["BasculaPort"].GetString();
-        PortBaud = data["BasculaBauds"].GetInt32();
-        if (PortBaud == 0)
-            PortBaud = 9600;
-        PrinterName = data["PrinterName"].GetString();
-        NeedManualAsk = data["NeedManualAsk"].GetBoolean();
-        if (NeedManualAsk)
-        {
-            AskChar = data["AskChar"].GetString();
-            TimerElapse = data["TimerElapse"].GetInt32();
-        }
+        var url = data["BasculaSocketUrl"].GetString();
 
-        PrintTemplate = data["PrintTemplate"].GetString();
-
-        PrintFontSize = data["PrintFontSize"].GetInt32();
+        if (url is not null)
+            BasculaSocketUrl = url;
     }
 }

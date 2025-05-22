@@ -1,129 +1,45 @@
-﻿using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Printing;
-using System.Globalization;
-using System.IO.Ports;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Timers;
+﻿using BasculaInterface.ViewModels;
 
 namespace BasculaInterface
 {
     public partial class MainPage : ContentPage
     {
-        private readonly SerialPort _bascula;
-
-        private System.Timers.Timer _pollingTimer;
-
-        private int _lecturasFalsas = 0;
-
         public double Tara { get; set; }
 
-        public MainPage()
+        private readonly BasculaViewModel _viewModel;
+
+        public MainPage(BasculaViewModel viewModel)
         {
             InitializeComponent();
-            _bascula = new SerialPort(MauiProgram.PortName, MauiProgram.PortBaud, Parity.None, 8, StopBits.One);
 
-            _bascula.DataReceived += new SerialDataReceivedEventHandler(DataRecievedHandler);
+            BindingContext = viewModel;
 
-            if (MauiProgram.NeedManualAsk)
-            {
-                _pollingTimer = new(MauiProgram.TimerElapse);
-                _pollingTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
-                _pollingTimer.AutoReset = true;
-            }
+            _viewModel = viewModel;
         }
 
-        protected override void OnAppearing()
+        public MainPage() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
+        {
+        }
+
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
-            _bascula.Open();
-
-            if (MauiProgram.NeedManualAsk)
-                _pollingTimer.Start();
+            await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
         }
 
-        protected override void OnDisappearing()
+        protected override async void OnDisappearing()
         {
             base.OnDisappearing();
-            _bascula.Close();
-
-            if (MauiProgram.NeedManualAsk)
-                _pollingTimer.Stop();
-        }
-
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                if (_bascula.IsOpen)
-                {
-                    // Este comando depende de tu modelo de báscula.
-                    // Muchos usan "P\r\n" o solo "\r\n" para pedir el peso.
-                    _bascula.Write(MauiProgram.AskChar);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al enviar comando: {ex.Message}");
-            }
-        }
-
-        private void DataRecievedHandler(object sender, SerialDataReceivedEventArgs e)
-        {
-            SerialPort sp = (SerialPort)sender;
-            string readData = sp.ReadExisting();
-
-            Debug.WriteLine($"Lectura del puerto {MauiProgram.PortName}: {readData}");
-
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                if (Tara != 0)
-                {
-                    double currentWeight = ParseScreenWeight(readData);
-
-                    DiferenciaLabel.Text = $"{Math.Abs(Tara - currentWeight):0.00} kg";
-
-
-                    PesoLabel.Text = currentWeight.ToString("0.00 kg");
-                }
-                else
-                {
-                    double currentWeight = ParseScreenWeight(readData);
-                    PesoLabel.Text = currentWeight.ToString("0.00 kg");
-                }
-            });
+            await _viewModel.DisconnectSocket();
         }
 
         private void OnTaraClicked(object sender, EventArgs e)
         {
-            Tara = ParseScreenWeight(PesoLabel.Text);
+            var tara = double.Parse(_viewModel.Peso);
 
-            TaraLabel.Text = Tara.ToString("0.00 kg");
-        }
+            _viewModel.TaraValue = tara;
 
-        private double ParseScreenWeight(string value)
-        {
-            var match = Regex.Match(value, @"-?\d+(\.\d+)?");
-
-            if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
-            {
-                _lecturasFalsas = 0;
-                return result;
-            }
-            else
-            {
-                if (++_lecturasFalsas > 5)
-                {
-                    _lecturasFalsas = 0;
-                    return 0;
-                }
-
-                Debug.WriteLine($"Conteo de lectura falsa: {_lecturasFalsas}");
-
-                return ParseScreenWeight(PesoLabel.Text);
-            }
+            _viewModel.Tara = tara.ToString("F2");
         }
 
         private async void OnImprimirClicked(object sender, EventArgs e)
@@ -131,30 +47,30 @@ namespace BasculaInterface
             try
             {
                 string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
-#if WINDOWS
-            PrintDocument document = new();
-            document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
 
-            string template = MauiProgram.PrintTemplate;
-            string ticket = template
-                .Replace("{fechaHora}", fechaHora)
-                .Replace("{tara}", Tara.ToString("0.00"))
-                .Replace("{neto}", PesoLabel.Text)
-                .Replace("{bruto}", Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara).ToString("0.00"));
+//#if WINDOWS
+//            PrintDocument document = new();
+//            document.PrinterSettings.PrinterName = MauiProgram.PrinterName;
+
+//            string template = MauiProgram.PrintTemplate;
+//            string ticket = template
+//                .Replace("{fechaHora}", fechaHora)
+//                .Replace("{tara}", _viewModel.Tara)
+//                .Replace("{neto}", _viewModel.Peso)
+//                .Replace("{bruto}", _viewModel.Diferencia);
 
 
-            document.PrintPage += (sender, e) =>
-            {
-                System.Drawing.Font font = new ("Courier New", MauiProgram.PrintFontSize);
-                e.Graphics.DrawString(ticket    , font, Brushes.Black, 10, 10);
-            };
+//            document.PrintPage += (sender, e) =>
+//            {
+//                System.Drawing.Font font = new ("Courier New", MauiProgram.PrintFontSize);
+//                e.Graphics.DrawString(ticket    , font, Brushes.Black, 10, 10);
+//            };
 
-            Task.Run(() => document.Print());
-
-#endif
-                EscribirLog($"Tara: {Tara:0.00} kg | " +
-                        $"Neto: {PesoLabel.Text} | " +
-                        $"Diferencia: {Math.Abs(ParseScreenWeight(PesoLabel.Text) - Tara):0.00} kg");
+//            Task.Run(() => document.Print());
+//#endif
+                EscribirLog($"Tara: {_viewModel.Tara} kg | " +
+                        $"Neto: {_viewModel.Peso} | " +
+                        $"Diferencia: {_viewModel.Diferencia} kg");
             }
             catch(Exception ex)
             {
@@ -181,9 +97,9 @@ namespace BasculaInterface
 
         private void OnCeroClicked(object sender, EventArgs e)
         {
-            Tara = 0;
-            TaraLabel.Text = "0.00 kg";
-            DiferenciaLabel.Text = "0.00 kg";
+            _viewModel.TaraValue = 0;
+            _viewModel.Tara = "0.00";
+            _viewModel.Diferencia = "0.00 ";
         }
     }
 

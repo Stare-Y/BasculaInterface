@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
              x:Class="BasculaInterface.MainPage">
+    <ContentPage.BindingContext>
+        <vm:BasculaViewModel/>
+    </ContentPage.BindingContext>
 
     <Grid Padding="20" RowSpacing="20" ColumnSpacing="20">
         <!-- Definimos filas y columnas -->
@@ -29,7 +33,7 @@
                HasShadow="True"
                BorderColor="White">
             <Label x:Name="PesoLabel"
-                   Text="0.00 kg"
+                   Text="{Binding Peso, StringFormat='{0} kg'}"
                    FontSize="144"
                    TextColor="Black"
                    HorizontalTextAlignment="Center"
@@ -48,7 +52,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Label x:Name="TaraLabel"
-                       Text="0.00 kg"
+                       Text="{Binding Tara, StringFormat='{0} kg'}"
                        FontSize="72"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
@@ -79,7 +83,7 @@
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <Label x:Name="DiferenciaLabel"
-                       Text="0.00 kg"
+                       Text="{Binding Diferencia, StringFormat='{0} kg'}"
                        FontSize="72"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
