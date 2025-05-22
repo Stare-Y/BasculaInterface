@@ -36,7 +36,7 @@
                BorderColor="White">
             <Label x:Name="PesoLabel"
                    Text="{Binding Peso, StringFormat='{0} kg'}"
-                   FontSize="144"
+                   FontSize="{Binding FontSizePeso}"
                    TextColor="Black"
                    HorizontalTextAlignment="Center"
                    VerticalTextAlignment="Center" 
@@ -45,7 +45,7 @@
         <Frame Grid.Row="1" Grid.Column="0"
                BackgroundColor="LightBlue"
                CornerRadius="20"
-               Padding="30"
+               Padding="10"
                HasShadow="True"
                BorderColor="White">
             <Grid>
@@ -55,7 +55,7 @@
                 </Grid.RowDefinitions>
                 <Label x:Name="TaraLabel"
                        Text="{Binding Tara, StringFormat='{0} kg'}"
-                       FontSize="72"
+                       FontSize="{Binding FontSizeTara}"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center" 
@@ -64,7 +64,7 @@
                 
                 <Label Grid.Row="1"
                         Text="TARA"
-                        FontSize="36"
+                       FontAutoScalingEnabled="True"
                         TextColor="Black"
                         HorizontalTextAlignment="Center"
                         VerticalTextAlignment="Center" />
@@ -76,7 +76,7 @@
         <Frame Grid.Row="1" Grid.Column="1"
                BackgroundColor="LightSkyBlue"
                CornerRadius="20"
-               Padding="30"
+               Padding="10"
                HasShadow="True"
                BorderColor="White">
             <Grid>
@@ -86,7 +86,7 @@
                 </Grid.RowDefinitions>
                 <Label x:Name="DiferenciaLabel"
                        Text="{Binding Diferencia, StringFormat='{0} kg'}"
-                       FontSize="72"
+                       FontSize="{Binding FontSizeTara}"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center" 
@@ -95,7 +95,7 @@
                 
                 <Label Grid.Row="1"
                         Text="DIFERENCIA"
-                        FontSize="36"
+                       FontAutoScalingEnabled="True"
                         TextColor="Black"
                         HorizontalTextAlignment="Center"
                         VerticalTextAlignment="Center" />

@@ -1,6 +1,7 @@
-﻿using BasculaInterface.ViewModels;
+﻿using System.Text.Json;
+using BasculaInterface.ViewModels;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
+using Microsoft.Maui.LifecycleEvents;
 
 namespace BasculaInterface;
 
@@ -23,8 +24,37 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+
+#if WINDOWS
+        builder.ConfigureLifecycleEvents(events =>
+        {
+            events.AddWindows(windowsLifeCycleBuilder =>
+            {
+                windowsLifeCycleBuilder.OnWindowCreated(window =>
+                {
+                    window.ExtendsContentIntoTitleBar = false;
+
+                    var handle = WinRT.Interop.WindowNative.GetWindowHandle(window);
+
+                    var id = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(handle);
+
+                    var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(id);
+
+                    if (appWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter overlappedPresenter)
+                    {
+                        overlappedPresenter.IsResizable = false;
+                        overlappedPresenter.IsMaximizable = false;
+                        overlappedPresenter.IsMinimizable = true;
+                        overlappedPresenter.Maximize();
+                    }
+                });
+            });
+        });
+
+#endif
+
 #if DEBUG
-		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
         builder.Services.AddTransient<BasculaViewModel>();

@@ -25,6 +25,10 @@ namespace BasculaInterface
         {
             base.OnAppearing();
             await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
+
+            var screenWidth = DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density;
+            _viewModel.FontSizePeso = screenWidth * 0.09; // Ajusta el factor según tus pruebas
+            _viewModel.FontSizeTara = screenWidth * 0.04; // Ajusta el factor según tus pruebas
         }
 
         protected override async void OnDisappearing()
