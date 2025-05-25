@@ -2,29 +2,24 @@
 using BasculaInterface.ViewModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+using CommunityToolkit.Maui;
 
 namespace BasculaInterface;
-
 public static class MauiProgram
 {
     public static string BasculaSocketUrl { get; set; } = "http://localhost:5284/";
-    public static IServiceProvider ServiceProvider { get; set; } = null!;
+    public static IServiceProvider ServiceProvider { get; set; } = null !;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
 
     public static MauiApp CreateMauiApp()
-	{
+    {
         LoadSettings();
-
         var builder = MauiApp.CreateBuilder();
-		builder
-			.UseMauiApp<App>()
-			.ConfigureFonts(fonts =>
-			{
-				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			});
-
-
+        builder.UseMauiApp<App>().ConfigureFonts(fonts =>
+        {
+            fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+            fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+        }).UseMauiCommunityToolkit();
 #if WINDOWS
         builder.ConfigureLifecycleEvents(events =>
         {
@@ -52,18 +47,14 @@ public static class MauiProgram
         });
 
 #endif
-
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-
         builder.Services.AddTransient<BasculaViewModel>();
-
         //build service provider
         ServiceProvider = builder.Services.BuildServiceProvider();
-
         return builder.Build();
-	}
+    }
 
     private static void LoadSettings()
     {
@@ -92,7 +83,7 @@ public static class MauiProgram
             PrintTemplate = template;
 #else
 #if DEBUG
-        BasculaSocketUrl = "http://10.0.2.2:5284/";
+        BasculaSocketUrl = "http://192.168.1.73:5284/";
 #endif
 #endif
     }

@@ -19,9 +19,26 @@ builder.Services.AddSingleton<PrintSettings>(sp =>
     return printService;
 });
 
+//cors allow all
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
+
+
 builder.Services.AddScoped<PrintService>();
 
 var app = builder.Build();
+
+//cors
+app.UseCors("AllowAll");
 
 app.MapHub<SerialPortHub>("/basculaSocket");
 

@@ -25,7 +25,7 @@ namespace BasculaTerminalApi.Controllers
             }
             else
             {
-                Console.WriteLine("Lectura inválida o error en la báscula.");
+                Console.WriteLine($"Lectura invalida o error en la báscula, valor retornado: {number}");
             }   
         }
     }

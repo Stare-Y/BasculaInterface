@@ -71,6 +71,8 @@ namespace BasculaTerminalApi.Service
 
         private double ParseScreenWeight(string value)
         {
+            value = value.Replace(" ", "").Trim();
+            Console.WriteLine($"Valor recibido: {value}");
             var match = Regex.Match(value, @"-?\d+(\.\d+)?");
 
             if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))

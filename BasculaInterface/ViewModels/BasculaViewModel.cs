@@ -109,6 +109,13 @@ namespace BasculaInterface.ViewModels
                     });
                 });
 
+                _basculaSocketHub.Closed += async (error) =>
+                {
+                    Estado = "Desconectado";
+                    await Task.Delay(5000);
+                    await ConnectSocket(socketUrl);
+                };
+
                 OnWeightReceived += UpdateWeight;
 
                 await _basculaSocketHub.StartAsync();
@@ -148,6 +155,12 @@ namespace BasculaInterface.ViewModels
             {
                 Estado = "Error: " + ex.Message;
             }
+            finally
+            {
+                //wait 5 seconds then update the status
+                await Task.Delay(5000);
+                Estado = "Conectado";
+            }
         }
 
         public async Task DisconnectSocket()
@@ -156,10 +169,7 @@ namespace BasculaInterface.ViewModels
             {
                 if (_basculaSocketHub == null)
                     return;
-                await _basculaSocketHub.StopAsync() ;
-                await _basculaSocketHub.DisposeAsync();
-
-                _httpClient.Dispose();
+                await _basculaSocketHub.StopAsync();
 
                 Estado = "Desconectado";
             }

@@ -1,4 +1,6 @@
 ﻿using BasculaInterface.ViewModels;
+using BasculaInterface.Views.PopUps;
+using CommunityToolkit.Maui.Views;
 
 namespace BasculaInterface
 {
@@ -63,6 +65,7 @@ namespace BasculaInterface
             EscribirLog($"Tara: {_viewModel.Tara} kg | " +
                     $"Neto: {_viewModel.Peso} | " +
                     $"Diferencia: {_viewModel.Diferencia} kg");
+
         }
 
         private void EscribirLog(string mensaje)
@@ -86,6 +89,26 @@ namespace BasculaInterface
             _viewModel.TaraValue = 0;
             _viewModel.Tara = "0.00";
             _viewModel.Diferencia = "0.00 ";
+        }
+
+        private async void BtnReconect_Clicked(object sender, EventArgs e)
+        {
+            var popup = new WaitPopUp();
+
+            this.ShowPopup(popup);
+            try
+            {
+                await _viewModel.DisconnectSocket();
+                await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Error al reconectar a la báscula: " + ex.Message, "OK");
+            }
+            finally
+            {
+                popup.Close();
+            }
         }
     }
 
