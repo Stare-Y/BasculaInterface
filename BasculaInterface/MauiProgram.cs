@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using BasculaInterface.ViewModels;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
-using CommunityToolkit.Maui;
 
 namespace BasculaInterface;
 public static class MauiProgram

@@ -93,21 +93,29 @@ namespace BasculaInterface
 
         private async void BtnReconect_Clicked(object sender, EventArgs e)
         {
-            var popup = new WaitPopUp();
-
-            this.ShowPopup(popup);
             try
             {
-                await _viewModel.DisconnectSocket();
-                await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
+
+                var popup = new WaitPopUp();
+
+                this.ShowPopup(popup);
+                try
+                {
+                    await _viewModel.DisconnectSocket();
+                    await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", "Error al reconectar a la báscula: " + ex.Message, "OK");
+                }
+                finally
+                {
+                    popup.Close();
+                }
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", "Error al reconectar a la báscula: " + ex.Message, "OK");
-            }
-            finally
-            {
-                popup.Close();
+                await DisplayAlert("Error", "Error inesperado: " + ex.Message, "OK");
             }
         }
     }

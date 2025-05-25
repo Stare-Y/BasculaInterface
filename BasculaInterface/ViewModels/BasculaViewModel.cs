@@ -109,13 +109,6 @@ namespace BasculaInterface.ViewModels
                     });
                 });
 
-                _basculaSocketHub.Closed += async (error) =>
-                {
-                    Estado = "Desconectado";
-                    await Task.Delay(5000);
-                    await ConnectSocket(socketUrl);
-                };
-
                 OnWeightReceived += UpdateWeight;
 
                 await _basculaSocketHub.StartAsync();
@@ -170,6 +163,9 @@ namespace BasculaInterface.ViewModels
                 if (_basculaSocketHub == null)
                     return;
                 await _basculaSocketHub.StopAsync();
+                await _basculaSocketHub.DisposeAsync();
+
+                _basculaSocketHub = null;
 
                 Estado = "Desconectado";
             }

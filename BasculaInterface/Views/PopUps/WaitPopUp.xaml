@@ -16,13 +16,14 @@
         HorizontalOptions="Center"
         IsRunning="True"
         VerticalOptions="Center"
-        WidthRequest="69"
-        Color="{StaticResource SubTier}" />
+        Color="SlateBlue"
+        WidthRequest="69"/>
 
         <Label
         HorizontalOptions="Center"
-        Style="{StaticResource Label}"
         Text="Espera..."
+        FontSize="Subtitle"
+        TextColor="White"
         VerticalOptions="Center" />
 
     </VerticalStackLayout>
