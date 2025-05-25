@@ -82,8 +82,8 @@ public static class MauiProgram
         if (template is not null)
             PrintTemplate = template;
 #else
-#if DEBUG
-        BasculaSocketUrl = "http://192.168.1.73:5284/";
+#if ANDROID
+        BasculaSocketUrl = "http://www.basculacpe.com/";
 #endif
 #endif
     }

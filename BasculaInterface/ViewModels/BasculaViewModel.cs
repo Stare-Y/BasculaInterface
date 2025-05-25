@@ -87,7 +87,7 @@ namespace BasculaInterface.ViewModels
 
         event Action<double>? OnWeightReceived;
 
-        private HttpClient _httpClient = new HttpClient();
+        private HttpClient? _httpClient;
 
         public BasculaViewModel() { }
 
@@ -99,7 +99,10 @@ namespace BasculaInterface.ViewModels
                 .WithUrl(socketUrl + "basculaSocket")
                 .Build();
 
-                _httpClient.BaseAddress = new Uri(socketUrl);
+                _httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(socketUrl)
+                };
 
                 _basculaSocketHub.On<double>("ReceiveNumber", data =>
                 {
@@ -116,7 +119,7 @@ namespace BasculaInterface.ViewModels
             }
             catch (Exception ex)
             {
-                Estado = "Error Conectando a Bascula: " + ex.Message;
+                Estado = $"Error: {socketUrl}: " + ex.Message;
             }
         }
 
@@ -134,25 +137,30 @@ namespace BasculaInterface.ViewModels
             {
                 var jsonString = JsonSerializer.Serialize(text);
                 var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("api/print", content);
-                if (response.IsSuccessStatusCode)
+                if (_httpClient is not null)
                 {
-                    Estado = "Ticket enviado a la impresora";
+                    var response = await _httpClient.PostAsync("api/print", content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Estado = "Ticket enviado a la impresora";
+                    }
+                    else
+                    {
+                        Estado = "Error al enviar el ultimo ticket: " + response.ReasonPhrase;
+                    }
+
+                    await Task.Delay(5000);
+
+                    Estado = "Conectado";
                 }
                 else
                 {
-                    Estado = "Error al enviar el ultimo ticket: " + response.ReasonPhrase;
+                    Estado = "Error: porfavor, presiona Reconectar";
                 }
             }
             catch (Exception ex)
             {
                 Estado = "Error: " + ex.Message;
-            }
-            finally
-            {
-                //wait 5 seconds then update the status
-                await Task.Delay(5000);
-                Estado = "Conectado";
             }
         }
 
@@ -160,12 +168,18 @@ namespace BasculaInterface.ViewModels
         {
             try
             {
-                if (_basculaSocketHub == null)
-                    return;
-                await _basculaSocketHub.StopAsync();
-                await _basculaSocketHub.DisposeAsync();
+                if (_basculaSocketHub != null)
+                {
+                    await _basculaSocketHub.StopAsync();
+                    await _basculaSocketHub.DisposeAsync();
+                    _basculaSocketHub = null;
+                }
 
-                _basculaSocketHub = null;
+                if (_httpClient != null)
+                {
+                    _httpClient.Dispose();
+                    _httpClient = null;
+                }
 
                 Estado = "Desconectado";
             }
