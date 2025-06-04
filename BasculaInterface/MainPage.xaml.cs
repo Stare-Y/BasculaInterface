@@ -10,6 +10,8 @@ namespace BasculaInterface
 
         private readonly BasculaViewModel _viewModel;
 
+        private CancellationTokenSource _cancellationTokenSource = null!;
+
         public MainPage(BasculaViewModel viewModel)
         {
             InitializeComponent();
@@ -17,6 +19,15 @@ namespace BasculaInterface
             BindingContext = viewModel;
 
             _viewModel = viewModel;
+
+            this.SizeChanged += AdjustFontSize;
+        }
+
+        private void AdjustFontSize(object? sender = null, EventArgs? e = null)
+        {
+            var screenWidth = DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density;
+            _viewModel.FontSizePeso = screenWidth * 0.09;
+            _viewModel.FontSizeTara = screenWidth * 0.04;
         }
 
         public MainPage() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
@@ -26,11 +37,10 @@ namespace BasculaInterface
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
 
-            var screenWidth = DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density;
-            _viewModel.FontSizePeso = screenWidth * 0.09; // Ajusta el factor según tus pruebas
-            _viewModel.FontSizeTara = screenWidth * 0.04; // Ajusta el factor según tus pruebas
+            AdjustFontSize();
+            
+            await _viewModel.ConnectSocket(MauiProgram.BasculaSocketUrl);
         }
 
         protected override async void OnDisappearing()
@@ -84,12 +94,6 @@ namespace BasculaInterface
             }
         }
 
-        private void OnCeroClicked(object sender, EventArgs e)
-        {
-            _viewModel.TaraValue = 0;
-            _viewModel.Tara = "0.00";
-            _viewModel.Diferencia = "0.00 ";
-        }
 
         private async void BtnReconect_Clicked(object sender, EventArgs e)
         {
@@ -117,6 +121,72 @@ namespace BasculaInterface
             {
                 await DisplayAlert("Error", "Error inesperado: " + ex.Message, "OK");
             }
+        }
+
+        private void Cero_Pressed(object sender, EventArgs e)
+        {
+            _cancellationTokenSource = new();
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(4000, _cancellationTokenSource.Token);
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        
+                        SetHostPopUp popup = new (MauiProgram.BasculaSocketUrl);
+
+                        popup.OnHostSet += async (host) =>
+                        {
+                            await OnHostSet(host, popup);
+                        };
+
+                        this.ShowPopup(popup);
+                    });
+                }
+                catch (TaskCanceledException)
+                {
+                    // La tarea fue cancelada, no hacer nada
+                }
+                catch (Exception ex)
+                {
+                    // Manejar cualquier otra excepción
+                    await DisplayAlert("Error", "Error al tratar de cambiar e host: " + ex.Message, "OK");
+                }
+            });
+        }
+
+        private async Task OnHostSet(string host, SetHostPopUp popup)
+        {
+            WaitPopUp waitPopUp = new();
+
+            this.ShowPopup(waitPopUp);
+            try
+            {
+                MauiProgram.BasculaSocketUrl = host;
+                await _viewModel.ConnectSocket(host);
+                popup.Close();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Error al conectar a la báscula: " + ex.Message, "OK");
+            }
+            finally
+            {
+                waitPopUp.Close();
+            }
+        }
+
+        private void Cero_Released(object sender, EventArgs e)
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+
+            _viewModel.TaraValue = 0;
+            _viewModel.Tara = "0.00";
+            _viewModel.Diferencia = "0.00 ";
         }
     }
 

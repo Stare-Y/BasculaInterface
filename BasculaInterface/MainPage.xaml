@@ -128,7 +128,10 @@
                 BackgroundColor="#DC3545"
                 TextColor="White"
                 CornerRadius="10"
-                Clicked="OnCeroClicked" />
+                x:Name="Cero"
+                Pressed="Cero_Pressed"
+                Released="Cero_Released"
+                />
 
 
 

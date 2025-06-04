@@ -4,11 +4,11 @@ using BasculaTerminalApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//as windows service
+builder.Host.UseWindowsService();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<BasculaService>();
@@ -45,7 +45,7 @@ app.MapHub<SerialPortHub>("/basculaSocket");
 app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromMinutes(2)});
     
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (builder.Configuration.GetValue<bool>("UseSwagger"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
