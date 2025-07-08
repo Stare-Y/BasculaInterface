@@ -2,8 +2,8 @@
 using System.IO.Ports;
 using System.Text.RegularExpressions;
 using System.Timers;
-using BasculaTerminalApi.Config;
 using BasculaTerminalApi.Events;
+using BasculaTerminalApi.Models;
 
 namespace BasculaTerminalApi.Service
 {

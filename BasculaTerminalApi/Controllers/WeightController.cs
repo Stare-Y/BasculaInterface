@@ -16,7 +16,6 @@ namespace BasculaTerminalApi.Controllers
             _weightRepo = weightRepo;
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] WeightEntryDto weightEntryDto)
         {

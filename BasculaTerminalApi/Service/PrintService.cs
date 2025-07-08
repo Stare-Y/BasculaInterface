@@ -1,6 +1,7 @@
-﻿using BasculaTerminalApi.Config;
+﻿using BasculaTerminalApi.Models;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Runtime.Versioning;
 
 namespace BasculaTerminalApi.Service
 {
@@ -11,7 +12,9 @@ namespace BasculaTerminalApi.Service
         {
             _printSettings = printSettings;
         }
-        public void Print(string text)
+
+        [SupportedOSPlatform("windows")]
+        public async Task Print(string text)
         {
             string fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
 
@@ -20,12 +23,14 @@ namespace BasculaTerminalApi.Service
 
             document.PrintPage += (sender, e) =>
             {
-                System.Drawing.Font font = new("Courier New", _printSettings.PrintFontSize);
-                e.Graphics.DrawString(text, font, Brushes.Black, 10, 10);
+                if (e.Graphics != null)
+                {
+                    System.Drawing.Font font = new("Courier New", _printSettings.PrintFontSize);
+                    e.Graphics.DrawString(text, font, Brushes.Black, 10, 10);
+                }
             };
 
-            Task.Run(() => document.Print());
-            
+            await Task.Run(() => document.Print());
         }
     }
 }

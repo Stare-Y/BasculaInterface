@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace BasculaTerminalApi.Config
+namespace BasculaTerminalApi.Models
 {
     public class PrintSettings
     {
