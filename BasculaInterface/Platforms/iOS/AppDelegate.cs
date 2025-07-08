@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace BasculaInterface;
+namespace BasculaInterface.Platforms.iOS;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace BasculaInterface;
+namespace BasculaInterface.Platforms.iOS;
 
 public class Program
 {
