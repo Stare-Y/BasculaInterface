@@ -1,10 +1,28 @@
 ﻿using Core.Application.DTOs;
 using Core.Domain.Entities;
+using Core.Domain.Entities.ContpaqiSQL;
 
 namespace Core.Application.Helpers
 {
     public static class WeightHelper
     {
+        public static IEnumerable<ClienteProveedorDto> BuildFromBaseEntity(IEnumerable<ClienteProveedor> clienteProveedors)
+        {
+            return clienteProveedors.Select(cp => new ClienteProveedorDto
+            {
+                Id = cp.CIDCLIENTEPROVEEDOR,
+                RazonSocial = cp.CRAZONSOCIAL,
+                RFC = cp.CRFC
+            });
+        }
+        public static IEnumerable<ProductoDto> BuildFromBaseEntity(IEnumerable<Producto> productos)
+        {
+            return productos.Select(p => new ProductoDto
+            {
+                Id = p.CIDPRODUCTO,
+                Nombre = p.CNOMBREPRODUCTO
+            });
+        }
         public static WeightEntry BuildFromDto(this WeightEntry weightEntry, WeightEntryDto weightEntryDto)
         {
             if (weightEntryDto == null)
@@ -21,6 +39,8 @@ namespace Core.Application.Helpers
                 Notes = weightEntryDto.Notes,
                 WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
+                    Id = wd.Id,
+                    FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
                     Weight = wd.Weight
                 }).ToList()
@@ -28,6 +48,79 @@ namespace Core.Application.Helpers
 
             return weightEntry;
         }
+
+        public static WeightEntryDto ConvertToDto(this WeightEntry weightEntry)
+        {
+            if (weightEntry == null)
+            {
+                throw new ArgumentNullException(nameof(weightEntry), "WeightEntry cannot be null");
+            }
+            return new WeightEntryDto
+            {
+                Id = weightEntry.Id,
+                PartnerId = weightEntry.PartnerId,
+                TareWeight = weightEntry.TareWeight,
+                NetWeight = weightEntry.NetWeight,
+                ConcludeDate = weightEntry.ConcludeDate,
+                Notes = weightEntry.Notes,
+                WeightDetails = weightEntry.WeightDetails.Select(wd => new WeightDetailDto
+                {
+                    Id = wd.Id,
+                    FK_WeightEntryId = wd.FK_WeightEntryId,
+                    FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Weight = wd.Weight
+                }).ToList()
+            };
+        }
+
+        public static WeightEntry ConvertToBaseEntry(this WeightEntryDto weightEntryDto)
+        {
+            if (weightEntryDto == null)
+            {
+                throw new ArgumentNullException(nameof(weightEntryDto), "WeightEntryDto cannot be null");
+            }
+            return new WeightEntry
+            {
+                Id = weightEntryDto.Id,
+                PartnerId = weightEntryDto.PartnerId,
+                TareWeight = weightEntryDto.TareWeight,
+                NetWeight = weightEntryDto.NetWeight,
+                ConcludeDate = weightEntryDto.ConcludeDate,
+                Notes = weightEntryDto.Notes,
+                WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
+                {
+                    Id = wd.Id,
+                    FK_WeightEntryId = wd.FK_WeightEntryId,
+                    FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Weight = wd.Weight
+                }).ToList()
+            };
+        }
+
+        public static IEnumerable<WeightEntryDto> ConvertRangeToDto(this IEnumerable<WeightEntry> weightEntries)
+        {
+            if (weightEntries == null)
+            {
+                throw new ArgumentNullException(nameof(weightEntries), "WeightEntries cannot be null");
+            }
+            return weightEntries.Select(we => new WeightEntryDto
+            {
+                Id = we.Id,
+                PartnerId = we.PartnerId,
+                TareWeight = we.TareWeight,
+                NetWeight = we.NetWeight,
+                ConcludeDate = we.ConcludeDate,
+                Notes = we.Notes,
+                WeightDetails = we.WeightDetails.Select(wd => new WeightDetailDto
+                {
+                    Id = wd.Id,
+                    FK_WeightEntryId = wd.FK_WeightEntryId,
+                    FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Weight = wd.Weight
+                }).ToList()
+            });
+        }
+
         public static WeightEntry UpdateFromDto(this WeightEntry weightEntry, WeightEntryDto weightEntryDto)
         {
             if (weightEntry == null)

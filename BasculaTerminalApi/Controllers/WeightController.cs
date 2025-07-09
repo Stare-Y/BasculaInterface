@@ -1,4 +1,5 @@
 ﻿using Core.Application.DTOs;
+using Core.Application.Helpers;
 using Core.Application.Interfaces;
 using Core.Application.Services;
 using Core.Domain.Entities;
@@ -21,7 +22,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntryDto);
+                WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntryDto.ConvertToBaseEntry());
 
                 return CreatedAtAction(nameof(GetById), new { id = newEntry.Id }, newEntry);
             }
@@ -41,7 +42,10 @@ namespace BasculaTerminalApi.Controllers
                 {
                     return NotFound($"Weight entry with ID {id} not found.");
                 }
-                return Ok(weightEntry);
+
+                WeightEntryDto weightEntryDto = weightEntry.ConvertToDto();
+
+                return Ok(weightEntryDto);
             }
             catch (Exception ex)
             {
@@ -50,16 +54,20 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int top = 21, [FromQuery] uint page = 1)
+        public async Task<IActionResult> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             try
             {
                 IEnumerable<WeightEntry> weightEntries = await _weightRepo.GetAllAsync(top, page);
+
                 if (weightEntries == null || !weightEntries.Any())
                 {
                     return NotFound("No weight entries found.");
                 }
-                return Ok(weightEntries);
+
+                IEnumerable<WeightEntryDto> dtos = weightEntries.ConvertRangeToDto();
+
+                return Ok(dtos);
             }
             catch (Exception ex)
             {
@@ -67,13 +75,13 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromBody] WeightEntryDto weightEntryDto, int id)
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] WeightEntryDto weightEntryDto)
         {
             try
             {
-                await _weightRepo.UpdateAsync(weightEntryDto, id);
-                return NoContent();
+                await _weightRepo.UpdateAsync(weightEntryDto.ConvertToBaseEntry());
+                return Ok();
             }
             catch (KeyNotFoundException knfEx)
             {

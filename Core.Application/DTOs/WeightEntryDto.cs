@@ -1,4 +1,6 @@
-﻿namespace Core.Application.DTOs
+﻿using Core.Domain.Entities.ContpaqiSQL;
+
+namespace Core.Application.DTOs
 {
     public class WeightEntryDto
     {

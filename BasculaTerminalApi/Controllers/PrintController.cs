@@ -15,11 +15,11 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult Print([FromBody] string ticket)
+        public async Task<IActionResult> Print([FromBody] string ticket)
         {
             try
             {
-                _printService.Print(ticket);
+                await _printService.Print(ticket);
 
                 Debug.WriteLine($"Ticket Printed: {ticket}");
 

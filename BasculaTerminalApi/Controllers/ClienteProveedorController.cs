@@ -1,4 +1,5 @@
 ﻿using Core.Application.DTOs;
+using Core.Application.Helpers;
 using Core.Application.Interfaces;
 using Core.Domain.Entities.ContpaqiSQL;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace BasculaTerminalApi.Controllers
                     return NotFound($"No clients/providers/partners found with the name '{name}'.");
                 }
 
-                IEnumerable<ClienteProveedorDto> dtos = ClienteProveedorDto.BuildFromBaseEntity(clientesProveedores);
+                IEnumerable<ClienteProveedorDto> dtos = WeightHelper.BuildFromBaseEntity(clientesProveedores);
                 
                 return Ok(dtos);
             }

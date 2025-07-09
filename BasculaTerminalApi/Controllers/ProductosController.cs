@@ -1,4 +1,5 @@
 ﻿using Core.Application.DTOs;
+using Core.Application.Helpers;
 using Core.Application.Interfaces;
 using Core.Domain.Entities.ContpaqiSQL;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace BasculaTerminalApi.Controllers
                     throw new KeyNotFoundException($"No products found with name: {name}");
                 }
 
-                IEnumerable<ProductoDto> dtos = ProductoDto.BuildFromBaseEntity(productos);
+                IEnumerable<ProductoDto> dtos = WeightHelper.BuildFromBaseEntity(productos);
 
                 return Ok(dtos);
             }

@@ -12,7 +12,21 @@ namespace Infrastructure.Data
         public DbSet<ClienteProveedor> ClientesProveedores { get; set; } = null!;
         public ContpaqiSQLContext(DbContextOptions<ContpaqiSQLContext> options) : base(options)
         {
+            // Bloquea migraciones automáticas
+            if (Database.IsSqlServer() && Database.GetPendingMigrations().Any())
+            {
+                throw new InvalidOperationException("Este contexto es solo lectura. No aplicar migraciones.");
+            }
+        }
 
+        public override int SaveChanges()
+        {
+            throw new InvalidOperationException("Este contexto es solo lectura.");
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("Este contexto es solo lectura.");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

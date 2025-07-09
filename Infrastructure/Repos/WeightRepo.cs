@@ -1,6 +1,4 @@
-﻿using Core.Application.DTOs;
-using Core.Application.Helpers;
-using Core.Application.Interfaces;
+﻿using Core.Application.Interfaces;
 using Core.Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +13,10 @@ namespace Infrastructure.Repos
             _context = context;
         }
 
-        public async Task<WeightEntry> CreateAsync(WeightEntryDto weightEntryDto)
+        public async Task<WeightEntry> CreateAsync(WeightEntry weightEntry)
         {
-            WeightEntry weightEntry = new WeightEntry().BuildFromDto(weightEntryDto);
-
             await _context.WeightEntries.AddAsync(weightEntry);
+
             await _context.SaveChangesAsync();
 
             return weightEntry;
@@ -28,13 +25,15 @@ namespace Infrastructure.Repos
         public async Task<WeightEntry?> GetByIdAsync(int id)
         {
             return await _context.WeightEntries
+                .AsNoTracking()
                 .Include(w => w.WeightDetails)
                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
-        public async Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 21, uint page = 1)
+        public async Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 30, uint page = 1)
         {
             return await _context.WeightEntries
+                .AsNoTracking()
                 .Include(w => w.WeightDetails)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip(((int)page - 1))
@@ -42,16 +41,19 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
-        public async Task UpdateAsync(WeightEntryDto weightEntryDto, int id)
+        public async Task UpdateAsync(WeightEntry weightEntry)
         {
-            WeightEntry? existingEntry = await GetByIdAsync(id);
+            if(weightEntry.Id <= 0)
+            {
+                throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
+            }
+            WeightEntry? existingEntry = await GetByIdAsync(weightEntry.Id);
             if (existingEntry == null)
             {
-                throw new KeyNotFoundException($"WeightEntry with ID {id} not found.");
+                throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
             }
             
-            existingEntry.UpdateFromDto(weightEntryDto);
-            _context.WeightEntries.Update(existingEntry);
+            _context.WeightEntries.Update(weightEntry);
 
             await _context.SaveChangesAsync();
         }
