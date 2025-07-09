@@ -32,12 +32,25 @@ namespace BasculaTerminalApi.Service
                 sp.UseNpgsql(connectionString);
             });
 
+            services.AddDbContext<ContpaqiSQLContext>(sp =>
+            {
+                string? connectionString = configuration.GetConnectionString("ContpaqSQLConnection");
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidDataException("No se pudo cargar la cadena de conexión a la base de datos desde el archivo de configuración.");
+                }
+
+                sp.UseSqlServer(connectionString);
+            });
+
             return services;
         }
 
         private static IServiceCollection AddRepoServices(this IServiceCollection services)
         {
             services.AddTransient<IWeightRepo, WeightRepo>();
+            services.AddTransient<IClienteProveedorRepo, ClienteProveedorRepo>();
+            services.AddTransient<IProductoRepo, ProductoRepo>();
             return services;
         }
 

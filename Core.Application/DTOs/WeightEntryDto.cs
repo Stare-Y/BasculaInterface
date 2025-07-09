@@ -1,9 +1,8 @@
-﻿using Core.Domain.Entities;
-
-namespace Core.Application.DTOs
+﻿namespace Core.Application.DTOs
 {
     public class WeightEntryDto
     {
+        public int Id { get; set; }
         public int? PartnerId { get; set; }
         public double TareWeight { get; set; } = 0;
         public double NetWeight { get; set; } = 0;
