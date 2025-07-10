@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Core.Application.Services;
+using Newtonsoft.Json;
 using System.Text;
 
 namespace BasculaInterface.Services
 {
-    public class ApiService
+    public class ApiService : IApiService
     {
         private readonly HttpClient _client;
 

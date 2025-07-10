@@ -24,5 +24,17 @@ namespace Infrastructure.Repos
 
             return clientesProveedores;
         }
+
+        public async Task<ClienteProveedor> GetById(int id, CancellationToken cancellationToken = default)
+        {
+            var clienteProveedor = await _context.ClientesProveedores.AsNoTracking()
+                .FirstOrDefaultAsync(cp => cp.CIDCLIENTEPROVEEDOR == id, cancellationToken);
+
+            if (clienteProveedor == null)
+                throw new KeyNotFoundException($"Cliente/Proveedor/Partner con ID {id} no encontrado.");
+
+            return clienteProveedor;
+        }
+
     }
 }

@@ -53,6 +53,25 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
+        [HttpGet("Pending")]
+        public async Task<IActionResult> GetPendingWeights([FromQuery] int top = 30, [FromQuery] uint page = 1)
+        {
+            try
+            {
+                IEnumerable<WeightEntry> pendingWeights = await _weightRepo.GetPendingWeights(top, page);
+                if (pendingWeights == null || !pendingWeights.Any())
+                {
+                    return NotFound("No pending weight entries found.");
+                }
+                IEnumerable<WeightEntryDto> dtos = pendingWeights.ConvertRangeToDto();
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving pending weight entries: {ex.Message}");
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {

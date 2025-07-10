@@ -12,5 +12,6 @@ namespace Core.Application.Interfaces
         /// <param name="cancellationToken"></param>
         /// <exception cref="KeyNotFoundException"></exception>
         Task<IEnumerable<ClienteProveedor>> SearchByName(string name, CancellationToken cancellationToken = default);
+        Task<ClienteProveedor> GetById(int id, CancellationToken cancellationToken = default);
     }
 }

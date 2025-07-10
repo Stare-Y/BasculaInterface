@@ -8,6 +8,7 @@ namespace Core.Domain.Entities
         public double TareWeight { get; set; } = 0;
         public double NetWeight { get; set; } = 0;
         public DateTime? ConcludeDate { get; set; }
+        public string VehiclePlate { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public ICollection<WeightDetail> WeightDetails { get; set; } = new List<WeightDetail>();
         

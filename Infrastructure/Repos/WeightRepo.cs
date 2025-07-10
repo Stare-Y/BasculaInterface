@@ -36,10 +36,23 @@ namespace Infrastructure.Repos
                 .AsNoTracking()
                 .Include(w => w.WeightDetails)
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip(((int)page - 1))
+                .Skip((int)page - 1)
                 .Take(top)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<WeightEntry>> GetPendingWeights(int top = 30, uint page = 1)
+        {
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Where(w => w.ConcludeDate == null)
+                .Include(w => w.WeightDetails)
+                .OrderByDescending(w => w.ConcludeDate)
+                .Skip((int)page - 1)
+                .Take(top)
+                .ToListAsync();
+        }
+
 
         public async Task UpdateAsync(WeightEntry weightEntry)
         {

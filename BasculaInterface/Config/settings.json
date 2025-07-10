@@ -1,4 +1,4 @@
 {
-    "BasculaSocketUrl": "http://localhost:5284/",
+    "BasculaSocketUrl": "http://localhost:6969/",
     "PrintTemplate": "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n"
 }

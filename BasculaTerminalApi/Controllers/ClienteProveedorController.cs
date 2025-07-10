@@ -41,5 +41,29 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest($"Error searching for clients/providers: {ex.Message}");
             }
         }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                ClienteProveedor? clienteProveedor = await _clienteProveedorRepo.GetById(id, cancellationToken);
+                if (clienteProveedor == null)
+                {
+                    return NotFound($"Client/Provider/Partner with ID {id} not found.");
+                }
+                ClienteProveedorDto dto = WeightHelper.BuildFromBaseEntity(new[] { clienteProveedor }).First();
+                
+                return Ok(dto);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving client/provider: {ex.Message}");
+            }
+        }
     }
 }

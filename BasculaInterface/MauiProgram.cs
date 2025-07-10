@@ -1,13 +1,15 @@
-﻿using System.Text.Json;
+﻿using BasculaInterface.Services;
 using BasculaInterface.ViewModels;
 using CommunityToolkit.Maui;
+using Core.Application.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+using System.Text.Json;
 
 namespace BasculaInterface;
 public static class MauiProgram
 {
-    public static string BasculaSocketUrl { get; set; } = "http://localhost:5284/";
+    public static string BasculaSocketUrl { get; set; } = "http://localhost:6969/";
     public static IServiceProvider ServiceProvider { get; set; } = null !;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
 
@@ -51,6 +53,14 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
         builder.Services.AddTransient<BasculaViewModel>();
+        builder.Services.AddTransient<PendingWeightsViewModel>();
+        builder.Services.AddTransient<IApiService, ApiService>();
+        builder.Services.AddHttpClient<IApiService, ApiService>(client =>
+        {
+            client.BaseAddress = new Uri(BasculaSocketUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
+        });
         //build service provider
         ServiceProvider = builder.Services.BuildServiceProvider();
         return builder.Build();

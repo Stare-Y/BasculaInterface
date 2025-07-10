@@ -37,6 +37,7 @@ namespace Core.Application.Helpers
                 NetWeight = weightEntryDto.NetWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
+                VehiclePlate = weightEntryDto.VehiclePlate,
                 WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
@@ -63,6 +64,7 @@ namespace Core.Application.Helpers
                 NetWeight = weightEntry.NetWeight,
                 ConcludeDate = weightEntry.ConcludeDate,
                 Notes = weightEntry.Notes,
+                VehiclePlate = weightEntry.VehiclePlate,
                 WeightDetails = weightEntry.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
@@ -87,6 +89,7 @@ namespace Core.Application.Helpers
                 NetWeight = weightEntryDto.NetWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
+                VehiclePlate = weightEntryDto.VehiclePlate,
                 WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
@@ -111,6 +114,7 @@ namespace Core.Application.Helpers
                 NetWeight = we.NetWeight,
                 ConcludeDate = we.ConcludeDate,
                 Notes = we.Notes,
+                VehiclePlate = we.VehiclePlate,
                 WeightDetails = we.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
@@ -136,13 +140,14 @@ namespace Core.Application.Helpers
             weightEntry.NetWeight = weightEntryDto.NetWeight;
             weightEntry.ConcludeDate = weightEntryDto.ConcludeDate;
             weightEntry.Notes = weightEntryDto.Notes;
+            weightEntry.VehiclePlate = weightEntryDto.VehiclePlate;
 
             // Update WeightDetails
             var existingDetails = weightEntry.WeightDetails.ToList(); // Get existing details
             var updatedDetails = weightEntryDto.WeightDetails.ToList(); // Get updated details from DTO
 
             // Update existing WeightDetails
-            foreach (var existingDetail in existingDetails)
+            foreach (WeightDetail existingDetail in existingDetails)
             {
                 var updatedDetail = updatedDetails.FirstOrDefault(wd => wd.FK_WeightedProductId == existingDetail.FK_WeightedProductId);
                 if (updatedDetail != null)
@@ -153,7 +158,7 @@ namespace Core.Application.Helpers
             }
 
             // Add new WeightDetails
-            foreach (var newDetail in updatedDetails)
+            foreach (WeightDetailDto newDetail in updatedDetails)
             {
                 if (!existingDetails.Any(ed => ed.FK_WeightedProductId == newDetail.FK_WeightedProductId))
                 {
@@ -166,7 +171,7 @@ namespace Core.Application.Helpers
             }
 
             // Remove WeightDetails that are no longer present in the DTO
-            foreach (var existingDetail in existingDetails.ToList())
+            foreach (WeightDetail existingDetail in existingDetails.ToList())
             {
                 if (!updatedDetails.Any(ud => ud.FK_WeightedProductId == existingDetail.FK_WeightedProductId))
                 {
