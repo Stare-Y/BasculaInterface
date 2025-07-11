@@ -23,5 +23,16 @@ namespace Infrastructure.Repos
 
             return productos;
         }
+        
+        public async Task<Producto> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            var producto = await _context.Productos.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.CIDPRODUCTO == id, cancellationToken);
+
+            if (producto == null)
+                throw new KeyNotFoundException($"No se encontró el producto con ID: {id}");
+
+            return producto;
+        }
     }
 }

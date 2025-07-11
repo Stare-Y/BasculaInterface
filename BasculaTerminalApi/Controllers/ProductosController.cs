@@ -41,5 +41,31 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest($"Error searching for products: {ex.Message}");
             }
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Producto? producto = await _productoRepo.GetByIdAsync(id, cancellationToken);
+
+                if (producto == null)
+                {
+                    throw new KeyNotFoundException($"Product with ID {id} not found.");
+                }
+
+                ProductoDto dto = WeightHelper.BuildFromBaseEntity(producto);
+
+                return Ok(dto);
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                return NotFound(knfEx.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving product: {ex.Message}");
+            }
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace BasculaTerminalApi.Service
                 }
             };
 
-            await Task.Run(() => document.Print());
+            await Task.Run(() => document.Print()).ConfigureAwait(false);
         }
     }
 }

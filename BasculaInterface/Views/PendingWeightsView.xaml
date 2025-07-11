@@ -3,53 +3,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
              x:Class="BasculaInterface.Views.PendingWeightsView"
-             Title="Pedidos Pendientes">
+             Title="Pedidos en Proceso">
     <ContentPage.BindingContext>
         <vm:PendingWeightsViewModel/>
     </ContentPage.BindingContext>
 
     <VerticalStackLayout>
-        <CollectionView ItemsSource="{Binding PendingWeights}" Margin="20">
+        <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="15"
-                       Margin="0,0,0,15"
-                       BackgroundColor="#F7F7F7"
-                       CornerRadius="12"
-                       HasShadow="False"
-                       BorderColor="#E0E0E0">
+                    <Frame CornerRadius="4" Padding="2" BackgroundColor="Transparent" BorderColor="Transparent">
+                        <Frame Padding="10"
+                                BackgroundColor="#F7F7F7"
+                                CornerRadius="4"
+                                HasShadow="False">
+                            <Grid ColumnDefinitions="*,*">
+                                <VerticalStackLayout Spacing="4" Grid.Column="0">
+                                    <Label Text="{Binding Partner.RazonSocial}"
+                                            FontAttributes="Bold"
+                                            FontSize="Subtitle"
+                                            TextColor="#222" />
 
-                        <Grid ColumnDefinitions="*,*">
+                                    <Label Text="{Binding WeightEntry.VehiclePlate}"
+                                            FontSize="Subtitle"
+                                            TextColor="#666" />
 
-                            <VerticalStackLayout Spacing="4" Grid.Column="0">
-                                
-                                <Label Text="{Binding Partner.RazonSocial}"
-                                   FontAttributes="Bold"
-                                   FontSize="18"
-                                   TextColor="#222" />
+                                </VerticalStackLayout>
 
-                                <Label Text="{Binding WeightEntry.VehiclePlate}"
-                                   FontSize="14"
-                                   TextColor="#666" />
-                                
-                            </VerticalStackLayout>
-                            
-                            <VerticalStackLayout Spacing="4" Grid.Column="1">
-                                
-                                <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
-                                    FontAttributes="Bold"
-                                    FontSize="16"
-                                    TextColor="#222" 
-                                    HorizontalTextAlignment="End"/>
+                                <VerticalStackLayout Spacing="4" Grid.Column="1">
 
-                                <Label Text="{Binding HistoryText}"
-                                    FontSize="16"
-                                    TextColor="DarkOrange" 
-                                    HorizontalTextAlignment="End"/>
-                                
-                            </VerticalStackLayout>
+                                    <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
+                                            FontAttributes="Bold"
+                                            FontSize="Subtitle"
+                                            TextColor="#222" 
+                                            HorizontalTextAlignment="End"/>
 
-                        </Grid>
+                                    <Label Text="{Binding HistoryText}"
+                                            FontSize="Body"
+                                            TextColor="DarkOrange" 
+                                            HorizontalTextAlignment="End"/>
+
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

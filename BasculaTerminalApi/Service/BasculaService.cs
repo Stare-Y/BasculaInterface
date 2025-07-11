@@ -15,7 +15,7 @@ namespace BasculaTerminalApi.Service
 
         private int _lecturasFalsas = 0;
 
-        private string _askChar = string.Empty;
+        private readonly string _askChar = string.Empty;
 
         //event to notify when a new weight is received
         public event EventHandler<OnBasculaReadEventArgs>? OnBasculaRead;
@@ -72,7 +72,6 @@ namespace BasculaTerminalApi.Service
         private double ParseScreenWeight(string value)
         {
             value = value.Replace(" ", "").Trim();
-            Console.WriteLine($"Valor recibido: {value}");
             var match = Regex.Match(value, @"-?\d+(\.\d+)?");
 
             if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))

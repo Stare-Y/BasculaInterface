@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+             x:Class="BasculaInterface.Views.WeightingScreen"
+             Title="WeightingScreen">
+    
+    <ContentPage.BindingContext>
+        <vm:BasculaViewModel/>
+    </ContentPage.BindingContext>
+
+    <Grid Padding="20" RowSpacing="20" ColumnSpacing="20">
+        <!-- Definimos filas y columnas -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+
+            <RowDefinition Height="3*"/>
+            <!-- Display -->
+            <RowDefinition Height="2*"/>
+            <!-- Espacio -->
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Text="{Binding Estado}" Grid.Row="0"
+                VerticalTextAlignment="Center"/>
+        <Button Text="Reconectar" Grid.Row="0" Grid.Column="1"
+                x:Name="BtnReconect"
+                Clicked="BtnReconect_Clicked"
+                BackgroundColor="Orange"/>
+
+        <!-- Display del peso -->
+        <Frame Grid.Row="1" Grid.ColumnSpan="2"
+               BackgroundColor="Lime"
+               CornerRadius="20"
+               Padding="30"
+               HasShadow="True"
+               BorderColor="White">
+            <Label x:Name="PesoLabel"
+                   Text="{Binding Peso, StringFormat='{0} kg'}"
+                   FontSize="Title"
+                   TextColor="Black"
+                   HorizontalTextAlignment="Center"
+                   VerticalTextAlignment="Center" 
+                   FontAttributes="Bold"/>
+        </Frame>
+        <Frame Grid.Row="2" Grid.Column="0"
+               BackgroundColor="LightBlue"
+               CornerRadius="20"
+               Padding="10"
+               HasShadow="True"
+               BorderColor="White">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Label x:Name="TaraLabel"
+                       Text="{Binding Tara, StringFormat='{0} kg'}"
+                       FontSize="Subtitle"
+                       TextColor="Black"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center" 
+                       Grid.Row="0"
+                       FontAttributes="Bold"/>
+
+                <Label Grid.Row="1"
+                        Text="TARA"
+                        FontAutoScalingEnabled="True"
+                        TextColor="Black"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+
+            </Grid>
+
+        </Frame>
+
+        <Frame Grid.Row="2" Grid.Column="1"
+               BackgroundColor="LightSkyBlue"
+               CornerRadius="20"
+               Padding="10"
+               HasShadow="True"
+               BorderColor="White">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Label x:Name="DiferenciaLabel"
+                       Text="{Binding Diferencia, StringFormat='{0} kg'}"
+                       FontSize="Subtitle"
+                       TextColor="Black"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center" 
+                       Grid.Row="0"
+                       FontAttributes="Bold"/>
+
+                <Label Grid.Row="1"
+                        Text="DIFERENCIA"
+                        TextColor="Black"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+
+            </Grid>
+
+        </Frame>
+
+        <!-- Botón IMPRIMIR -->
+        <Button Grid.Row="3" Grid.ColumnSpan="2"
+                Text="IMPRIMIR"
+                BackgroundColor="#28A745"
+                TextColor="White"
+                CornerRadius="10"
+                Clicked="OnImprimirClicked"
+                Margin="0,10,0,0" />
+    </Grid>
+</ContentPage>

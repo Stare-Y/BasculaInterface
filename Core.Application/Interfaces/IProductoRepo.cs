@@ -10,5 +10,7 @@ namespace Core.Application.Interfaces
         /// <param name="name"></param>
         /// <exception cref="KeyNotFoundException"></exception>
         Task<IEnumerable<Producto>> SearchByNameAsync(string name, CancellationToken cancellationToken = default);
+
+        Task<Producto> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     }
 }

@@ -16,17 +16,9 @@ namespace BasculaTerminalApi.Controllers
         }
         private async void SendWeightNumber(object sender, OnBasculaReadEventArgs e)
         {
-            var number = e?.Weight ?? throw new Exception("Error leyendo evento de lectura de peso");
-            await _context.Clients.All.SendAsync("ReceiveNumber", number);
+            double number = e?.Weight ?? throw new Exception("Error leyendo evento de lectura de peso");
 
-            if (number > 0)
-            {
-                Console.WriteLine($"Peso: {number}");
-            }
-            else
-            {
-                Console.WriteLine($"Lectura invalida o error en la báscula, valor retornado: {number}");
-            }   
+            await _context.Clients.All.SendAsync("ReceiveNumber", number);
         }
     }
 }

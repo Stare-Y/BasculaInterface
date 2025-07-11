@@ -19,7 +19,9 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
+#pragma warning disable CA1416 // Validar la compatibilidad de la plataforma
                 await _printService.Print(ticket);
+#pragma warning restore CA1416 // Validar la compatibilidad de la plataforma
 
                 Debug.WriteLine($"Ticket Printed: {ticket}");
 

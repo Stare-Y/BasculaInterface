@@ -11,6 +11,7 @@ namespace BasculaTerminalApi.Service
         public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddPersistency(configuration);
+
             services.AddBasculaService();
 
             services.AddPrintService(configuration);
@@ -64,7 +65,7 @@ namespace BasculaTerminalApi.Service
         {
             services.AddSingleton<PrintSettings>(sp =>
             {
-                PrintSettings? settings = configuration.GetValue<PrintSettings>("HardwareSettings");
+                PrintSettings? settings = configuration.GetSection("SerialSettings").Get<PrintSettings>();
                 if (settings is null)
                 {
                     throw new InvalidDataException("No se pudo cargar la configuración de impresion/bascula desde el archivo de configuración.");

@@ -2,6 +2,7 @@
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities;
 using System.Collections.ObjectModel;
 
 namespace BasculaInterface.ViewModels
@@ -42,17 +43,18 @@ namespace BasculaInterface.ViewModels
                 ClienteProveedorDto? partner = _clienteProveedorDtos.FirstOrDefault(p => p.Id == weight.PartnerId);
                 if (partner != null)
                 {
-                    string historyText = string.Empty;
+                    string teoricWeightText = string.Empty;
 
-                    if(weight.WeightDetails.Count > 0)
+                    if (weight.WeightDetails.Count > 0)
                     {
-                        foreach (WeightDetailDto detail in weight.WeightDetails)
-                        {
-                            historyText += $"+|{detail.Weight}|";
-                        }
+                        teoricWeightText += 
+                            "Total (teorico): " 
+                            + (weight.WeightDetails.Sum(d => d.Weight) 
+                            + weight.TareWeight).ToString() 
+                            + " kg.";
                     }
 
-                    PendingWeights.Add(new PendingWeightViewRow(weight, partner, historyText));
+                    PendingWeights.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
                 }
             }
         }
@@ -60,8 +62,8 @@ namespace BasculaInterface.ViewModels
         private async Task LoadClienteProveedorAsync()
         {
             _clienteProveedorDtos.Clear();
-            
-            foreach(WeightEntryDto weight in _pendingWeights)
+
+            foreach (WeightEntryDto weight in _pendingWeights)
             {
                 //get the partner id
                 if (weight.PartnerId.HasValue && weight.PartnerId.Value > 0)

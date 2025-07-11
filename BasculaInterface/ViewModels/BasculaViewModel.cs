@@ -1,32 +1,16 @@
 ﻿using System.Text;
 using System.Text.Json;
 using BasculaInterface.ViewModels.Base;
+using Core.Application.DTOs;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BasculaInterface.ViewModels
 {
     public class BasculaViewModel : ViewModelBase
     {
-        private double _fontSizePeso = 120;
-        public double FontSizePeso
-        {
-            get => _fontSizePeso;
-            set 
-            {
-                _fontSizePeso = value;
-                OnPropertyChanged();
-            }
-        }
-        private double _fontSizeTara;
-        public double FontSizeTara
-        {
-            get => _fontSizeTara;
-            set
-            {
-                _fontSizeTara = value;
-                OnPropertyChanged();
-            }
-        }
+        public WeightEntryDto? WeightEntry { get; set; } = null;
+        public ClienteProveedorDto? Partner { get; set; } = null;
+        
         private string _peso = "0.00";
         public string Peso
         {

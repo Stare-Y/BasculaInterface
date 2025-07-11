@@ -23,6 +23,18 @@ namespace Core.Application.Helpers
                 Nombre = p.CNOMBREPRODUCTO
             });
         }
+        public static ProductoDto BuildFromBaseEntity(Producto producto)
+        {
+            if (producto == null)
+            {
+                throw new ArgumentNullException(nameof(producto), "Producto cannot be null");
+            }
+            return new ProductoDto
+            {
+                Id = producto.CIDPRODUCTO,
+                Nombre = producto.CNOMBREPRODUCTO
+            };
+        }
         public static WeightEntry BuildFromDto(this WeightEntry weightEntry, WeightEntryDto weightEntryDto)
         {
             if (weightEntryDto == null)
