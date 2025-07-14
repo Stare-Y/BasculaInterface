@@ -26,7 +26,7 @@ namespace BasculaTerminalApi.Service
                 if (e.Graphics != null)
                 {
                     System.Drawing.Font font = new("Courier New", _printSettings.PrintFontSize);
-                    e.Graphics.DrawString(text, font, Brushes.Black, 10, 10);
+                    e.Graphics.DrawString(fechaHora + text, font, Brushes.Black, 10, 10);
                 }
             };
 

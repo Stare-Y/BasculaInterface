@@ -67,7 +67,6 @@ namespace BasculaInterface.ViewModels
         event Action<double>? OnWeightReceived;
         private readonly IApiService? _apiService;
 
-
         public BasculaViewModel(IApiService apiService)
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));

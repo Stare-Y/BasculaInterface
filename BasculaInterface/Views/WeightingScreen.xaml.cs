@@ -278,4 +278,9 @@ public partial class WeightingScreen : ContentPage
         productSelectView.OnProductSelected += OnProductSelected;
         Shell.Current.Navigation.PushModalAsync(productSelectView);
     }
+
+    private void BtnBack_Clicked(object sender, EventArgs e)
+    {
+        Shell.Current.Navigation.PopModalAsync();
+    }
 }

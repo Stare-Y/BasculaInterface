@@ -23,15 +23,22 @@
                                 HasShadow="False">
                             <Grid ColumnDefinitions="*,*">
                                 <VerticalStackLayout Spacing="4" Grid.Column="0">
-                                    <Label Text="{Binding Partner.RazonSocial}"
-                                            FontAttributes="Bold"
-                                            FontSize="Subtitle"
-                                            TextColor="#222" />
+                                    <Label 
+                                        Text="{Binding Partner.RazonSocial}"
+                                        FontAttributes="Bold"
+                                        FontSize="Subtitle"
+                                        TextColor="#222" />
 
-                                    <Label Text="{Binding WeightEntry.VehiclePlate}"
+                                    <HorizontalStackLayout>
+                                        <Label 
+                                            Text="{Binding WeightEntry.VehiclePlate, StringFormat='{0} | '}"
                                             FontSize="Subtitle"
                                             TextColor="#666" />
-
+                                        <Label 
+                                            Text="{Binding WeightEntry.Notes, StringFormat='{0}.'}" 
+                                            FontSize="Subtitle" 
+                                            TextColor="#666" />
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
                                 <VerticalStackLayout Spacing="4" Grid.Column="1">

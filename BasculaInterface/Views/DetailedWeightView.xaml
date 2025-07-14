@@ -20,7 +20,7 @@
             <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}" FontSize="Title"  HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="1"/>
             <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="5">
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="20">
             <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" BorderColor="LightGrey" BackgroundColor="White" BorderWidth="2" Grid.Column="0"/>
             <Button x:Name="BtnNewEntry" Text="Nueva Entrada" Clicked="BtnNewEntry_Clicked" BorderColor="RoyalBlue" BackgroundColor="White" BorderWidth="2" Grid.Column="1"/>
         </Grid>
@@ -48,9 +48,10 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        <Grid Grid.Row="3" RowDefinitions="*,*" RowSpacing="4">
-            <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0"/>
-            <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1"/>
+        <Grid Grid.Row="3" RowDefinitions="*,*" ColumnSpacing="20" RowSpacing="4" ColumnDefinitions="*,*">
+            <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
+            <Button x:Name="BtnPrintTicket" Text="Imprimir" Clicked="BtnPrintTicket_Clicked" Grid.Row="1" Grid.Column="0"/>
+            <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1" Grid.Column="1"/>
         </Grid>
     </Grid>
 </ContentPage>

@@ -3,6 +3,9 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
+using System.Reflection.PortableExecutable;
+using System.Text;
+using System.Text.Json;
 
 namespace BasculaInterface.ViewModels
 {
@@ -42,6 +45,12 @@ namespace BasculaInterface.ViewModels
             WeightEntry = updatedEntry;
             await LoadProductsAsync(WeightEntry, Partner);
 
+            //ifweightentry has partnerid, fetch partner details
+            if (WeightEntry.PartnerId.HasValue && WeightEntry.PartnerId.Value > 0)
+            {
+                Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/{WeightEntry.PartnerId.Value}");
+            }
+
             OnPropertyChanged(nameof(WeightEntry));
         }
 
@@ -58,6 +67,14 @@ namespace BasculaInterface.ViewModels
 
             // Send the updated weight entry to the API
             await _apiService.PutAsync<object>("api/Weight", WeightEntry);
+        }
+
+        public async Task PrintTicketAsync(string text)
+        {
+            if (_apiService is not null)
+            {
+                await _apiService.PostAsync<object>("api/print", text).ConfigureAwait(false);
+            }
         }
 
         public async Task LoadProductsAsync(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null)
@@ -94,7 +111,7 @@ namespace BasculaInterface.ViewModels
                 }
                 else
                 {
-                    row.Description = "Sin producto asignado";
+                    row.Description = "Peso Libre";
                 }
 
                 WeightEntryDetailRows.Add(row);

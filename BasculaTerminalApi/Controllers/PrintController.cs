@@ -25,7 +25,7 @@ namespace BasculaTerminalApi.Controllers
 
                 Debug.WriteLine($"Ticket Printed: {ticket}");
 
-                return Ok("Ticket sent to print");
+                return Ok("Ticket impreso xd");
             }
             catch (Exception ex)
             {
