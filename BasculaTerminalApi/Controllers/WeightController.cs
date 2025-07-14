@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BasculaTerminalApi.Controllers
 {
     [ApiController]
-    [Route("[Controller]")]
+    [Route("api/[Controller]")]
     public class WeightController : ControllerBase, IWeightService<IActionResult>
     {
         private readonly IWeightRepo _weightRepo = null!;
@@ -100,7 +100,7 @@ namespace BasculaTerminalApi.Controllers
             try
             {
                 await _weightRepo.UpdateAsync(weightEntryDto.ConvertToBaseEntry());
-                return Ok();
+                return Ok("Update Successful :D");
             }
             catch (KeyNotFoundException knfEx)
             {

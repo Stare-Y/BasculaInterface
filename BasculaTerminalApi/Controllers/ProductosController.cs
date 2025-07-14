@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BasculaTerminalApi.Controllers
 {
     [ApiController]
-    [Route("[Controller]")]
+    [Route("api/[Controller]")]
     public class ProductosController : ControllerBase
     {
         private readonly IProductoRepo _productoRepo;
@@ -16,8 +16,8 @@ namespace BasculaTerminalApi.Controllers
             _productoRepo = productoRepo ?? throw new ArgumentNullException(nameof(productoRepo));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SearchByName([FromQuery] string name, CancellationToken cancellationToken)
+        [HttpGet("ByName/{name}")]
+        public async Task<IActionResult> SearchByName(string name, CancellationToken cancellationToken)
         {
             try
             {

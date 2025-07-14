@@ -46,7 +46,7 @@ namespace Core.Application.Helpers
             {
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
-                NetWeight = weightEntryDto.NetWeight,
+                BruteWeight = weightEntryDto.BruteWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
@@ -55,6 +55,7 @@ namespace Core.Application.Helpers
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Tare = wd.Tare,
                     Weight = wd.Weight
                 }).ToList()
             };
@@ -73,7 +74,7 @@ namespace Core.Application.Helpers
                 Id = weightEntry.Id,
                 PartnerId = weightEntry.PartnerId,
                 TareWeight = weightEntry.TareWeight,
-                NetWeight = weightEntry.NetWeight,
+                BruteWeight = weightEntry.BruteWeight,
                 ConcludeDate = weightEntry.ConcludeDate,
                 Notes = weightEntry.Notes,
                 VehiclePlate = weightEntry.VehiclePlate,
@@ -82,6 +83,7 @@ namespace Core.Application.Helpers
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Tare = wd.Tare,
                     Weight = wd.Weight
                 }).ToList()
             };
@@ -98,7 +100,7 @@ namespace Core.Application.Helpers
                 Id = weightEntryDto.Id,
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
-                NetWeight = weightEntryDto.NetWeight,
+                BruteWeight = weightEntryDto.BruteWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
@@ -107,6 +109,7 @@ namespace Core.Application.Helpers
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Tare = wd.Tare,
                     Weight = wd.Weight
                 }).ToList()
             };
@@ -123,7 +126,7 @@ namespace Core.Application.Helpers
                 Id = we.Id,
                 PartnerId = we.PartnerId,
                 TareWeight = we.TareWeight,
-                NetWeight = we.NetWeight,
+                BruteWeight = we.BruteWeight,
                 ConcludeDate = we.ConcludeDate,
                 Notes = we.Notes,
                 VehiclePlate = we.VehiclePlate,
@@ -132,6 +135,7 @@ namespace Core.Application.Helpers
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
+                    Tare = wd.Tare,
                     Weight = wd.Weight
                 }).ToList()
             });
@@ -149,7 +153,7 @@ namespace Core.Application.Helpers
             }
             weightEntry.PartnerId = weightEntryDto.PartnerId;
             weightEntry.TareWeight = weightEntryDto.TareWeight;
-            weightEntry.NetWeight = weightEntryDto.NetWeight;
+            weightEntry.BruteWeight = weightEntryDto.BruteWeight;
             weightEntry.ConcludeDate = weightEntryDto.ConcludeDate;
             weightEntry.Notes = weightEntryDto.Notes;
             weightEntry.VehiclePlate = weightEntryDto.VehiclePlate;
@@ -166,6 +170,7 @@ namespace Core.Application.Helpers
                 {
                     // Update properties of existing detail
                     existingDetail.Weight = updatedDetail.Weight;
+                    existingDetail.Tare = updatedDetail.Tare;
                 }
             }
 
@@ -177,6 +182,7 @@ namespace Core.Application.Helpers
                     weightEntry.WeightDetails.Add(new WeightDetail
                     {
                         FK_WeightedProductId = newDetail.FK_WeightedProductId,
+                        Tare = newDetail.Tare,
                         Weight = newDetail.Weight
                     });
                 }

@@ -20,6 +20,7 @@
         WidthRequest="69"/>
 
         <Label
+            x:Name="LblMessage"
         HorizontalOptions="Center"
         Text="Espera..."
         FontSize="Subtitle"

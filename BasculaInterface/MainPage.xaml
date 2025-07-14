@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
              x:Class="BasculaInterface.MainPage">
-    <Grid>
-        <Label Text="hola"/>
+    <Grid RowDefinitions="*,*">
+        <Label Text="Pedidos CPE :D" Grid.Row="0" FontSize="Title" HorizontalOptions="Center"/>
+        <Button x:Name="BtnLogIn" Clicked="BtnLogIn_Clicked" Text="Log In" Grid.Row="1"/>
     </Grid>
 
 </ContentPage>

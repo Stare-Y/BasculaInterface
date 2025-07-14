@@ -9,6 +9,7 @@ namespace Core.Domain.Entities
         [Required]
         public int FK_WeightEntryId { get; set; }
         public double Weight { get; set; } = 0;
+        public double Tare { get; set; } = 0;
         public int? FK_WeightedProductId { get; set; }
 
         [ForeignKey("FK_WeightEntryId")]

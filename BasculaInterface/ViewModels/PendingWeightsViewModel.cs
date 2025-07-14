@@ -1,4 +1,5 @@
-﻿using BasculaInterface.Models;
+﻿using BasculaInterface.Exceptions;
+using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
@@ -26,13 +27,35 @@ namespace BasculaInterface.ViewModels
         {
             _pendingWeights.Clear();
 
-            _pendingWeights = await _apiService.GetAsync<List<WeightEntryDto>>("Weight/Pending");
+            try
+            {
+                _pendingWeights = await _apiService.GetAsync<List<WeightEntryDto>>("api/Weight/Pending");
 
-            await LoadClienteProveedorAsync();
+                await LoadClienteProveedorAsync();
 
-            BuildObservableCollection();
+                BuildObservableCollection();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("NotFound"))
+                {
+                    throw new OriginEmptyException("No hay pesos pendientes, puedes crear uno nuevo :D");
 
-            OnCollectionChanged(nameof(_pendingWeights));
+                }
+                else
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+            finally
+            {
+                await LoadClienteProveedorAsync();
+
+                BuildObservableCollection();
+
+                OnCollectionChanged(nameof(_pendingWeights));
+            }
+
         }
 
         private void BuildObservableCollection()
@@ -56,6 +79,10 @@ namespace BasculaInterface.ViewModels
 
                     PendingWeights.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
                 }
+                else
+                {
+                    PendingWeights.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "Socio no identificado" }, string.Empty));
+                }
             }
         }
 
@@ -68,7 +95,7 @@ namespace BasculaInterface.ViewModels
                 //get the partner id
                 if (weight.PartnerId.HasValue && weight.PartnerId.Value > 0)
                 {
-                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"ClienteProveedor/{weight.PartnerId.Value}");
+                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/{weight.PartnerId.Value}");
                     if (partner != null)
                     {
                         _clienteProveedorDtos.Add(partner);

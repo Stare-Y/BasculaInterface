@@ -2,91 +2,86 @@
 using System.Text.Json;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
+using Core.Application.Services;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BasculaInterface.ViewModels
 {
     public class BasculaViewModel : ViewModelBase
     {
-        public WeightEntryDto? WeightEntry { get; set; } = null;
-        public ClienteProveedorDto? Partner { get; set; } = null;
-        
-        private string _peso = "0.00";
+        private WeightEntryDto?_weightEntry;
+        public WeightEntryDto? WeightEntry 
+        {
+            get => _weightEntry;
+            set
+            {
+                _weightEntry = value;
+                OnPropertyChanged(nameof(WeightEntry));
+            }
+        }
+        private ClienteProveedorDto? _partner;
+        public ClienteProveedorDto? Partner
+        {
+            get => _partner;
+            set
+            {
+                _partner = value;
+                OnPropertyChanged(nameof(Partner));
+            }
+        }
+
+        private ProductoDto? _product;
+        public ProductoDto? Product 
+        {
+            get => _product;
+            set 
+            {
+                _product = value;
+                OnPropertyChanged(nameof(Product));
+            }
+        }
+
+        private double _pesoTotal = 0;
         public string Peso
         {
-            get => _peso;
-            set
-            {
-                if (_peso != value)
-                {
-                    _peso = value;
-                    OnPropertyChanged();
-                }
-            }
+            get => _pesoTotal.ToString("F2");
         }
 
-        private string _tara = "0.00";
+        private double _tara = 0;
         public string Tara
         {
-            get => _tara;
-            set
-            {
-                if (_tara != value)
-                {
-                    _tara = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        private string _diferencia = "0.00";
-        public string Diferencia
-        {
-            get => _diferencia;
-            set
-            {
-                if (_diferencia != value)
-                {
-                    _diferencia = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        private string _estado = "Desconectado";
-        public string Estado
-        {
-            get => _estado;
-            private set
-            {
-                if (_estado != value)
-                {
-                    _estado = value;
-                    OnPropertyChanged();
-                }
-            }
+            get => _tara.ToString("F2");
         }
 
-        public double TaraValue { get; set; }
+
+        private double _diferenciaAbs = 0;
+        public string Diferencia
+        {
+            get => _diferenciaAbs.ToString("F2");
+        }
+
+        public string Estado { get; private set; } = "Desconectado";
 
         private HubConnection? _basculaSocketHub;
 
         event Action<double>? OnWeightReceived;
+        private readonly IApiService? _apiService;
 
-        private HttpClient? _httpClient;
+
+        public BasculaViewModel(IApiService apiService)
+        {
+            _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
+        }
 
         public BasculaViewModel() { }
 
-        public async Task ConnectSocket(string socketUrl)
+        public async Task ConnectSocket()
         {
             try
             {
                 _basculaSocketHub = new HubConnectionBuilder()
-                .WithUrl(socketUrl + "basculaSocket")
+                .WithUrl(_apiService?.GetBaseUrl() + "basculaSocket")
                 .Build();
-
-                _httpClient = new HttpClient
-                {
-                    BaseAddress = new Uri(socketUrl)
-                };
 
                 _basculaSocketHub.On<double>("ReceiveNumber", data =>
                 {
@@ -103,39 +98,48 @@ namespace BasculaInterface.ViewModels
             }
             catch (Exception ex)
             {
-                Estado = $"Error: {socketUrl}: " + ex.Message;
+                Estado = $"Error conectando socket: {_apiService?.GetBaseUrl()}: " + ex.Message;
+            }
+            finally
+            {
+                OnPropertyChanged(nameof(Estado));
             }
         }
 
         private void UpdateWeight(double data)
         {
-            if (TaraValue != 0)
-                Diferencia = Math.Abs(TaraValue - data).ToString("0.00");
+            if (_tara != 0)
+            {
+                _diferenciaAbs = Math.Abs(_tara - data);
+            }
 
-            Peso = data.ToString("0.00");
+            _pesoTotal = data;
+
+            OnPropertyChanged(nameof(Peso));
+            OnPropertyChanged(nameof(Tara));
+            OnPropertyChanged(nameof(Diferencia));
         }
 
+        public void SetTara(double tara)
+        {
+            if (tara < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tara), "Tara cannot be negative.");
+            }
+            _tara = tara;
+            OnPropertyChanged(nameof(Tara));
+        }
         public async Task PrintTicketAsync(string text)
         {
             try
             {
-                var jsonString = JsonSerializer.Serialize(text);
-                var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                if (_httpClient is not null)
+                string jsonString = JsonSerializer.Serialize(text);
+                StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                if (_apiService is not null)
                 {
-                    var response = await _httpClient.PostAsync("api/print", content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Estado = "Ticket enviado a la impresora";
-                    }
-                    else
-                    {
-                        Estado = "Error al enviar el ultimo ticket: " + response.ReasonPhrase;
-                    }
+                    await _apiService.PostAsync<object>("api/print", content).ConfigureAwait(false);
 
-                    await Task.Delay(5000);
-
-                    Estado = "Conectado";
+                    Estado = "Impresion enviada";
                 }
                 else
                 {
@@ -146,9 +150,13 @@ namespace BasculaInterface.ViewModels
             {
                 Estado = "Error: " + ex.Message;
             }
+            finally
+            {
+                OnPropertyChanged(nameof(Estado));
+            }
         }
 
-        public async Task DisconnectSocket()
+        public async Task ReleaseSocket()
         {
             try
             {
@@ -159,18 +167,85 @@ namespace BasculaInterface.ViewModels
                     _basculaSocketHub = null;
                 }
 
-                if (_httpClient != null)
-                {
-                    _httpClient.Dispose();
-                    _httpClient = null;
-                }
-
                 Estado = "Desconectado";
             }
             catch (Exception ex)
             {
                 Estado = "Error: " + ex.Message;
             }
+            finally
+            {
+                OnPropertyChanged(nameof(Estado));
+            }
+        }
+
+        public async Task CaptureNewWeightEntry()
+        {
+            if(_pesoTotal == 0)
+            {
+                throw new InvalidOperationException("Peso total no puede ser cero.");
+            }
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry is not initialized.");
+            }
+            if (_tara == 0 && WeightEntry.TareWeight != 0)
+            {
+                throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
+            }
+            if (_tara == 0)
+            {
+                WeightEntry.TareWeight = _pesoTotal;
+                WeightEntry.BruteWeight = _pesoTotal;
+                WeightEntry.PartnerId = Partner?.Id;
+
+                await PostNewWeightEntry();
+            }
+            else
+            {
+                if (WeightEntry.Id == 0)
+                {
+                    throw new InvalidOperationException("WeightEntry must have a valid Id before capturing a new weight entry.");
+                }
+                WeightEntry.PartnerId = Partner?.Id;
+                WeightEntry.BruteWeight = _pesoTotal;
+                WeightEntry.WeightDetails.Add(new WeightDetailDto
+                {
+                    FK_WeightEntryId = WeightEntry.Id,
+                    Tare = _tara,
+                    Weight = _diferenciaAbs,
+                    FK_WeightedProductId = Product?.Id,
+                });
+
+                await PutWeightEntry();
+            }
+        }
+
+        private async Task PostNewWeightEntry()
+        {
+            if (_apiService == null)
+            {
+                throw new InvalidOperationException("ApiService is not initialized.");
+            }
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry is not initialized.");
+            }
+
+            await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
+        }
+
+        private async Task PutWeightEntry()
+        {
+            if (_apiService == null)
+            {
+                throw new InvalidOperationException("ApiService is not initialized.");
+            }
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry is not initialized.");
+            }
+            await _apiService.PutAsync<object>("api/Weight/", WeightEntry);
         }
     }
 }

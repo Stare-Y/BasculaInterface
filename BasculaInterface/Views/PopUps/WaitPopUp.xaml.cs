@@ -8,4 +8,8 @@ public partial class WaitPopUp : Popup
 	{
 		InitializeComponent();
 	}
+	public WaitPopUp(string message) : this()
+	{
+		LblMessage.Text = message;
+    }
 }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BasculaTerminalApi.Controllers
 {
     [ApiController]
-    [Route("[Controller]")]
+    [Route("api/[Controller]")]
     public class ClienteProveedorController : ControllerBase
     {
         private readonly IClienteProveedorRepo _clienteProveedorRepo;
@@ -16,8 +16,8 @@ namespace BasculaTerminalApi.Controllers
             _clienteProveedorRepo = clienteProveedorRepo ?? throw new ArgumentNullException(nameof(clienteProveedorRepo));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> SearchByName([FromQuery] string name, CancellationToken cancellationToken)
+        [HttpGet("ByName/{name}")]
+        public async Task<IActionResult> SearchByName(string name, CancellationToken cancellationToken)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             try

@@ -4,7 +4,8 @@ namespace BasculaInterface.Views;
 
 public partial class DetailedWeightView : ContentPage
 {
-	public DetailedWeightView(DetailedWeightViewModel viewModel)
+    private bool _entriesChanged = false;
+    public DetailedWeightView(DetailedWeightViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
@@ -12,9 +13,26 @@ public partial class DetailedWeightView : ContentPage
 
 	public DetailedWeightView() { }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        if (BindingContext is DetailedWeightViewModel viewModel)
+        {
+            if (_entriesChanged)
+            {
+                try
+                {
+                    await viewModel.FetchNewWeightDetails();
+                    _entriesChanged = false;
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
+                    return;
+                }
+            }
+        }
     }
 
     private DetailedWeightViewModel GetViewModel()
@@ -31,7 +49,7 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnVolver_Clicked(object sender, EventArgs e)
     {
-        await Shell.Current.Navigation.PopModalAsync();
+        await Shell.Current.Navigation.PopAsync();
     }
 
     private async void BtnNewEntry_Clicked(object sender, EventArgs e)
@@ -43,11 +61,26 @@ public partial class DetailedWeightView : ContentPage
             WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner);
 
             await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+
+            _entriesChanged = true;
         }
     }
 
-    private void BtnFinishWeight_Clicked(object sender, EventArgs e)
+    private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
+        if(BindingContext is DetailedWeightViewModel viewModel)
+        {
+            try
+            {
+                await viewModel.ConcludeWeightProcess();
 
+                await Shell.Current.Navigation.PopAsync();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudo concluir el proceso de pesaje: " + ex.Message, "OK");
+                return;
+            }
+        }
     }
 }

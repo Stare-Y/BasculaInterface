@@ -17,7 +17,8 @@
         <Grid Grid.Row="0" ColumnDefinitions="*,*" RowDefinitions="*,*" >
             <Label Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             <Label Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="1"/>
-            <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}" FontSize="Title"  HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"/>
+            <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}" FontSize="Title"  HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="1"/>
+            <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="5">
             <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" BorderColor="LightGrey" BackgroundColor="White" BorderWidth="2" Grid.Column="0"/>
@@ -37,7 +38,10 @@
                                     <Label HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}"/>
                                     <Label HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}.'}"/>
                                 </HorizontalStackLayout>
-                                <Label HorizontalTextAlignment="End" Grid.Column="1" FontSize="Title" Text="{Binding Weight, StringFormat='{0} kg'}"/>
+                                <HorizontalStackLayout Grid.Column="1">
+                                    <Label HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{0} + '}"/>
+                                    <Label HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{0} kg'}"/>
+                                </HorizontalStackLayout>
                             </Grid>
                         </Frame>
                     </Frame>

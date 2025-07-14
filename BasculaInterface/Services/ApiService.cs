@@ -12,7 +12,10 @@ namespace BasculaInterface.Services
         {
             _client = client;
         }
-
+        public string GetBaseUrl()
+        {
+            return _client.BaseAddress?.ToString() ?? throw new InvalidOperationException("Base address is not set.");
+        }
         public async Task<T> GetAsync<T>(string endpoint)
         {
             HttpResponseMessage response = await _client.GetAsync(endpoint);

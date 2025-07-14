@@ -8,8 +8,12 @@
         <vm:PendingWeightsViewModel/>
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout>
-        <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged">
+    <Grid RowDefinitions="1*,9*">
+        <Grid ColumnDefinitions="*,*">
+            <Button x:Name="BtnReconnect" Text="Reconectar" Clicked="BtnReconnect_Clicked" Grid.Column="0" IsVisible="False"/>
+            <Button x:Name="BtnNewWeighProcess" Text="Nueva Entrada" Clicked="BtnNewWeighProcess_Clicked" Grid.Column="1" IsVisible="False"/>
+        </Grid>
+        <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged" Grid.Row="1">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame CornerRadius="4" Padding="2" BackgroundColor="Transparent" BorderColor="Transparent">
@@ -50,5 +54,5 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

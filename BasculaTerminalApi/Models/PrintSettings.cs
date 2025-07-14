@@ -11,6 +11,7 @@ namespace BasculaTerminalApi.Models
         public int TimerElapse { get; set; } = 750;
         public string AskChar { get; set; } = "P";
         public int PrintFontSize { get; set; } = 16;
+        public int AcceptableDifference { get; set; } = 500;
 
         public void ReadSettings()
         {
@@ -68,6 +69,10 @@ namespace BasculaTerminalApi.Models
             if (data.TryGetValue("PrintFontSize", out var fontSize) && fontSize.TryGetInt32(out var fontSizeValue))
             {
                 PrintFontSize = fontSizeValue;
+            }
+            if (data.TryGetValue("AcceptableDifference", out var acceptableDifference) && acceptableDifference.TryGetInt32(out var diffValue))
+            {
+                AcceptableDifference = diffValue;
             }
         }
     }
