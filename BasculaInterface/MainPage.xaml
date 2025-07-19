@@ -2,9 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-             x:Class="BasculaInterface.MainPage">
+            xmlns:local="clr-namespace:BasculaInterface"
+            x:Class="BasculaInterface.MainPage">
+
     <Grid RowDefinitions="*,*">
-        <Label Text="Pedidos CPE :D" Grid.Row="0" FontSize="Title" HorizontalOptions="Center"/>
+        <Entry x:Name="EntryHost" Placeholder="Host" Grid.Row="0" FontSize="Title" />
         <Button x:Name="BtnLogIn" Clicked="BtnLogIn_Clicked" Text="Log In" Grid.Row="1"/>
     </Grid>
 

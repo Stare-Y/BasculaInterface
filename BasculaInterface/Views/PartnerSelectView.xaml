@@ -32,9 +32,13 @@
                     SelectionChanged="ResultsCollectionView_SelectionChanged">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5" Padding="10" BorderColor="LightGray">
+                    <Border  Stroke="#CCC"
+                            StrokeThickness="1"
+                            Background="#F7F7F7"
+                            StrokeShape="RoundRectangle 8"
+                            Padding="12">
                         <Label Text="{Binding RazonSocial}" />
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

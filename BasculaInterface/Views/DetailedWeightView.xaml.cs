@@ -5,7 +5,7 @@ using System.Reflection.Metadata;
 
 namespace BasculaInterface.Views;
 
-public partial class DetailedWeightView : ContentPage
+public partial class DetailedWeightView : ContentPage 
 {
     private bool _entriesChanged = false;
     private WaitPopUp? _popup;

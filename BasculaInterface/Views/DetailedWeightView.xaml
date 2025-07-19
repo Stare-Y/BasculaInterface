@@ -21,37 +21,36 @@
             <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="20">
-            <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" BorderColor="LightGrey" BackgroundColor="White" BorderWidth="2" Grid.Column="0"/>
-            <Button x:Name="BtnNewEntry" Text="Nueva Entrada" Clicked="BtnNewEntry_Clicked" BorderColor="RoyalBlue" BackgroundColor="White" BorderWidth="2" Grid.Column="1"/>
+            <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" TextColor="White" BackgroundColor="RoyalBlue" BorderWidth="2" Grid.Column="0"/>
+            <Button x:Name="BtnNewEntry" Text="Nueva Entrada" Clicked="BtnNewEntry_Clicked" TextColor="White"  BackgroundColor="LightSeaGreen" BorderWidth="2" Grid.Column="1"/>
         </Grid>
         <CollectionView ItemsSource="{Binding WeightEntryDetailRows}" Grid.Row="2">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame CornerRadius="4" Padding="1" BackgroundColor="Transparent" BorderColor="Transparent">
-                        <Frame Padding="5"
-                            BackgroundColor="#666"
-                            CornerRadius="4"
-                            HasShadow="False"
-                            BorderColor="Transparent">
+                        <Border 
+                            Stroke="#CCC"
+                            StrokeThickness="1"
+                            Background="#F7F7F7"
+                            StrokeShape="RoundRectangle 8"
+                            Padding="12">
                             <Grid ColumnDefinitions="*,*">
                                 <HorizontalStackLayout Grid.Column="0">
-                                    <Label HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}"/>
-                                    <Label HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}.'}"/>
+                                <Label HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
+                                <Label HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}.'}" VerticalTextAlignment="Center"/>
                                 </HorizontalStackLayout>
                                 <HorizontalStackLayout Grid.Column="1">
-                                    <Label HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{0} + '}"/>
-                                    <Label HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{0} kg'}"/>
+                                <Label HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>
+                                <Label HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{}{0:F2} kg'}" VerticalTextAlignment="Center"/>
                                 </HorizontalStackLayout>
                             </Grid>
-                        </Frame>
-                    </Frame>
+                        </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
         <Grid Grid.Row="3" RowDefinitions="*,*" ColumnSpacing="20" RowSpacing="4" ColumnDefinitions="*,*">
             <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
             <Button x:Name="BtnPrintTicket" Text="Imprimir" Clicked="BtnPrintTicket_Clicked" Grid.Row="1" Grid.Column="0"/>
-            <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1" Grid.Column="1"/>
+            <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1" Grid.Column="1" BackgroundColor="Red"/>
         </Grid>
     </Grid>
 </ContentPage>
