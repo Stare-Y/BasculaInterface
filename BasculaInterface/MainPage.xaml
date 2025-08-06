@@ -6,8 +6,8 @@
             x:Class="BasculaInterface.MainPage">
 
     <Grid RowDefinitions="*,*">
-        <Entry x:Name="EntryHost" Placeholder="Host" Grid.Row="0" FontSize="Title" />
-        <Button x:Name="BtnLogIn" Clicked="BtnLogIn_Clicked" Text="Log In" Grid.Row="1"/>
+        <Entry x:Name="EntryHost" Placeholder="Host" Grid.Row="0" FontSize="Title" IsVisible="False"/>
+        <Button x:Name="BtnLogIn" Pressed="BtnLogin_Pressed" Released="BtnLogin_Released" Text="Log In" Grid.Row="1" />
     </Grid>
 
 </ContentPage>

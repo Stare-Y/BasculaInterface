@@ -6,5 +6,6 @@ namespace Core.Application.DTOs
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = null!;
+        public int IdValorClasificacion6 { get; set; }
     }
 }

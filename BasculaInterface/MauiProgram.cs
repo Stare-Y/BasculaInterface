@@ -15,7 +15,6 @@ public static class MauiProgram
 
     public static MauiApp CreateMauiApp()
     {
-        LoadSettings();
         var builder = MauiApp.CreateBuilder();
         builder.UseMauiApp<App>().ConfigureFonts(fonts =>
         {
@@ -66,38 +65,5 @@ public static class MauiProgram
         //build service provider
         ServiceProvider = builder.Services.BuildServiceProvider();
         return builder.Build();
-    }
-
-    private static void LoadSettings()
-    {
-#if WINDOWS
-        string settingsFile = Path.Combine(AppContext.BaseDirectory, "Config/settings.json");
-        if (!File.Exists(settingsFile))
-        {
-            return;
-        }
-
-        string jsonContent = File.ReadAllText(settingsFile);
-
-        var data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonContent);
-
-        if (data is null)
-            throw new InvalidDataException("El archivo settings.json parece ser nulo");
-
-        var url = data["BasculaSocketUrl"].GetString();
-
-        var template = data["PrintTemplate"].GetString();
-
-        if (url is not null)
-            BasculaSocketUrl = url;
-
-        if (template is not null)
-            PrintTemplate = template;
-#else
-#if ANDROID
-            BasculaSocketUrl = "http://192.168.1.240:6969/";
-#endif
-#endif
-
     }
 }

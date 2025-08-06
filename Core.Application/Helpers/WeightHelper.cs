@@ -20,7 +20,8 @@ namespace Core.Application.Helpers
             return productos.Select(p => new ProductoDto
             {
                 Id = p.CIDPRODUCTO,
-                Nombre = p.CNOMBREPRODUCTO
+                Nombre = p.CNOMBREPRODUCTO,
+                IdValorClasificacion6 = p.CIDVALORCLASIFICACION6
             });
         }
         public static ProductoDto BuildFromBaseEntity(Producto producto)
@@ -32,7 +33,8 @@ namespace Core.Application.Helpers
             return new ProductoDto
             {
                 Id = producto.CIDPRODUCTO,
-                Nombre = producto.CNOMBREPRODUCTO
+                Nombre = producto.CNOMBREPRODUCTO,
+                IdValorClasificacion6 = producto.CIDVALORCLASIFICACION6
             };
         }
         public static WeightEntry BuildFromDto(this WeightEntry weightEntry, WeightEntryDto weightEntryDto)
