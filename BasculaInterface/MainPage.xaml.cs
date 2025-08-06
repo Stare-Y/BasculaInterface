@@ -61,7 +61,7 @@ namespace BasculaInterface
 
                 await Task.Delay(1000); // Simulate a delay for login process
                 await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
-                EntryHost.IsVisible = false;
+                BorderEntryHost.IsVisible = false;
             }
             catch (Exception ex)
             {
@@ -98,7 +98,7 @@ namespace BasculaInterface
                 await Task.Delay(4444, _cancellationTokenSource.Token);
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    EntryHost.IsVisible = true;
+                    BorderEntryHost.IsVisible = true;
 
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();

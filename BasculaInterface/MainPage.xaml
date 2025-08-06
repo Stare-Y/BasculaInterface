@@ -5,9 +5,47 @@
             xmlns:local="clr-namespace:BasculaInterface"
             x:Class="BasculaInterface.MainPage">
 
-    <Grid RowDefinitions="*,*">
-        <Entry x:Name="EntryHost" Placeholder="Host" Grid.Row="0" FontSize="Title" IsVisible="False"/>
-        <Button x:Name="BtnLogIn" Pressed="BtnLogin_Pressed" Released="BtnLogin_Released" Text="Log In" Grid.Row="1" />
+    <Grid RowDefinitions="1*,3*,1*" ColumnDefinitions="1*,3*,1*" Background="Wheat">
+        <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="1*,3*,1*" Grid.Row="1" Grid.Column="1">
+            <Border Stroke="#CCC"
+            StrokeThickness="1"
+            Background="CornflowerBlue"
+            StrokeShape="RoundRectangle 8"
+            Padding="50"
+            Grid.Row="1"
+            Grid.Column="1">
+                <Grid RowDefinitions="auto,*,*,*" Padding="4">
+
+                    <Label Text="Bascula CPE" FontSize="Large" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="End" HorizontalTextAlignment="Center" Grid.Row="0" Padding="4"/>
+                    <Grid RowDefinitions="*,auto" ColumnDefinitions="*,*" Grid.Row="1" Padding="4">
+                        <Label Text="Username" FontSize="Subtitle" TextColor="White" VerticalTextAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+
+                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                            <Entry x:Name="EntryUsername" FontSize="Subtitle" Placeholder="Username" BackgroundColor="White" TextColor="Black" />
+                        </Border>
+                    </Grid>
+                    <Grid RowDefinitions="*,auto" ColumnDefinitions="*,*" Grid.Row="2" Padding="4">
+                        <Label Text="Password" FontSize="Subtitle" TextColor="White" VerticalTextAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+
+                            <Entry x:Name="EntryPassword" FontSize="Subtitle" IsPassword="True" BackgroundColor="White" TextColor="Black" />
+                        </Border>
+
+                    </Grid>
+                    <Grid RowDefinitions="*,auto" Grid.Row="3" Padding="4">
+                        <Border x:Name="BorderEntryHost" IsVisible="False" Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                            
+                            <Entry x:Name="EntryHost" FontSize="Subtitle" Placeholder="Host" TextColor="Black"/>
+                        </Border>
+
+                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="LightSkyBlue"  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+
+                            <Button x:Name="BtnLogIn" Pressed="BtnLogin_Pressed" BackgroundColor="LightSkyBlue" FontSize="Title" FontAttributes="Bold" Released="BtnLogin_Released" Text="Login"  />
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 
 </ContentPage>

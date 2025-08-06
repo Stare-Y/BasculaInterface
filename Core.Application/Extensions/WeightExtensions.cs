@@ -2,9 +2,9 @@
 using Core.Domain.Entities;
 using Core.Domain.Entities.ContpaqiSQL;
 
-namespace Core.Application.Helpers
+namespace Core.Application.Extensions
 {
-    public static class WeightHelper
+    public static class WeightExtensions
     {
         public static IEnumerable<ClienteProveedorDto> BuildFromBaseEntity(IEnumerable<ClienteProveedor> clienteProveedors)
         {

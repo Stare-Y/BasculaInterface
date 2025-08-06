@@ -1,5 +1,4 @@
-﻿using Core.Application.DTOs;
-using Core.Domain.Entities.ContpaqiSQL;
+﻿using Core.Domain.Entities.ContpaqiSQL;
 
 namespace Core.Domain.Interfaces
 {
