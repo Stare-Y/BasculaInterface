@@ -3,7 +3,6 @@ using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
-using Core.Domain.Entities;
 using System.Collections.ObjectModel;
 
 namespace BasculaInterface.ViewModels
@@ -55,7 +54,6 @@ namespace BasculaInterface.ViewModels
 
                 OnCollectionChanged(nameof(_pendingWeights));
             }
-
         }
 
         private void BuildObservableCollection()

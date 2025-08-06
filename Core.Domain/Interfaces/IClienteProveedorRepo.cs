@@ -1,7 +1,7 @@
 ﻿using Core.Application.DTOs;
 using Core.Domain.Entities.ContpaqiSQL;
 
-namespace Core.Application.Interfaces
+namespace Core.Domain.Interfaces
 {
     public interface IClienteProveedorRepo
     {

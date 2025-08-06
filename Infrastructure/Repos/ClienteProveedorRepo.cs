@@ -1,5 +1,5 @@
-﻿using Core.Application.Interfaces;
-using Core.Domain.Entities.ContpaqiSQL;
+﻿using Core.Domain.Entities.ContpaqiSQL;
+using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

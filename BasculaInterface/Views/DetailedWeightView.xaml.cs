@@ -1,7 +1,6 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
-using System.Reflection.Metadata;
 
 namespace BasculaInterface.Views;
 

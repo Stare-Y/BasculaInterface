@@ -1,8 +1,8 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Helpers;
-using Core.Application.Interfaces;
 using Core.Application.Services;
 using Core.Domain.Entities;
+using Core.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers

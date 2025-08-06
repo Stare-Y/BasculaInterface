@@ -1,5 +1,5 @@
 ﻿using BasculaTerminalApi.Models;
-using Core.Application.Interfaces;
+using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repos;
 using Microsoft.EntityFrameworkCore;
