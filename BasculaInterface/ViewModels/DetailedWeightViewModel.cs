@@ -3,9 +3,6 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Text.Json;
 
 namespace BasculaInterface.ViewModels
 {
@@ -23,7 +20,52 @@ namespace BasculaInterface.ViewModels
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
 
+        public async Task AddProductToWeightEntry(ProductoDto product)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before adding products.");
+            }
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product), "Product cannot be null.");
+            }
+            WeightDetailDto newDetail = new WeightDetailDto
+            {
+                FK_WeightedProductId = product.Id,
+                Tare = 0, // Default tare value, can be adjusted later
+                Weight = 0 // Default weight value, can be adjusted later
+            };
+            WeightEntry.WeightDetails.Add(newDetail);
+            await UpdateWeightEntry();
+        }
+
         public DetailedWeightViewModel() { }
+
+        public async Task RemoveWeightEntryDetail(WeightEntryDetailRow selectedRow)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("Cannot remove an item that doesn't exist");
+            }
+            if (selectedRow == null)
+            {
+                throw new ArgumentNullException(nameof(selectedRow), "Selected row cannot be null.");
+            }
+            WeightDetailDto? detailToRemove = WeightEntry.WeightDetails.FirstOrDefault(d => d.Id == selectedRow.Id);
+            if (detailToRemove != null)
+            {
+                
+
+                await DeleteWeightDetail(selectedRow.Id);
+
+                WeightEntry.WeightDetails.Remove(detailToRemove);
+                WeightEntryDetailRows.Remove(selectedRow);
+
+                OnCollectionChanged(nameof(WeightEntryDetailRows));
+                OnPropertyChanged(nameof(TotalWeight));
+            }
+        }
 
         public async Task FetchNewWeightDetails()
         {
@@ -52,6 +94,39 @@ namespace BasculaInterface.ViewModels
             }
 
             OnPropertyChanged(nameof(WeightEntry));
+            OnPropertyChanged(nameof(Partner));
+            OnPropertyChanged(nameof(TotalWeight));
+        }
+
+        public async Task UpdateWeightEntry()
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before updating.");
+            }
+            // Validate the weight entry before updating
+            if (WeightEntry.WeightDetails == null || !WeightEntry.WeightDetails.Any())
+            {
+                throw new InvalidOperationException("WeightEntry must have at least one weight detail.");
+            }
+            // Send the updated weight entry to the API
+            await _apiService.PutAsync<object>("api/Weight", WeightEntry);
+
+            await FetchNewWeightDetails();
+        }
+
+        public async Task DeleteWeightDetail(int detailId)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before deleting a detail.");
+            }
+            if (detailId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(detailId), "Detail ID must be a positive integer.");
+            }
+            // Send delete request to the API
+            await _apiService.DeleteAsync($"api/Weight/Detail/{detailId}");
         }
 
         public async Task ConcludeWeightProcess()
@@ -102,6 +177,7 @@ namespace BasculaInterface.ViewModels
                     Id = detail.Id,
                     Tare = detail.Tare,
                     Weight = detail.Weight,
+                    FK_WeightedProductId = detail.FK_WeightedProductId,
                 };
 
                 if (detail.FK_WeightedProductId is not null)

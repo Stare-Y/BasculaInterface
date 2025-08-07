@@ -12,17 +12,26 @@
     <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10">
 
         <!-- Fila de búsqueda -->
-        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" ColumnSpacing="10">
+        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" RowDefinitions="*,*" ColumnSpacing="10">
+            <Button Text="Volver"
+                    x:Name="BtnBack"
+                    Grid.Column="0"
+                    Clicked="OnBackClicked"
+                    IsVisible="True"
+                    Grid.Row="0"
+                    HorizontalOptions="Start"/>
             <SearchBar x:Name="SearchBar"
                     Placeholder="Buscar Producto..."
                     SearchButtonPressed="SearchBar_SearchButtonPressed"
-                    Grid.Column="0"/>
+                    Grid.Column="0"
+                       Grid.Row="1"/>
 
             <Button Text="Confirmar"
                     x:Name="BtnConfirm"
                     Grid.Column="2"
                     Clicked="OnConfirmClicked"
-                    IsEnabled="False"/>
+                    IsEnabled="False"
+                    Grid.Row="1"/>
         </Grid>
 
         <!-- Resultados -->
@@ -38,10 +47,18 @@
                             Background="#F7F7F7"
                             StrokeShape="RoundRectangle 8"
                             Padding="12">
-                        <Label Text="{Binding Nombre}" />
+                        <Label Text="{Binding Nombre}" TextColor="Black" FontSize="Subtitle"/>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label Text="No se encontraron productos." 
+                       HorizontalOptions="Center" 
+                       VerticalOptions="Center" 
+                       TextColor="Gray"
+                       FontSize="Header"
+                       BackgroundColor="Black"/>
+            </CollectionView.EmptyView>
         </CollectionView>
 
     </Grid>

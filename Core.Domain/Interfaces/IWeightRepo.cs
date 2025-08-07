@@ -10,5 +10,6 @@ namespace Core.Domain.Interfaces
         Task<IEnumerable<WeightEntry>> GetPendingWeights(int top = 30, uint page = 1);
         Task UpdateAsync(WeightEntry weightEntry);
         Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteDetailAsync(int id);
     }
 }

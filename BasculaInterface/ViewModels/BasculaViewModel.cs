@@ -53,6 +53,11 @@ namespace BasculaInterface.ViewModels
             get => _tara.ToString("F2");
         }
 
+        public double TaraCurrentValue
+        {
+            get => _tara;
+        }
+
 
         private double _diferenciaAbs = 0;
         public string Diferencia
@@ -126,8 +131,24 @@ namespace BasculaInterface.ViewModels
                 throw new ArgumentOutOfRangeException(nameof(tara), "Tara cannot be negative.");
             }
             _tara = tara;
+
+            _diferenciaAbs = Math.Abs(_pesoTotal - _tara);
+
+            OnPropertyChanged(nameof(Tara));
+            OnPropertyChanged(nameof(Diferencia));
+        }
+
+        public void SetTaraFromPesoTotal()
+        {
+            if (_pesoTotal < 0)
+            {
+                throw new InvalidOperationException("Peso total cannot be negative.");
+            }
+            _tara = _pesoTotal;
+
             OnPropertyChanged(nameof(Tara));
         }
+
         public async Task PrintTicketAsync(string text)
         {
             try
@@ -178,9 +199,51 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public async Task CaptureNewWeightEntry()
+        public async Task CaptureNewWeightEntry(double? overrideTara = null)
         {
-            if(_pesoTotal == 0)
+            ValidateBeforePosting();
+            if (_tara == 0)
+            {
+                WeightEntry!.TareWeight = _pesoTotal;
+                WeightEntry.BruteWeight = _pesoTotal;
+                WeightEntry.PartnerId = Partner?.Id;
+
+                await PostNewWeightEntry();
+            }
+            else
+            {
+                if (WeightEntry!.Id == 0)
+                {
+                    throw new InvalidOperationException("WeightEntry must have a valid Id before capturing a new weight entry.");
+                }
+                WeightEntry.PartnerId = Partner?.Id;
+                WeightEntry.BruteWeight = _pesoTotal;
+
+                if(WeightEntry.WeightDetails.Any(w => w.FK_WeightedProductId == Product?.Id))
+                {
+                    // If the product already exists, update the weight
+                    WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
+                    existingDetail.Weight = _diferenciaAbs;
+                    existingDetail.Tare = overrideTara ?? _tara;
+                }
+                else
+                {
+                    // If the product does not exist, add a new detail
+                    WeightEntry.WeightDetails.Add(new WeightDetailDto
+                    {
+                        FK_WeightEntryId = WeightEntry.Id,
+                        Tare = overrideTara ?? _tara,
+                        Weight = _diferenciaAbs,
+                        FK_WeightedProductId = Product?.Id,
+                    });
+                }
+
+                await PutWeightEntry();
+            }
+        }
+        private void ValidateBeforePosting()
+        {
+            if (_pesoTotal == 0)
             {
                 throw new InvalidOperationException("Peso total no puede ser cero.");
             }
@@ -192,31 +255,9 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
             }
-            if (_tara == 0)
+            if (string.IsNullOrEmpty(WeightEntry.VehiclePlate))
             {
-                WeightEntry.TareWeight = _pesoTotal;
-                WeightEntry.BruteWeight = _pesoTotal;
-                WeightEntry.PartnerId = Partner?.Id;
-
-                await PostNewWeightEntry();
-            }
-            else
-            {
-                if (WeightEntry.Id == 0)
-                {
-                    throw new InvalidOperationException("WeightEntry must have a valid Id before capturing a new weight entry.");
-                }
-                WeightEntry.PartnerId = Partner?.Id;
-                WeightEntry.BruteWeight = _pesoTotal;
-                WeightEntry.WeightDetails.Add(new WeightDetailDto
-                {
-                    FK_WeightEntryId = WeightEntry.Id,
-                    Tare = _tara,
-                    Weight = _diferenciaAbs,
-                    FK_WeightedProductId = Product?.Id,
-                });
-
-                await PutWeightEntry();
+                throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }
         }
 

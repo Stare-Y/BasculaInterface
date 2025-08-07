@@ -35,8 +35,8 @@ namespace BasculaInterface.ViewModels
 
             foreach (var product in products)
             {
-                if (product.IdValorClasificacion6 == 0)
-                    continue;
+                //if (product.IdValorClasificacion6 == 0)
+                //    continue;
 
                 Products.Add(product);
             }

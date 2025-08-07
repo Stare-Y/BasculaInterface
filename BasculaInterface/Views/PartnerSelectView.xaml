@@ -7,21 +7,31 @@
     <ContentPage.BindingContext>
         <vm:PartnerSelectorViewModel/>
     </ContentPage.BindingContext>
-    
-    <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10">
+
+    <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10" BackgroundColor="#80F5DEB3">
 
         <!-- Fila de búsqueda -->
-        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" ColumnSpacing="10">
+        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" RowDefinitions="*,*" ColumnSpacing="10">
+            <Button Text="Volver"
+        x:Name="BtnBack"
+        Grid.Column="0"
+        Clicked="OnBackClicked"
+        IsVisible="True"
+        Grid.Row="0"
+        HorizontalOptions="Start"/>
             <SearchBar x:Name="SearchBar"
                 Placeholder="Buscar Socio..."
                 SearchButtonPressed="SearchBar_SearchButtonPressed"
-                Grid.Column="0"/>
+                Grid.Column="0"
+                       BackgroundColor="White" TextColor="Black"
+                       Grid.Row="1"/>
 
             <Button Text="Confirmar"
                 x:Name="BtnConfirm"
                 Grid.Column="2"
                 Clicked="OnConfirmClicked"
-                IsEnabled="False"/>
+                IsEnabled="False"
+                    Grid.Row="1"/>
         </Grid>
 
         <!-- Resultados -->
@@ -35,12 +45,19 @@
                     <Border  Stroke="#CCC"
                             StrokeThickness="1"
                             Background="#F7F7F7"
-                            StrokeShape="RoundRectangle 8"
+                            StrokeShape="RoundRectangle 21"
                             Padding="12">
-                        <Label Text="{Binding RazonSocial}" />
+                        <Label Text="{Binding RazonSocial}" TextColor="Black"/>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label Text="No se encontraron clientes con ese nombre." 
+            HorizontalOptions="Center" 
+            VerticalOptions="Center" 
+            TextColor="Gray"
+            FontSize="Header"/>
+            </CollectionView.EmptyView>
         </CollectionView>
 
     </Grid>

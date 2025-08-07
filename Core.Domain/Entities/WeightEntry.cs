@@ -11,6 +11,7 @@ namespace Core.Domain.Entities
         public DateTime? ConcludeDate { get => _concludeDate?.ToLocalTime(); set => _concludeDate = value?.ToUniversalTime(); }
         public string VehiclePlate { get; set; } = string.Empty;
         public string? Notes { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public ICollection<WeightDetail> WeightDetails { get; set; } = new List<WeightDetail>();
         
     }

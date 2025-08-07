@@ -7,6 +7,7 @@
         public double Tare { get; set; } = 0;
         public double Weight { get; set; } = 0;
         private string _description = string.Empty;
+        public int? FK_WeightedProductId { get; set; } = null;
 
         public string Description
         {

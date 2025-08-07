@@ -1,20 +1,26 @@
+using BasculaInterface.Models;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
+using Core.Application.DTOs;
+using Core.Domain.Entities;
 
 namespace BasculaInterface.Views;
 
-public partial class DetailedWeightView : ContentPage 
+public partial class DetailedWeightView : ContentPage
 {
     private bool _entriesChanged = false;
     private WaitPopUp? _popup;
     public DetailedWeightView(DetailedWeightViewModel viewModel)
-	{
-		InitializeComponent();
-		BindingContext = viewModel;
-	}
+    {
+        InitializeComponent();
+        BindingContext = viewModel;
+#if ANDROID
+        BtnNuevoProducto.IsVisible = false;
+#endif
+    }
 
-	public DetailedWeightView() { }
+    public DetailedWeightView() { }
 
     protected override async void OnAppearing()
     {
@@ -78,7 +84,7 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
-        if(BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is DetailedWeightViewModel viewModel)
         {
             DisplayWaitPopUp("Concluyendo proceso de pesaje, espere...");
             try
@@ -86,6 +92,8 @@ public partial class DetailedWeightView : ContentPage
                 await viewModel.ConcludeWeightProcess();
 
                 await viewModel.PrintTicketAsync(BuildTicket());
+
+                await DisplayAlert("Éxito", "Proceso de pesaje concluido correctamente.", "OK");
 
                 await Shell.Current.Navigation.PopAsync();
             }
@@ -109,8 +117,10 @@ public partial class DetailedWeightView : ContentPage
             try
             {
                 await viewModel.PrintTicketAsync(BuildTicket());
+
+                await DisplayAlert("Éxito", "Ticket impreso correctamente.", "OK");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await DisplayAlert("Error", "No se pudo imprimir el ticket: " + ex.Message, "OK");
             }
@@ -123,7 +133,7 @@ public partial class DetailedWeightView : ContentPage
 
     private string BuildTicket()
     {
-        if(BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is DetailedWeightViewModel viewModel)
         {
             string header = $"\n\n\tCooperativa\n\tPedro\n\tEzqueda\n\n" +
                 $"Socio: {(viewModel.Partner?.RazonSocial.Length > 13 ? viewModel.Partner?.RazonSocial.Substring(0, 15) : viewModel.Partner?.RazonSocial),-15}\n" +
@@ -132,12 +142,105 @@ public partial class DetailedWeightView : ContentPage
                 $"Bruto: {viewModel.WeightEntry?.BruteWeight} kg\n\n";
 
             string details = string.Join("\n", viewModel.WeightEntryDetailRows.Select(row => $"{(row.Description.Length > 15 ? row.Description.Substring(0, 15) : row.Description),-15}|{row.Weight} kg"));
-       
+
             details += $"\n\nNeto: {viewModel.WeightEntryDetailRows.Sum(row => row.Weight)} kg";
 
             return header + details;
         }
 
         return "error generando ticket";
+    }
+
+    private void BtnNuevoProducto_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is DetailedWeightViewModel viewModel)
+        {
+            DisplayWaitPopUp("Cargando, espere...");
+            try
+            {
+                ProductSelectView productSelectView = new ProductSelectView();
+                productSelectView.OnProductSelected += async (product) =>
+                {
+                    await viewModel.AddProductToWeightEntry(product);
+                    await Shell.Current.Navigation.PopModalAsync();
+                };
+                Shell.Current.Navigation.PushModalAsync(productSelectView);
+            }
+            catch (Exception ex)
+            {
+                DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
+            }
+            finally
+            {
+                _popup?.Close();
+            }
+        }
+    }
+
+    private async void CollectionViewWeightDetails_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        WeightEntryDetailRow? row = (WeightEntryDetailRow)CollectionViewWeightDetails.SelectedItem;
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+        {
+            CollectionViewWeightDetails.SelectedItem = null;
+            return;
+        }
+
+        if (row != null)
+        {
+            if (row.Tare > 0)
+            {
+                CollectionViewWeightDetails.SelectedItem = null;
+                return;
+                //DisplayAlert("Info", "No se puede eliminar un producto que ya ha sido pesado.", "OK");
+            }
+            else
+            {
+                ProductoDto? producto = null;
+                if (row.FK_WeightedProductId.HasValue)
+                {
+                    producto = new ProductoDto
+                    {
+                        Id = row.FK_WeightedProductId.Value,
+                        Nombre = row.Description
+                    };
+                }
+
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto);
+
+                await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+
+                _entriesChanged = true;
+            }
+        }
+
+        CollectionViewWeightDetails.SelectedItem = null;
+    }
+
+    private async void DeleteWeightDetail_Clicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.BindingContext is WeightEntryDetailRow selectedRow)
+        {
+            if (BindingContext is DetailedWeightViewModel viewModel)
+            {
+                DisplayWaitPopUp("Eliminando pesada, espere...");
+                try
+                {
+                    
+                    await viewModel.RemoveWeightEntryDetail(selectedRow);
+
+                    await DisplayAlert("Éxito", "Registro eliminado correctamente.", "OK");
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", "No se pudo eliminar la pesada: " + ex.Message, "OK");
+                }
+                finally
+                {
+                    _popup?.Close();
+                }
+            }
+        }
     }
 }

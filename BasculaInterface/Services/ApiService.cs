@@ -47,7 +47,7 @@ namespace BasculaInterface.Services
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<T> PatchAsync<T>(string endpoint, object data)
+        public async Task<T> PatchAsync<T>(string endpoint, object? data)
         {
             StringContent content = await SerializeContent(data);
 
@@ -56,6 +56,15 @@ namespace BasculaInterface.Services
             await ValidateResponse(response);
 
             return await DeserializeResponse<T>(response);
+        }
+
+        public async Task<bool> DeleteAsync(string endpoint)
+        {
+            HttpResponseMessage response = await _client.DeleteAsync(endpoint);
+
+            await ValidateResponse(response);
+
+            return response.IsSuccessStatusCode;
         }
 
         private async Task<StringContent> SerializeContent(object? data)

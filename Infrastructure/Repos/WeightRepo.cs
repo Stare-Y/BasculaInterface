@@ -27,7 +27,7 @@ namespace Infrastructure.Repos
             return await _context.WeightEntries
                 .AsNoTracking()
                 .Include(w => w.WeightDetails)
-                .FirstOrDefaultAsync(w => w.Id == id);
+                .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
         }
 
         public async Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 30, uint page = 1)
@@ -45,7 +45,7 @@ namespace Infrastructure.Repos
         {
             return await _context.WeightEntries
                 .AsNoTracking()
-                .Where(w => w.ConcludeDate == null)
+                .Where(w => w.ConcludeDate == null && !w.IsDeleted)
                 .Include(w => w.WeightDetails)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
@@ -78,7 +78,19 @@ namespace Infrastructure.Repos
             {
                 return false;
             }
-            _context.WeightEntries.Remove(weightEntry);
+            weightEntry.IsDeleted = true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteDetailAsync(int id)
+        {
+            WeightDetail? weightDetail = await _context.WeightDetails.FindAsync(id);
+            if (weightDetail == null)
+            {
+                return false;
+            }
+            weightDetail.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
         }

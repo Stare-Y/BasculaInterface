@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
              x:Class="BasculaInterface.Views.WeightingScreen"
              Title="WeightingScreen">
-    
+
     <ContentPage.BindingContext>
         <vm:BasculaViewModel/>
     </ContentPage.BindingContext>
@@ -13,7 +13,7 @@
         <Grid Grid.Row="0" ColumnDefinitions="*,*">
             <Label Text="{Binding Estado}" 
                     VerticalTextAlignment="Center"/>
-            
+
             <Button Text="Reconectar" Grid.Column="1"
                     x:Name="BtnReconect"
                     Clicked="BtnReconect_Clicked"
@@ -74,17 +74,20 @@
            BorderColor="White">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="2*"/>
-                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Label x:Name="TaraLabel"
-                   Text="{Binding Tara, StringFormat='{0} kg'}"
-                   FontSize="Subtitle"
-                   TextColor="Black"
-                   HorizontalTextAlignment="Center"
-                   VerticalTextAlignment="Center" 
-                   Grid.Row="0"
-                   FontAttributes="Bold"/>
+                    <Button x:Name="TaraLabel"
+                            Text="{Binding Tara, StringFormat='{0} kg'}"
+                            FontSize="Subtitle"
+                            Grid.Row="0"
+                            FontAttributes="Bold"
+                            BackgroundColor="LightBlue"
+                            TextColor="Black"
+                            IsEnabled="False"
+                            Pressed="TaraLabel_Pressed"
+                            Released="TaraLabel_Released">
+                    </Button>
 
                     <Label Grid.Row="1"
                     Text="TARA"
@@ -133,15 +136,14 @@
                     Text="Volver"
                     Clicked="BtnBack_Clicked"
                     BackgroundColor="Orange" />
-            
+
             <Button x:Name="BtnCaptureNewWeight"
                     Grid.Row="3" Grid.Column="1"
                     Text="Confirmar Nueva Entrada"
                     BackgroundColor="#28A745"
                     TextColor="White"
                     CornerRadius="10"
-                    Pressed="BtnCaptureNewWeight_Pressed"
-                    Released="BtnCaptureNewWeight_Released"/>
+                    Clicked="BtnCaptureNewWeight_Clicked"/>
         </Grid>
     </Grid>
 </ContentPage>

@@ -129,5 +129,23 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest($"Error deleting weight entry: {ex.Message}");
             }
         }
+
+        [HttpDelete("Detail/{id}")]
+        public async Task<IActionResult> DeleteDetail(int id)
+        {
+            try
+            {
+                bool deleted = await _weightRepo.DeleteDetailAsync(id);
+                if (!deleted)
+                {
+                    return NotFound($"Weight detail with ID {id} not found.");
+                }
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error deleting weight detail: {ex.Message}");
+            }
+        }
     }
 }
