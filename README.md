@@ -4,8 +4,9 @@ this is an api, that hosts a websocket that connects to a serial weight, so that
 
 
 
-Comando para preparar la migracion antes del deploy: dotnet ef migrations add LogBookRefactorMigration --project Infrastructure --startup-project telemetry
-
+Comando para preparar la migracion antes del deploy: 
+dotnet ef migrations add LogicDeletion --project Infrastructure --startup-project BasculaTerminalApi --context WeightDBContext
 on dir: \repos\ees.core.telemetry>
 
-then: dotnet ef database update --project Infrastructure --startup-project telemetry
+then: 
+dotnet ef database update --project Infrastructure --startup-project BasculaTerminalApi --context WeightDBContext
