@@ -3,7 +3,6 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
-using Core.Domain.Entities;
 
 namespace BasculaInterface.Views;
 

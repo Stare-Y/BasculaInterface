@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
         public int? PartnerId { get; set; }
-        public double TareWeight { get; set; } = 0;
-        public double BruteWeight { get; set; } = 0;
+        public double TareWeight { get; set; } = 0; //initial weight
+        public double BruteWeight { get; set; } = 0; //final weight
         public DateTime? ConcludeDate { get; set; }
         public string VehiclePlate { get; set; } = string.Empty;
         public string? Notes { get; set; }
