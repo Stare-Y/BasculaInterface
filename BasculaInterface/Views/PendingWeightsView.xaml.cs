@@ -11,6 +11,7 @@ namespace BasculaInterface.Views;
 public partial class PendingWeightsView : ContentPage
 {
     private WaitPopUp? _popup;
+    private CancellationTokenSource? _cancellationTokenSource = null;
 
     public PendingWeightsView(PendingWeightsViewModel viewModel)
     {
@@ -24,24 +25,34 @@ public partial class PendingWeightsView : ContentPage
         base.OnAppearing();
         if (BindingContext is PendingWeightsViewModel viewModel)
         {
+            DisplayWaitPopUp("Cargando pesos pendientes, espere");
+            await Task.Yield();
             try
             {
+                EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
+
                 await viewModel.LoadPendingWeightsAsync();
-                
-                BtnNewWeighProcess.IsVisible = true;
+
+                if (!MauiProgram.IsSecondaryTerminal)
+                {
+                    BtnNewWeighProcess.IsVisible = true;
+                    BtnRefresh.IsVisible = true;
+                }
+
                 BtnReconnect.IsVisible = false;
-            }
-            catch (OriginEmptyException)
-            {
-                await DisplayAlert("Info", "No hay pesos pendientes, puedes crear uno nuevo :D", "OK");
-                BtnNewWeighProcess.IsVisible = true;
-                BtnReconnect.IsVisible = false;
+
+                return;
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
                 BtnReconnect.IsVisible = true;
+                BtnRefresh.IsVisible = false;
                 BtnNewWeighProcess.IsVisible = false;
+            }
+            finally
+            {
+                _popup?.Close();
             }
         }
     }
@@ -81,27 +92,67 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnNewWeighProcess_Clicked(object sender, EventArgs e)
     {
-        WeightingScreen weightingView = new(new WeightEntryDto());
+        DisplayWaitPopUp("Preparando bascula, espere...");
 
-        await Shell.Current.Navigation.PushModalAsync(weightingView);
+        try
+        {
+            BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
+
+            if (!await basculaViewModel.CanWeight())
+            {
+                throw new InvalidOperationException("Bascula ocupada");
+            }
+
+            WeightingScreen weightingView = new(new WeightEntryDto());
+
+            await Shell.Current.Navigation.PushModalAsync(weightingView);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cargar la pantalla de pesaje: " + ex.Message, "OK");
+        }
+        finally
+        {
+            _popup?.Close();
+        }
     }
 
-    private async void BtnReconnect_Clicked(object sender, EventArgs e)
+    private async Task Reconect()
     {
         if(BindingContext is PendingWeightsViewModel viewModel)
         {
+            if (EntryHost.Text.Contains("http"))
+            {
+                Preferences.Set("HostUrl", EntryHost.Text);
+            }
+            else
+            {
+                Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
+            }
+
             DisplayWaitPopUp("Reconectando, espere");
             try
             {
                 await viewModel.LoadPendingWeightsAsync();
 
-                BtnNewWeighProcess.IsVisible = true;
+                if (!MauiProgram.IsSecondaryTerminal)
+                {
+                    BtnNewWeighProcess.IsVisible = true;
+                }
+
                 BtnReconnect.IsVisible = false;
+                BorderEntryHost.IsVisible = false;
+
             }
             catch (OriginEmptyException)
             {
                 await DisplayAlert("Info", "No hay pesos pendientes, puedes crear uno nuevo :D", "OK");
-                BtnNewWeighProcess.IsVisible = true;
+                if (!MauiProgram.IsSecondaryTerminal)
+                {
+                    BtnNewWeighProcess.IsVisible = true;
+
+                }
+
                 BtnReconnect.IsVisible = false;
             }
             catch (Exception ex)
@@ -114,6 +165,48 @@ public partial class PendingWeightsView : ContentPage
             {
                 _popup?.Close();
             }
+        }
+    }
+
+    private async void BtnReconnect_Pressed(object sender, EventArgs e)
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(4444, _cancellationTokenSource.Token);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                BorderEntryHost.IsVisible = true;
+
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
+            });
+        }
+        catch (TaskCanceledException)
+        {
+            // La tarea fue cancelada, no hacer nada
+        }
+        catch (Exception ex)
+        {
+            // Manejar cualquier otra excepción
+            await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
+        }
+    }
+
+    private async void BtnReconnect_Released(object sender, EventArgs e)
+    {
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+            if (string.IsNullOrEmpty(EntryHost.Text))
+            {
+                await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
+                return;
+            }
+            await Reconect();
         }
     }
 }

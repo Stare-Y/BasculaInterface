@@ -6,6 +6,8 @@
         public int OrderIndex { get; set; } = 0;
         public double Tare { get; set; } = 0;
         public double Weight { get; set; } = 0;
+        public double? SecondaryTare { get; set; }
+        public string? WeightedBy { get; set; }
         private string _description = string.Empty;
         public int? FK_WeightedProductId { get; set; } = null;
 

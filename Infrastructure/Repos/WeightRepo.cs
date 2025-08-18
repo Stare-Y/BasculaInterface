@@ -26,7 +26,8 @@ namespace Infrastructure.Repos
         {
             return await _context.WeightEntries
                 .AsNoTracking()
-                .Include(w => w.WeightDetails)
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
                 .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
         }
 
@@ -34,7 +35,8 @@ namespace Infrastructure.Repos
         {
             return await _context.WeightEntries
                 .AsNoTracking()
-                .Include(w => w.WeightDetails)
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
                 .Take(top)
@@ -46,7 +48,8 @@ namespace Infrastructure.Repos
             return await _context.WeightEntries
                 .AsNoTracking()
                 .Where(w => w.ConcludeDate == null && !w.IsDeleted)
-                .Include(w => w.WeightDetails)
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
                 .Take(top)

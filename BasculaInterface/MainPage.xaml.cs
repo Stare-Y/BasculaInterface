@@ -14,6 +14,14 @@ namespace BasculaInterface
         {
             InitializeComponent();
             BindingContext = this;
+            if (MauiProgram.IsSecondaryTerminal)
+            {
+                CheckBoxSecondaryTerminal.IsChecked = true;
+            }
+            else
+            {
+                CheckBoxSecondaryTerminal.IsChecked = false;
+            }
         }
 
         protected override void OnAppearing()
@@ -38,18 +46,15 @@ namespace BasculaInterface
 
         private async Task LogIn()
         {
-            DisplayWaitPopUp("Iniciando sesión, espere");
 
             if (EntryHost.Text.Contains("http"))
             {
-                MauiProgram.BasculaSocketUrl = EntryHost.Text;
+                Preferences.Set("HostUrl", EntryHost.Text);
             }
             else
             {
-                MauiProgram.BasculaSocketUrl = "http://" + EntryHost.Text + "/";
+                Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
             }
-
-            Preferences.Set("HostUrl", MauiProgram.BasculaSocketUrl);
 
             try
             {
@@ -59,17 +64,14 @@ namespace BasculaInterface
                     return;
                 }
 
-                await Task.Delay(1000); // Simulate a delay for login process
                 await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
                 BorderEntryHost.IsVisible = false;
+                StackCheckBox.IsVisible = false;
+                CheckBoxSecondaryTerminal.IsVisible = false;
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error", "No se pudo iniciar sesión: " + ex.Message, "OK");
-            }
-            finally
-            {
-                _popup?.Close();
             }
         }
 
@@ -99,6 +101,8 @@ namespace BasculaInterface
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     BorderEntryHost.IsVisible = true;
+                    StackCheckBox.IsVisible = true;
+                    CheckBoxSecondaryTerminal.IsVisible = true;
 
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
@@ -114,6 +118,13 @@ namespace BasculaInterface
                 // Manejar cualquier otra excepción
                 await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
             }
+        }
+
+        private void CheckBoxSecondaryTerminal_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            MauiProgram.IsSecondaryTerminal = e.Value;
+
+            Preferences.Set("SecondaryTerminal", e.Value);
         }
     }
 }

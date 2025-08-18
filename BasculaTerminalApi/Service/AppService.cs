@@ -1,4 +1,5 @@
 ﻿using BasculaTerminalApi.Models;
+using Core.Application.Services;
 using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repos;
@@ -58,6 +59,7 @@ namespace BasculaTerminalApi.Service
         private static IServiceCollection AddBasculaService(this IServiceCollection services)
         {
             services.AddSingleton<BasculaService>();
+            services.AddSingleton<IWeightLogisticService, WeightLogisticService>();
             return services;
         }
 

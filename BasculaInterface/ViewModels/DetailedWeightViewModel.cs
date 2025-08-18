@@ -176,8 +176,10 @@ namespace BasculaInterface.ViewModels
                 {
                     Id = detail.Id,
                     Tare = detail.Tare,
-                    Weight = detail.Weight,
+                    Weight = detail.Weight, 
                     FK_WeightedProductId = detail.FK_WeightedProductId,
+                    WeightedBy = detail.WeightedBy,
+                    SecondaryTare = detail.SecondaryTare
                 };
 
                 if (detail.FK_WeightedProductId is not null)

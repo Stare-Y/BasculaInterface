@@ -14,9 +14,12 @@ public partial class DetailedWeightView : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
-#if ANDROID
-        BtnNuevoProducto.IsVisible = false;
-#endif
+        if (MauiProgram.IsSecondaryTerminal)
+        {
+            BtnNuevoProducto.IsVisible = false;
+            BtnNewEntry.IsVisible = false;
+            BtnFinishWeight.IsVisible = false;
+        }
     }
 
     public DetailedWeightView() { }
@@ -40,6 +43,22 @@ public partial class DetailedWeightView : ContentPage
                     return;
                 }
             }
+
+            if(viewModel.WeightEntryDetailRows.Count > 0 && !MauiProgram.IsSecondaryTerminal)
+            {
+                if(viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+                {
+                    BtnFinishWeight.IsVisible = false;
+                }
+                else
+                {
+                    BtnFinishWeight.IsVisible = true;
+                }
+
+                return;
+            }
+
+            BtnFinishWeight.IsVisible = false;
         }
     }
 
@@ -164,6 +183,8 @@ public partial class DetailedWeightView : ContentPage
                     await Shell.Current.Navigation.PopModalAsync();
                 };
                 Shell.Current.Navigation.PushModalAsync(productSelectView);
+
+                _entriesChanged = true;
             }
             catch (Exception ex)
             {
@@ -186,35 +207,61 @@ public partial class DetailedWeightView : ContentPage
             return;
         }
 
-        if (row != null)
+        try
         {
-            if (row.Tare > 0)
+            if (row != null)
             {
-                CollectionViewWeightDetails.SelectedItem = null;
-                return;
-                //DisplayAlert("Info", "No se puede eliminar un producto que ya ha sido pesado.", "OK");
-            }
-            else
-            {
-                ProductoDto? producto = null;
-                if (row.FK_WeightedProductId.HasValue)
+                if (row.Tare > 0)
                 {
-                    producto = new ProductoDto
-                    {
-                        Id = row.FK_WeightedProductId.Value,
-                        Nombre = row.Description
-                    };
+                    return;
                 }
 
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto);
+                if (!string.IsNullOrEmpty(row.WeightedBy) && row.WeightedBy != DeviceInfo.Name )
+                {
+                    await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
+                    return;
+                }
 
-                await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+                DisplayWaitPopUp("Preparando bascula, espere...");
+                try
+                {
+                    BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
 
-                _entriesChanged = true;
+                    if (!await basculaViewModel.CanWeight())
+                    {
+                        throw new InvalidOperationException("Bascula ocupada");
+                    }
+
+                    ProductoDto? producto = null;
+                    if (row.FK_WeightedProductId.HasValue)
+                    {
+                        producto = new ProductoDto
+                        {
+                            Id = row.FK_WeightedProductId.Value,
+                            Nombre = row.Description
+                        };
+                    }
+
+                    WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+
+                    await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+
+                    _entriesChanged = true;
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", "No se pudo cargar la pantalla de pesaje: " + ex.Message, "OK");
+                }
+                finally
+                {
+                    _popup?.Close();
+                }
             }
         }
-
-        CollectionViewWeightDetails.SelectedItem = null;
+        finally
+        {
+            CollectionViewWeightDetails.SelectedItem = null;
+        }
     }
 
     private async void DeleteWeightDetail_Clicked(object sender, EventArgs e)
@@ -229,7 +276,21 @@ public partial class DetailedWeightView : ContentPage
                     
                     await viewModel.RemoveWeightEntryDetail(selectedRow);
 
+                    if (viewModel.WeightEntryDetailRows.Count > 0)
+                    {
+                        if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+                        {
+                            BtnFinishWeight.IsVisible = false;
+                        }
+                        else
+                        {
+                            BtnFinishWeight.IsVisible = true;
+                        }
+                    }
+
                     await DisplayAlert("Éxito", "Registro eliminado correctamente.", "OK");
+
+                    _entriesChanged = true;
                 }
                 catch (Exception ex)
                 {

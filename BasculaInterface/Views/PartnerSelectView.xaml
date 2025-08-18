@@ -8,7 +8,7 @@
         <vm:PartnerSelectorViewModel/>
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10" BackgroundColor="#80F5DEB3">
+    <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10" >
 
         <!-- Fila de búsqueda -->
         <Grid Grid.Row="0" ColumnDefinitions="9*,1*" RowDefinitions="*,*" ColumnSpacing="10">
@@ -23,7 +23,6 @@
                 Placeholder="Buscar Socio..."
                 SearchButtonPressed="SearchBar_SearchButtonPressed"
                 Grid.Column="0"
-                       BackgroundColor="White" TextColor="Black"
                        Grid.Row="1"/>
 
             <Button Text="Confirmar"
@@ -53,10 +52,10 @@
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
                 <Label Text="No se encontraron clientes con ese nombre." 
-            HorizontalOptions="Center" 
-            VerticalOptions="Center" 
-            TextColor="Gray"
-            FontSize="Header"/>
+                        HorizontalOptions="Center" 
+                        VerticalOptions="Center" 
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}}"
+                        FontSize="Subtitle"/>
             </CollectionView.EmptyView>
         </CollectionView>
 

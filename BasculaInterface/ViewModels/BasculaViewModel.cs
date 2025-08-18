@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
@@ -70,14 +71,38 @@ namespace BasculaInterface.ViewModels
         private HubConnection? _basculaSocketHub;
 
         event Action<double>? OnWeightReceived;
-        private readonly IApiService? _apiService;
+        private readonly IApiService _apiService;
 
         public BasculaViewModel(IApiService apiService)
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
 
-        public BasculaViewModel() { }
+        public async Task<bool> CanWeight( )
+        {
+            try
+            {
+                return await _apiService.PutAsync<bool>($"api/Weight/CanWeight?deviceId={Preferences.Get("DeviceName", DeviceInfo.Name)}", null);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task ReleaseWeight()
+        {
+            try
+            {
+                await _apiService.PutAsync<bool>($"api/Weight/ReleaseWeight?deviceId={Preferences.Get("DeviceName", DeviceInfo.Name)}", null);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error releasing weight: {ex.Message}");
+            }
+        }
+
+        public BasculaViewModel() {  }
 
         public async Task ConnectSocket()
         {
@@ -87,15 +112,15 @@ namespace BasculaInterface.ViewModels
                 .WithUrl(_apiService?.GetBaseUrl() + "basculaSocket")
                 .Build();
 
-                _basculaSocketHub.On<double>("ReceiveNumber", data =>
+                OnWeightReceived += UpdateWeight;
+
+                _basculaSocketHub.On<double>("ReceiveLecture", lecture =>
                 {
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        OnWeightReceived?.Invoke(data);
+                        OnWeightReceived?.Invoke(lecture);
                     });
                 });
-
-                OnWeightReceived += UpdateWeight;
 
                 await _basculaSocketHub.StartAsync();
                 Estado = "Conectado";
@@ -110,14 +135,14 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        private void UpdateWeight(double data)
+        private void UpdateWeight(double lecture)
         {
             if (_tara != 0)
             {
-                _diferenciaAbs = Math.Abs(_tara - data);
+                _diferenciaAbs = Math.Abs(_tara - lecture);
             }
 
-            _pesoTotal = data;
+            _pesoTotal = lecture;
 
             OnPropertyChanged(nameof(Peso));
             OnPropertyChanged(nameof(Tara));
@@ -225,6 +250,7 @@ namespace BasculaInterface.ViewModels
                     WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
                     existingDetail.Weight = _diferenciaAbs;
                     existingDetail.Tare = overrideTara ?? _tara;
+                    existingDetail.WeightedBy = DeviceInfo.Name;
                 }
                 else
                 {
@@ -235,12 +261,37 @@ namespace BasculaInterface.ViewModels
                         Tare = overrideTara ?? _tara,
                         Weight = _diferenciaAbs,
                         FK_WeightedProductId = Product?.Id,
+                        WeightedBy = DeviceInfo.Name
                     });
                 }
 
                 await PutWeightEntry();
             }
         }
+        
+        public async Task PutSecondaryTara()
+        {
+            if (TaraCurrentValue < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(TaraCurrentValue), "Secondary tara cannot be negative or 0.");
+            }
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry is not initialized.");
+            }
+            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(w => w.FK_WeightedProductId == Product?.Id);
+            if (detail != null)
+            {
+                detail.SecondaryTare = TaraCurrentValue;
+                detail.WeightedBy = DeviceInfo.Name;
+                await PutWeightEntry();
+            }
+            else
+            {
+                throw new InvalidOperationException("No weight detail found for the current product.");
+            }
+        }
+
         private void ValidateBeforePosting()
         {
             if (_pesoTotal == 0)
@@ -272,6 +323,8 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
 
+            WeightEntry.RegisteredBy = DeviceInfo.Name;
+
             await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
         }
 
@@ -285,6 +338,9 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
+
+            WeightEntry.RegisteredBy = DeviceInfo.Name;
+
             await _apiService.PutAsync<object>("api/Weight/", WeightEntry);
         }
     }

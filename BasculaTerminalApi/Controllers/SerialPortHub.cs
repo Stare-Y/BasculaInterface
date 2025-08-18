@@ -6,7 +6,7 @@ namespace BasculaTerminalApi.Controllers
 {
     public class SerialPortHub : Hub
     {
-        private static IHubContext<SerialPortHub> _context = null!;
+        private readonly IHubContext<SerialPortHub> _context = null!;
 
         public SerialPortHub(IHubContext<SerialPortHub> context, BasculaService basculaService)
         {
@@ -14,11 +14,12 @@ namespace BasculaTerminalApi.Controllers
 
             basculaService.OnBasculaRead += SendWeightNumber;
         }
+
         private async void SendWeightNumber(object sender, OnBasculaReadEventArgs e)
         {
             double number = e?.Weight ?? throw new Exception("Error leyendo evento de lectura de peso");
 
-            await _context.Clients.All.SendAsync("ReceiveNumber", number);
+            await _context.Clients.All.SendAsync("ReceiveLecture", number);
         }
     }
 }

@@ -4,6 +4,7 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace BasculaInterface.ViewModels
 {
@@ -15,12 +16,46 @@ namespace BasculaInterface.ViewModels
 
         private readonly IApiService _apiService = null!;
 
-        public PendingWeightsViewModel(IApiService apiService)
+        public PendingWeightsViewModel(IApiService apiService) : this()
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
+        private bool isRefreshing;
+        public bool IsRefreshing
+        {
+            get => isRefreshing;
+            set
+            {
+                if (isRefreshing == value) return;
+                isRefreshing = value;
+                OnPropertyChanged(nameof(IsRefreshing));
+            }
+        }
 
-        public PendingWeightsViewModel() { }
+        public ICommand RefreshCommand { get; }
+        public PendingWeightsViewModel()
+        {
+            RefreshCommand = new Command(async () =>
+            {
+                IsRefreshing = true;
+                try
+                {
+                    await LoadPendingWeightsAsync();
+
+                }
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("NotFound"))
+                    {
+                        throw new OriginEmptyException("No hay pesos pendientes, puedes crear uno nuevo :D");
+                    }
+                    else
+                    {
+                        throw new Exception(ex.Message);
+                    }
+                }
+            });
+        }
 
         public async Task LoadPendingWeightsAsync()
         {
@@ -34,25 +69,10 @@ namespace BasculaInterface.ViewModels
 
                 BuildObservableCollection();
             }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("NotFound"))
-                {
-                    throw new OriginEmptyException("No hay pesos pendientes, puedes crear uno nuevo :D");
-
-                }
-                else
-                {
-                    throw new Exception(ex.Message);
-                }
-            }
             finally
             {
-                await LoadClienteProveedorAsync();
-
-                BuildObservableCollection();
-
                 OnCollectionChanged(nameof(_pendingWeights));
+                IsRefreshing = false;
             }
         }
 
@@ -68,10 +88,10 @@ namespace BasculaInterface.ViewModels
 
                     if (weight.WeightDetails.Count > 0)
                     {
-                        teoricWeightText += 
-                            "Total (teorico): " 
-                            + (weight.WeightDetails.Sum(d => d.Weight) 
-                            + weight.TareWeight).ToString() 
+                        teoricWeightText +=
+                            "Total (teorico): "
+                            + (weight.WeightDetails.Sum(d => d.Weight)
+                            + weight.TareWeight).ToString()
                             + " kg.";
                     }
 
@@ -87,6 +107,12 @@ namespace BasculaInterface.ViewModels
         private async Task LoadClienteProveedorAsync()
         {
             _clienteProveedorDtos.Clear();
+
+            if (_pendingWeights.Count == 0)
+            {
+                OnCollectionChanged(nameof(_clienteProveedorDtos));
+                return;
+            }
 
             foreach (WeightEntryDto weight in _pendingWeights)
             {

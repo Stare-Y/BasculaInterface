@@ -52,13 +52,16 @@ namespace Core.Application.Extensions
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
+                RegisteredBy = weightEntryDto.RegisteredBy,
                 WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
                     Tare = wd.Tare,
-                    Weight = wd.Weight
+                    Weight = wd.Weight,
+                    SecondaryTare = wd.SecondaryTare,
+                    WeightedBy = wd.WeightedBy
                 }).ToList()
             };
 
@@ -80,13 +83,16 @@ namespace Core.Application.Extensions
                 ConcludeDate = weightEntry.ConcludeDate,
                 Notes = weightEntry.Notes,
                 VehiclePlate = weightEntry.VehiclePlate,
+                RegisteredBy = weightEntry.RegisteredBy,
                 WeightDetails = weightEntry.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
                     Tare = wd.Tare,
-                    Weight = wd.Weight
+                    Weight = wd.Weight,
+                    SecondaryTare = wd.SecondaryTare,
+                    WeightedBy = wd.WeightedBy
                 }).ToList()
             };
         }
@@ -106,13 +112,16 @@ namespace Core.Application.Extensions
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
+                RegisteredBy = weightEntryDto.RegisteredBy,
                 WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
                     Tare = wd.Tare,
-                    Weight = wd.Weight
+                    Weight = wd.Weight,
+                    WeightedBy = wd.WeightedBy,
+                    SecondaryTare = wd.SecondaryTare
                 }).ToList()
             };
         }
@@ -132,13 +141,16 @@ namespace Core.Application.Extensions
                 ConcludeDate = we.ConcludeDate,
                 Notes = we.Notes,
                 VehiclePlate = we.VehiclePlate,
+                RegisteredBy = we.RegisteredBy,
                 WeightDetails = we.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
                     FK_WeightedProductId = wd.FK_WeightedProductId,
                     Tare = wd.Tare,
-                    Weight = wd.Weight
+                    Weight = wd.Weight,
+                    SecondaryTare = wd.SecondaryTare,
+                    WeightedBy = wd.WeightedBy
                 }).ToList()
             });
         }
@@ -159,6 +171,7 @@ namespace Core.Application.Extensions
             weightEntry.ConcludeDate = weightEntryDto.ConcludeDate;
             weightEntry.Notes = weightEntryDto.Notes;
             weightEntry.VehiclePlate = weightEntryDto.VehiclePlate;
+            weightEntry.RegisteredBy = weightEntryDto.RegisteredBy;
 
             // Update WeightDetails
             var existingDetails = weightEntry.WeightDetails.ToList(); // Get existing details
@@ -173,6 +186,8 @@ namespace Core.Application.Extensions
                     // Update properties of existing detail
                     existingDetail.Weight = updatedDetail.Weight;
                     existingDetail.Tare = updatedDetail.Tare;
+                    existingDetail.SecondaryTare = updatedDetail.SecondaryTare;
+                    existingDetail.WeightedBy = updatedDetail.WeightedBy;
                 }
             }
 
@@ -185,7 +200,9 @@ namespace Core.Application.Extensions
                     {
                         FK_WeightedProductId = newDetail.FK_WeightedProductId,
                         Tare = newDetail.Tare,
-                        Weight = newDetail.Weight
+                        Weight = newDetail.Weight,
+                        SecondaryTare = newDetail.SecondaryTare,
+                        WeightedBy = newDetail.WeightedBy
                     });
                 }
             }

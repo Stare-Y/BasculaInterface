@@ -12,6 +12,8 @@ namespace Core.Domain.Entities
         public double Tare { get; set; } = 0;
         public int? FK_WeightedProductId { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public string? WeightedBy { get; set; }
+        public double? SecondaryTare { get; set; } = null;
 
         [ForeignKey("FK_WeightEntryId")]
         public WeightEntry WeightEntry { get; set; } = null!;

@@ -12,9 +12,11 @@ namespace BasculaTerminalApi.Controllers
     public class WeightController : ControllerBase, IWeightService<IActionResult>
     {
         private readonly IWeightRepo _weightRepo = null!;
-        public WeightController(IWeightRepo weightRepo)
+        private readonly IWeightLogisticService _weightLogisticService = null!;
+        public WeightController(IWeightRepo weightRepo, IWeightLogisticService weightLogisticService)
         {
             _weightRepo = weightRepo;
+            _weightLogisticService = weightLogisticService;
         }
 
         [HttpPost]
@@ -59,10 +61,7 @@ namespace BasculaTerminalApi.Controllers
             try
             {
                 IEnumerable<WeightEntry> pendingWeights = await _weightRepo.GetPendingWeights(top, page);
-                if (pendingWeights == null || !pendingWeights.Any())
-                {
-                    return NotFound("No pending weight entries found.");
-                }
+                
                 IEnumerable<WeightEntryDto> dtos = pendingWeights.ConvertRangeToDto();
                 return Ok(dtos);
             }
@@ -145,6 +144,32 @@ namespace BasculaTerminalApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest($"Error deleting weight detail: {ex.Message}");
+            }
+        }
+
+        [HttpPut("CanWeight")]
+        public async Task<ActionResult<bool>> RequestWeight([FromQuery]string deviceId)
+        {
+            try
+            {
+                return Ok(await _weightLogisticService.RequestWeight(deviceId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error requesting weight: {ex.Message}");
+            }
+        }
+
+        [HttpPut("ReleaseWeight")]
+        public async Task<ActionResult<bool>> ReleaseWeight([FromQuery]string deviceId)
+        {
+            try
+            {
+                return Ok(await _weightLogisticService.ReleaseWeight(deviceId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error releasing weight: {ex.Message}");
             }
         }
     }

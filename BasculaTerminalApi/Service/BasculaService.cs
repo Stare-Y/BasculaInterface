@@ -44,8 +44,6 @@ namespace BasculaTerminalApi.Service
             {
                 if (_bascula.IsOpen)
                 {
-                    // Este comando depende de tu modelo de báscula.
-                    // Muchos usan "P\r\n" o solo "\r\n" para pedir el peso.
                     _bascula.Write("p");
                 }
             }
@@ -63,7 +61,7 @@ namespace BasculaTerminalApi.Service
             double currentWeight = ParseScreenWeight(readData);
 
             //invoke on weight received event
-            if (currentWeight != -1)
+            if (currentWeight > -1)
             {
                 OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
             }

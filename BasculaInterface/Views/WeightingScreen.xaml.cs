@@ -2,7 +2,6 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
-using Microsoft.Maui.Graphics.Text;
 
 namespace BasculaInterface.Views;
 
@@ -12,14 +11,14 @@ public partial class WeightingScreen : ContentPage
     private bool _taraChanged = false;
     private double? _oldTara = null;
     private CancellationTokenSource? _cancellationTokenSource = null;
+    private CancellationTokenSource? _cancellationTokenKeepAlive = null;
     public WeightingScreen(BasculaViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
-        
     }
 
-    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
+    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {
         if (BindingContext is BasculaViewModel viewModel)
         {
@@ -27,18 +26,68 @@ public partial class WeightingScreen : ContentPage
             viewModel.Partner = partner;
             viewModel.Product = productoDto;
 
-            if (weightEntry.BruteWeight > 0)
+            if (useIncommingTara || !MauiProgram.IsSecondaryTerminal)
             {
-                viewModel.SetTara(weightEntry.BruteWeight);
+                if (weightEntry.BruteWeight > 0)
+                {
+                    viewModel.SetTara(weightEntry.BruteWeight);
+                }
+                else
+                {
+                    viewModel.SetTara(0);
+                }
             }
-            else
+            else if(productoDto is not null )
             {
-                viewModel.SetTara(0);
+                WeightDetailDto weightingDetail = weightEntry.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id) 
+                    ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
+
+                _oldTara = weightEntry.BruteWeight;
+
+                if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)
+                {
+
+                    viewModel.SetTara(weightingDetail.SecondaryTare.Value);
+                    _taraChanged = true;
+                }
+                else
+                {
+                    weightingDetail.SecondaryTare = 0;
+                    viewModel.SetTara(0);
+                    GridTaraLabel.IsVisible = false;
+                    GridSetTaraInicial.IsVisible = true;
+                    BtnCaptureNewWeight.IsVisible = false;
+                }
             }
         }
     }
 
     public WeightingScreen() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>()) { }
+
+    private async Task KeepWeightAlive()
+    {
+        if (BindingContext is BasculaViewModel viewModel)
+        {
+
+            if (!await viewModel.CanWeight())
+            {
+                if (_cancellationTokenKeepAlive is not null)
+                {
+                    _cancellationTokenKeepAlive.Cancel();
+                    _cancellationTokenKeepAlive.Dispose();
+                    _cancellationTokenKeepAlive = null;
+                }
+
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await DisplayAlert("Error", "La báscula dejó de estar disponible", "OK");
+                    await Shell.Current.Navigation.PopModalAsync();
+                });
+
+                return;
+            }
+        }
+    }
 
     protected override async void OnAppearing()
     {
@@ -46,52 +95,41 @@ public partial class WeightingScreen : ContentPage
 
         if (BindingContext is BasculaViewModel viewModel)
         {
-            if (!(viewModel.TaraCurrentValue <= 0))
+            try
             {
-#if ANDROID
+                TaraLabel.BackgroundColor = Colors.LightBlue;
+                TaraLabel.TextColor = Colors.Black;
 
-                TaraLabel.IsEnabled = true;
-#endif
-            }
-            else
-            {
-                TaraLabel.IsEnabled = false;
-            }
+                await viewModel.ConnectSocket();
 
-            TaraLabel.BackgroundColor = Colors.LightBlue;
-            TaraLabel.TextColor = Colors.Black;
+                BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
+                BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
+                EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
 
-            await viewModel.ConnectSocket();
+                _cancellationTokenKeepAlive = new CancellationTokenSource();
+                _ = StartKeepAliveLoop(_cancellationTokenKeepAlive.Token);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", ex.Message, "OK");
+                await Shell.Current.Navigation.PopModalAsync();
+            }
+        }
+    }
 
-            if (viewModel.Partner is null || viewModel.Partner.Id == 0)
+    private async Task StartKeepAliveLoop(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
             {
-                BtnPickPartner.IsVisible = true;
+                await KeepWeightAlive();
+                await Task.Delay(TimeSpan.FromSeconds(4), token);
             }
-            else
-            {
-                BtnPickPartner.IsVisible = false;
-            }
-
-            if (viewModel.Product is null)
-            {
-                if (viewModel.WeightEntry?.TareWeight != 0)
-                {
-                    BtnPickProduct.IsVisible = true;
-                }
-            }
-            else
-            {
-                BtnPickProduct.IsVisible = false;
-            }
-
-            if (viewModel.WeightEntry is not null && !string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate))
-            {
-                EntryVehiclePlate.IsEnabled = false;
-            }
-            else
-            {
-                EntryVehiclePlate.IsEnabled = true;
-            }
+        }
+        catch (TaskCanceledException)
+        {
+            // esperado al cerrar la pantalla
         }
     }
 
@@ -101,7 +139,14 @@ public partial class WeightingScreen : ContentPage
 
         if (BindingContext is BasculaViewModel viewModel)
         {
+            if (_cancellationTokenKeepAlive is not null)
+            {
+                _cancellationTokenKeepAlive.Cancel();
+                _cancellationTokenKeepAlive.Dispose();
+                _cancellationTokenKeepAlive = null;
+            }
             await viewModel.ReleaseSocket();
+            await viewModel.ReleaseWeight();
         }
     }
 
@@ -236,11 +281,11 @@ public partial class WeightingScreen : ContentPage
             await Task.Delay(2121, _cancellationTokenSource.Token);
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                if(BindingContext is BasculaViewModel viewModel)
+                if (BindingContext is BasculaViewModel viewModel)
                 {
-                    if(!_taraChanged)
+                    if (!_taraChanged)
                         _oldTara = viewModel.TaraCurrentValue;
-                    
+
                     viewModel.SetTaraFromPesoTotal();
 
                     _taraChanged = true;
@@ -253,7 +298,7 @@ public partial class WeightingScreen : ContentPage
                 await DisplayAlert("Tara Establecida", "La tara se ha restablecido correctamente.", "OK");
             });
         }
-        catch(TaskCanceledException)
+        catch (TaskCanceledException)
         {
             // La tarea fue cancelada, no hacer nada
         }
@@ -270,6 +315,38 @@ public partial class WeightingScreen : ContentPage
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
+        }
+    }
+
+    private async void BtnSetTaraInicial_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is BasculaViewModel viewModel)
+        {
+            try
+            {
+                WeightDetailDto weightingDetail = viewModel.WeightEntry?.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == viewModel.Product?.Id)
+                    ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
+
+                viewModel.SetTaraFromPesoTotal();
+
+                await viewModel.PutSecondaryTara();
+
+                _taraChanged = true;
+
+                GridSetTaraInicial.IsVisible = false;
+
+                GridTaraLabel.IsVisible = true;
+
+                BtnCaptureNewWeight.Text = "Registrar Peso Final";
+
+                BtnCaptureNewWeight.IsVisible = true;
+
+                await DisplayAlert("Tara Establecida", "La tara se ha restablecido correctamente.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
+            }
         }
     }
 }

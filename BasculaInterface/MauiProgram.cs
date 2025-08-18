@@ -4,15 +4,13 @@ using CommunityToolkit.Maui;
 using Core.Application.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
-using System.Text.Json;
 
 namespace BasculaInterface;
 public static class MauiProgram
 {
-    public static string BasculaSocketUrl { get; set; } = "http://192.168.1.240:6969/";
     public static IServiceProvider ServiceProvider { get; set; } = null !;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
-
+    public static bool IsSecondaryTerminal { get; set; } = false;
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -46,11 +44,23 @@ public static class MauiProgram
                 });
             });
         });
-
+        IsSecondaryTerminal = Preferences.Get("SecondaryTerminal", false);
 #endif
+
+#if ANDROID
+
+        IsSecondaryTerminal = Preferences.Get("SecondaryTerminal", true);
+#endif
+
+
+        Preferences.Set("DeviceName", DeviceInfo.Name);
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        
+        Preferences.Set("FilterClasif6", true);
+
         builder.Services.AddTransient<BasculaViewModel>();
         builder.Services.AddTransient<PendingWeightsViewModel>();
         builder.Services.AddTransient<ProductSelectorViewModel>();
@@ -58,7 +68,7 @@ public static class MauiProgram
         builder.Services.AddTransient<IApiService, ApiService>();
         builder.Services.AddHttpClient<IApiService, ApiService>(client =>
         {
-            client.BaseAddress = new Uri(BasculaSocketUrl);
+            client.BaseAddress = new Uri(Preferences.Get("HostUrl", "http://bascula.cpe/"));
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });

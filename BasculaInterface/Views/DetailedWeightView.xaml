@@ -35,29 +35,34 @@
                             StrokeShape="RoundRectangle 8"
                             Padding="12">
                         <Grid ColumnDefinitions="*,*" MinimumHeightRequest="50">
-                            <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="21">
-                                <Button Text="✕"
-                                        BackgroundColor="Red"
-                                        TextColor="White"
-                                        FontSize="Small"
-                                        Padding="4"
-                                        IsVisible="False"
-                                        CornerRadius="12"
-                                        Clicked="DeleteWeightDetail_Clicked">
-                                    <Button.Triggers>
-                                        <MultiTrigger TargetType="Button">
-                                            <MultiTrigger.Conditions>
-                                                <BindingCondition Binding="{Binding Tare}" Value="0" />
-                                                <BindingCondition Binding="{Binding Weight}" Value="0" />
-                                            </MultiTrigger.Conditions>
-                                            <Setter Property="IsVisible" Value="True" />
-                                        </MultiTrigger>
-                                        <Trigger TargetType="Button" Property="IsVisible" Value="False" />
-                                    </Button.Triggers>
-                                </Button>
-                                <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
-                                <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}.'}" VerticalTextAlignment="Center"/>
-                            </HorizontalStackLayout>
+                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="21">
+                                <HorizontalStackLayout HorizontalOptions="Start" Spacing="21">
+                                    <Button Text="✕"
+                                                BackgroundColor="Red"
+                                                TextColor="White"
+                                                FontSize="Small"
+                                                Padding="4"
+                                                IsVisible="False"
+                                                CornerRadius="12"
+                                                Clicked="DeleteWeightDetail_Clicked">
+                                        <Button.Triggers>
+                                            <MultiTrigger TargetType="Button">
+                                                <MultiTrigger.Conditions>
+                                                    <BindingCondition Binding="{Binding Tare}" Value="0" />
+                                                    <BindingCondition Binding="{Binding Weight}" Value="0" />
+                                                    <BindingCondition Binding="{Binding SecondaryTare}" Value="{x:Null}" />
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="IsVisible" Value="True" />
+                                            </MultiTrigger>
+                                            <Trigger TargetType="Button" Property="IsVisible" Value="False" />
+                                        </Button.Triggers>
+                                    </Button>
+                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
+                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}. '}" VerticalTextAlignment="Center"/>
+                                </HorizontalStackLayout>
+                                
+                                <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy}" VerticalTextAlignment="Center"/>
+                            </VerticalStackLayout>
                             <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End">
                                 <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>
                                 <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{}{0:F2} kg'}" VerticalTextAlignment="Center"/>

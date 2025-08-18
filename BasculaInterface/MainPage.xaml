@@ -2,50 +2,60 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-            xmlns:local="clr-namespace:BasculaInterface"
-            x:Class="BasculaInterface.MainPage">
+             xmlns:local="clr-namespace:BasculaInterface"
+             x:Class="BasculaInterface.MainPage">
 
-    <Grid RowDefinitions="1*,3*,1*" ColumnDefinitions="1*,3*,1*" Background="Wheat">
-        <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="1*,3*,1*" Grid.Row="1" Grid.Column="1">
-            <Border Stroke="#CCC"
-            StrokeThickness="1"
-            Background="CornflowerBlue"
-            StrokeShape="RoundRectangle 8"
-            Padding="50"
-            Grid.Row="1"
-            Grid.Column="1">
-                <Grid RowDefinitions="auto,*,*,*" Padding="4">
+    <Grid RowDefinitions="2*,3*,auto" Padding="20">
 
-                    <Label Text="Bascula CPE" FontSize="Large" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="End" HorizontalTextAlignment="Center" Grid.Row="0" Padding="4"/>
-                    <Grid RowDefinitions="*,auto" ColumnDefinitions="*,*" Grid.Row="1" Padding="4">
-                        <Label Text="Username" FontSize="Subtitle" TextColor="White" VerticalTextAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+        <!-- Título de bienvenida -->
+        <StackLayout Grid.Row="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="13">
+            <Label Text="Cooperativa Pedro Ezqueda" 
+                   FontSize="{OnPlatform Android=36, WinUI=54}" 
+                   FontAttributes="Bold" 
+                   HorizontalTextAlignment="Center"/>
+            <Label Text="Control de basculas y pedidos" 
+                   FontSize="{OnPlatform Android=21, WinUI=36}" 
+                   HorizontalTextAlignment="Center"/>
+        </StackLayout>
 
-                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                            <Entry x:Name="EntryUsername" FontSize="Subtitle" Placeholder="Username" BackgroundColor="White" TextColor="Black" />
-                        </Border>
-                    </Grid>
-                    <Grid RowDefinitions="*,auto" ColumnDefinitions="*,*" Grid.Row="2" Padding="4">
-                        <Label Text="Password" FontSize="Subtitle" TextColor="White" VerticalTextAlignment="Center" Grid.Row="0" Grid.Column="0"/>
-                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-
-                            <Entry x:Name="EntryPassword" FontSize="Subtitle" IsPassword="True" BackgroundColor="White" TextColor="Black" />
-                        </Border>
-
-                    </Grid>
-                    <Grid RowDefinitions="*,auto" Grid.Row="3" Padding="4">
-                        <Border x:Name="BorderEntryHost" IsVisible="False" Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                            
-                            <Entry x:Name="EntryHost" FontSize="Subtitle" Placeholder="Host" TextColor="Black"/>
-                        </Border>
-
-                        <Border Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="LightSkyBlue"  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-
-                            <Button x:Name="BtnLogIn" Pressed="BtnLogin_Pressed" BackgroundColor="LightSkyBlue" FontSize="Title" FontAttributes="Bold" Released="BtnLogin_Released" Text="Login"  />
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
+        <!-- Botón de login gigante -->
+        <Grid Grid.Row="1" HorizontalOptions="Center" VerticalOptions="Center">
+                <Button x:Name="BtnLogIn"
+                        Pressed="BtnLogin_Pressed"
+                        Released="BtnLogin_Released"
+                        BackgroundColor="LightSkyBlue"
+                        FontSize="Title"
+                        FontAttributes="Bold"
+                        Text="Login"
+                        MinimumWidthRequest="{OnPlatform Android=250, WinUI=430}"
+                        MinimumHeightRequest="130"/>
         </Grid>
+
+        <!-- Elementos ocultos opcionales -->
+        <StackLayout Grid.Row="2" Spacing="10">
+            <Border x:Name="BorderEntryHost"
+                    IsVisible="False"
+                    Stroke="#ccc"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 30"
+                    BackgroundColor="White"
+                    Padding="5">
+                <Entry x:Name="EntryHost"
+                       FontSize="Subtitle"
+                       Placeholder="Host"
+                       TextColor="Black"/>
+            </Border>
+
+            <HorizontalStackLayout IsVisible="False"
+                                  x:Name="StackCheckBox"
+                                  Spacing="10">
+                <CheckBox x:Name="CheckBoxSecondaryTerminal"
+                          CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged"/>
+                <Label Text="Usar terminal secundaria"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </StackLayout>
+
     </Grid>
 
 </ContentPage>

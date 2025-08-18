@@ -18,6 +18,12 @@ public partial class PartnerSelectView : ContentPage
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        SearchBar.Focus();
+    }
+
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
         _popup = new WaitPopUp(message);

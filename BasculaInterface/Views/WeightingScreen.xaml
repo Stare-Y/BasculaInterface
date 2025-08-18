@@ -59,45 +59,52 @@
            HasShadow="True"
            BorderColor="White">
                 <Label x:Name="PesoLabel"
-               Text="{Binding Peso, StringFormat='{0} kg'}"
-               FontSize="Title"
-               TextColor="Black"
-               HorizontalTextAlignment="Center"
-               VerticalTextAlignment="Center" 
-               FontAttributes="Bold"/>
+                       Text="{Binding Peso, StringFormat='{0} kg'}"
+                       FontSize="{OnPlatform Android=36, WinUI=54}"
+                       TextColor="Black"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center" 
+                       FontAttributes="Bold"/>
             </Frame>
             <Frame Grid.Row="2" Grid.Column="0"
-           BackgroundColor="LightBlue"
-           CornerRadius="20"
-           Padding="10"
-           HasShadow="True"
-           BorderColor="White">
+                   BackgroundColor="LightBlue"
+                   CornerRadius="20"
+                   Padding="10"
+                   HasShadow="True"
+                   BorderColor="White">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Button x:Name="TaraLabel"
-                            Text="{Binding Tara, StringFormat='{0} kg'}"
-                            FontSize="Subtitle"
-                            Grid.Row="0"
-                            FontAttributes="Bold"
-                            BackgroundColor="LightBlue"
-                            TextColor="Black"
-                            IsEnabled="False"
-                            Pressed="TaraLabel_Pressed"
-                            Released="TaraLabel_Released">
-                    </Button>
+                    <Grid x:Name="GridTaraLabel">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Label  x:Name="TaraLabel"
+                                 Text="{Binding Tara, StringFormat='{0} kg'}"
+                                 FontSize="Title"
+                                 Grid.Row="0"
+                                 FontAttributes="Bold"
+                                 BackgroundColor="LightBlue"
+                                 TextColor="Black"
+                                 HorizontalTextAlignment="Center"
+                                 VerticalTextAlignment="Center"/>
 
-                    <Label Grid.Row="1"
-                    Text="TARA"
-                    FontAutoScalingEnabled="True"
-                    TextColor="Black"
-                    HorizontalTextAlignment="Center"
-                    VerticalTextAlignment="Center" />
+                        <Label Grid.Row="1"
+                                 Text="TARA"
+                                 FontAutoScalingEnabled="True"
+                                 TextColor="Black"
+                                 HorizontalTextAlignment="Center"
+                                 VerticalTextAlignment="Center" />
 
+                    </Grid>
+                    <Grid x:Name="GridSetTaraInicial" IsVisible="False">
+                        <Button x:Name="BtnSetTaraInicial"
+                                 Text="Capturar Tara"
+                                 Clicked="BtnSetTaraInicial_Clicked"
+                                 BackgroundColor="LightBlue"
+                                 TextColor="Black"/>
+
+                    </Grid>
                 </Grid>
-
             </Frame>
 
             <Frame Grid.Row="2" Grid.Column="1"
@@ -113,7 +120,7 @@
                     </Grid.RowDefinitions>
                     <Label x:Name="DiferenciaLabel"
                    Text="{Binding Diferencia, StringFormat='{0} kg'}"
-                   FontSize="Subtitle"
+                   FontSize="Title"
                    TextColor="Black"
                    HorizontalTextAlignment="Center"
                    VerticalTextAlignment="Center" 

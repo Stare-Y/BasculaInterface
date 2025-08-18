@@ -9,5 +9,7 @@ namespace Core.Application.DTOs
         public double Tare { get; set; } = 0;
         public double Weight { get; set; } = 0;
         public int? FK_WeightedProductId { get; set; }
+        public string? WeightedBy { get; set; }
+        public double? SecondaryTare { get; set; } = null;
     }
 }

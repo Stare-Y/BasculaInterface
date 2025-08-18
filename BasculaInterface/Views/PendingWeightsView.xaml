@@ -9,56 +9,73 @@
     </ContentPage.BindingContext>
 
     <Grid RowDefinitions="1*,9*">
-        <Grid ColumnDefinitions="*,*" Grid.Row="0">
-            <Button x:Name="BtnReconnect" Text="Reconectar" Clicked="BtnReconnect_Clicked" Grid.Column="0" IsVisible="False"/>
-            <Button x:Name="BtnNewWeighProcess" Text="Nueva Entrada" Clicked="BtnNewWeighProcess_Clicked" Grid.Column="1" IsVisible="False"/>
+        <Grid ColumnDefinitions="*,*" Grid.Row="0" ColumnSpacing="15" Padding="10">
+            <Button x:Name="BtnReconnect" Text="Reconectar" FontSize="Subtitle" Pressed="BtnReconnect_Pressed" Released="BtnReconnect_Released" Grid.Column="0" IsVisible="False"/>
+            <Button x:Name="BtnRefresh" Text="Actualizar" FontSize="Subtitle" Pressed="BtnReconnect_Pressed" Released="BtnReconnect_Released" Grid.Column="0" IsVisible="False"/>
+            <Button x:Name="BtnNewWeighProcess" FontSize="Subtitle" Text="Nueva Entrada" Clicked="BtnNewWeighProcess_Clicked" Grid.Column="1" IsVisible="False"/>
+            <Border x:Name="BorderEntryHost" IsVisible="False" Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Column="1" >
+                <Entry x:Name="EntryHost" FontSize="Subtitle" Placeholder="Host" TextColor="Black"/>
+            </Border>
         </Grid>
-        <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged" Grid.Row="1">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border Stroke="#CCC"
+        <RefreshView x:Name="RefreshViewPendingWeights" 
+                     IsRefreshing="{Binding IsRefreshing}" 
+                     Command="{Binding RefreshCommand}" 
+                     Grid.Row="1">
+            <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged" Grid.Row="1">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Stroke="#CCC"
                             StrokeThickness="1"
                             Background="#F7F7F7"
                             StrokeShape="RoundRectangle 8"
                             Padding="12">
-                        <Grid ColumnDefinitions="*,*">
-                            <VerticalStackLayout Spacing="4" Grid.Column="0">
-                                <Label 
+                            <Grid ColumnDefinitions="*,*">
+                                <VerticalStackLayout Spacing="4" Grid.Column="0">
+                                    <Label 
                                         Text="{Binding Partner.RazonSocial}"
                                         FontAttributes="Bold"
                                         FontSize="Subtitle"
                                         TextColor="#222" />
 
-                                <HorizontalStackLayout>
-                                    <Label 
+                                    <HorizontalStackLayout>
+                                        <Label 
                                             Text="{Binding WeightEntry.VehiclePlate, StringFormat='{0} | '}"
                                             FontSize="Subtitle"
                                             TextColor="#666" />
-                                    <Label 
+                                        <Label 
                                             Text="{Binding WeightEntry.Notes, StringFormat='{0}.'}" 
                                             FontSize="Subtitle" 
                                             TextColor="#666" />
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
 
-                            <VerticalStackLayout Spacing="4" Grid.Column="1">
+                                <VerticalStackLayout Spacing="4" Grid.Column="1">
 
-                                <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
+                                    <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
                                             FontAttributes="Bold"
                                             FontSize="Subtitle"
                                             TextColor="#222" 
                                             HorizontalTextAlignment="End"/>
 
-                                <Label Text="{Binding HistoryText}"
+                                    <Label Text="{Binding HistoryText}"
                                             FontSize="Body"
                                             TextColor="DarkOrange" 
                                             HorizontalTextAlignment="End"/>
 
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="No hay pedidos pendientes"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       FontSize="Title"
+                       TextColor="White"
+                       BackgroundColor="DimGrey"/>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </RefreshView>
     </Grid>
 </ContentPage>
