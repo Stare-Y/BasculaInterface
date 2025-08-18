@@ -12,7 +12,7 @@
             <RowDefinition Height="2*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="5*"/>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" ColumnDefinitions="*,*" RowDefinitions="*,*" >
             <Label Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="0"/>
@@ -25,19 +25,23 @@
             <Button Text="Agregar Producto Pendiente" x:Name="BtnNuevoProducto" Clicked="BtnNuevoProducto_Clicked"  TextColor="White" BackgroundColor="CornflowerBlue" BorderWidth="2" Grid.Column="1" FontSize="Subtitle"/>
             <Button x:Name="BtnNewEntry" Text="Nueva Entrada" Clicked="BtnNewEntry_Clicked" TextColor="White"  BackgroundColor="LightSeaGreen" BorderWidth="2" Grid.Column="2" FontSize="Subtitle"/>
         </Grid>
-        <CollectionView x:Name="CollectionViewWeightDetails" ItemsSource="{Binding WeightEntryDetailRows}" Grid.Row="2" SelectionMode="Single" SelectionChanged="CollectionViewWeightDetails_SelectionChanged">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border 
+        <RefreshView x:Name="RefreshViewPendingWeights" 
+             IsRefreshing="{Binding IsRefreshing}" 
+             Command="{Binding RefreshCommand}" 
+             Grid.Row="2">
+            <CollectionView x:Name="CollectionViewWeightDetails" ItemsSource="{Binding WeightEntryDetailRows}" SelectionMode="Single" SelectionChanged="CollectionViewWeightDetails_SelectionChanged">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border 
                             Stroke="#CCC"
                             StrokeThickness="1"
                             Background="#F7F7F7"
                             StrokeShape="RoundRectangle 8"
                             Padding="12">
-                        <Grid ColumnDefinitions="*,*" MinimumHeightRequest="50">
-                            <VerticalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="21">
-                                <HorizontalStackLayout HorizontalOptions="Start" Spacing="21">
-                                    <Button Text="✕"
+                            <Grid ColumnDefinitions="*,*" MinimumHeightRequest="50">
+                                <VerticalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="21">
+                                    <HorizontalStackLayout HorizontalOptions="Start" Spacing="21">
+                                        <Button Text="✕"
                                                 BackgroundColor="Red"
                                                 TextColor="White"
                                                 FontSize="Small"
@@ -45,35 +49,38 @@
                                                 IsVisible="False"
                                                 CornerRadius="12"
                                                 Clicked="DeleteWeightDetail_Clicked">
-                                        <Button.Triggers>
-                                            <MultiTrigger TargetType="Button">
-                                                <MultiTrigger.Conditions>
-                                                    <BindingCondition Binding="{Binding Tare}" Value="0" />
-                                                    <BindingCondition Binding="{Binding Weight}" Value="0" />
-                                                    <BindingCondition Binding="{Binding SecondaryTare}" Value="{x:Null}" />
-                                                </MultiTrigger.Conditions>
-                                                <Setter Property="IsVisible" Value="True" />
-                                            </MultiTrigger>
-                                            <Trigger TargetType="Button" Property="IsVisible" Value="False" />
-                                        </Button.Triggers>
-                                    </Button>
-                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
-                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}. '}" VerticalTextAlignment="Center"/>
+                                            <Button.Triggers>
+                                                <MultiTrigger TargetType="Button">
+                                                    <MultiTrigger.Conditions>
+                                                        <BindingCondition Binding="{Binding Tare}" Value="0" />
+                                                        <BindingCondition Binding="{Binding Weight}" Value="0" />
+                                                        <BindingCondition Binding="{Binding SecondaryTare}" Value="{x:Null}" />
+                                                        <BindingCondition Binding="{Binding IsSecondaryTerminal}" Value="False" />
+                                                    </MultiTrigger.Conditions>
+                                                    <Setter Property="IsVisible" Value="True" />
+                                                </MultiTrigger>
+                                                <Trigger TargetType="Button" Property="IsVisible" Value="False" />
+                                            </Button.Triggers>
+                                        </Button>
+                                        <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
+                                        <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}. '}" VerticalTextAlignment="Center"/>
+                                    </HorizontalStackLayout>
+
+                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy}" VerticalTextAlignment="Center"/>
+                                </VerticalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                    <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>
+                                    <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{}{0:F2} kg'}" VerticalTextAlignment="Center"/>
                                 </HorizontalStackLayout>
-                                
-                                <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy}" VerticalTextAlignment="Center"/>
-                            </VerticalStackLayout>
-                            <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End">
-                                <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>
-                                <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{}{0:F2} kg'}" VerticalTextAlignment="Center"/>
-                            </HorizontalStackLayout>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-        <Grid Grid.Row="3" RowDefinitions="*,*" ColumnSpacing="20" RowSpacing="4" ColumnDefinitions="*,*">
-            <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+        <Grid Grid.Row="3" RowDefinitions="auto,auto" ColumnSpacing="20" RowSpacing="4" ColumnDefinitions="*,*">
+            <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0" Grid.Column="1" />
+            <Button x:Name="BtnRefresh" Text="Actualizar" Clicked="BtnRefresh_Clicked" Grid.Row="0" Grid.Column="0" IsVisible="False"/>
             <Button x:Name="BtnPrintTicket" Text="Imprimir" Clicked="BtnPrintTicket_Clicked" Grid.Row="1" Grid.Column="0" FontSize="Subtitle"/>
             <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1" Grid.Column="1" FontSize="Subtitle"     TextColor="White" BackgroundColor="Red"/>
         </Grid>

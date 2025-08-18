@@ -44,18 +44,22 @@ public partial class DetailedWeightView : ContentPage
                 }
             }
 
-            if(viewModel.WeightEntryDetailRows.Count > 0 && !MauiProgram.IsSecondaryTerminal)
+            if (!MauiProgram.IsSecondaryTerminal)
             {
-                if(viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+                BtnRefresh.IsVisible = true;
+                if (viewModel.WeightEntryDetailRows.Count > 0)
                 {
-                    BtnFinishWeight.IsVisible = false;
-                }
-                else
-                {
-                    BtnFinishWeight.IsVisible = true;
-                }
+                    if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+                    {
+                        BtnFinishWeight.IsVisible = false;
+                    }
+                    else
+                    {
+                        BtnFinishWeight.IsVisible = true;
+                    }
 
-                return;
+                    return;
+                }
             }
 
             BtnFinishWeight.IsVisible = false;
@@ -301,6 +305,14 @@ public partial class DetailedWeightView : ContentPage
                     _popup?.Close();
                 }
             }
+        }
+    }
+
+    private void BtnRefresh_Clicked(object sender, EventArgs e)
+    {
+        if(BindingContext is DetailedWeightViewModel viewModel)
+        {
+            viewModel.IsRefreshing = true;
         }
     }
 }

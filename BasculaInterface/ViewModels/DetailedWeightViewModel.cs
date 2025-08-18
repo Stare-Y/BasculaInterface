@@ -3,11 +3,13 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace BasculaInterface.ViewModels
 {
     public class DetailedWeightViewModel : ViewModelBase
     {
+        public bool IsSecondaryTerminal => MauiProgram.IsSecondaryTerminal;
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
@@ -18,7 +20,37 @@ namespace BasculaInterface.ViewModels
         public DetailedWeightViewModel(IApiService apiService)
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
+            RefreshCommand = new Command(async () =>
+            {
+                try
+                {
+                    await FetchNewWeightDetails();
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions, e.g., show an alert or log the error
+                    throw new Exception("Error refreshing weight details: " + ex.Message);
+                }
+                finally
+                {
+                    IsRefreshing = false;
+                }
+            });
         }
+
+        private bool isRefreshing;
+        public bool IsRefreshing
+        {
+            get => isRefreshing;
+            set
+            {
+                if (isRefreshing == value) return;
+                isRefreshing = value;
+                OnPropertyChanged(nameof(IsRefreshing));
+            }
+        }
+
+        public ICommand RefreshCommand { get; }
 
         public async Task AddProductToWeightEntry(ProductoDto product)
         {
@@ -154,7 +186,7 @@ namespace BasculaInterface.ViewModels
 
         public async Task LoadProductsAsync(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null)
         {
-            WeightEntry = weightEntry ?? throw new ArgumentNullException(nameof(weightEntry));
+            WeightEntry = weightEntry;
 
             Partner = partner ?? new ClienteProveedorDto { RazonSocial = "Socio no identificado"};
 
