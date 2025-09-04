@@ -213,53 +213,53 @@ public partial class DetailedWeightView : ContentPage
 
         try
         {
-            if (row != null)
+            if (row is null)
+                return;
+
+            if (row.Tare > 0)
             {
-                if (row.Tare > 0)
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(row.WeightedBy) && row.WeightedBy != DeviceInfo.Name)
+            {
+                await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
+                return;
+            }
+
+            DisplayWaitPopUp("Preparando bascula, espere...");
+            try
+            {
+                BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
+
+                if (!await basculaViewModel.CanWeight())
                 {
-                    return;
+                    throw new InvalidOperationException("Bascula ocupada");
                 }
 
-                if (!string.IsNullOrEmpty(row.WeightedBy) && row.WeightedBy != DeviceInfo.Name )
+                ProductoDto? producto = null;
+                if (row.FK_WeightedProductId.HasValue)
                 {
-                    await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
-                    return;
-                }
-
-                DisplayWaitPopUp("Preparando bascula, espere...");
-                try
-                {
-                    BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
-
-                    if (!await basculaViewModel.CanWeight())
+                    producto = new ProductoDto
                     {
-                        throw new InvalidOperationException("Bascula ocupada");
-                    }
-
-                    ProductoDto? producto = null;
-                    if (row.FK_WeightedProductId.HasValue)
-                    {
-                        producto = new ProductoDto
-                        {
-                            Id = row.FK_WeightedProductId.Value,
-                            Nombre = row.Description
-                        };
-                    }
-
-                    WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
-
-                    await Shell.Current.Navigation.PushModalAsync(weightingScreen);
-
-                    _entriesChanged = true;
+                        Id = row.FK_WeightedProductId.Value,
+                        Nombre = row.Description
+                    };
                 }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", "No se pudo cargar la pantalla de pesaje: " + ex.Message, "OK");
-                }
-                finally
-                {
-                    _popup?.Close();
-                }
+
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+
+                await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+
+                _entriesChanged = true;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudo cargar la pantalla de pesaje: " + ex.Message, "OK");
+            }
+            finally
+            {
+                _popup?.Close();
             }
         }
         finally
@@ -277,7 +277,7 @@ public partial class DetailedWeightView : ContentPage
                 DisplayWaitPopUp("Eliminando pesada, espere...");
                 try
                 {
-                    
+
                     await viewModel.RemoveWeightEntryDetail(selectedRow);
 
                     if (viewModel.WeightEntryDetailRows.Count > 0)
@@ -310,7 +310,7 @@ public partial class DetailedWeightView : ContentPage
 
     private void BtnRefresh_Clicked(object sender, EventArgs e)
     {
-        if(BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
         }

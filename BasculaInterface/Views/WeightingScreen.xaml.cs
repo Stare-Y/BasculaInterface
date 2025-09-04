@@ -9,7 +9,6 @@ public partial class WeightingScreen : ContentPage
 {
     public double Tara { get; set; }
     private bool _taraChanged = false;
-    private double? _oldTara = null;
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
     public WeightingScreen(BasculaViewModel viewModel)
@@ -41,8 +40,6 @@ public partial class WeightingScreen : ContentPage
             {
                 WeightDetailDto weightingDetail = weightEntry.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id) 
                     ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
-
-                _oldTara = weightEntry.BruteWeight;
 
                 if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)
                 {
@@ -223,7 +220,7 @@ public partial class WeightingScreen : ContentPage
         {
             try
             {
-                await viewModel.CaptureNewWeightEntry(_oldTara);
+                await viewModel.CaptureNewWeightEntry();
 
                 await Shell.Current.Navigation.PopModalAsync();
             }
@@ -283,9 +280,6 @@ public partial class WeightingScreen : ContentPage
             {
                 if (BindingContext is BasculaViewModel viewModel)
                 {
-                    if (!_taraChanged)
-                        _oldTara = viewModel.TaraCurrentValue;
-
                     viewModel.SetTaraFromPesoTotal();
 
                     _taraChanged = true;

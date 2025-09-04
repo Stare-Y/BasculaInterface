@@ -11,5 +11,6 @@ namespace Core.Application.DTOs
         public int? FK_WeightedProductId { get; set; }
         public string? WeightedBy { get; set; }
         public double? SecondaryTare { get; set; } = null;
+        public double? RequiredAmount { get; set; } = null;
     }
 }

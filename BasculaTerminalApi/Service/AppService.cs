@@ -26,20 +26,20 @@ namespace BasculaTerminalApi.Service
         {
             services.AddDbContext<WeightDBContext>(sp =>
             {
-                string? connectionString = configuration.GetConnectionString("PostgresWeightConnection");
+                string? connectionString = Environment.GetEnvironmentVariable("PostgresWeightConnection");
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    throw new InvalidDataException("No se pudo cargar la cadena de conexión a la base de datos desde el archivo de configuración.");
+                    throw new InvalidDataException("Couldn't load PostgresWeightConnection conn string.");
                 }
                 sp.UseNpgsql(connectionString);
             });
 
             services.AddDbContext<ContpaqiSQLContext>(sp =>
             {
-                string? connectionString = configuration.GetConnectionString("ContpaqSQLConnection");
+                string? connectionString = Environment.GetEnvironmentVariable("ContpaqSQLConnection");
                 if (string.IsNullOrEmpty(connectionString))
                 {
-                    throw new InvalidDataException("No se pudo cargar la cadena de conexión a la base de datos desde el archivo de configuración.");
+                    throw new InvalidDataException("Couldn't load ContpaqSQLConnection conn string.");
                 }
 
                 sp.UseSqlServer(connectionString);

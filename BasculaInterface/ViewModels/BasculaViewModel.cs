@@ -10,8 +10,8 @@ namespace BasculaInterface.ViewModels
 {
     public class BasculaViewModel : ViewModelBase
     {
-        private WeightEntryDto?_weightEntry;
-        public WeightEntryDto? WeightEntry 
+        private WeightEntryDto? _weightEntry;
+        public WeightEntryDto? WeightEntry
         {
             get => _weightEntry;
             set
@@ -32,10 +32,10 @@ namespace BasculaInterface.ViewModels
         }
 
         private ProductoDto? _product;
-        public ProductoDto? Product 
+        public ProductoDto? Product
         {
             get => _product;
-            set 
+            set
             {
                 _product = value;
                 OnPropertyChanged(nameof(Product));
@@ -78,7 +78,7 @@ namespace BasculaInterface.ViewModels
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
 
-        public async Task<bool> CanWeight( )
+        public async Task<bool> CanWeight()
         {
             try
             {
@@ -102,7 +102,7 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public BasculaViewModel() {  }
+        public BasculaViewModel() { }
 
         public async Task ConnectSocket()
         {
@@ -224,9 +224,10 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public async Task CaptureNewWeightEntry(double? overrideTara = null)
+        public async Task CaptureNewWeightEntry()
         {
             ValidateBeforePosting();
+
             if (_tara == 0)
             {
                 WeightEntry!.TareWeight = _pesoTotal;
@@ -234,41 +235,45 @@ namespace BasculaInterface.ViewModels
                 WeightEntry.PartnerId = Partner?.Id;
 
                 await PostNewWeightEntry();
+
+                return;
             }
-            else
+
+            if (WeightEntry!.Id == 0)
             {
-                if (WeightEntry!.Id == 0)
-                {
-                    throw new InvalidOperationException("WeightEntry must have a valid Id before capturing a new weight entry.");
-                }
-                WeightEntry.PartnerId = Partner?.Id;
-                WeightEntry.BruteWeight = _pesoTotal;
-
-                if(WeightEntry.WeightDetails.Any(w => w.FK_WeightedProductId == Product?.Id))
-                {
-                    // If the product already exists, update the weight
-                    WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
-                    existingDetail.Weight = _diferenciaAbs;
-                    existingDetail.Tare = overrideTara ?? _tara;
-                    existingDetail.WeightedBy = DeviceInfo.Name;
-                }
-                else
-                {
-                    // If the product does not exist, add a new detail
-                    WeightEntry.WeightDetails.Add(new WeightDetailDto
-                    {
-                        FK_WeightEntryId = WeightEntry.Id,
-                        Tare = overrideTara ?? _tara,
-                        Weight = _diferenciaAbs,
-                        FK_WeightedProductId = Product?.Id,
-                        WeightedBy = DeviceInfo.Name
-                    });
-                }
-
-                await PutWeightEntry();
+                throw new InvalidOperationException("WeightEntry must have a valid Id before capturing a new weight entry.");
             }
+
+            WeightEntry.PartnerId = Partner?.Id;
+
+            if (WeightEntry.WeightDetails.Any(w => w.FK_WeightedProductId == Product?.Id))
+            {
+                // If the product already exists, update the weight
+                WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
+                existingDetail.Weight = _diferenciaAbs;
+                existingDetail.Tare = WeightEntry.BruteWeight;
+                existingDetail.WeightedBy = DeviceInfo.Name;
+
+                WeightEntry.BruteWeight += _diferenciaAbs;
+
+                return;
+            }
+
+            // If the product does not exist, add a new detail
+            WeightEntry.WeightDetails.Add(new WeightDetailDto
+            {
+                FK_WeightEntryId = WeightEntry.Id,
+                Tare = WeightEntry.BruteWeight,
+                Weight = _diferenciaAbs,
+                FK_WeightedProductId = Product?.Id,
+                WeightedBy = DeviceInfo.Name
+            });
+
+            WeightEntry.BruteWeight = _pesoTotal;
+
+            await PutWeightEntry();
         }
-        
+
         public async Task PutSecondaryTara()
         {
             if (TaraCurrentValue < 1)

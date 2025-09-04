@@ -50,7 +50,7 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public ICommand RefreshCommand { get; }
+        public ICommand? RefreshCommand { get; }
 
         public async Task AddProductToWeightEntry(ProductoDto product)
         {

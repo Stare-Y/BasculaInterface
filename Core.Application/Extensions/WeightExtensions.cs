@@ -121,7 +121,8 @@ namespace Core.Application.Extensions
                     Tare = wd.Tare,
                     Weight = wd.Weight,
                     WeightedBy = wd.WeightedBy,
-                    SecondaryTare = wd.SecondaryTare
+                    SecondaryTare = wd.SecondaryTare,
+                    RequiredAmount = wd.RequiredAmount
                 }).ToList()
             };
         }
