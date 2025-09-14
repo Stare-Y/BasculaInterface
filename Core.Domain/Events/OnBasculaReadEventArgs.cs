@@ -1,4 +1,4 @@
-﻿namespace BasculaTerminalApi.Events
+﻿namespace Core.Domain.Events
 {
     public class OnBasculaReadEventArgs : EventArgs
     {

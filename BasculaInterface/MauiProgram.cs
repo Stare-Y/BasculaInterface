@@ -2,6 +2,7 @@
 using BasculaInterface.ViewModels;
 using CommunityToolkit.Maui;
 using Core.Application.Services;
+using Infrastructure.Service;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 

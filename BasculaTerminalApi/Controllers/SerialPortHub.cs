@@ -1,5 +1,5 @@
-﻿using BasculaTerminalApi.Events;
-using BasculaTerminalApi.Service;
+﻿using Core.Application.Services;
+using Core.Domain.Events;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BasculaTerminalApi.Controllers
@@ -8,14 +8,14 @@ namespace BasculaTerminalApi.Controllers
     {
         private readonly IHubContext<SerialPortHub> _context = null!;
 
-        public SerialPortHub(IHubContext<SerialPortHub> context, BasculaService basculaService)
+        public SerialPortHub(IHubContext<SerialPortHub> context, IBasculaService basculaService)
         {
             _context = context;
 
             basculaService.OnBasculaRead += SendWeightNumber;
         }
 
-        private async void SendWeightNumber(object sender, OnBasculaReadEventArgs e)
+        private async void SendWeightNumber(object?sender, OnBasculaReadEventArgs e)
         {
             double number = e?.Weight ?? throw new Exception("Error leyendo evento de lectura de peso");
 

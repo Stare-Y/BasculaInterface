@@ -3,6 +3,7 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace BasculaInterface.ViewModels
@@ -14,7 +15,7 @@ namespace BasculaInterface.ViewModels
         public ClienteProveedorDto? Partner { get; set; } = null;
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = new ObservableCollection<WeightEntryDetailRow>();
-        
+
         private readonly IApiService _apiService = null!;
 
         public DetailedWeightViewModel(IApiService apiService)
@@ -52,7 +53,7 @@ namespace BasculaInterface.ViewModels
 
         public ICommand? RefreshCommand { get; }
 
-        public async Task AddProductToWeightEntry(ProductoDto product)
+        public async Task AddProductToWeightEntry(ProductoDto product, double qty = 0)
         {
             if (WeightEntry == null)
             {
@@ -66,7 +67,8 @@ namespace BasculaInterface.ViewModels
             {
                 FK_WeightedProductId = product.Id,
                 Tare = 0, // Default tare value, can be adjusted later
-                Weight = 0 // Default weight value, can be adjusted later
+                Weight = 0, // Default weight value, can be adjusted later
+                RequiredAmount = qty
             };
             WeightEntry.WeightDetails.Add(newDetail);
             await UpdateWeightEntry();
@@ -87,7 +89,7 @@ namespace BasculaInterface.ViewModels
             WeightDetailDto? detailToRemove = WeightEntry.WeightDetails.FirstOrDefault(d => d.Id == selectedRow.Id);
             if (detailToRemove != null)
             {
-                
+
 
                 await DeleteWeightDetail(selectedRow.Id);
 
@@ -110,7 +112,7 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry.Id must be a valid positive integer.");
             }
             // Fetch the latest weight entry details from the API
-            WeightEntryDto? updatedEntry = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/{WeightEntry.Id}");
+            WeightEntryDto? updatedEntry = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
             if (updatedEntry == null)
             {
                 throw new InvalidOperationException("Failed to fetch updated weight entry details.");
@@ -122,7 +124,7 @@ namespace BasculaInterface.ViewModels
             //ifweightentry has partnerid, fetch partner details
             if (WeightEntry.PartnerId.HasValue && WeightEntry.PartnerId.Value > 0)
             {
-                Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/{WeightEntry.PartnerId.Value}");
+                Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={WeightEntry.PartnerId.Value}");
             }
 
             OnPropertyChanged(nameof(WeightEntry));
@@ -158,7 +160,7 @@ namespace BasculaInterface.ViewModels
                 throw new ArgumentOutOfRangeException(nameof(detailId), "Detail ID must be a positive integer.");
             }
             // Send delete request to the API
-            await _apiService.DeleteAsync($"api/Weight/Detail/{detailId}");
+            await _apiService.DeleteAsync($"api/Weight/Detail?id={detailId}");
         }
 
         public async Task ConcludeWeightProcess()
@@ -178,9 +180,13 @@ namespace BasculaInterface.ViewModels
 
         public async Task PrintTicketAsync(string text)
         {
-            if (_apiService is not null)
+            try
             {
-                await _apiService.PostAsync<object>("api/print", text).ConfigureAwait(false);
+                await _apiService.PostAsync<object>("api/print", text);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error printing ticket: " + ex.Message);
             }
         }
 
@@ -188,7 +194,7 @@ namespace BasculaInterface.ViewModels
         {
             WeightEntry = weightEntry;
 
-            Partner = partner ?? new ClienteProveedorDto { RazonSocial = "Socio no identificado"};
+            Partner = partner ?? new ClienteProveedorDto { RazonSocial = "Socio no identificado" };
 
             if (WeightEntry == null)
             {
@@ -208,15 +214,18 @@ namespace BasculaInterface.ViewModels
                 {
                     Id = detail.Id,
                     Tare = detail.Tare,
-                    Weight = detail.Weight, 
+                    Weight = detail.Weight,
                     FK_WeightedProductId = detail.FK_WeightedProductId,
-                    WeightedBy = detail.WeightedBy,
-                    SecondaryTare = detail.SecondaryTare
+                    WeightedBy = detail.WeightedBy == null 
+                                    ? null
+                                    : "Cubierto: " + detail.WeightedBy,
+                    SecondaryTare = detail.SecondaryTare,
+                    RequiredAmount = detail.RequiredAmount
                 };
 
                 if (detail.FK_WeightedProductId is not null)
                 {
-                    ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/{detail.FK_WeightedProductId}");
+                    ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
                     row.Description = product?.Nombre ?? $"Unknown Product ({detail.FK_WeightedProductId})";
                 }
                 else
@@ -229,7 +238,7 @@ namespace BasculaInterface.ViewModels
 
             //sort the rows by id, and assign the order index
             WeightEntryDetailRows = new ObservableCollection<WeightEntryDetailRow>(
-                WeightEntryDetailRows.OrderBy(row => row.Id).Select((row, index) => 
+                WeightEntryDetailRows.OrderBy(row => row.Id).Select((row, index) =>
                 {
                     row.OrderIndex = index + 1;
                     return row;

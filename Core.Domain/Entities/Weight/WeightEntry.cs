@@ -1,6 +1,6 @@
 ﻿using Core.Domain.Entities.Base;
 
-namespace Core.Domain.Entities
+namespace Core.Domain.Entities.Weight
 {
     public class WeightEntry : BaseEntity
     {

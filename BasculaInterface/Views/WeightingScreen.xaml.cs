@@ -253,8 +253,17 @@ public partial class WeightingScreen : ContentPage
         if (BindingContext is BasculaViewModel viewModel)
         {
             viewModel.Product = product;
+
             BtnPickProduct.IsVisible = false;
+
             await Shell.Current.Navigation.PopModalAsync();
+
+            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
+
+            object? quantity = await this.ShowPopupAsync(quantityPopUp);
+
+            if (quantity is double qty)
+                viewModel.ProductQuantity = qty;
         }
     }
 

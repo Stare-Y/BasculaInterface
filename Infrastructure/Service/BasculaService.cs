@@ -1,13 +1,16 @@
-﻿using System.Globalization;
+﻿using Core.Application.Services;
+using Core.Application.Settings;
+using Core.Domain.Events;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.IO.Ports;
 using System.Text.RegularExpressions;
 using System.Timers;
-using BasculaTerminalApi.Events;
-using BasculaTerminalApi.Models;
 
-namespace BasculaTerminalApi.Service
+namespace Infrastructure.Service
 {
-    public class BasculaService
+    public class BasculaService : IBasculaService
     {
         private SerialPort _bascula = null!;
 
@@ -15,40 +18,48 @@ namespace BasculaTerminalApi.Service
 
         private int _lecturasFalsas = 0;
 
-        private readonly string _askChar = string.Empty;
+        private readonly string _askChar = "P";
 
-        //event to notify when a new weight is received
+        private readonly ILogger<BasculaService> _logger;
+
         public event EventHandler<OnBasculaReadEventArgs>? OnBasculaRead;
 
-        public BasculaService(PrintSettings printSettings)
+        private readonly WeightSettings _printSettings;
+
+        public BasculaService(IOptions<WeightSettings> optionsSettings, ILogger<BasculaService> logger)
         {
-            _bascula = new SerialPort(printSettings.BasculaPort, printSettings.BasculaBauds, Parity.None, 8, StopBits.One);
+            _printSettings = optionsSettings.Value;
+
+            _bascula = new SerialPort(_printSettings.BasculaPort, _printSettings.BasculaBauds, Parity.None, 8, StopBits.One);
 
             _bascula.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-            if (printSettings.NeedManualAsk)
+            if (_printSettings.NeedManualAsk)
             {
                 _pollingTimer = new(750);
                 _pollingTimer.Elapsed += new ElapsedEventHandler(OnTimerElapsed);
                 _pollingTimer.AutoReset = true;
                 _pollingTimer.Start();
-                _askChar = printSettings.AskChar;
+                _askChar = _printSettings.AskChar;
             }
 
             _bascula.Open();
+
+            _logger = logger;
         }
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
         {
             try
             {
                 if (_bascula.IsOpen)
                 {
-                    _bascula.Write("p");
+                    _bascula.Write(_askChar);
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al enviar comando a la báscula");
                 Console.WriteLine($"Error al enviar comando: {ex.Message}");
             }
         }
@@ -60,7 +71,6 @@ namespace BasculaTerminalApi.Service
 
             double currentWeight = ParseScreenWeight(readData);
 
-            //invoke on weight received event
             if (currentWeight > -1)
             {
                 OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
@@ -81,6 +91,7 @@ namespace BasculaTerminalApi.Service
             {
                 if (++_lecturasFalsas > 5)
                 {
+                    _logger.LogWarning("Se han recibido más de 5 lecturas inválidas consecutivas. Reiniciando contador.");
                     _lecturasFalsas = 0;
                     return 0;
                 }

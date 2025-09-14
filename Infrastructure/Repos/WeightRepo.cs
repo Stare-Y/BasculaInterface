@@ -1,4 +1,4 @@
-﻿using Core.Domain.Entities;
+﻿using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +22,20 @@ namespace Infrastructure.Repos
             return weightEntry;
         }
 
-        public async Task<WeightEntry?> GetByIdAsync(int id)
+        public async Task<WeightEntry> GetByIdAsync(int id)
         {
-            return await _context.WeightEntries
+            WeightEntry? entry = await _context.WeightEntries
                 .AsNoTracking()
                 .Include(w => w.WeightDetails
-                                .Where(wd => !wd.IsDeleted))
+                .Where(wd => !wd.IsDeleted))
                 .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
+
+            if (entry == null)
+            {
+                throw new KeyNotFoundException($"WeightEntry with ID {id} not found.");
+            }
+
+            return entry;
         }
 
         public async Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 30, uint page = 1)
@@ -56,19 +63,14 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
-
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
             if(weightEntry.Id <= 0)
             {
                 throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
             }
-            WeightEntry? existingEntry = await GetByIdAsync(weightEntry.Id);
-            if (existingEntry == null)
-            {
-                throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
-            }
-            
+            WeightEntry existingEntry = await GetByIdAsync(weightEntry.Id);
+
             _context.WeightEntries.Update(weightEntry);
 
             await _context.SaveChangesAsync();

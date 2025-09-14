@@ -1,21 +1,22 @@
-﻿using BasculaTerminalApi.Models;
-using Core.Application.Services;
+﻿using Core.Application.Services;
+using Core.Application.Settings;
 using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repos;
+using Infrastructure.Service;
 using Microsoft.EntityFrameworkCore;
 
 namespace BasculaTerminalApi.Service
 {
-    public static class AppService
+    public static class ConfigureServices
     {
         public static IServiceCollection AddBusinessServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<WeightSettings>(configuration.GetSection("WeightSettings"));
+
             services.AddPersistency(configuration);
 
             services.AddBasculaService();
-
-            services.AddPrintService(configuration);
 
             services.AddRepoServices();
 
@@ -27,6 +28,7 @@ namespace BasculaTerminalApi.Service
             services.AddDbContext<WeightDBContext>(sp =>
             {
                 string? connectionString = Environment.GetEnvironmentVariable("PostgresWeightConnection");
+
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     throw new InvalidDataException("Couldn't load PostgresWeightConnection conn string.");
@@ -37,6 +39,7 @@ namespace BasculaTerminalApi.Service
             services.AddDbContext<ContpaqiSQLContext>(sp =>
             {
                 string? connectionString = Environment.GetEnvironmentVariable("ContpaqSQLConnection");
+
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     throw new InvalidDataException("Couldn't load ContpaqSQLConnection conn string.");
@@ -50,32 +53,32 @@ namespace BasculaTerminalApi.Service
 
         private static IServiceCollection AddRepoServices(this IServiceCollection services)
         {
-            services.AddTransient<IWeightRepo, WeightRepo>();
-            services.AddTransient<IClienteProveedorRepo, ClienteProveedorRepo>();
-            services.AddTransient<IProductoRepo, ProductoRepo>();
+            services.AddScoped<IWeightRepo, WeightRepo>();
+
+            services.AddScoped<IClienteProveedorRepo, ClienteProveedorRepo>();
+
+            services.AddScoped<IProductRepo, ProductRepo>();
+
+            services.AddScoped<ITurnRepo, TurnRepo>();
+
+            services.AddScoped<IProductService, ProductService>();
+
+            services.AddScoped<IClienteProveedorService, ClienteProveedorService>();
+
+            services.AddScoped<ITurnService, TurnService>();
+
             return services;
         }
 
         private static IServiceCollection AddBasculaService(this IServiceCollection services)
         {
-            services.AddSingleton<BasculaService>();
+            services.AddSingleton<IBasculaService, BasculaService>();
+
             services.AddSingleton<IWeightLogisticService, WeightLogisticService>();
-            return services;
-        }
 
-        public static IServiceCollection AddPrintService(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddSingleton<PrintSettings>(sp =>
-            {
-                PrintSettings? settings = configuration.GetSection("SerialSettings").Get<PrintSettings>();
-                if (settings is null)
-                {
-                    throw new InvalidDataException("No se pudo cargar la configuración de impresion/bascula desde el archivo de configuración.");
-                }
-                return settings;
-            });
+            services.AddScoped<IWeightService, WeightService>();
 
-            services.AddSingleton<PrintService>();
+            services.AddScoped<IPrintService, PrintService>();
 
             return services;
         }

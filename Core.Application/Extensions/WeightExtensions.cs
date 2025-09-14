@@ -1,6 +1,6 @@
 ﻿using Core.Application.DTOs;
-using Core.Domain.Entities;
 using Core.Domain.Entities.ContpaqiSQL;
+using Core.Domain.Entities.Weight;
 
 namespace Core.Application.Extensions
 {
@@ -61,7 +61,8 @@ namespace Core.Application.Extensions
                     Tare = wd.Tare,
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
-                    WeightedBy = wd.WeightedBy
+                    WeightedBy = wd.WeightedBy,
+                    RequiredAmount = wd.RequiredAmount
                 }).ToList()
             };
 
@@ -92,7 +93,8 @@ namespace Core.Application.Extensions
                     Tare = wd.Tare,
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
-                    WeightedBy = wd.WeightedBy
+                    WeightedBy = wd.WeightedBy,
+                    RequiredAmount = wd.RequiredAmount
                 }).ToList()
             };
         }
@@ -151,7 +153,8 @@ namespace Core.Application.Extensions
                     Tare = wd.Tare,
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
-                    WeightedBy = wd.WeightedBy
+                    WeightedBy = wd.WeightedBy,
+                    RequiredAmount = wd.RequiredAmount
                 }).ToList()
             });
         }
@@ -189,6 +192,7 @@ namespace Core.Application.Extensions
                     existingDetail.Tare = updatedDetail.Tare;
                     existingDetail.SecondaryTare = updatedDetail.SecondaryTare;
                     existingDetail.WeightedBy = updatedDetail.WeightedBy;
+                    existingDetail.RequiredAmount = updatedDetail.RequiredAmount;
                 }
             }
 
@@ -203,7 +207,8 @@ namespace Core.Application.Extensions
                         Tare = newDetail.Tare,
                         Weight = newDetail.Weight,
                         SecondaryTare = newDetail.SecondaryTare,
-                        WeightedBy = newDetail.WeightedBy
+                        WeightedBy = newDetail.WeightedBy,
+                        RequiredAmount = newDetail.RequiredAmount,
                     });
                 }
             }

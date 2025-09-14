@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Core.Domain.Entities
+namespace Core.Domain.Entities.Weight
 {
     public class WeightDetail : BaseEntity
     {

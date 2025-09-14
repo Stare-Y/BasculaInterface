@@ -1,6 +1,8 @@
 using BasculaTerminalApi.Controllers;
-using BasculaTerminalApi.Models;
 using BasculaTerminalApi.Service;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +39,12 @@ if (builder.Configuration.GetValue<bool>("UseSwagger"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<WeightDBContext>();
+    db.Database.Migrate();
 }
 
 app.UseAuthorization();

@@ -1,7 +1,4 @@
-﻿using Core.Application.DTOs;
-using Core.Application.Extensions;
-using Core.Domain.Entities.ContpaqiSQL;
-using Core.Domain.Interfaces;
+﻿using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
@@ -10,62 +7,22 @@ namespace BasculaTerminalApi.Controllers
     [Route("api/[Controller]")]
     public class ProductosController : ControllerBase
     {
-        private readonly IProductoRepo _productoRepo;
-        public ProductosController(IProductoRepo productoRepo)
+        private readonly IProductService _productService;
+        public ProductosController(IProductService productoRepo)
         {
-            _productoRepo = productoRepo ?? throw new ArgumentNullException(nameof(productoRepo));
+            _productService = productoRepo ?? throw new ArgumentNullException(nameof(productoRepo));
         }
 
-        [HttpGet("ByName/{name}")]
-        public async Task<IActionResult> SearchByName(string name, CancellationToken cancellationToken)
+        [HttpGet("ByName")]
+        public async Task<IActionResult> SearchByName([FromQuery]string name)
         {
-            try
-            {
-                IEnumerable<Producto> productos = await _productoRepo.SearchByNameAsync(name, cancellationToken);
-
-                if (productos == null || !productos.Any())
-                {
-                    throw new KeyNotFoundException($"No products found with name: {name}");
-                }
-
-                IEnumerable<ProductoDto> dtos = WeightExtensions.BuildFromBaseEntity(productos);
-
-                return Ok(dtos);
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error searching for products: {ex.Message}");
-            }
+            return Ok(await _productService.SearchByNameAsync(name));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        [HttpGet("ById")]
+        public async Task<IActionResult> GetById([FromQuery]int id)
         {
-            try
-            {
-                Producto? producto = await _productoRepo.GetByIdAsync(id, cancellationToken);
-
-                if (producto == null)
-                {
-                    throw new KeyNotFoundException($"Product with ID {id} not found.");
-                }
-
-                ProductoDto dto = WeightExtensions.BuildFromBaseEntity(producto);
-
-                return Ok(dto);
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving product: {ex.Message}");
-            }
+            return Ok(await _productService.GetByIdAsync(id));
         }
     }
 }

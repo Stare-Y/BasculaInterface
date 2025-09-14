@@ -1,6 +1,6 @@
 ﻿using Core.Application.Services;
 
-namespace BasculaTerminalApi.Service
+namespace Infrastructure.Service
 {
     public class WeightLogisticService : IWeightLogisticService
     {

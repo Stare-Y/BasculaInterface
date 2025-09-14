@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace BasculaInterface.ViewModels
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public class BasculaViewModel : ViewModelBase
     {
         private WeightEntryDto? _weightEntry;
@@ -66,12 +67,14 @@ namespace BasculaInterface.ViewModels
             get => _diferenciaAbs.ToString("F2");
         }
 
+        public double ProductQuantity { get; set; } = 0;
+
         public string Estado { get; private set; } = "Desconectado";
 
         private HubConnection? _basculaSocketHub;
 
         event Action<double>? OnWeightReceived;
-        private readonly IApiService _apiService;
+        private readonly IApiService _apiService = null!;
 
         public BasculaViewModel(IApiService apiService)
         {
@@ -256,9 +259,11 @@ namespace BasculaInterface.ViewModels
 
                 WeightEntry.BruteWeight += _diferenciaAbs;
 
+                await PutWeightEntry();
+
                 return;
             }
-
+            
             // If the product does not exist, add a new detail
             WeightEntry.WeightDetails.Add(new WeightDetailDto
             {
@@ -266,6 +271,7 @@ namespace BasculaInterface.ViewModels
                 Tare = WeightEntry.BruteWeight,
                 Weight = _diferenciaAbs,
                 FK_WeightedProductId = Product?.Id,
+                RequiredAmount = ProductQuantity,
                 WeightedBy = DeviceInfo.Name
             });
 
@@ -346,7 +352,7 @@ namespace BasculaInterface.ViewModels
 
             WeightEntry.RegisteredBy = DeviceInfo.Name;
 
-            await _apiService.PutAsync<object>("api/Weight/", WeightEntry);
+            await _apiService.PutAsync<object>("api/Weight", WeightEntry);
         }
     }
 }

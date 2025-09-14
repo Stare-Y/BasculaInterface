@@ -1,31 +1,29 @@
-﻿using System.Diagnostics;
-using BasculaTerminalApi.Service;
+﻿using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BasculaTerminalApi.Controllers
 {
     [ApiController]
-    [Route("api/print")]
+    [Route("api/[Controller]")]
     public class PrintController : ControllerBase
     {
-        private readonly PrintService _printService;
-        public PrintController(PrintService printService)
+        private readonly IPrintService _printService;
+        public PrintController(IPrintService printService)
         {
             _printService = printService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Print([FromBody] string ticket)
+        public IActionResult Print([FromBody] string ticket)
         {
             try
             {
-#pragma warning disable CA1416 // Validar la compatibilidad de la plataforma
-                await _printService.Print(ticket);
-#pragma warning restore CA1416 // Validar la compatibilidad de la plataforma
+                _printService.Print(ticket);
 
                 Debug.WriteLine($"Ticket Printed: {ticket}");
 
-                return Ok("Ticket impreso xd");
+                return Accepted("Ticket impreso");
             }
             catch (Exception ex)
             {

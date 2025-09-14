@@ -29,7 +29,7 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("API service is not initialized.");
             }
 
-            List<ProductoDto> products = await _apiService.GetAsync<List<ProductoDto>>($"api/Productos/ByName/{searchTerm}");
+            List<ProductoDto> products = await _apiService.GetAsync<List<ProductoDto>>($"api/Productos/ByName?name={searchTerm}");
 
             Products.Clear();
 

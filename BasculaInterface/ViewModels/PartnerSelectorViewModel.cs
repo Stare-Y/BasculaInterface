@@ -28,7 +28,7 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("API service is not initialized.");
             }
-            List<ClienteProveedorDto> partners = await _apiService.GetAsync<List<ClienteProveedorDto>>($"api/ClienteProveedor/ByName/{searchTerm}");
+            IEnumerable<ClienteProveedorDto> partners = await _apiService.GetAsync<IEnumerable<ClienteProveedorDto>>($"api/ClienteProveedor/ByName?name={searchTerm}");
             Partners.Clear();
             foreach (var partner in partners)
             {

@@ -1,7 +1,5 @@
 ﻿using Core.Application.DTOs;
-using Core.Application.Extensions;
-using Core.Domain.Entities.ContpaqiSQL;
-using Core.Domain.Interfaces;
+using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
@@ -10,60 +8,22 @@ namespace BasculaTerminalApi.Controllers
     [Route("api/[Controller]")]
     public class ClienteProveedorController : ControllerBase
     {
-        private readonly IClienteProveedorRepo _clienteProveedorRepo;
-        public ClienteProveedorController(IClienteProveedorRepo clienteProveedorRepo)
+        private readonly IClienteProveedorService _clienteProveedorService;
+        public ClienteProveedorController(IClienteProveedorService clienteProveedorRepo)
         {
-            _clienteProveedorRepo = clienteProveedorRepo ?? throw new ArgumentNullException(nameof(clienteProveedorRepo));
+            _clienteProveedorService = clienteProveedorRepo ?? throw new ArgumentNullException(nameof(clienteProveedorRepo));
         }
 
-        [HttpGet("ByName/{name}")]
-        public async Task<IActionResult> SearchByName(string name, CancellationToken cancellationToken)
+        [HttpGet("ByName")]
+        public async Task<ActionResult<IEnumerable<ClienteProveedorDto>>> SearchByName([FromQuery]string name)
         {
-            try
-            {
-                IEnumerable<ClienteProveedor> clientesProveedores = await _clienteProveedorRepo.SearchByName(name, cancellationToken);
-
-                if (clientesProveedores == null || !clientesProveedores.Any())
-                {
-                    return NotFound($"No clients/providers/partners found with the name '{name}'.");
-                }
-
-                IEnumerable<ClienteProveedorDto> dtos = WeightExtensions.BuildFromBaseEntity(clientesProveedores);
-                
-                return Ok(dtos);
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error searching for clients/providers: {ex.Message}");
-            }
+            return Ok(await _clienteProveedorService.SearchByName(name));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        [HttpGet("ById")]
+        public async Task<ActionResult<ClienteProveedorDto>> GetById([FromQuery]int id)
         {
-            try
-            {
-                ClienteProveedor? clienteProveedor = await _clienteProveedorRepo.GetById(id, cancellationToken);
-                if (clienteProveedor == null)
-                {
-                    return NotFound($"Client/Provider/Partner with ID {id} not found.");
-                }
-                ClienteProveedorDto dto = WeightExtensions.BuildFromBaseEntity(new[] { clienteProveedor }).First();
-                
-                return Ok(dto);
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving client/provider: {ex.Message}");
-            }
+            return Ok(await _clienteProveedorService.GetById(id));
         }
     }
 }

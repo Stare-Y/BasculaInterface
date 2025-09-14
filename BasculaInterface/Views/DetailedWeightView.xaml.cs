@@ -173,26 +173,49 @@ public partial class DetailedWeightView : ContentPage
         return "error generando ticket";
     }
 
-    private void BtnNuevoProducto_Clicked(object sender, EventArgs e)
+    private async void OnProductSelected(ProductoDto product)
     {
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
-            DisplayWaitPopUp("Cargando, espere...");
+            try
+            {
+                PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
+                var result = await this.ShowPopupAsync(quantityPopUp);
+
+                double qty = 0;
+
+                if(result is double pickedQty)
+                {
+                    qty = pickedQty;
+                }
+
+                await viewModel.AddProductToWeightEntry(product, qty);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudo agregar el producto: " + ex.Message, "OK");
+            }
+        }
+    }
+
+    private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
+    {
+        DisplayWaitPopUp("Cargando vista de productos, espere...");
+        if (BindingContext is DetailedWeightViewModel viewModel)
+        {
             try
             {
                 ProductSelectView productSelectView = new ProductSelectView();
-                productSelectView.OnProductSelected += async (product) =>
-                {
-                    await viewModel.AddProductToWeightEntry(product);
-                    await Shell.Current.Navigation.PopModalAsync();
-                };
-                Shell.Current.Navigation.PushModalAsync(productSelectView);
+
+                productSelectView.OnProductSelected += OnProductSelected;
+
+                await Shell.Current.Navigation.PushModalAsync(productSelectView);
 
                 _entriesChanged = true;
             }
             catch (Exception ex)
             {
-                DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
+                await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
             }
             finally
             {

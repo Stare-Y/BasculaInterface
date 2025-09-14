@@ -56,23 +56,17 @@ namespace BasculaInterface
                 Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
             }
 
-            try
-            {
-                if (EntryHost.Text == string.Empty)
-                {
-                    await DisplayAlert("Error", "Por favor, ingrese la URL del host.", "OK");
-                    return;
-                }
 
-                await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
-                BorderEntryHost.IsVisible = false;
-                StackCheckBox.IsVisible = false;
-                CheckBoxSecondaryTerminal.IsVisible = false;
-            }
-            catch (Exception ex)
+            if (EntryHost.Text == string.Empty)
             {
-                await DisplayAlert("Error", "No se pudo iniciar sesión: " + ex.Message, "OK");
+                await DisplayAlert("Error", "Por favor, ingrese la URL del host.", "OK");
+                return;
             }
+
+            await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
+            BorderEntryHost.IsVisible = false;
+            StackCheckBox.IsVisible = false;
+            CheckBoxSecondaryTerminal.IsVisible = false;
         }
 
         private async void BtnLogin_Released(object sender, EventArgs e)
@@ -82,18 +76,31 @@ namespace BasculaInterface
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
-                if (string.IsNullOrEmpty(EntryHost.Text))
+                try
                 {
-                    await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
-                    return;
+                    if (string.IsNullOrEmpty(EntryHost.Text))
+                    {
+                        await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
+                        return;
+                    }
+                    await LogIn();
                 }
-                await LogIn();
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
+                }
+                finally
+                {
+                    _popup?.Close();
+
+                }
             }
         }
 
 
         private async void BtnLogin_Pressed(object sender, EventArgs e)
         {
+            DisplayWaitPopUp("Cargando, por favor espere...");
             _cancellationTokenSource = new CancellationTokenSource();
             try
             {

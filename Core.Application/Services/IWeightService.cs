@@ -2,13 +2,14 @@
 
 namespace Core.Application.Services
 {
-    public interface IWeightService<T>
-        where T : class
+    public interface IWeightService
     {
-        Task<T> Create(WeightEntryDto weightEntryDto);
-        Task<T> GetById(int id);
-        Task<T> GetAll(int top = 21, uint page = 1);
-        Task<T> Update(WeightEntryDto weightEntryDto);
-        Task<T> Delete(int id);
+        Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry);
+        Task<WeightEntryDto> GetByIdAsync(int id);
+        Task<IEnumerable<WeightEntryDto>> GetAllAsync(int top = 30, uint page = 1);
+        Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1);
+        Task UpdateAsync(WeightEntryDto weightEntry);
+        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteDetailAsync(int id);
     }
 }

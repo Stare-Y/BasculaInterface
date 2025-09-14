@@ -66,7 +66,9 @@
                                         <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}. '}" VerticalTextAlignment="Center"/>
                                     </HorizontalStackLayout>
 
-                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy}" VerticalTextAlignment="Center"/>
+                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding RequiredAmountText, StringFormat='{0} kg. '}" VerticalTextAlignment="Center"/>
+                                    
+                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy, StringFormat='{0}'}" VerticalTextAlignment="Center"/>
                                 </VerticalStackLayout>
                                 <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End">
                                     <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>

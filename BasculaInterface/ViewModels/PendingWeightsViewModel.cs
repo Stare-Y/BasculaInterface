@@ -119,7 +119,7 @@ namespace BasculaInterface.ViewModels
                 //get the partner id
                 if (weight.PartnerId.HasValue && weight.PartnerId.Value > 0)
                 {
-                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/{weight.PartnerId.Value}");
+                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={weight.PartnerId.Value}");
                     if (partner != null)
                     {
                         _clienteProveedorDtos.Add(partner);

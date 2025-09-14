@@ -74,6 +74,7 @@ public partial class ProductSelectView : ContentPage
         if (!confirmed)
         {
             OnProductSelected?.Invoke(productoDto);
+            await Shell.Current.Navigation.PopModalAsync();
         }
         else
         {

@@ -1,126 +1,64 @@
 ﻿using Core.Application.DTOs;
-using Core.Application.Extensions;
 using Core.Application.Services;
-using Core.Domain.Entities;
-using Core.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
     [ApiController]
     [Route("api/[Controller]")]
-    public class WeightController : ControllerBase, IWeightService<IActionResult>
+    public class WeightController : ControllerBase
     {
-        private readonly IWeightRepo _weightRepo = null!;
+        private readonly IWeightService _weightService = null!;
         private readonly IWeightLogisticService _weightLogisticService = null!;
-        public WeightController(IWeightRepo weightRepo, IWeightLogisticService weightLogisticService)
+        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService)
         {
-            _weightRepo = weightRepo;
+            _weightService = weightService;
             _weightLogisticService = weightLogisticService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] WeightEntryDto weightEntryDto)
+        public async Task<ActionResult<WeightEntryDto>> Create([FromBody] WeightEntryDto weightEntryDto)
         {
-            try
-            {
-                WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntryDto.ConvertToBaseEntry());
-
-                return CreatedAtAction(nameof(GetById), new { id = newEntry.Id }, newEntry);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error creating weight entry: {ex.Message}");
-            }
+            return Ok( await _weightService.CreateAsync(weightEntryDto));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("ById")]
+        public async Task<ActionResult<WeightEntryDto>> GetById([FromQuery]int id)
         {
-            try
-            {
-                WeightEntry? weightEntry = await _weightRepo.GetByIdAsync(id);
-                if (weightEntry == null)
-                {
-                    return NotFound($"Weight entry with ID {id} not found.");
-                }
-
-                WeightEntryDto weightEntryDto = weightEntry.ConvertToDto();
-
-                return Ok(weightEntryDto);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving weight entry: {ex.Message}");
-            }
+            return  Ok(await _weightService.GetByIdAsync(id));
         }
 
         [HttpGet("Pending")]
-        public async Task<IActionResult> GetPendingWeights([FromQuery] int top = 30, [FromQuery] uint page = 1)
+        public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetPendingWeights([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
-            try
-            {
-                IEnumerable<WeightEntry> pendingWeights = await _weightRepo.GetPendingWeights(top, page);
-                
-                IEnumerable<WeightEntryDto> dtos = pendingWeights.ConvertRangeToDto();
-                return Ok(dtos);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving pending weight entries: {ex.Message}");
-            }
+            return Ok(await _weightService.GetPendingWeights(top, page));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
+        [HttpGet("All")]
+        public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
-            try
-            {
-                IEnumerable<WeightEntry> weightEntries = await _weightRepo.GetAllAsync(top, page);
-
-                if (weightEntries == null || !weightEntries.Any())
-                {
-                    return NotFound("No weight entries found.");
-                }
-
-                IEnumerable<WeightEntryDto> dtos = weightEntries.ConvertRangeToDto();
-
-                return Ok(dtos);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error retrieving weight entries: {ex.Message}");
-            }
+            return Ok(await _weightService.GetAllAsync(top, page));
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] WeightEntryDto weightEntryDto)
         {
-            try
-            {
-                await _weightRepo.UpdateAsync(weightEntryDto.ConvertToBaseEntry());
-                return Ok("Update Successful :D");
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                return NotFound(knfEx.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error updating weight entry: {ex.Message}");
-            }
+            await _weightService.UpdateAsync(weightEntryDto);
+
+            return Ok("Update Successful :D");
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery]int id)
         {
             try
             {
-                bool deleted = await _weightRepo.DeleteAsync(id);
+                bool deleted = await _weightService.DeleteAsync(id);
                 if (!deleted)
                 {
                     return NotFound($"Weight entry with ID {id} not found.");
                 }
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -129,12 +67,12 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpDelete("Detail/{id}")]
-        public async Task<IActionResult> DeleteDetail(int id)
+        [HttpDelete("Detail")]
+        public async Task<IActionResult> DeleteDetail([FromQuery]int id)
         {
             try
             {
-                bool deleted = await _weightRepo.DeleteDetailAsync(id);
+                bool deleted = await _weightService.DeleteDetailAsync(id);
                 if (!deleted)
                 {
                     return NotFound($"Weight detail with ID {id} not found.");
