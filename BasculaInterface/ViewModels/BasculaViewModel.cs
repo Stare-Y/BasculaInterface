@@ -47,7 +47,9 @@ namespace BasculaInterface.ViewModels
         public string Peso
         {
             get => _pesoTotal.ToString("F2");
+            set => fakePesoWrite = value;
         }
+        private string? fakePesoWrite = null;
 
         private double _tara = 0;
         public string Tara
@@ -138,7 +140,12 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        private void UpdateWeight(double lecture)
+        public void UpdateWeight(double lecture)
+        {
+            UpdateWeight(lecture, true);
+        }
+
+        public void UpdateWeight(double lecture, bool notifyWeightChange = true)
         {
             if (_tara != 0)
             {
@@ -147,7 +154,10 @@ namespace BasculaInterface.ViewModels
 
             _pesoTotal = lecture;
 
-            OnPropertyChanged(nameof(Peso));
+            if (notifyWeightChange)
+            {
+                OnPropertyChanged(nameof(Peso));
+            }
             OnPropertyChanged(nameof(Tara));
             OnPropertyChanged(nameof(Diferencia));
         }
@@ -305,6 +315,11 @@ namespace BasculaInterface.ViewModels
 
         private void ValidateBeforePosting()
         {
+            if (Preferences.Get("RequirePartner", false))
+            {
+                if(Partner is null || Partner.Id < 1)
+                    throw new InvalidOperationException("Es obligatorio especificar al socio.");
+            }
             if (_pesoTotal == 0)
             {
                 throw new InvalidOperationException("Peso total no puede ser cero.");
@@ -323,6 +338,20 @@ namespace BasculaInterface.ViewModels
             }
         }
 
+        private async Task PrintTurnAsync(WeightEntryDto newWeightEntry)
+        {
+            try
+            {
+                TurnDto turn = await _apiService.GetAsync<TurnDto>($"api/Turn?weightId={newWeightEntry.Id}");
+
+                await _apiService.PostAsync<object>("api/Print", turn.PrintData(Partner?.RazonSocial));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error printing turn: " + ex.Message);
+            }
+        }
+
         private async Task PostNewWeightEntry()
         {
             if (_apiService == null)
@@ -336,7 +365,9 @@ namespace BasculaInterface.ViewModels
 
             WeightEntry.RegisteredBy = DeviceInfo.Name;
 
-            await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
+            WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
+
+            await PrintTurnAsync(newEntry);
         }
 
         private async Task PutWeightEntry()

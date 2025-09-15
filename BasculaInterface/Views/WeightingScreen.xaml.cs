@@ -1,5 +1,6 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
 
@@ -11,10 +12,12 @@ public partial class WeightingScreen : ContentPage
     private bool _taraChanged = false;
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
+    private WaitPopUp? _popup;
     public WeightingScreen(BasculaViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        PesoLabel.IsEnabled = Preferences.Get("ManualWeight", false);
     }
 
     public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
@@ -213,11 +216,18 @@ public partial class WeightingScreen : ContentPage
             }
         }
     }
+    private void DisplayWaitPopUp(string message = "Cargando, espere")
+    {
+        _popup = new WaitPopUp(message);
+
+        this.ShowPopup(_popup);
+    }
 
     private async void BtnCaptureNewWeight_Clicked(object sender, EventArgs e)
     {
         if (BindingContext is BasculaViewModel viewModel)
         {
+            DisplayWaitPopUp("Capturando peso, espere...");
             try
             {
                 await viewModel.CaptureNewWeightEntry();
@@ -227,6 +237,11 @@ public partial class WeightingScreen : ContentPage
             catch (Exception ex)
             {
                 await DisplayAlert("Error", "Error al capturar el nuevo peso: " + ex.Message, "OK");
+            }
+            finally
+            {
+                _popup?.Close();
+                _popup = null;
             }
         }
     }
@@ -349,6 +364,35 @@ public partial class WeightingScreen : ContentPage
             catch (Exception ex)
             {
                 await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
+            }
+        }
+    }
+
+    private void PesoLabel_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if(Preferences.Get("ManualWeight", false))
+        {
+            var entry = (Entry)sender;
+
+            if (string.IsNullOrEmpty(entry.Text))
+                return;
+
+            if (entry.Text.ToUpper().Contains("KG"))
+                return;
+
+            // Allow digits and ONE dot
+            if (!double.TryParse(entry.Text, out double manualWeight))
+            {
+                // revert to old text if invalid
+                entry.Text = e.OldTextValue;
+                return;
+            }
+            else
+            {
+                if (BindingContext is not BasculaViewModel viewModel)
+                    return;
+
+                viewModel.UpdateWeight(manualWeight, false);
             }
         }
     }

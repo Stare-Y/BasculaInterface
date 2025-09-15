@@ -47,6 +47,7 @@ public partial class DetailedWeightView : ContentPage
             if (!MauiProgram.IsSecondaryTerminal)
             {
                 BtnRefresh.IsVisible = true;
+                BtnDeleteEntry.IsVisible = true;
                 if (viewModel.WeightEntryDetailRows.Count > 0)
                 {
                     if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
@@ -336,6 +337,31 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
+        }
+    }
+
+    private async void BtnDeleteEntry_Clicked(object sender, EventArgs e)
+    {
+        if(BindingContext is not DetailedWeightViewModel viewModel)
+        {
+            return;
+        }
+
+        bool confirmed = await DisplayAlert("Confirmación", "¿Estás seguro de que deseas eliminar toda la entrada de peso? Esta acción no se puede deshacer.", "No", "Si");
+        
+        if (confirmed)
+            return;
+        
+        DisplayWaitPopUp("Eliminando entrada de peso, espere...");
+        try
+        {
+            await viewModel.DeleteWeightEntry();
+
+            await Shell.Current.Navigation.PopAsync();
+        }
+        finally
+        {
+            _popup?.Close();
         }
     }
 }

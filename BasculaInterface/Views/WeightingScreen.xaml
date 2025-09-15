@@ -58,13 +58,16 @@
            Padding="30"
            HasShadow="True"
            BorderColor="White">
-                <Label x:Name="PesoLabel"
+                <Entry x:Name="PesoLabel"
+                       BackgroundColor="Transparent"
+                       IsEnabled="False"
                        Text="{Binding Peso, StringFormat='{0} kg'}"
                        FontSize="{OnPlatform Android=36, WinUI=54}"
                        TextColor="Black"
                        HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center" 
-                       FontAttributes="Bold"/>
+                       FontAttributes="Bold"
+                       TextChanged="PesoLabel_TextChanged"/>
             </Frame>
             <Frame Grid.Row="2" Grid.Column="0"
                    BackgroundColor="LightBlue"

@@ -129,7 +129,7 @@
                     <VisualState x:Name="Normal" />
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Cool950}, Dark={StaticResource Cool200}}" />
+                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource Black}}" />
                             <Setter Property="Opacity" Value="0.7" />
 
                         </VisualState.Setters>

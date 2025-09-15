@@ -14,9 +14,17 @@ namespace BasculaInterface
         {
             InitializeComponent();
             BindingContext = this;
+            CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
+            CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
+
             if (MauiProgram.IsSecondaryTerminal)
             {
                 CheckBoxSecondaryTerminal.IsChecked = true;
+                CheckBoxManualWeight.IsEnabled = false;
+                CheckBoxRequirePartner.IsEnabled = false;
+
+                CheckBoxManualWeight.IsChecked = false;
+                CheckBoxRequirePartner.IsChecked = false;
             }
             else
             {
@@ -71,13 +79,14 @@ namespace BasculaInterface
 
         private async void BtnLogin_Released(object sender, EventArgs e)
         {
-            if (_cancellationTokenSource != null)
+            try
             {
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-                _cancellationTokenSource = null;
-                try
+                if (_cancellationTokenSource != null)
                 {
+                    _cancellationTokenSource.Cancel();
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
+
                     if (string.IsNullOrEmpty(EntryHost.Text))
                     {
                         await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
@@ -85,15 +94,15 @@ namespace BasculaInterface
                     }
                     await LogIn();
                 }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
-                }
-                finally
-                {
-                    _popup?.Close();
-
-                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
+            }
+            finally
+            {
+                _popup?.Close();
+                _popup = null;
             }
         }
 
@@ -119,6 +128,8 @@ namespace BasculaInterface
             catch (TaskCanceledException)
             {
                 // La tarea fue cancelada, no hacer nada
+                _popup?.Close();
+                _popup = null;
             }
             catch (Exception ex)
             {
@@ -132,6 +143,18 @@ namespace BasculaInterface
             MauiProgram.IsSecondaryTerminal = e.Value;
 
             Preferences.Set("SecondaryTerminal", e.Value);
+
+            CheckBoxManualWeight.IsEnabled = !e.Value;
+        }
+
+        private void CheckBoxManualWeight_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            Preferences.Set("ManualWeight", e.Value);
+        }
+
+        private void CheckBoxRequirePartner_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            Preferences.Set("RequirePartner", e.Value);
         }
     }
 }

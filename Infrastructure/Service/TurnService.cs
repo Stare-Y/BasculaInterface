@@ -22,7 +22,7 @@ namespace Infrastructure.Service
                 Number = turn.Number,
                 Description = turn.Description,
                 WeightEntryId = turn.WeightEntryId,
-                CreatedAt = turn.CreatedAt
+                CreatedAt = turn.CreatedAt.ToLocalTime()
             };
         }
     }

@@ -76,6 +76,26 @@ namespace BasculaInterface.ViewModels
 
         public DetailedWeightViewModel() { }
 
+        public async Task DeleteWeightEntry()
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before deletion.");
+            }
+            if (WeightEntry.Id <= 0)
+            {
+                throw new InvalidOperationException("WeightEntry.Id must be a valid positive integer.");
+            }
+            // Send delete request to the API
+            await _apiService.DeleteAsync($"api/Weight?id={WeightEntry.Id}");
+            WeightEntry = null;
+            Partner = null;
+            WeightEntryDetailRows.Clear();
+            OnPropertyChanged(nameof(WeightEntry));
+            OnPropertyChanged(nameof(Partner));
+            OnCollectionChanged(nameof(WeightEntryDetailRows));
+        }
+
         public async Task RemoveWeightEntryDetail(WeightEntryDetailRow selectedRow)
         {
             if (WeightEntry == null)
@@ -182,11 +202,25 @@ namespace BasculaInterface.ViewModels
         {
             try
             {
-                await _apiService.PostAsync<object>("api/print", text);
+                await _apiService.PostAsync<object>("api/Print", text);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Error printing ticket: " + ex.Message);
+            }
+        }
+        
+        public async Task PrintTurnAsync()
+        {
+            try
+            {
+                TurnDto turn = await _apiService.GetAsync<TurnDto>($"api/Turn?weightId={WeightEntry?.Id}");
+
+                await _apiService.PostAsync<object>("api/Print", turn.PrintData(Partner?.RazonSocial));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error printing turn: " + ex.Message);
             }
         }
 

@@ -53,6 +53,14 @@
                           CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged"/>
                 <Label Text="Usar terminal secundaria"
                        VerticalOptions="Center"/>
+                <CheckBox x:Name="CheckBoxManualWeight"
+                          CheckedChanged="CheckBoxManualWeight_CheckedChanged"/>
+                <Label Text="Capturar peso manualmente"
+                       VerticalOptions="Center"/>
+                <CheckBox x:Name="CheckBoxRequirePartner"
+                          CheckedChanged="CheckBoxRequirePartner_CheckedChanged"/>
+                <Label Text="Forzar elegir socio"
+                       VerticalOptions="Center"/>
             </HorizontalStackLayout>
         </StackLayout>
 

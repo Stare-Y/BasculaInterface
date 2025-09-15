@@ -18,7 +18,10 @@
             <Label Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="0"/>
             <Label Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="1"/>
             <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}" FontSize="Title"  HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="1"/>
-            <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
+            <HorizontalStackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End">
+                <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center"/>
+                <Button x:Name="BtnDeleteEntry" IsVisible="False" Text="Eliminar" Clicked="BtnDeleteEntry_Clicked" BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary}, Dark={StaticResource SecondaryDark}}"/>
+            </HorizontalStackLayout>
         </Grid>
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="20">
             <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" TextColor="White" BackgroundColor="DimGrey" BorderWidth="2" Grid.Column="0" FontSize="Subtitle"/>
