@@ -246,13 +246,12 @@ public partial class WeightingScreen : ContentPage
         }
     }
 
-    private async void OnPartnerSelected(ClienteProveedorDto partner)
+    private void OnPartnerSelected(ClienteProveedorDto partner)
     {
         if (BindingContext is BasculaViewModel viewModel)
         {
             viewModel.Partner = partner;
             BtnPickPartner.IsVisible = false;
-            await Shell.Current.Navigation.PopModalAsync();
         }
     }
 

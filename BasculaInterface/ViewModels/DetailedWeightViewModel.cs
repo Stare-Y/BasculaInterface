@@ -252,7 +252,7 @@ namespace BasculaInterface.ViewModels
                     FK_WeightedProductId = detail.FK_WeightedProductId,
                     WeightedBy = detail.WeightedBy == null 
                                     ? null
-                                    : "Cubierto: " + detail.WeightedBy,
+                                    : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,
                     RequiredAmount = detail.RequiredAmount
                 };

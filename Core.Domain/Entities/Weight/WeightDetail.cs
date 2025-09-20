@@ -11,7 +11,6 @@ namespace Core.Domain.Entities.Weight
         public double Weight { get; set; } = 0;
         public double Tare { get; set; } = 0;
         public int? FK_WeightedProductId { get; set; }
-        public bool IsDeleted { get; set; } = false;
         public string? WeightedBy { get; set; }
         public double? SecondaryTare { get; set; } = null;
         public double? RequiredAmount { get; set; } = null;
