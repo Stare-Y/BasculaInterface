@@ -48,15 +48,14 @@
                 <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
                 <Setter Property="TextColor" Value="{StaticResource 4}" />
                 <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=18, WinUI=24}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=200, WinUI=300}" />
-                <Setter Property="HeightRequest" Value="100" />
+                <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
+                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=300}" />
+                <Setter Property="HeightRequest" Value="{OnPlatform Android=50, WinUI=100}" />
                 <Setter Property="CornerRadius" Value="30" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
                 <Setter Property="BorderColor" Value="{StaticResource 4}" />
-                <Setter Property="BorderWidth" Value="4" />
-                <Setter Property="Shadow" Value="{StaticResource DefaultShadow}" />
+                <Setter Property="BorderWidth" Value="3" />
 
 
 
@@ -78,15 +77,6 @@
                                     <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
                                     <Setter Property="TextColor" Value="{StaticResource 1}" />
                                     <Setter Property="BorderColor" Value="{StaticResource 2}" />
-                                    <Setter Property="Shadow">
-                                        <Setter.Value>
-                                            <Shadow
-                                                Brush="Black"
-                                                Opacity="0.8"
-                                                Radius="10"
-                                                Offset="5,5" />
-                                        </Setter.Value>
-                                    </Setter>
                                 </VisualState.Setters>
                             </VisualState>
 
@@ -98,6 +88,55 @@
 
                 </Setter>
             </Style>
+
+            <Style x:Key="BotonPrincipal" TargetType="Button">
+
+                <Setter Property="FontFamily" Value="Monserrat" />
+                <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                <Setter Property="TextColor" Value="{StaticResource 1}" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
+                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=300}" />
+                <Setter Property="HeightRequest" Value="{OnPlatform Android=50, WinUI=100}" />
+                <Setter Property="CornerRadius" Value="30" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="BorderColor" Value="{StaticResource 1}" />
+                <Setter Property="BorderWidth" Value="3" />
+
+
+
+                <Setter Property="VisualStateManager.VisualStateGroups">
+
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="TextColor" Value="{StaticResource 4}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BorderColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="TextColor" Value="{StaticResource 4}" />
+                                    <Setter Property="BorderColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+
+
+
+                </Setter>
+            </Style>
+
+
 
             <Style x:Key="RoundedBorderStyle" TargetType="Border">
                 <Setter Property="Stroke" Value="{StaticResource 4}" />
