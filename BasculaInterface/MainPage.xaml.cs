@@ -74,11 +74,15 @@ namespace BasculaInterface
             await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
             BorderEntryHost.IsVisible = false;
             StackCheckBox.IsVisible = false;
+            ScrollCheckBox.IsVisible = false;
             CheckBoxSecondaryTerminal.IsVisible = false;
         }
 
         private async void BtnLogin_Released(object sender, EventArgs e)
         {
+            BtnLogIn.Opacity = 0;
+            await BtnLogIn.FadeTo(1, 200);
+
             try
             {
                 if (_cancellationTokenSource != null)
@@ -118,6 +122,7 @@ namespace BasculaInterface
                 {
                     BorderEntryHost.IsVisible = true;
                     StackCheckBox.IsVisible = true;
+                    ScrollCheckBox.IsVisible = true;
                     CheckBoxSecondaryTerminal.IsVisible = true;
 
                     _cancellationTokenSource?.Cancel();

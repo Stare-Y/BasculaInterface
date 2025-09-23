@@ -1,81 +1,255 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-             x:Class="BasculaInterface.Views.PendingWeightsView"
-             Title="Pedidos en Proceso">
+<ContentPage
+    x:Class="BasculaInterface.Views.PendingWeightsView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    Title="Pedidos en Proceso">
     <ContentPage.BindingContext>
-        <vm:PendingWeightsViewModel/>
+        <vm:PendingWeightsViewModel />
     </ContentPage.BindingContext>
 
-    <Grid RowDefinitions="1*,9*">
-        <Grid ColumnDefinitions="*,*" Grid.Row="0" ColumnSpacing="15" Padding="10">
-            <Button x:Name="BtnReconnect" Text="Reconectar" FontSize="Subtitle" Pressed="BtnReconnect_Pressed" Released="BtnReconnect_Released" Grid.Column="0" IsVisible="False"/>
-            <Button x:Name="BtnRefresh" Text="Actualizar" FontSize="Subtitle" Pressed="BtnReconnect_Pressed" Released="BtnReconnect_Released" Grid.Column="0" IsVisible="False"/>
-            <Button x:Name="BtnNewWeighProcess" FontSize="Subtitle" Text="Nueva Entrada" Clicked="BtnNewWeighProcess_Clicked" Grid.Column="1" IsVisible="False"/>
-            <Border x:Name="BorderEntryHost" IsVisible="False" Stroke="#ccc" StrokeThickness="1" StrokeShape="RoundRectangle 30" BackgroundColor="White" Padding="5" Grid.Column="1" >
-                <Entry x:Name="EntryHost" FontSize="Subtitle" Placeholder="Host" TextColor="Black"/>
+
+    <Grid
+        Padding="{OnPlatform WinUI=30}"
+        BackgroundColor="{StaticResource 1}"
+        ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
+        RowDefinitions="{OnPlatform Android='50,*,10,75'}">
+
+        <BoxView
+            Grid.Row="{OnPlatform Android=2}"
+            HeightRequest="2"
+            HorizontalOptions="Fill"
+            IsVisible="{OnPlatform Android=True,
+                                   WinUI=False}"
+            VerticalOptions="Start"
+            Color="{StaticResource 4}" />
+
+        <Grid
+            Grid.Row="{OnPlatform Android=3}"
+            Grid.Column="{OnPlatform WinUI=0}"
+            ColumnDefinitions="{OnPlatform Android='*,*,*'}"
+            ColumnSpacing="15"
+            RowDefinitions="{OnPlatform WinUI='*,*,*,*'}"
+            RowSpacing="15">
+
+
+            <Button
+                x:Name="BtnReconnect"
+                Grid.Row="{OnPlatform WinUI=2}"
+                Grid.Column="{OnPlatform Android=0}"
+                IsVisible="False"
+                Pressed="BtnReconnect_Pressed"
+                Released="BtnReconnect_Released"
+                Style="{StaticResource Boton}"
+                Text="Reconectar" />
+            <Button
+                x:Name="BtnRefresh"
+                Grid.Row="{OnPlatform WinUI=1}"
+                Grid.Column="{OnPlatform Android=1}"
+                IsVisible="False"
+                Pressed="BtnReconnect_Pressed"
+                Released="BtnReconnect_Released"
+                Style="{StaticResource Boton}"
+                Text="Actualizar" />
+
+            <Button
+                x:Name="BtnNewWeighProcess"
+                Grid.Row="{OnPlatform WinUI=0}"
+                Grid.Column="{OnPlatform Android=2}"
+                Clicked="BtnNewWeighProcess_Clicked"
+                IsVisible="False"
+                Style="{StaticResource BotonPrincipal}"
+                Text="Nueva Entrada" />
+
+            <Button
+                x:Name="BtnExit"
+                Grid.Row="{OnPlatform WinUI=3}"
+                Clicked="BtnExit_Clicked"
+                IsVisible="{OnPlatform Android=False}"
+                Style="{StaticResource Boton}"
+                Text="Salir" />
+
+            <!--  What is this?  -->
+            <Border
+                x:Name="BorderEntryHost"
+                Grid.Column="1"
+                Padding="5"
+                BackgroundColor="White"
+                IsVisible="False"
+                Stroke="#ccc"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="1">
+                <Entry
+                    x:Name="EntryHost"
+                    FontSize="Subtitle"
+                    Placeholder="Host"
+                    TextColor="Black" />
             </Border>
         </Grid>
-        <RefreshView x:Name="RefreshViewPendingWeights" 
-                     IsRefreshing="{Binding IsRefreshing}" 
-                     Command="{Binding RefreshCommand}" 
-                     Grid.Row="1">
-            <CollectionView ItemsSource="{Binding PendingWeights}" Margin="8" SelectionMode="Single" x:Name="PendingWeightsCollectionView" SelectionChanged="PendingWeightsCollectionView_SelectionChanged" Grid.Row="1">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Stroke="#CCC"
-                            StrokeThickness="1"
-                            Background="#F7F7F7"
-                            StrokeShape="RoundRectangle 8"
-                            Padding="12">
-                            <Grid ColumnDefinitions="*,*">
-                                <VerticalStackLayout Spacing="4" Grid.Column="0">
-                                    <Label 
-                                        Text="{Binding Partner.RazonSocial}"
-                                        FontAttributes="Bold"
-                                        FontSize="Subtitle"
-                                        TextColor="#222" />
 
-                                    <HorizontalStackLayout>
-                                        <Label 
-                                            Text="{Binding WeightEntry.VehiclePlate, StringFormat='{0} | '}"
-                                            FontSize="Subtitle"
-                                            TextColor="#666" />
-                                        <Label 
-                                            Text="{Binding WeightEntry.Notes, StringFormat='{0}.'}" 
-                                            FontSize="Subtitle" 
-                                            TextColor="#666" />
-                                    </HorizontalStackLayout>
-                                </VerticalStackLayout>
 
-                                <VerticalStackLayout Spacing="4" Grid.Column="1">
+        <Grid
+            Grid.Row="{OnPlatform Android=1}"
+            Grid.Column="{OnPlatform WinUI=1}"
+            Padding="{OnPlatform Android=30}"
+            VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
-                                    <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
-                                            FontAttributes="Bold"
-                                            FontSize="Subtitle"
-                                            TextColor="#222" 
-                                            HorizontalTextAlignment="End"/>
+            <Border
+                Padding="{OnPlatform WinUI=15}"
+                Stroke="{OnPlatform Android={StaticResource 1},
+                                    WinUI=LightGray}"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="1.5">
 
-                                    <Label Text="{Binding HistoryText}"
-                                            FontSize="Body"
-                                            TextColor="DarkOrange" 
-                                            HorizontalTextAlignment="End"/>
+                <RefreshView
+                    x:Name="RefreshViewPendingWeights"
+                    Command="{Binding RefreshCommand}"
+                    IsRefreshing="{Binding IsRefreshing}">
 
-                                </VerticalStackLayout>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-                <CollectionView.EmptyView>
-                    <Label Text="No hay pedidos pendientes"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       FontSize="Title"
-                       TextColor="White"
-                       BackgroundColor="DimGrey"/>
-                </CollectionView.EmptyView>
-            </CollectionView>
-        </RefreshView>
+                    <ScrollView Orientation="Vertical">
+
+                        <CollectionView
+                            x:Name="PendingWeightsCollectionView"
+                            ItemsSource="{Binding PendingWeights}"
+                            SelectionChanged="PendingWeightsCollectionView_SelectionChanged"
+                            SelectionMode="Single">
+
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        x:Name="BtnSeleccionar"
+                                        Padding="12"
+                                        Stroke="{OnPlatform Android={StaticResource 4},
+                                                            WinUI={StaticResource 1}}"
+                                        StrokeShape="RoundRectangle 30"
+                                        StrokeThickness="2">
+                                        <Grid ColumnDefinitions="3*,*">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                                <Label
+                                                    FontSize="{OnPlatform WinUI=26,
+                                                                          Android=15}"
+                                                    HorizontalOptions="Start"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding Partner.RazonSocial}"
+                                                    TextColor="{StaticResource 4}" />
+
+                                                <HorizontalStackLayout>
+                                                    <Label
+                                                        FontSize="{OnPlatform WinUI=26,
+                                                                              Android=12}"
+                                                        HorizontalOptions="Start"
+                                                        Style="{StaticResource Label}"
+                                                        Text="{Binding WeightEntry.VehiclePlate, StringFormat='{0} | '}"
+                                                        TextColor="{StaticResource Black}" />
+                                                    <Label
+                                                        FontSize="{OnPlatform WinUI=26,
+                                                                              Android=12}"
+                                                        HorizontalOptions="Start"
+                                                        Style="{StaticResource Label}"
+                                                        Text="{Binding WeightEntry.Notes, StringFormat='{0}.'}"
+                                                        TextColor="{StaticResource Black}" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+
+                                                <Label
+                                                    Margin="0,20,0,0"
+                                                    FontAttributes="Bold"
+                                                    FontSize="{OnPlatform WinUI=22,
+                                                                          Android=14}"
+                                                    HorizontalOptions="End"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
+                                                    TextColor="{StaticResource Black}" />
+
+                                                <Label
+                                                    FontSize="{OnPlatform WinUI=22,
+                                                                          Android=14}"
+                                                    HorizontalOptions="End"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding HistoryText}"
+                                                    TextColor="{StaticResource 2}" />
+
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroupList>
+                                                <VisualStateGroup x:Name="CommonStates">
+                                                    <VisualState x:Name="Normal" />
+                                                    <VisualState x:Name="PointerOver">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="BackgroundColor" Value="LightGray" />
+                                                            <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateGroupList>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Border>
+
+                                </DataTemplate>
+
+                            </CollectionView.ItemTemplate>
+
+                            <CollectionView.EmptyView>
+
+                                <Label
+                                    FontSize="Title"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource Label}"
+                                    Text="No hay pedidos pendientes"
+                                    TextColor="White"
+                                    VerticalOptions="Center" />
+
+                            </CollectionView.EmptyView>
+
+                        </CollectionView>
+
+                    </ScrollView>
+
+                </RefreshView>
+
+            </Border>
+        </Grid>
+
+        <Grid
+            Grid.Row="{OnPlatform Android=0}"
+            Padding="10"
+            BackgroundColor="{StaticResource 4}"
+            HorizontalOptions="Fill"
+            IsVisible="{OnPlatform Android=True,
+                                   WinUI=False}">
+
+            <Border
+                x:Name="BtnExitAndroid"
+                BackgroundColor="{StaticResource 4}"
+                HeightRequest="40"
+                HorizontalOptions="Start"
+                Stroke="{StaticResource 4}"
+                StrokeShape="RoundRectangle 60"
+                VerticalOptions="Center"
+                WidthRequest="40">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnExit_Clicked" />
+                </Border.GestureRecognizers>
+
+                <Image
+                    Aspect="AspectFit"
+                    HeightRequest="30"
+                    Source="back.png"
+                    WidthRequest="30" />
+
+            </Border>
+
+        </Grid>
+
     </Grid>
+
 </ContentPage>
