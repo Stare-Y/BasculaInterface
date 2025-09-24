@@ -1,6 +1,7 @@
 ﻿using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace BasculaTerminalApi.Controllers
 {
@@ -9,9 +10,11 @@ namespace BasculaTerminalApi.Controllers
     public class PrintController : ControllerBase
     {
         private readonly IPrintService _printService;
-        public PrintController(IPrintService printService)
+        private readonly ILogger<PrintController> _logger;
+        public PrintController(IPrintService printService, ILogger<PrintController> logger)
         {
             _printService = printService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -27,6 +30,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error printing ticket with {ticket}", ticket);
                 return BadRequest($"Error printing ticket: {ex.Message}");
             }
         }
