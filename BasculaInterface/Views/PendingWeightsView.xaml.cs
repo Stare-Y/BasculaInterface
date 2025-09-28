@@ -66,6 +66,9 @@ public partial class PendingWeightsView : ContentPage
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        //BtnSeleccionar.Opacity = 0; 
+        //await BtnSeleccionar.FadeTo(1, 200);
+
         PendingWeightViewRow? row = (PendingWeightViewRow)PendingWeightsCollectionView.SelectedItem;
 
         if (row != null)
@@ -92,6 +95,9 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnNewWeighProcess_Clicked(object sender, EventArgs e)
     {
+        BtnNewWeighProcess.Opacity = 0;
+        await BtnNewWeighProcess.FadeTo(1, 200);
+
         DisplayWaitPopUp("Preparando bascula, espere...");
 
         try
@@ -170,6 +176,9 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnReconnect_Pressed(object sender, EventArgs e)
     {
+        BtnRefresh.Opacity = 0;
+        await BtnRefresh.FadeTo(1, 200);
+
         _cancellationTokenSource = new CancellationTokenSource();
         try
         {
@@ -196,6 +205,9 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnReconnect_Released(object sender, EventArgs e)
     {
+        BtnReconnect.Opacity = 0;
+        await BtnReconnect.FadeTo(2, 200);
+
         if (_cancellationTokenSource != null)
         {
             _cancellationTokenSource.Cancel();
@@ -208,5 +220,16 @@ public partial class PendingWeightsView : ContentPage
             }
             await Reconect();
         }
+    }
+
+    private async void BtnExit_Clicked(object sender, EventArgs e)
+    {
+        BtnExitAndroid.Opacity = 0;
+        await BtnExitAndroid.FadeTo(1, 200);
+
+        BtnExit.Opacity = 0;
+        await BtnExit.FadeTo(1, 200); 
+
+        await Shell.Current.Navigation.PopAsync();
     }
 }

@@ -1,43 +1,50 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
-<ResourceDictionary 
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- 🎨 Colores principales -->
+
+    <!--  Paleta de colores para la App  -->
+
+    <Color x:Key="1">#F4F4F2</Color>
+    <Color x:Key="2">#C89F69</Color>
+    <Color x:Key="3">#FEBC9C</Color>
+    <Color x:Key="4">#14134F</Color>
+    <Color x:Key="Black">#000</Color>
+
+    <!--  🎨 Colores principales  -->
     <Color x:Key="Primary">#E8BFAE</Color>
-    <!-- tono piel suave -->
+    <!--  tono piel suave  -->
     <Color x:Key="PrimaryDark">#CFAF70</Color>
     <Color x:Key="PrimaryDarkText">#FFF5E0</Color>
-    <!-- texto claro sobre PrimaryDark -->
+    <!--  texto claro sobre PrimaryDark  -->
 
-    <!-- texto oscuro sobre Primary -->
+    <!--  texto oscuro sobre Primary  -->
     <Color x:Key="PrimaryText">#4B3A2F</Color>
-    <!-- texto legible sobre Primary (#E8BFAE) -->
+    <!--  texto legible sobre Primary (#E8BFAE)  -->
 
     <Color x:Key="Secondary">#3A506B</Color>
-    <!-- azul petróleo -->
+    <!--  azul petróleo  -->
     <Color x:Key="SecondaryDarkText">#5C6B73</Color>
-    <!-- texto sobre Secondary -->
+    <!--  texto sobre Secondary  -->
     <Color x:Key="SecondaryDark">#2C3F52</Color>
-    <!-- fondo más oscuro que Secondary -->
+    <!--  fondo más oscuro que Secondary  -->
     <Color x:Key="SecondaryText">#E1E6EB</Color>
-    <!-- texto legible sobre Secondary -->
+    <!--  texto legible sobre Secondary  -->
 
 
     <Color x:Key="Tertiary">#FFFFFF</Color>
-    <!-- blanco como neutro -->
+    <!--  blanco como neutro  -->
     <Color x:Key="TertiaryDark">#121212</Color>
-    <!-- fondo oscuro neutro -->
+    <!--  fondo oscuro neutro  -->
 
-    <!-- 🎨 Colores de soporte derivados de los principales (escala de tonos cálidos y fríos) -->
+    <!--  🎨 Colores de soporte derivados de los principales (escala de tonos cálidos y fríos)  -->
     <Color x:Key="Warm100">#F8EBDD</Color>
     <Color x:Key="Warm200">#F2D7BB</Color>
     <Color x:Key="Warm300">#E8BFAE</Color>
-    <!-- coincide con Primary -->
+    <!--  coincide con Primary  -->
     <Color x:Key="Warm400">#D9A878</Color>
     <Color x:Key="Warm500">#CFAF70</Color>
-    <!-- coincide con PrimaryDark -->
+    <!--  coincide con PrimaryDark  -->
     <Color x:Key="Warm600">#B78F52</Color>
     <Color x:Key="Warm900">#8C613C</Color>
     <Color x:Key="Warm950">#5E3D27</Color>
@@ -47,43 +54,42 @@
     <Color x:Key="Cool300">#A3C1D5</Color>
     <Color x:Key="Cool400">#7CA3BF</Color>
     <Color x:Key="Cool500">#5C6B73</Color>
-    <!-- coincide con SecondaryDarkText -->
+    <!--  coincide con SecondaryDarkText  -->
     <Color x:Key="Cool600">#4B5861</Color>
     <Color x:Key="Cool900">#2E3B44</Color>
     <Color x:Key="Cool950">#1B242C</Color>
 
-    <!-- 🎨 Colores básicos -->
+    <!--  🎨 Colores básicos  -->
     <Color x:Key="White">#FFFFFF</Color>
-    <Color x:Key="Black">#000000</Color>
     <Color x:Key="Magenta">#D600AA</Color>
     <Color x:Key="MidnightBlue">#3A506B</Color>
     <Color x:Key="OffBlack">#CFAF70</Color>
-    <!-- como acento cálido -->
+    <!--  como acento cálido  -->
 
-    <!-- 🎨 Brushes principales -->
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+    <!--  🎨 Brushes principales  -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}" />
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}" />
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}" />
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}" />
 
-    <!-- 🎨 Brushes derivados de tonos cálidos (Warm) -->
-    <SolidColorBrush x:Key="Warm100Brush" Color="{StaticResource Warm100}"/>
-    <SolidColorBrush x:Key="Warm200Brush" Color="{StaticResource Warm200}"/>
-    <SolidColorBrush x:Key="Warm300Brush" Color="{StaticResource Warm300}"/>
-    <SolidColorBrush x:Key="Warm400Brush" Color="{StaticResource Warm400}"/>
-    <SolidColorBrush x:Key="Warm500Brush" Color="{StaticResource Warm500}"/>
-    <SolidColorBrush x:Key="Warm600Brush" Color="{StaticResource Warm600}"/>
-    <SolidColorBrush x:Key="Warm900Brush" Color="{StaticResource Warm900}"/>
-    <SolidColorBrush x:Key="Warm950Brush" Color="{StaticResource Warm950}"/>
+    <!--  🎨 Brushes derivados de tonos cálidos (Warm)  -->
+    <SolidColorBrush x:Key="Warm100Brush" Color="{StaticResource Warm100}" />
+    <SolidColorBrush x:Key="Warm200Brush" Color="{StaticResource Warm200}" />
+    <SolidColorBrush x:Key="Warm300Brush" Color="{StaticResource Warm300}" />
+    <SolidColorBrush x:Key="Warm400Brush" Color="{StaticResource Warm400}" />
+    <SolidColorBrush x:Key="Warm500Brush" Color="{StaticResource Warm500}" />
+    <SolidColorBrush x:Key="Warm600Brush" Color="{StaticResource Warm600}" />
+    <SolidColorBrush x:Key="Warm900Brush" Color="{StaticResource Warm900}" />
+    <SolidColorBrush x:Key="Warm950Brush" Color="{StaticResource Warm950}" />
 
-    <!-- 🎨 Brushes derivados de tonos fríos (Cool) -->
-    <SolidColorBrush x:Key="Cool100Brush" Color="{StaticResource Cool100}"/>
-    <SolidColorBrush x:Key="Cool200Brush" Color="{StaticResource Cool200}"/>
-    <SolidColorBrush x:Key="Cool300Brush" Color="{StaticResource Cool300}"/>
-    <SolidColorBrush x:Key="Cool400Brush" Color="{StaticResource Cool400}"/>
-    <SolidColorBrush x:Key="Cool500Brush" Color="{StaticResource Cool500}"/>
-    <SolidColorBrush x:Key="Cool600Brush" Color="{StaticResource Cool600}"/>
-    <SolidColorBrush x:Key="Cool900Brush" Color="{StaticResource Cool900}"/>
-    <SolidColorBrush x:Key="Cool950Brush" Color="{StaticResource Cool950}"/>
+    <!--  🎨 Brushes derivados de tonos fríos (Cool)  -->
+    <SolidColorBrush x:Key="Cool100Brush" Color="{StaticResource Cool100}" />
+    <SolidColorBrush x:Key="Cool200Brush" Color="{StaticResource Cool200}" />
+    <SolidColorBrush x:Key="Cool300Brush" Color="{StaticResource Cool300}" />
+    <SolidColorBrush x:Key="Cool400Brush" Color="{StaticResource Cool400}" />
+    <SolidColorBrush x:Key="Cool500Brush" Color="{StaticResource Cool500}" />
+    <SolidColorBrush x:Key="Cool600Brush" Color="{StaticResource Cool600}" />
+    <SolidColorBrush x:Key="Cool900Brush" Color="{StaticResource Cool900}" />
+    <SolidColorBrush x:Key="Cool950Brush" Color="{StaticResource Cool950}" />
 </ResourceDictionary>
