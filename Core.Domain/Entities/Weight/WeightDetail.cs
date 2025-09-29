@@ -10,7 +10,8 @@ namespace Core.Domain.Entities.Weight
         public int FK_WeightEntryId { get; set; }
         public double Weight { get; set; } = 0;
         public double Tare { get; set; } = 0;
-        public int? FK_WeightedProductId { get; set; }
+        public int? FK_WeightedProductId { get; set; } = null;
+        public double? ProductPrice { get; set; } = null;
         public string? WeightedBy { get; set; }
         public double? SecondaryTare { get; set; } = null;
         public double? RequiredAmount { get; set; } = null;

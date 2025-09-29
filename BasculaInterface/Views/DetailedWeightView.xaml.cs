@@ -74,6 +74,7 @@ public partial class DetailedWeightView : ContentPage
         this.ShowPopup(_popup);
     }
 
+
     private DetailedWeightViewModel GetViewModel()
     {
         if (BindingContext is DetailedWeightViewModel viewModel)
@@ -176,52 +177,63 @@ public partial class DetailedWeightView : ContentPage
 
     private async void OnProductSelected(ProductoDto product)
     {
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
-            try
+            await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
+            return;
+        }
+        try
+        {
+            if (viewModel.Partner is null)
             {
-                PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
-                var result = await this.ShowPopupAsync(quantityPopUp);
-
-                double qty = 0;
-
-                if(result is double pickedQty)
-                {
-                    qty = pickedQty;
-                }
-
-                await viewModel.AddProductToWeightEntry(product, qty);
+                throw new InvalidOperationException("No se ha seleccionado un socio, es necesario para validar si se puede continuar con su pedido.");
             }
-            catch (Exception ex)
+            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
+            var result = await this.ShowPopupAsync(quantityPopUp);
+
+            double qty = 0;
+
+            if (result is double pickedQty)
             {
-                await DisplayAlert("Error", "No se pudo agregar el producto: " + ex.Message, "OK");
+                qty = pickedQty;
             }
+
+            double composedCost = (qty * product.Precio) + viewModel.TotalCost;
+
+            if (!viewModel.Partner.IgnoreCreditLimit && viewModel.Partner.CreditLimit > 0 && composedCost > viewModel.Partner.AvailableCredit)
+            {
+                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
+            }
+
+            await viewModel.AddProductToWeightEntry(product, qty);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo agregar el producto: \n" + ex.Message, "OK");
         }
     }
 
     private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
     {
-        DisplayWaitPopUp("Cargando vista de productos, espere...");
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
-            try
-            {
-                ProductSelectView productSelectView = new ProductSelectView();
+            await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
+            return;
+        }
 
-                productSelectView.OnProductSelected += OnProductSelected;
+        try
+        {
+            ProductSelectView productSelectView = new ProductSelectView();
 
-                await Shell.Current.Navigation.PushModalAsync(productSelectView);
+            productSelectView.OnProductSelected += OnProductSelected;
 
-                _entriesChanged = true;
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
-            }
-            finally
-            {
-                _popup?.Close();
-            }
+            await Shell.Current.Navigation.PushModalAsync(productSelectView);
+
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
         }
     }
 
@@ -271,7 +283,7 @@ public partial class DetailedWeightView : ContentPage
                     };
                 }
 
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+                WeightingScreen weightingScreen = new (viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
 

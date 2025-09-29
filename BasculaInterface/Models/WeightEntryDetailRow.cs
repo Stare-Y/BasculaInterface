@@ -12,6 +12,7 @@
         public int? FK_WeightedProductId { get; set; } = null;
         public bool IsSecondaryTerminal => MauiProgram.IsSecondaryTerminal;
         public double? RequiredAmount { get; set; } = null;
+        public double? ProductPrice { get; set; } = null;
         public string RequiredAmountText => RequiredAmount.HasValue 
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") 
             : string.Empty;

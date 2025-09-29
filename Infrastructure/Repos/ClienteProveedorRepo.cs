@@ -13,16 +13,15 @@ namespace Infrastructure.Repos
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, CancellationToken cancellationToken)
+
+        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int top = 50, CancellationToken cancellationToken = default)
         {
-            var clientesProveedores = await _context.ClientesProveedores.AsNoTracking().Where(
+            return await _context.ClientesProveedores
+                .AsNoTracking()
+                .Where(
                 cp => cp.CRAZONSOCIAL.Contains(name))
+                .Take(top)
                 .ToListAsync(cancellationToken);
-
-            if (clientesProveedores.Count == 0)
-                throw new KeyNotFoundException($"No se encontraron clientes/proveedores con el nombre: {name}");
-
-            return clientesProveedores;
         }
 
         public async Task<ClienteProveedor> GetById(int id, CancellationToken cancellationToken = default)

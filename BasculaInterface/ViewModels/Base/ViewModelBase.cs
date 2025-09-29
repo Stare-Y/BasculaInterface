@@ -7,11 +7,11 @@ namespace BasculaInterface.ViewModels.Base
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        protected void OnCollectionChanged([CallerMemberName] string collectionName = null)
+        protected void OnCollectionChanged([CallerMemberName] string? collectionName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(collectionName));
         }
