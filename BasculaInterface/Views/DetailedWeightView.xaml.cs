@@ -3,6 +3,7 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
+using Microsoft.Maui.Devices;
 
 namespace BasculaInterface.Views;
 
@@ -46,7 +47,11 @@ public partial class DetailedWeightView : ContentPage
 
             if (!MauiProgram.IsSecondaryTerminal)
             {
-                BtnRefresh.IsVisible = true;
+                if (DeviceInfo.Current.Platform != DevicePlatform.Android)
+                {
+                    BtnRefresh.IsVisible = true;
+                }
+
                 BtnDeleteEntry.IsVisible = true;
                 if (viewModel.WeightEntryDetailRows.Count > 0)
                 {
@@ -88,11 +93,17 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnVolver_Clicked(object sender, EventArgs e)
     {
+        BtnVolver.Opacity = 0;
+        await BtnVolver.FadeTo(1, 200);
+
         await Shell.Current.Navigation.PopAsync();
     }
 
     private async void BtnNewEntry_Clicked(object sender, EventArgs e)
     {
+        BtnNewEntry.Opacity = 0;
+        await BtnNewEntry.FadeTo(1, 200); 
+
         DetailedWeightViewModel viewModel = GetViewModel();
 
         if (viewModel.WeightEntry != null && viewModel.Partner != null)
@@ -107,6 +118,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
+        BtnFinishWeight.Opacity = 0;
+        await BtnFinishWeight.FadeTo(1, 200); 
+
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             DisplayWaitPopUp("Concluyendo proceso de pesaje, espere...");
@@ -134,6 +148,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnPrintTicket_Clicked(object sender, EventArgs e)
     {
+        BtnPrintTicket.Opacity = 0;
+        await BtnPrintTicket.FadeTo(1, 200); 
+
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             DisplayWaitPopUp("Imprimiendo ticket, espere...");
@@ -201,6 +218,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
     {
+        BtnNuevoProducto.Opacity = 0;
+        await BtnNuevoProducto.FadeTo(1, 200); 
+        
         DisplayWaitPopUp("Cargando vista de productos, espere...");
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
@@ -294,6 +314,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void DeleteWeightDetail_Clicked(object sender, EventArgs e)
     {
+        //BtnWeightDetail.Opacity = 0;
+        //await BtnWeightDetail.FadeTo(1, 200);
+
         if (sender is Button btn && btn.BindingContext is WeightEntryDetailRow selectedRow)
         {
             if (BindingContext is DetailedWeightViewModel viewModel)
@@ -332,8 +355,10 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
-    private void BtnRefresh_Clicked(object sender, EventArgs e)
+    private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
+        BtnRefresh.Opacity = 0;
+        await BtnRefresh.FadeTo(1, 200); 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
@@ -342,7 +367,10 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnDeleteEntry_Clicked(object sender, EventArgs e)
     {
-        if(BindingContext is not DetailedWeightViewModel viewModel)
+        BtnDeleteEntry.Opacity = 0;
+        await BtnDeleteEntry.FadeTo(1, 200);
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
             return;
         }
@@ -364,4 +392,5 @@ public partial class DetailedWeightView : ContentPage
             _popup?.Close();
         }
     }
+
 }
