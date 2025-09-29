@@ -70,6 +70,7 @@ public partial class PartnerSelectView : ContentPage
         }
         else
         {
+            ResultsCollectionView.SelectedItems?.Clear();
             ResultsCollectionView.SelectedItem = null;
             BtnConfirm.IsEnabled = false;
         }

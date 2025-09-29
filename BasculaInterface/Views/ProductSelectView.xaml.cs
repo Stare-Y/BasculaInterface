@@ -56,13 +56,23 @@ public partial class ProductSelectView : ContentPage
 
     private void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if(ResultsCollectionView.SelectedItem is not null)
+        if (ResultsCollectionView.SelectedItem is not null)
         {
             BtnConfirm.IsEnabled = true;
+
+            // Marcar el RadioButton del item seleccionado:
+            if (e.CurrentSelection.FirstOrDefault() is ProductoDto seleccionado)
+            {
+                // busca el contenedor visual del item
+                var container = (sender as CollectionView)?.FindByName<RadioButton>("RadioCheck");
+                if (container != null)
+                    container.IsChecked = true;
+            }
         }
         else
         {
             BtnConfirm.IsEnabled = false;
+
         }
     }
 
@@ -78,7 +88,9 @@ public partial class ProductSelectView : ContentPage
         }
         else
         {
+            ResultsCollectionView.SelectedItems?.Clear();
             ResultsCollectionView.SelectedItem = null;
+
             BtnConfirm.IsEnabled = false;
         }
     }
@@ -87,4 +99,6 @@ public partial class ProductSelectView : ContentPage
     {
         await Shell.Current.Navigation.PopModalAsync();
     }
+
+
 }
