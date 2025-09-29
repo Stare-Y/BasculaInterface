@@ -1,42 +1,11 @@
 ﻿using Core.Application.DTOs;
-using Core.Domain.Entities.ContpaqiSQL;
 using Core.Domain.Entities.Weight;
 
 namespace Core.Application.Extensions
 {
     public static class WeightExtensions
     {
-        public static IEnumerable<ClienteProveedorDto> BuildFromBaseEntity(IEnumerable<ClienteProveedor> clienteProveedors)
-        {
-            return clienteProveedors.Select(cp => new ClienteProveedorDto
-            {
-                Id = cp.CIDCLIENTEPROVEEDOR,
-                RazonSocial = cp.CRAZONSOCIAL,
-                RFC = cp.CRFC
-            });
-        }
-        public static IEnumerable<ProductoDto> BuildFromBaseEntity(IEnumerable<Producto> productos)
-        {
-            return productos.Select(p => new ProductoDto
-            {
-                Id = p.CIDPRODUCTO,
-                Nombre = p.CNOMBREPRODUCTO,
-                IdValorClasificacion6 = p.CIDVALORCLASIFICACION6
-            });
-        }
-        public static ProductoDto BuildFromBaseEntity(Producto producto)
-        {
-            if (producto == null)
-            {
-                throw new ArgumentNullException(nameof(producto), "Producto cannot be null");
-            }
-            return new ProductoDto
-            {
-                Id = producto.CIDPRODUCTO,
-                Nombre = producto.CNOMBREPRODUCTO,
-                IdValorClasificacion6 = producto.CIDVALORCLASIFICACION6
-            };
-        }
+        
         public static WeightEntry BuildFromDto(this WeightEntry weightEntry, WeightEntryDto weightEntryDto)
         {
             if (weightEntryDto == null)
@@ -53,7 +22,7 @@ namespace Core.Application.Extensions
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
                 RegisteredBy = weightEntryDto.RegisteredBy,
-                WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
+                WeightDetails = [.. weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
@@ -62,8 +31,9 @@ namespace Core.Application.Extensions
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
-                    RequiredAmount = wd.RequiredAmount
-                }).ToList()
+                    RequiredAmount = wd.RequiredAmount,
+                    ProductPrice = wd.ProductPrice
+                })]
             };
 
             return weightEntry;
@@ -85,7 +55,7 @@ namespace Core.Application.Extensions
                 Notes = weightEntry.Notes,
                 VehiclePlate = weightEntry.VehiclePlate,
                 RegisteredBy = weightEntry.RegisteredBy,
-                WeightDetails = weightEntry.WeightDetails.Select(wd => new WeightDetailDto
+                WeightDetails = [.. weightEntry.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
@@ -94,8 +64,9 @@ namespace Core.Application.Extensions
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
-                    RequiredAmount = wd.RequiredAmount
-                }).ToList()
+                    RequiredAmount = wd.RequiredAmount,
+                    ProductPrice = wd.ProductPrice
+                })]
             };
         }
 
@@ -115,7 +86,7 @@ namespace Core.Application.Extensions
                 Notes = weightEntryDto.Notes,
                 VehiclePlate = weightEntryDto.VehiclePlate,
                 RegisteredBy = weightEntryDto.RegisteredBy,
-                WeightDetails = weightEntryDto.WeightDetails.Select(wd => new WeightDetail
+                WeightDetails = [.. weightEntryDto.WeightDetails.Select(wd => new WeightDetail
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
@@ -124,8 +95,9 @@ namespace Core.Application.Extensions
                     Weight = wd.Weight,
                     WeightedBy = wd.WeightedBy,
                     SecondaryTare = wd.SecondaryTare,
-                    RequiredAmount = wd.RequiredAmount
-                }).ToList()
+                    RequiredAmount = wd.RequiredAmount,
+                    ProductPrice = wd.ProductPrice
+                })]
             };
         }
 
@@ -145,7 +117,7 @@ namespace Core.Application.Extensions
                 Notes = we.Notes,
                 VehiclePlate = we.VehiclePlate,
                 RegisteredBy = we.RegisteredBy,
-                WeightDetails = we.WeightDetails.Select(wd => new WeightDetailDto
+                WeightDetails = [.. we.WeightDetails.Select(wd => new WeightDetailDto
                 {
                     Id = wd.Id,
                     FK_WeightEntryId = wd.FK_WeightEntryId,
@@ -154,8 +126,9 @@ namespace Core.Application.Extensions
                     Weight = wd.Weight,
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
-                    RequiredAmount = wd.RequiredAmount
-                }).ToList()
+                    RequiredAmount = wd.RequiredAmount,
+                    ProductPrice = wd.ProductPrice
+                })]
             });
         }
 
@@ -193,6 +166,7 @@ namespace Core.Application.Extensions
                     existingDetail.SecondaryTare = updatedDetail.SecondaryTare;
                     existingDetail.WeightedBy = updatedDetail.WeightedBy;
                     existingDetail.RequiredAmount = updatedDetail.RequiredAmount;
+                    existingDetail.ProductPrice = updatedDetail.ProductPrice;
                 }
             }
 
@@ -209,6 +183,7 @@ namespace Core.Application.Extensions
                         SecondaryTare = newDetail.SecondaryTare,
                         WeightedBy = newDetail.WeightedBy,
                         RequiredAmount = newDetail.RequiredAmount,
+                        ProductPrice = newDetail.ProductPrice
                     });
                 }
             }

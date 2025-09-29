@@ -41,7 +41,8 @@ public partial class WeightingScreen : ContentPage
             }
             else if(productoDto is not null )
             {
-                WeightDetailDto weightingDetail = weightEntry.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id) 
+                WeightDetailDto weightingDetail = weightEntry.WeightDetails
+                    .FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id) 
                     ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
                 if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)

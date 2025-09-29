@@ -39,6 +39,15 @@ namespace BasculaInterface.ViewModels
             });
         }
 
+        public double TotalCost => WeightEntryDetailRows.Sum(row => 
+            {
+                if (row.FK_WeightedProductId.HasValue && row.RequiredAmount.HasValue && row.ProductPrice.HasValue)
+                {
+                    return row.ProductPrice.Value * row.RequiredAmount.Value;
+                }
+                return 0;
+            });
+
         private bool isRefreshing;
         public bool IsRefreshing
         {
@@ -250,6 +259,7 @@ namespace BasculaInterface.ViewModels
                     Tare = detail.Tare,
                     Weight = detail.Weight,
                     FK_WeightedProductId = detail.FK_WeightedProductId,
+                    ProductPrice = detail.ProductPrice,
                     WeightedBy = detail.WeightedBy == null 
                                     ? null
                                     : detail.WeightedBy,

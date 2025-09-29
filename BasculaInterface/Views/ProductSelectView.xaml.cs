@@ -73,8 +73,8 @@ public partial class ProductSelectView : ContentPage
         bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {productoDto.Nombre}?", "No", "Si");
         if (!confirmed)
         {
-            OnProductSelected?.Invoke(productoDto);
             await Shell.Current.Navigation.PopModalAsync();
+            OnProductSelected?.Invoke(productoDto);
         }
         else
         {

@@ -15,18 +15,17 @@ namespace Infrastructure.Repos
         public async Task<IEnumerable<Producto>> SearchByNameAsync(string name)
         {
             return await _context.Productos
-                                    .AsNoTracking()
-                                    .Where(p => p.CNOMBREPRODUCTO.Contains(name))
-                                    .ToListAsync();
+                .AsNoTracking()
+                .Where(p => p.CNOMBREPRODUCTO.Contains(name))
+                .ToListAsync();
         }
         
         public async Task<Producto> GetByIdAsync(int id)
         {
-            var producto = await _context.Productos.AsNoTracking()
-                .FirstOrDefaultAsync(p => p.CIDPRODUCTO == id);
-
-            if (producto == null)
-                throw new KeyNotFoundException($"No se encontró el producto con ID: {id}");
+            var producto = await _context.Productos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.CIDPRODUCTO == id)
+                ?? throw new KeyNotFoundException($"No se encontró el producto con ID: {id}");
 
             return producto;
         }
