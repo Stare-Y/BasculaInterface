@@ -145,7 +145,7 @@ namespace Infrastructure.Service
 
         private async Task BuildWeightEntryDocument(Document document, WeightEntryDto entry)
         {
-            document.SetMargins(0, 10f, 10f, 10f);
+            document.SetMargins(10f, 10f, 10f, 10f);
 
             document.Add(await BuildWeightHeader(entry));
 
