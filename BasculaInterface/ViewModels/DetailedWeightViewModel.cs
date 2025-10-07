@@ -207,11 +207,15 @@ namespace BasculaInterface.ViewModels
             await _apiService.PutAsync<object>("api/Weight", WeightEntry);
         }
 
-        public async Task PrintTicketAsync(string text)
+        public async Task PrintTicketAsync()
         {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before printing.");
+            }
             try
             {
-                await _apiService.PostAsync<object>("api/Print", text);
+                await _apiService.PostAsync<object>("api/Print/WeightEntry", WeightEntry);
             }
             catch (Exception ex)
             {
@@ -225,7 +229,7 @@ namespace BasculaInterface.ViewModels
             {
                 TurnDto turn = await _apiService.GetAsync<TurnDto>($"api/Turn?weightId={WeightEntry?.Id}");
 
-                await _apiService.PostAsync<object>("api/Print", turn.PrintData(Partner?.RazonSocial));
+                await _apiService.PostAsync<object>("api/Print/Text", turn.PrintData(Partner?.RazonSocial));
             }
             catch (Exception ex)
             {
@@ -246,7 +250,7 @@ namespace BasculaInterface.ViewModels
 
             WeightEntryDetailRows.Clear();
 
-            if (WeightEntry.WeightDetails == null || !WeightEntry.WeightDetails.Any())
+            if (WeightEntry.WeightDetails == null || WeightEntry.WeightDetails.Count == 0)
             {
                 return; // No details to load
             }

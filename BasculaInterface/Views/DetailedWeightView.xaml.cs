@@ -129,7 +129,7 @@ public partial class DetailedWeightView : ContentPage
             {
                 await viewModel.ConcludeWeightProcess();
 
-                await viewModel.PrintTicketAsync(BuildTicket());
+                await viewModel.PrintTicketAsync();
 
                 await DisplayAlert("Éxito", "Proceso de pesaje concluido correctamente.", "OK");
 
@@ -157,7 +157,7 @@ public partial class DetailedWeightView : ContentPage
             DisplayWaitPopUp("Imprimiendo ticket, espere...");
             try
             {
-                await viewModel.PrintTicketAsync(BuildTicket());
+                await viewModel.PrintTicketAsync();
 
                 await DisplayAlert("Éxito", "Ticket impreso correctamente.", "OK");
             }
