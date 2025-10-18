@@ -1,5 +1,4 @@
 ﻿using Core.Application.DTOs;
-using Core.Application.Extensions;
 using Core.Application.Services;
 using Core.Domain.Entities.ContpaqiSQL;
 using Core.Domain.Interfaces;
@@ -18,14 +17,14 @@ namespace Infrastructure.Service
         {
             IEnumerable<Producto> productos = await _productRepo.SearchByNameAsync(name);
 
-            return WeightExtensions.BuildFromBaseEntity(productos);
+            return productos.Select(p => new ProductoDto (p));
         }
 
         public async Task<ProductoDto> GetByIdAsync(int id)
         {
             Producto producto = await _productRepo.GetByIdAsync(id);
 
-            return WeightExtensions.BuildFromBaseEntity(producto);
+            return new ProductoDto(producto);
         }
     }
 }

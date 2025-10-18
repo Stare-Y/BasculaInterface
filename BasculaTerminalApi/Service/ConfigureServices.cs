@@ -67,6 +67,8 @@ namespace BasculaTerminalApi.Service
 
             services.AddScoped<ITurnService, TurnService>();
 
+            services.AddScoped<IDocumentRepo, DocumentRepo>();
+
             return services;
         }
 

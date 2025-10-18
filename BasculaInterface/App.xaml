@@ -49,8 +49,8 @@
                 <Setter Property="TextColor" Value="{StaticResource 4}" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=300}" />
-                <Setter Property="HeightRequest" Value="{OnPlatform Android=50, WinUI=100}" />
+                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=280}" />
+                <Setter Property="HeightRequest" Value="{OnPlatform Android=60, WinUI=80}" />
                 <Setter Property="CornerRadius" Value="30" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
@@ -96,8 +96,8 @@
                 <Setter Property="TextColor" Value="{StaticResource 1}" />
                 <Setter Property="FontAttributes" Value="Bold" />
                 <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=300}" />
-                <Setter Property="HeightRequest" Value="{OnPlatform Android=50, WinUI=100}" />
+                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=280}" />
+                <Setter Property="HeightRequest" Value="{OnPlatform Android=60, WinUI=80}" />
                 <Setter Property="CornerRadius" Value="30" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
@@ -247,7 +247,28 @@
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="StrokeShape" Value="RoundRectangle 30" />
 
+                <Setter Property="VisualStateManager.VisualStateGroups">
 
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal" />
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+
+                </Setter>
             </Style>
 
             <Style x:Key="EntryDatos" TargetType="Entry">

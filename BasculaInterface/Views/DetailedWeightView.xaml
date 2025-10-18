@@ -1,57 +1,416 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-             x:Class="BasculaInterface.Views.DetailedWeightView"
-             Title="DetailedWeightView">
+<ContentPage
+    x:Class="BasculaInterface.Views.DetailedWeightView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    Title="DetailedWeightView"
+    BackgroundColor="{StaticResource 1}">
+
     <ContentPage.BindingContext>
-        <vm:DetailedWeightViewModel/>
+        <vm:DetailedWeightViewModel />
     </ContentPage.BindingContext>
-    <Grid Margin="10" RowSpacing="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="5*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" ColumnDefinitions="*,*" RowDefinitions="*,*" >
-            <Label Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="0"/>
-            <Label Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0}'}" FontSize="Title" VerticalTextAlignment="Center" Grid.Column="0" Grid.Row="1"/>
-            <Label Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}" FontSize="Title"  HorizontalTextAlignment="End" VerticalTextAlignment="Center" Grid.Column="1" Grid.Row="1"/>
-            <HorizontalStackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End">
-                <Label Text="{Binding WeightEntry.Notes}" FontSize="Title" HorizontalTextAlignment="End" VerticalTextAlignment="Center"/>
-                <Button x:Name="BtnDeleteEntry" IsVisible="False" Text="Eliminar" Clicked="BtnDeleteEntry_Clicked" BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary}, Dark={StaticResource SecondaryDark}}"/>
-            </HorizontalStackLayout>
+
+
+    <Grid
+        Margin="30"
+        BackgroundColor="{StaticResource 1}"
+        RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
+                                    WinUI='100,Auto,100,*,Auto,Auto'}"
+        RowSpacing="15">
+
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="{OnPlatform Android='*,225,*',
+                                           WinUI='*,*,*'}"
+            VerticalOptions="Center">
+
+
+            <Border
+                x:Name="BtnVolver"
+                Grid.Column="0"
+                BackgroundColor="{StaticResource 4}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Start"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=50,
+                                          WinUI=100}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
+                </Border.GestureRecognizers>
+
+
+                <Image
+                    x:Name="ImgBack"
+                    Aspect="AspectFit"
+                    HeightRequest="{OnPlatform Android=40,
+                                               WinUI=60}"
+                    Source="back.png"
+                    WidthRequest="{OnPlatform Android=40,
+                                              WinUI=60}" />
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgBack" Property="Image.Source" Value="back2.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgBack" Property="Image.Source" Value="back2.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                BackgroundColor="{StaticResource Gray}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Start"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                WidthRequest="{OnPlatform Android=200,
+                                          WinUI=450}">
+
+
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="{OnPlatform Android=10,
+                                          WinUI=24}"
+                    Style="{StaticResource Label}"
+                    Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}"
+                    TextColor="{StaticResource 4}"
+                    VerticalTextAlignment="Center" />
+
+            </Border>
+
+            <Border
+                Grid.Column="2"
+                BackgroundColor="{StaticResource Gray}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="End"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                WidthRequest="{OnPlatform Android=75,
+                                          WinUI=300}">
+
+                <Grid RowDefinitions="35,*">
+
+                    <Label
+                        Grid.Row="0"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=10,
+                                              WinUI=22}"
+                        Style="{StaticResource Label}"
+                        Text="Placas"
+                        TextColor="{StaticResource 4}"
+                        VerticalTextAlignment="Start" />
+
+                    <Label
+                        Grid.Row="1"
+                        Margin="{OnPlatform Android='0,-10,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=10,
+                                              WinUI=20}"
+                        Style="{StaticResource Label}"
+                        Text="{Binding WeightEntry.VehiclePlate, StringFormat='{0}'}"
+                        TextColor="{StaticResource Black}"
+                        VerticalOptions="Start"
+                        VerticalTextAlignment="Center" />
+
+
+                </Grid>
+
+            </Border>
+
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="20">
-            <Button Text="Volver" x:Name="BtnVolver" Clicked="BtnVolver_Clicked" TextColor="White" BackgroundColor="DimGrey" BorderWidth="2" Grid.Column="0" FontSize="Subtitle"/>
-            <Button Text="Agregar Producto Pendiente" x:Name="BtnNuevoProducto" Clicked="BtnNuevoProducto_Clicked"  TextColor="White" BackgroundColor="CornflowerBlue" BorderWidth="2" Grid.Column="1" FontSize="Subtitle"/>
-            <Button x:Name="BtnNewEntry" Text="Nueva Entrada" Clicked="BtnNewEntry_Clicked" TextColor="White"  BackgroundColor="LightSeaGreen" BorderWidth="2" Grid.Column="2" FontSize="Subtitle"/>
+
+        <BoxView
+            Grid.Row="1"
+            HeightRequest="2"
+            HorizontalOptions="Fill"
+            VerticalOptions="Start"
+            Color="{StaticResource 4}" />
+
+
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="{OnPlatform Android='15,0,70,80,*',
+                                           WinUI='100,100,*,*,*'}"
+            ColumnSpacing="25"
+            VerticalOptions="Start">
+
+            <Border
+                x:Name="BtnPrintTicket"
+                Grid.Column="0"
+                BackgroundColor="{StaticResource 4}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Start"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=50,
+                                          WinUI=100}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnPrintTicket_Clicked" />
+                </Border.GestureRecognizers>
+
+                <Image
+                    x:Name="ImgPrinter"
+                    Aspect="AspectFit"
+                    HeightRequest="{OnPlatform Android=30,
+                                               WinUI=60}"
+                    Source="printer2.png"
+                    WidthRequest="{OnPlatform Android=30,
+                                              WinUI=60}" />
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgPrinter" Property="Image.Source" Value="printer.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgPrinter" Property="Image.Source" Value="printer.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                x:Name="BtnRefresh"
+                Grid.Column="1"
+                BackgroundColor="{StaticResource 4}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Start"
+                IsVisible="{OnPlatform Android=false,
+                                       WinUI=true}"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=50,
+                                          WinUI=100}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnRefresh_Clicked" />
+                </Border.GestureRecognizers>
+
+                <Image
+                    x:Name="ImgRefrsh"
+                    Aspect="AspectFit"
+                    HeightRequest="{OnPlatform Android=40,
+                                               WinUI=60}"
+                    Source="refresh2.png"
+                    WidthRequest="{OnPlatform Android=40,
+                                              WinUI=60}" />
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgRefrsh" Property="Image.Source" Value="refresh.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 1}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgRefrsh" Property="Image.Source" Value="refresh.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                Grid.Column="2"
+                BackgroundColor="{StaticResource Gray}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 60"
+                WidthRequest="{OnPlatform Android=85,
+                                          WinUI=300}">
+
+                <Grid RowDefinitions="35,*">
+
+                    <Label
+                        Grid.Row="0"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=11,
+                                              WinUI=22}"
+                        Style="{StaticResource Label}"
+                        Text="Notas"
+                        TextColor="{StaticResource 4}"
+                        VerticalTextAlignment="Start" />
+
+                    <Label
+                        Grid.Row="1"
+                        Margin="{OnPlatform Android='0,-10,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=10,
+                                              WinUI=20}"
+                        Style="{StaticResource Label}"
+                        Text="{Binding WeightEntry.Notes}"
+                        TextColor="{StaticResource Black}"
+                        VerticalOptions="Start"
+                        VerticalTextAlignment="Center" />
+
+
+                </Grid>
+
+            </Border>
+
+            <Border
+                Grid.Column="3"
+                BackgroundColor="{StaticResource Gray}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 4}"
+                StrokeShape="RoundRectangle 60"
+                StrokeThickness="2"
+                WidthRequest="{OnPlatform Android=85,
+                                          WinUI=300}">
+
+
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    Style="{StaticResource Label}"
+                    Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}"
+                    TextColor="{StaticResource 4}"
+                    VerticalTextAlignment="Center" />
+
+            </Border>
+
+            <Border
+                Grid.Column="4"
+                BackgroundColor="{StaticResource Gray}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="End"
+                Stroke="{StaticResource 4}"
+                StrokeShape="RoundRectangle 60"
+                StrokeThickness="2"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=300}">
+
+
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    Style="{StaticResource Label}"
+                    Text="{Binding TotalWeight, StringFormat='Peso Total (teorico): {0} kg.'}"
+                    TextColor="{StaticResource 4}"
+                    VerticalTextAlignment="Center" />
+
+            </Border>
+
         </Grid>
-        <RefreshView x:Name="RefreshViewPendingWeights" 
-             IsRefreshing="{Binding IsRefreshing}" 
-             Command="{Binding RefreshCommand}" 
-             Grid.Row="2">
-            <CollectionView x:Name="CollectionViewWeightDetails" ItemsSource="{Binding WeightEntryDetailRows}" SelectionMode="Single" SelectionChanged="CollectionViewWeightDetails_SelectionChanged">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border 
-                            Stroke="#CCC"
-                            StrokeThickness="1"
-                            Background="#F7F7F7"
-                            StrokeShape="RoundRectangle 8"
-                            Padding="12">
-                            <Grid ColumnDefinitions="*,*" MinimumHeightRequest="50">
-                                <VerticalStackLayout Grid.Column="0" HorizontalOptions="Start" Spacing="21">
-                                    <HorizontalStackLayout HorizontalOptions="Start" Spacing="21">
-                                        <Button Text="✕"
-                                                BackgroundColor="Red"
-                                                TextColor="White"
-                                                FontSize="Small"
-                                                Padding="4"
-                                                IsVisible="False"
-                                                CornerRadius="12"
-                                                Clicked="DeleteWeightDetail_Clicked">
+
+
+
+        <RefreshView
+            x:Name="RefreshViewPendingWeights"
+            Grid.Row="3"
+            Command="{Binding RefreshCommand}"
+            IsRefreshing="{Binding IsRefreshing}"
+            VerticalOptions="Start">
+
+            <ScrollView
+                HorizontalOptions="Fill"
+                Orientation="Vertical"
+                VerticalOptions="Fill">
+
+                <CollectionView
+                    x:Name="CollectionViewWeightDetails"
+                    HorizontalOptions="Fill"
+                    ItemsSource="{Binding WeightEntryDetailRows}"
+                    SelectionChanged="CollectionViewWeightDetails_SelectionChanged"
+                    SelectionMode="Single">
+
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                x:Name="BtnSelectedItem"
+                                Background="{StaticResource Gray}"
+                                HeightRequest="{OnPlatform Android=80,
+                                                           WinUI=120}"
+                                Stroke="{StaticResource 1}"
+                                StrokeShape="RoundRectangle 60"
+                                StrokeThickness="2"
+                                Style="{StaticResource RoundedBorderStyle}"
+                                WidthRequest="{OnPlatform Android=325}">
+                                <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='50,125,50,5,50', WinUI='Auto,*,*,20,*'}">
+
+                                    <Grid
+                                        Grid.Column="0"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center">
+
+                                        <Button
+                                            x:Name="BtnSeleccionar"
+                                            BackgroundColor="{StaticResource 4}"
+                                            BorderWidth="0"
+                                            Clicked="DeleteWeightDetail_Clicked"
+                                            HeightRequest="{OnPlatform Android=50,
+                                                                       WinUI=75}"
+                                            IsVisible="False"
+                                            Style="{StaticResource Boton}"
+                                            Text="✕"
+                                            TextColor="White"
+                                            WidthRequest="{OnPlatform Android=50,
+                                                                      WinUI=75}">
                                             <Button.Triggers>
                                                 <MultiTrigger TargetType="Button">
                                                     <MultiTrigger.Conditions>
@@ -64,30 +423,445 @@
                                                 </MultiTrigger>
                                                 <Trigger TargetType="Button" Property="IsVisible" Value="False" />
                                             </Button.Triggers>
-                                        </Button>
-                                        <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle"  Text="{Binding OrderIndex, StringFormat='{0}.- '}" VerticalTextAlignment="Center"/>
-                                        <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding Description, StringFormat='{0}. '}" VerticalTextAlignment="Center"/>
-                                    </HorizontalStackLayout>
 
-                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding RequiredAmountText, StringFormat='{0} kg. '}" VerticalTextAlignment="Center"/>
-                                    
-                                    <Label TextColor="Black" HorizontalTextAlignment="Start" FontSize="Subtitle" Text="{Binding WeightedBy, StringFormat='{0}'}" VerticalTextAlignment="Center"/>
-                                </VerticalStackLayout>
-                                <HorizontalStackLayout Grid.Column="1" HorizontalOptions="End">
-                                    <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Subtitle" Text="{Binding Tare, StringFormat='{}{0:F2} + '}" VerticalTextAlignment="Center"/>
-                                    <Label TextColor="Black" HorizontalTextAlignment="End" FontSize="Title" Text="{Binding Weight, StringFormat='{}{0:F2} kg'}" VerticalTextAlignment="Center"/>
-                                </HorizontalStackLayout>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroupList>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Normal" />
+                                                        <VisualState x:Name="PointerOver">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="Red" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+
+                                                        <VisualState x:Name="Pressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateGroupList>
+                                            </VisualStateManager.VisualStateGroups>
+                                        </Button>
+
+                                    </Grid>
+
+                                    <VerticalStackLayout
+                                        Grid.Column="1"
+                                        HorizontalOptions="Center"
+                                        Spacing="5"
+                                        VerticalOptions="Center">
+                                        <HorizontalStackLayout
+                                            HorizontalOptions="Start"
+                                            Spacing="5"
+                                            VerticalOptions="Center">
+
+                                            <Label
+                                                FontSize="{OnPlatform Android=11,
+                                                                      WinUI=25}"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding OrderIndex, StringFormat='{0}.- '}"
+                                                TextColor="{StaticResource 4}" />
+                                            <Label
+                                                FontSize="{OnPlatform Android=11,
+                                                                      WinUI=25}"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding Description, StringFormat='{0}. '}"
+                                                TextColor="{StaticResource 4}" />
+                                        </HorizontalStackLayout>
+
+                                        <Label
+                                            FontSize="{OnPlatform Android=8,
+                                                                  WinUI=20}"
+                                            Style="{StaticResource Label}"
+                                            Text="{Binding RequiredAmountText, StringFormat='{0} kg. '}"
+                                            TextColor="Black"
+                                            VerticalTextAlignment="Center" />
+
+
+                                        <!-- IDK WHAT IS THIS SHIT ??? <Label
+                                            FontSize="Subtitle"
+                                            HorizontalTextAlignment="Start"
+                                            Text="{Binding WeightedBy, StringFormat='{0}'}"
+                                            TextColor="Black"
+                                            VerticalTextAlignment="Center" />-->
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Column="2"
+                                        HorizontalOptions="Center"
+                                        Spacing="5"
+                                        VerticalOptions="Center">
+
+                                        <Label
+                                            FontSize="{OnPlatform Android=11,
+                                                                  WinUI=28}"
+                                            Style="{StaticResource Label}"
+                                            Text="Tara"
+                                            TextColor="{StaticResource 4}" />
+
+                                        <Label
+                                            FontSize="{OnPlatform Android=11,
+                                                                  WinUI=26}"
+                                            Style="{StaticResource Label}"
+                                            Text="{Binding Tare, StringFormat='{}{0:F2} kg'}"
+                                            TextColor="{StaticResource Black}" />
+
+                                    </VerticalStackLayout>
+
+                                    <Label
+                                        Grid.Column="3"
+                                        FontSize="{OnPlatform Android=11,
+                                                              WinUI=26}"
+                                        Style="{StaticResource Label}"
+                                        Text="+"
+                                        TextColor="{StaticResource 4}" />
+
+
+                                    <VerticalStackLayout
+                                        Grid.Column="4"
+                                        HorizontalOptions="Center"
+                                        Spacing="5"
+                                        VerticalOptions="Center">
+
+                                        <Label
+                                            FontSize="{OnPlatform Android=11,
+                                                                  WinUI=28}"
+                                            Style="{StaticResource Label}"
+                                            Text="Peso"
+                                            TextColor="{StaticResource 4}" />
+
+                                        <Label
+                                            FontSize="{OnPlatform Android=11,
+                                                                  WinUI=26}"
+                                            Style="{StaticResource Label}"
+                                            Text="{Binding Weight, StringFormat='{}{0:F2} kg'}"
+                                            TextColor="{StaticResource Black}" />
+
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                            </Border>
+
+                        </DataTemplate>
+
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+            </ScrollView>
+
         </RefreshView>
-        <Grid Grid.Row="3" RowDefinitions="auto,auto" ColumnSpacing="20" RowSpacing="4" ColumnDefinitions="*,*">
-            <Label Text="{Binding TotalWeight, StringFormat='Total (teorico): {0} kg.'}" VerticalTextAlignment="Center" HorizontalTextAlignment="End" FontSize="Subtitle" Grid.Row="0" Grid.Column="1" />
-            <Button x:Name="BtnRefresh" Text="Actualizar" Clicked="BtnRefresh_Clicked" Grid.Row="0" Grid.Column="0" IsVisible="False"/>
-            <Button x:Name="BtnPrintTicket" Text="Imprimir" Clicked="BtnPrintTicket_Clicked" Grid.Row="1" Grid.Column="0" FontSize="Subtitle"/>
-            <Button x:Name="BtnFinishWeight" Text="Finalizar" Clicked="BtnFinishWeight_Clicked" Grid.Row="1" Grid.Column="1" FontSize="Subtitle"     TextColor="White" BackgroundColor="Red"/>
+
+        <BoxView
+            Grid.Row="4"
+            HeightRequest="2"
+            HorizontalOptions="Fill"
+            VerticalOptions="End"
+            Color="{StaticResource 4}" />
+
+        <Grid
+            Grid.Row="5"
+            ColumnDefinitions="*,*,*,*"
+            HorizontalOptions="Fill"
+            VerticalOptions="End">
+
+
+            <Border
+                x:Name="BtnDeleteEntry"
+                Grid.Column="0"
+                BackgroundColor="{StaticResource 1}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 40"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnDeleteEntry_Clicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="DeleteIcon"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=25,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="trash.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=25,
+                                                  WinUI=50}" />
+
+                    <Label
+                        x:Name="DeleteLabel"
+                        Margin="{OnPlatform Android='0,-5,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Borrar Entrada"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="DeleteIcon" Property="Image.Source" Value="trash2.png" />
+                                    <Setter TargetName="DeleteLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="DeleteLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                x:Name="BtnNuevoProducto"
+                Grid.Column="1"
+                BackgroundColor="{StaticResource 1}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 40"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnNuevoProducto_Clicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="NuevoProducto"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=30,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="addproduct.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=30,
+                                                  WinUI=50}" />
+
+                    <Label
+                        x:Name="NuevoProductoLabel"
+                        Margin="{OnPlatform Android='0,-10,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Nuevo Producto"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="NuevoProducto" Property="Image.Source" Value="addproduct2.png" />
+                                    <Setter TargetName="NuevoProductoLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="NuevoProductoLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                x:Name="BtnNewEntry"
+                Grid.Column="2"
+                BackgroundColor="{StaticResource 1}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 40"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnNewEntry_Clicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="NuevoEntry"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=30,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="addweight.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=30,
+                                                  WinUI=50}" />
+
+                    <Label
+                        x:Name="NuevoEntryLabel"
+                        Margin="{OnPlatform Android='0,-10,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Nueva Entrada"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="NuevoEntry" Property="Image.Source" Value="addweight2.png" />
+                                    <Setter TargetName="NuevoEntryLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="NuevoEntryLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+            <Border
+                x:Name="BtnFinishWeight"
+                Grid.Column="3"
+                BackgroundColor="{StaticResource 1}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 40"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnFinishWeight_Clicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="FinalizarPeso"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=30,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="finishweight.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=30,
+                                                  WinUI=50}" />
+
+                    <Label
+                        x:Name="FinalizarPesoLabel"
+                        Margin="{OnPlatform Android='0,-10,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Finalizar Peso"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="FinalizarPeso" Property="Image.Source" Value="finishweight2.png" />
+                                    <Setter TargetName="FinalizarPesoLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="FinalizarPesoLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+
         </Grid>
+
+
     </Grid>
+
 </ContentPage>

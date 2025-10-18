@@ -61,14 +61,34 @@ public partial class PartnerSelectView : ContentPage
 
     private async void OnConfirmClicked(object sender, EventArgs e)
     {
-        ClienteProveedorDto partner = (ClienteProveedorDto)ResultsCollectionView.SelectedItem;
-
-        bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {partner.RazonSocial}?", "No", "Si");
-        if (!confirmed)
+        try
         {
-            OnPartnerSelected?.Invoke(partner);
+            if (ResultsCollectionView.SelectedItem is not ClienteProveedorDto partner)
+            {
+                await DisplayAlert("Error", "No has seleccionado ningún socio.", "OK");
+                return;
+            }
+
+            if (!partner.OrderRequestAllowed)
+            {
+                await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, no tiene credito habilitado", "OK");
+                return;
+            }
+
+            if (!partner.IgnoreCreditLimit && partner.CreditLimit != 0 && partner.AvailableCredit < 0)
+            {
+                await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, excede su limite de credito", "OK");
+                return;
+            }
+
+            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {partner.RazonSocial}?", "No", "Si");
+            if (!confirmed)
+            {
+                OnPartnerSelected?.Invoke(partner);
+                await Shell.Current.Navigation.PopAsync();
+            }
         }
-        else
+        finally
         {
             ResultsCollectionView.SelectedItems?.Clear();
             ResultsCollectionView.SelectedItem = null;

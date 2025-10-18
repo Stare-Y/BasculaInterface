@@ -1,7 +1,7 @@
-﻿using Core.Application.Services;
+﻿using Core.Application.DTOs;
+using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace BasculaTerminalApi.Controllers
 {
@@ -17,16 +17,33 @@ namespace BasculaTerminalApi.Controllers
             _logger = logger;
         }
 
-        [HttpPost]
+        [HttpPost("Text")]
         public IActionResult Print([FromBody] string ticket)
         {
             try
             {
                 _printService.Print(ticket);
 
-                Debug.WriteLine($"Ticket Printed: {ticket}");
+                _logger.LogInformation("Plain Text printed successfuly.");
 
-                return Accepted("Ticket impreso");
+                return Accepted();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error printing ticket: {ex.Message}");
+            }
+        }
+
+        [HttpPost("WeightEntry")]
+        public async Task<IActionResult> Print([FromBody] WeightEntryDto weightEntry)
+        {
+            try
+            {
+                await _printService.Print(weightEntry);
+
+                _logger.LogInformation("WeightEntry printed successfuly.");
+
+                return Accepted();
             }
             catch (Exception ex)
             {

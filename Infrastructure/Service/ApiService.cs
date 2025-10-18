@@ -1,4 +1,5 @@
 ﻿using Core.Application.Services;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
@@ -26,27 +27,27 @@ namespace Infrastructure.Service
                 {
                     if (endpoint is not null)
                     {
-                        Console.WriteLine("==== HTTP REQUEST ====");
-                        Console.WriteLine($"{endpoint}");
+                        Debug.WriteLine("==== HTTP REQUEST ====");
+                        Debug.WriteLine($"{endpoint}");
                     }
 
                     if (payload is not null)
                     {
-                        Console.WriteLine("Request Body:");
-                        Console.WriteLine(await payload.ReadAsStringAsync());
+                        Debug.WriteLine("Request Body:");
+                        Debug.WriteLine(await payload.ReadAsStringAsync());
                     }
 
                     return;
                 }
 
-                Console.WriteLine("==== HTTP REQUEST ====");
-                Console.WriteLine($"{requestMessage?.Method} {requestMessage?.RequestUri}");
+                Debug.WriteLine("==== HTTP REQUEST ====");
+                Debug.WriteLine($"{requestMessage?.Method} {requestMessage?.RequestUri}");
 
                 if (requestMessage?.Content != null)
                 {
                     string requestBody = await requestMessage.Content.ReadAsStringAsync();
-                    Console.WriteLine("Request Body:");
-                    Console.WriteLine(requestBody);
+                    Debug.WriteLine("Request Body:");
+                    Debug.WriteLine(requestBody);
                 }
             }
             catch
@@ -57,8 +58,8 @@ namespace Infrastructure.Service
 
         private async Task LogResponse(HttpResponseMessage response)
         {
-            Console.WriteLine("==== HTTP RESPONSE ====");
-            Console.WriteLine($"Status: {(int)response.StatusCode} {response.ReasonPhrase}");
+            Debug.WriteLine("==== HTTP RESPONSE ====");
+            Debug.WriteLine($"Status: {(int)response.StatusCode} {response.ReasonPhrase}");
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -72,14 +73,14 @@ namespace Infrastructure.Service
                         new JsonSerializerOptions { WriteIndented = true }
                     );
 
-                    Console.WriteLine("Response Body:");
-                    Console.WriteLine(formattedJson);
+                    Debug.WriteLine("Response Body:");
+                    Debug.WriteLine(formattedJson);
                 }
                 catch
                 {
                     // Si no es JSON, lo imprimimos como está
-                    Console.WriteLine("Response Body:");
-                    Console.WriteLine(responseBody);
+                    Debug.WriteLine("Response Body:");
+                    Debug.WriteLine(responseBody);
                 }
             }
         }

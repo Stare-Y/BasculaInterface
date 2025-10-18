@@ -9,6 +9,7 @@
     <Color x:Key="2">#C89F69</Color>
     <Color x:Key="3">#FEBC9C</Color>
     <Color x:Key="4">#14134F</Color>
+    <Color x:Key="Gray">#e1e1e1</Color>
     <Color x:Key="Black">#000</Color>
 
     <!--  🎨 Colores principales  -->

@@ -1,5 +1,4 @@
 ﻿using Core.Application.DTOs;
-using Core.Application.Extensions;
 using Core.Application.Services;
 using Core.Domain.Entities.ContpaqiSQL;
 using Core.Domain.Interfaces;
@@ -9,21 +8,51 @@ namespace Infrastructure.Service
     public class ClienteProveedorService : IClienteProveedorService
     {
         private readonly IClienteProveedorRepo _clienteProveedorRepo;
-        public ClienteProveedorService(IClienteProveedorRepo clienteProveedorRepo)
+        private readonly IDocumentRepo _documentRepo;
+        public ClienteProveedorService(IClienteProveedorRepo clienteProveedorRepo, IDocumentRepo documentRepo)
         {
             _clienteProveedorRepo = clienteProveedorRepo;
+            _documentRepo = documentRepo;
         }
         public async Task<IEnumerable<ClienteProveedorDto>> SearchByName(string name)
         {
             IEnumerable<ClienteProveedor> clientesProveedores = await _clienteProveedorRepo.SearchByName(name);
 
-            return WeightExtensions.BuildFromBaseEntity(clientesProveedores);
+            List<ClienteProveedorDto> clientesProveedoresDto = [];
+
+            foreach (ClienteProveedor client in clientesProveedores)
+            {
+                clientesProveedoresDto.Add(new ClienteProveedorDto
+                {
+                    Id = client.CIDCLIENTEPROVEEDOR,
+                    RazonSocial = client.CRAZONSOCIAL,
+                    RFC = client.CRFC,
+                    CreditLimit = client.CLIMITECREDITOCLIENTE,
+                    Debt = await _documentRepo.GetClientDebt(client.CIDCLIENTEPROVEEDOR),
+                    OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1,
+                    IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1
+                });
+            }
+
+            return clientesProveedoresDto;
         }
+
         public async Task<ClienteProveedorDto> GetById(int id)
         {
             ClienteProveedor clienteProveedor = await _clienteProveedorRepo.GetById(id);
 
-            return WeightExtensions.BuildFromBaseEntity([clienteProveedor]).First();
+            double debt = await _documentRepo.GetClientDebt(id);
+
+            return new ClienteProveedorDto
+            {
+                Id = clienteProveedor.CIDCLIENTEPROVEEDOR,
+                RazonSocial = clienteProveedor.CRAZONSOCIAL,
+                RFC = clienteProveedor.CRFC,
+                CreditLimit = clienteProveedor.CLIMITECREDITOCLIENTE,
+                Debt = debt,
+                OrderRequestAllowed = clienteProveedor.CBANCREDITOYCOBRANZA == 1 && clienteProveedor.CBANVENTACREDITO == 1,
+                IgnoreCreditLimit = clienteProveedor.CBANEXCEDERCREDITO == 1,
+            };
         }
     }
 }

@@ -3,6 +3,7 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
+using Microsoft.Maui.Devices;
 
 namespace BasculaInterface.Views;
 
@@ -46,7 +47,11 @@ public partial class DetailedWeightView : ContentPage
 
             if (!MauiProgram.IsSecondaryTerminal)
             {
-                BtnRefresh.IsVisible = true;
+                if (DeviceInfo.Current.Platform != DevicePlatform.Android)
+                {
+                    BtnRefresh.IsVisible = true;
+                }
+
                 BtnDeleteEntry.IsVisible = true;
                 if (viewModel.WeightEntryDetailRows.Count > 0)
                 {
@@ -74,6 +79,7 @@ public partial class DetailedWeightView : ContentPage
         this.ShowPopup(_popup);
     }
 
+
     private DetailedWeightViewModel GetViewModel()
     {
         if (BindingContext is DetailedWeightViewModel viewModel)
@@ -88,11 +94,17 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnVolver_Clicked(object sender, EventArgs e)
     {
+        BtnVolver.Opacity = 0;
+        await BtnVolver.FadeTo(1, 200);
+
         await Shell.Current.Navigation.PopAsync();
     }
 
     private async void BtnNewEntry_Clicked(object sender, EventArgs e)
     {
+        BtnNewEntry.Opacity = 0;
+        await BtnNewEntry.FadeTo(1, 200); 
+
         DetailedWeightViewModel viewModel = GetViewModel();
 
         if (viewModel.WeightEntry != null && viewModel.Partner != null)
@@ -107,6 +119,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
+        BtnFinishWeight.Opacity = 0;
+        await BtnFinishWeight.FadeTo(1, 200); 
+
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             DisplayWaitPopUp("Concluyendo proceso de pesaje, espere...");
@@ -114,7 +129,7 @@ public partial class DetailedWeightView : ContentPage
             {
                 await viewModel.ConcludeWeightProcess();
 
-                await viewModel.PrintTicketAsync(BuildTicket());
+                await viewModel.PrintTicketAsync();
 
                 await DisplayAlert("Éxito", "Proceso de pesaje concluido correctamente.", "OK");
 
@@ -134,12 +149,15 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnPrintTicket_Clicked(object sender, EventArgs e)
     {
+        BtnPrintTicket.Opacity = 0;
+        await BtnPrintTicket.FadeTo(1, 200); 
+
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             DisplayWaitPopUp("Imprimiendo ticket, espere...");
             try
             {
-                await viewModel.PrintTicketAsync(BuildTicket());
+                await viewModel.PrintTicketAsync();
 
                 await DisplayAlert("Éxito", "Ticket impreso correctamente.", "OK");
             }
@@ -176,52 +194,63 @@ public partial class DetailedWeightView : ContentPage
 
     private async void OnProductSelected(ProductoDto product)
     {
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
-            try
+            await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
+            return;
+        }
+        try
+        {
+            if (viewModel.Partner is null)
             {
-                PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
-                var result = await this.ShowPopupAsync(quantityPopUp);
-
-                double qty = 0;
-
-                if(result is double pickedQty)
-                {
-                    qty = pickedQty;
-                }
-
-                await viewModel.AddProductToWeightEntry(product, qty);
+                throw new InvalidOperationException("No se ha seleccionado un socio, es necesario para validar si se puede continuar con su pedido.");
             }
-            catch (Exception ex)
+            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
+            var result = await this.ShowPopupAsync(quantityPopUp);
+
+            double qty = 0;
+
+            if (result is double pickedQty)
             {
-                await DisplayAlert("Error", "No se pudo agregar el producto: " + ex.Message, "OK");
+                qty = pickedQty;
             }
+
+            double composedCost = (qty * product.Precio) + viewModel.TotalCost;
+
+            if (!viewModel.Partner.IgnoreCreditLimit && viewModel.Partner.CreditLimit > 0 && composedCost > viewModel.Partner.AvailableCredit)
+            {
+                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
+            }
+
+            await viewModel.AddProductToWeightEntry(product, qty);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo agregar el producto: \n" + ex.Message, "OK");
         }
     }
 
     private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
     {
-        DisplayWaitPopUp("Cargando vista de productos, espere...");
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
-            try
-            {
-                ProductSelectView productSelectView = new ProductSelectView();
+            await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
+            return;
+        }
 
-                productSelectView.OnProductSelected += OnProductSelected;
+        try
+        {
+            ProductSelectView productSelectView = new ProductSelectView();
 
-                await Shell.Current.Navigation.PushModalAsync(productSelectView);
+            productSelectView.OnProductSelected += OnProductSelected;
 
-                _entriesChanged = true;
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
-            }
-            finally
-            {
-                _popup?.Close();
-            }
+            await Shell.Current.Navigation.PushModalAsync(productSelectView);
+
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
         }
     }
 
@@ -271,7 +300,7 @@ public partial class DetailedWeightView : ContentPage
                     };
                 }
 
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+                WeightingScreen weightingScreen = new (viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
 
@@ -294,6 +323,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void DeleteWeightDetail_Clicked(object sender, EventArgs e)
     {
+        //BtnWeightDetail.Opacity = 0;
+        //await BtnWeightDetail.FadeTo(1, 200);
+
         if (sender is Button btn && btn.BindingContext is WeightEntryDetailRow selectedRow)
         {
             if (BindingContext is DetailedWeightViewModel viewModel)
@@ -332,8 +364,10 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
-    private void BtnRefresh_Clicked(object sender, EventArgs e)
+    private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
+        BtnRefresh.Opacity = 0;
+        await BtnRefresh.FadeTo(1, 200); 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
@@ -342,7 +376,10 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnDeleteEntry_Clicked(object sender, EventArgs e)
     {
-        if(BindingContext is not DetailedWeightViewModel viewModel)
+        BtnDeleteEntry.Opacity = 0;
+        await BtnDeleteEntry.FadeTo(1, 200);
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
         {
             return;
         }
@@ -364,4 +401,5 @@ public partial class DetailedWeightView : ContentPage
             _popup?.Close();
         }
     }
+
 }

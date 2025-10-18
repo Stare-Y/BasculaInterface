@@ -8,8 +8,7 @@
 
     <Grid>
 
-        <Image         
-            Aspect="AspectFill" Source="background.png" />
+        <Image Aspect="AspectFill" Source="background.png" />
 
         <Grid
             Padding="30"
@@ -17,9 +16,7 @@
             RowSpacing="30">
 
             <!--  Título de bienvenida  -->
-            <StackLayout 
-                Margin="0,50,0,0"
-                Grid.Row="0">
+            <StackLayout Grid.Row="0" Margin="0,50,0,0">
 
                 <Image Source="logo.png" Style="{StaticResource Logo}" />
 
@@ -41,10 +38,12 @@
 
                 <Button
                     x:Name="BtnLogIn"
+                    HeightRequest="{OnPlatform Android=75, WinUI=100}"
                     Pressed="BtnLogin_Pressed"
                     Released="BtnLogin_Released"
                     Style="{StaticResource Boton}"
-                    Text="Login" />
+                    Text="Login"
+                    WidthRequest="{OnPlatform Android=200, WinUI=300}" />
             </Grid>
 
             <!--  Elementos ocultos opcionales  -->

@@ -195,7 +195,7 @@ namespace BasculaInterface.ViewModels
                 StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
                 if (_apiService is not null)
                 {
-                    await _apiService.PostAsync<object>("api/print", content).ConfigureAwait(false);
+                    await _apiService.PostAsync<object>("api/Print/Text", content).ConfigureAwait(false);
 
                     Estado = "Impresion enviada";
                 }
@@ -344,7 +344,7 @@ namespace BasculaInterface.ViewModels
             {
                 TurnDto turn = await _apiService.GetAsync<TurnDto>($"api/Turn?weightId={newWeightEntry.Id}");
 
-                await _apiService.PostAsync<object>("api/Print", turn.PrintData(Partner?.RazonSocial));
+                await _apiService.PostAsync<object>("api/Print/Text", turn.PrintData(Partner?.RazonSocial));
             }
             catch (Exception ex)
             {
