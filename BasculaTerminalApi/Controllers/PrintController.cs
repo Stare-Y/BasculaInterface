@@ -47,7 +47,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error printing ticket with {ticket}", ticket);
+                //_logger.LogError(ex, "Error printing ticket with {ticket}", ticket);
                 return BadRequest($"Error printing ticket: {ex.Message}");
             }
         }

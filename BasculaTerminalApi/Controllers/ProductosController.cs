@@ -14,9 +14,9 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("ByName")]
-        public async Task<IActionResult> SearchByName([FromQuery]string name)
+        public async Task<IActionResult> SearchByName([FromQuery]string name, [FromQuery] int page = 1, [FromQuery] int sizePage = 50)
         {
-            return Ok(await _productService.SearchByNameAsync(name));
+            return Ok(await _productService.SearchByNameAsync(name,page, sizePage));
         }
 
         [HttpGet("ById")]
