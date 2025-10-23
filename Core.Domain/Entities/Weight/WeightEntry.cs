@@ -12,6 +12,10 @@ namespace Core.Domain.Entities.Weight
         public string VehiclePlate { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public string? RegisteredBy { get; set; }
-        public ICollection<WeightDetail> WeightDetails { get; set; } = []; 
+        public ICollection<WeightDetail> WeightDetails { get; set; } = [];
+        public override string ToString()
+        {
+            return $"Brute: {BruteWeight}, Plate: {VehiclePlate}, Partner: {PartnerId}, WeightDetails: {WeightDetails.Count}";
+        }
     }
 }

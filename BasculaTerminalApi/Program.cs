@@ -20,12 +20,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
         builder =>
-        {
+        {   
             builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
         });
 });
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 var app = builder.Build();
 

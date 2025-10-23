@@ -18,18 +18,23 @@ namespace Infrastructure.Service
         {
             IEnumerable<ClienteProveedor> clientesProveedores = await _clienteProveedorRepo.SearchByName(name);
 
-            return await Task.WhenAll(clientesProveedores.Select(async c =>
-                new ClienteProveedorDto
+            List<ClienteProveedorDto> clientesProveedoresDto = [];
+
+            foreach (ClienteProveedor client in clientesProveedores)
+            {
+                clientesProveedoresDto.Add(new ClienteProveedorDto
                 {
-                    Id = c.CIDCLIENTEPROVEEDOR,
-                    RazonSocial = c.CRAZONSOCIAL,
-                    RFC = c.CRFC,
-                    CreditLimit = c.CLIMITECREDITOCLIENTE,
-                    Debt = await _documentRepo.GetClientDebt(c.CIDCLIENTEPROVEEDOR),
-                    OrderRequestAllowed = c.CBANCREDITOYCOBRANZA == 1 && c.CBANVENTACREDITO == 1,
-                    IgnoreCreditLimit = c.CBANEXCEDERCREDITO == 1
-                }
-            ));
+                    Id = client.CIDCLIENTEPROVEEDOR,
+                    RazonSocial = client.CRAZONSOCIAL,
+                    RFC = client.CRFC,
+                    CreditLimit = client.CLIMITECREDITOCLIENTE,
+                    Debt = await _documentRepo.GetClientDebt(client.CIDCLIENTEPROVEEDOR),
+                    OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1,
+                    IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1
+                });
+            }
+
+            return clientesProveedoresDto;
         }
 
         public async Task<ClienteProveedorDto> GetById(int id)

@@ -18,5 +18,9 @@ namespace Core.Domain.Entities.Weight
 
         [ForeignKey("FK_WeightEntryId")]
         public WeightEntry WeightEntry { get; set; } = null!;
+        public override string ToString()
+        {
+            return $"Weight: {Weight}, Tare: {Tare}, ProductId: {FK_WeightedProductId}, Price: {ProductPrice}";
+        }
     }
 }

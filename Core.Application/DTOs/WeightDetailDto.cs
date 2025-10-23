@@ -1,6 +1,4 @@
-﻿using Core.Domain.Entities;
-
-namespace Core.Application.DTOs
+﻿namespace Core.Application.DTOs
 {
     public class WeightDetailDto
     {
