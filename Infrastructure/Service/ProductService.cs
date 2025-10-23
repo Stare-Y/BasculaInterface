@@ -13,9 +13,9 @@ namespace Infrastructure.Service
             _productRepo = productRepo;
         }
 
-        public async Task<IEnumerable<ProductoDto>> SearchByNameAsync(string name)
+        public async Task<IEnumerable<ProductoDto>> SearchByNameAsync(string name, int page,int sizePage)
         {
-            IEnumerable<Producto> productos = await _productRepo.SearchByNameAsync(name);
+            IEnumerable<Producto> productos = await _productRepo.SearchByNameAsync(name,page,sizePage);
 
             return productos.Select(p => new ProductoDto (p));
         }

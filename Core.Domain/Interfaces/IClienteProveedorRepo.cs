@@ -10,7 +10,7 @@ namespace Core.Domain.Interfaces
         /// <param name="name"></param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="KeyNotFoundException"></exception>
-        Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int top = 50, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int page = 1, int sizePage = 50, CancellationToken cancellationToken = default);
         Task<ClienteProveedor> GetById(int id, CancellationToken cancellationToken = default);
     }
 }
