@@ -90,6 +90,7 @@ public partial class PartnerSelectView : ContentPage
         }
         finally
         {
+            ResultsCollectionView.SelectedItems?.Clear();
             ResultsCollectionView.SelectedItem = null;
             BtnConfirm.IsEnabled = false;
         }

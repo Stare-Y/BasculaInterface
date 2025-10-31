@@ -12,26 +12,37 @@
     <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10">
 
         <!-- Fila de búsqueda -->
-        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" RowDefinitions="*,*" ColumnSpacing="10">
+        <Grid Padding="10"
+              RowDefinitions="Auto,Auto"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="10"
+              RowSpacing="10">
+
+            <!-- Botón Volver (arriba izquierda) -->
             <Button Text="Volver"
+                    Style="{StaticResource HoverButton}"
                     x:Name="BtnBack"
+                    Grid.Row="0"
                     Grid.Column="0"
                     Clicked="OnBackClicked"
-                    IsVisible="True"
-                    Grid.Row="0"
-                    HorizontalOptions="Start"/>
-            <SearchBar x:Name="SearchBar"
-                    Placeholder="Buscar Producto..."
-                    SearchButtonPressed="SearchBar_SearchButtonPressed"
-                    Grid.Column="0"
-                       Grid.Row="1"/>
+                    HorizontalOptions="Start"/> 
 
+            <!-- Botón Confirmar (arriba derecha) -->
             <Button Text="Confirmar"
+                    Style="{StaticResource PrimaryButton}"
                     x:Name="BtnConfirm"
-                    Grid.Column="2"
+                    Grid.Row="0"
+                    Grid.Column="1"
                     Clicked="OnConfirmClicked"
-                    IsEnabled="False"
-                    Grid.Row="1"/>
+                    IsEnabled="False"/>     
+
+            <!-- Barra de búsqueda (ocupa toda la fila 1) -->
+            <SearchBar x:Name="SearchBar"
+               Grid.Row="1"
+               Grid.ColumnSpan="2"
+               Placeholder="Buscar Producto..."
+               PlaceholderColor="Gray"
+               SearchButtonPressed="SearchBar_SearchButtonPressed"/>
         </Grid>
 
         <!-- Resultados -->
@@ -39,27 +50,90 @@
                         x:Name="ResultsCollectionView"
                         SelectionMode="Single"
                         ItemsSource="{Binding Products}"
-                        SelectionChanged="ResultsCollectionView_SelectionChanged">
+                        SelectionChanged="ResultsCollectionView_SelectionChanged" 
+                        Margin="0,0,10,0"
+                        >
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical"
+                           ItemSpacing="2" />
+            </CollectionView.ItemsLayout>
+            
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border Stroke="#CCC"
-                            StrokeThickness="1"
-                            Background="#F7F7F7"
-                            StrokeShape="RoundRectangle 8"
-                            Padding="12">
-                        <Label Text="{Binding Nombre}" TextColor="Black" FontSize="Subtitle"/>
+                        StrokeThickness="1"
+                        Background="White"
+                        StrokeShape="RoundRectangle 3"
+                        Padding="12">
+                      
+                        <Border.Shadow>
+                            <Shadow Brush="Black"
+                                    Offset="2,2"
+                                    Radius="5"
+                                    Opacity="0.1"/>
+                        </Border.Shadow>
+
+
+                        <Grid ColumnDefinitions="30,*,Auto">
+
+                            <!-- RadioButton -->
+                            <!--<RadioButton 
+                                IsEnabled="False"
+                                IsChecked="{Binding ., 
+                                            Converter={StaticResource SelectionConverter}, 
+                                            ConverterParameter={x:Reference ResultsCollectionView}}"/>-->
+
+                            <!-- Nombre -->
+                            <Label x:Name="LabelNombre"
+                           Grid.Column="1"
+                           Text="{Binding Nombre}" 
+                           TextColor="Black" 
+                           FontSize="16"
+                           VerticalOptions="Center"/>
+                        </Grid>
+
+                        <!-- Estados visuales -->
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+                                <VisualState Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Stroke" Value="#CCC"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+
+                                        <!--<Setter TargetName="LabelNombre"
+                                                  Property="TextColor"
+                                                  Value="Blue"/>-->            
+                                        <Setter   Property="Background"  Value="#F0F8FF"/>
+
+                                        <Setter  Property="Stroke"  Value="Blue"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+                                
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
             <CollectionView.EmptyView>
-                <Label Text="No se encontraron productos." 
-                       HorizontalOptions="Center" 
-                       VerticalOptions="Center" 
+                <Grid Padding="10">
+                    
+                    <Label Text="No se encontraron productos."
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
                        TextColor="Gray"
-                       FontSize="Header"
-                       BackgroundColor="Black"/>
+                       FontSize="20"
+                       FontAttributes="Italic"/>    
+                </Grid>
             </CollectionView.EmptyView>
         </CollectionView>
 
     </Grid>
+
+
 </ContentPage>

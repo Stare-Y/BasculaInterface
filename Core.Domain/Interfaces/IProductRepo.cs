@@ -9,7 +9,7 @@ namespace Core.Domain.Interfaces
         /// </summary>
         /// <param name="name"></param>
         /// <exception cref="KeyNotFoundException"></exception>
-        Task<IEnumerable<Producto>> SearchByNameAsync(string name);
+        Task<IEnumerable<Producto>> SearchByNameAsync(string name, int page, int sizePage);
 
         Task<Producto> GetByIdAsync(int id);
     }

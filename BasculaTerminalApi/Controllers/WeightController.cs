@@ -1,6 +1,7 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace BasculaTerminalApi.Controllers
 {
@@ -10,10 +11,12 @@ namespace BasculaTerminalApi.Controllers
     {
         private readonly IWeightService _weightService = null!;
         private readonly IWeightLogisticService _weightLogisticService = null!;
-        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService)
+        private readonly ILogger<WeightController> _logger;
+        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService,ILogger<WeightController> logger)
         {
             _weightService = weightService;
             _weightLogisticService = weightLogisticService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -63,6 +66,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error deleting weight entry with ID {Id}", id);
                 return BadRequest($"Error deleting weight entry: {ex.Message}");
             }
         }
@@ -72,6 +76,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
+
                 bool deleted = await _weightService.DeleteDetailAsync(id);
                 if (!deleted)
                 {
@@ -81,6 +86,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error deleting detail entry with ID {Id}", id);
                 return BadRequest($"Error deleting weight detail: {ex.Message}");
             }
         }
@@ -94,6 +100,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error requesting weight with ID {Id}", deviceId);
                 return BadRequest($"Error requesting weight: {ex.Message}");
             }
         }
@@ -107,6 +114,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error releasing weight with ID {Id}", deviceId);
                 return BadRequest($"Error releasing weight: {ex.Message}");
             }
         }

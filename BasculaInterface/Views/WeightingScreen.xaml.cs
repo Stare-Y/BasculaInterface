@@ -98,12 +98,12 @@ public partial class WeightingScreen : ContentPage
         {
             try
             {
-                TaraLabel.BackgroundColor = Colors.LightBlue;
-                TaraLabel.TextColor = Colors.Black;
+                //TaraLabel.BackgroundColor = Colors.LightBlue;
+                //TaraLabel.TextColor = Colors.Black;
 
                 await viewModel.ConnectSocket();
 
-                BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
+                //BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
                 BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
                 EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
 
@@ -355,7 +355,7 @@ public partial class WeightingScreen : ContentPage
 
                 GridTaraLabel.IsVisible = true;
 
-                BtnCaptureNewWeight.Text = "Registrar Peso Final";
+                CaptureWeightLabel.Text = "Registrar Peso Final";
 
                 BtnCaptureNewWeight.IsVisible = true;
 
