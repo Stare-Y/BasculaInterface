@@ -12,14 +12,18 @@ namespace Infrastructure.Repos
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-        public async Task<IEnumerable<Producto>> SearchByNameAsync(string name)
+        public async Task<IEnumerable<Producto>> SearchByNameAsync(string name, int page, int sizePage)
         {
+            if (page < 1) page = 1;
+
             return await _context.Productos
                 .AsNoTracking()
                 .Where(p => p.CNOMBREPRODUCTO.Contains(name))
+                .Skip((page - 1) * sizePage)    
+                .Take(sizePage)                  
+                .OrderBy(p => p.CNOMBREPRODUCTO) 
                 .ToListAsync();
         }
-        
         public async Task<Producto> GetByIdAsync(int id)
         {
             var producto = await _context.Productos

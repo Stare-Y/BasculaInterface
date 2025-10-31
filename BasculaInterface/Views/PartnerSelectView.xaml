@@ -11,26 +11,37 @@
     <Grid RowDefinitions="Auto,*" ColumnSpacing="10" Padding="10" >
 
         <!-- Fila de búsqueda -->
-        <Grid Grid.Row="0" ColumnDefinitions="9*,1*" RowDefinitions="*,*" ColumnSpacing="10">
-            <Button Text="Volver"
-        x:Name="BtnBack"
-        Grid.Column="0"
-        Clicked="OnBackClicked"
-        IsVisible="True"
-        Grid.Row="0"
-        HorizontalOptions="Start"/>
-            <SearchBar x:Name="SearchBar"
-                Placeholder="Buscar Socio..."
-                SearchButtonPressed="SearchBar_SearchButtonPressed"
-                Grid.Column="0"
-                       Grid.Row="1"/>
+        <Grid Padding="10"
+              RowDefinitions="Auto,Auto"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="10"
+              RowSpacing="10">
 
+            <!-- Botón Volver (arriba izquierda) -->
+            <Button Text="Volver"
+                    Style="{StaticResource HoverButton}"
+                    x:Name="BtnBack"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Clicked="OnBackClicked"
+                    HorizontalOptions="Start"/>
+
+            <!-- Botón Confirmar (arriba derecha) -->
             <Button Text="Confirmar"
-                x:Name="BtnConfirm"
-                Grid.Column="2"
-                Clicked="OnConfirmClicked"
-                IsEnabled="False"
-                    Grid.Row="1"/>
+                    Style="{StaticResource PrimaryButton}"
+                    x:Name="BtnConfirm"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Clicked="OnConfirmClicked"
+                    IsEnabled="False"/>
+
+            <!-- Barra de búsqueda (ocupa toda la fila 1) -->
+            <SearchBar x:Name="SearchBar"
+               Grid.Row="1"
+               Grid.ColumnSpan="2"
+               Placeholder="Buscar Socio..."
+               PlaceholderColor="Gray"
+               SearchButtonPressed="SearchBar_SearchButtonPressed"/>
         </Grid>
 
         <!-- Resultados -->
@@ -38,24 +49,71 @@
                     x:Name="ResultsCollectionView"
                     SelectionMode="Single"
                     ItemsSource="{Binding Partners}"
-                    SelectionChanged="ResultsCollectionView_SelectionChanged">
+                    SelectionChanged="ResultsCollectionView_SelectionChanged"
+                    Margin="0,0,10,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical"
+               ItemSpacing="2" />
+            </CollectionView.ItemsLayout>
+            
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border  Stroke="#CCC"
                             StrokeThickness="1"
-                            Background="#F7F7F7"
-                            StrokeShape="RoundRectangle 21"
+                            Background="White"
+                            StrokeShape="RoundRectangle 3"
                             Padding="12">
-                        <Label Text="{Binding RazonSocial}" TextColor="Black"/>
+                        <Border.Shadow>
+                            <Shadow Brush="Black"
+                                Offset="2,2"
+                                Radius="5"
+                                Opacity="0.1"/>
+                        </Border.Shadow>
+
+
+                        <Grid ColumnDefinitions="30,*,Auto">
+
+                            <!-- Nombre -->
+                            <Label x:Name="LabelNombre"
+                                   Grid.Column="1"
+                                   Text="{Binding RazonSocial}" 
+                                   TextColor="Black" 
+                                   FontSize="16"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+
+                        <!-- Estados visuales -->
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup Name="CommonStates">
+                                <VisualState Name="Normal"/>
+                                <VisualState Name="Selected">
+                                    <VisualState.Setters>
+
+                                        <!--<Setter TargetName="LabelNombre"
+                          Property="TextColor"
+                          Value="Blue"/>-->
+                                        <Setter   Property="Background"  Value="#F0F8FF"/>
+
+                                        <Setter  Property="Stroke"  Value="Blue"/>
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+            
             <CollectionView.EmptyView>
-                <Label Text="No se encontraron clientes con ese nombre." 
-                        HorizontalOptions="Center" 
-                        VerticalOptions="Center" 
-                        TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}}"
-                        FontSize="Subtitle"/>
+
+                <Grid>
+                    <Label Text="No se encontraron clientes con ese nombre." 
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center"
+                         TextColor="Gray"
+                         FontSize="20"
+                         FontAttributes="Italic"/>
+                </Grid>
             </CollectionView.EmptyView>
         </CollectionView>
 

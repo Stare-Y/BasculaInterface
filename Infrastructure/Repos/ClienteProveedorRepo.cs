@@ -1,4 +1,5 @@
-﻿using Core.Domain.Entities.ContpaqiSQL;
+﻿using Azure;
+using Core.Domain.Entities.ContpaqiSQL;
 using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +15,15 @@ namespace Infrastructure.Repos
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int top = 50, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int page = 1,int sizePage = 50, CancellationToken cancellationToken = default)
         {
             return await _context.ClientesProveedores
                 .AsNoTracking()
                 .Where(
                 cp => cp.CRAZONSOCIAL.Contains(name))
-                .Take(top)
+                .Skip((page - 1) * sizePage)
+                .Take(sizePage)
+                .OrderBy(p => p.CRAZONSOCIAL)
                 .ToListAsync(cancellationToken);
         }
 

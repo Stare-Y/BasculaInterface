@@ -1,6 +1,7 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BasculaTerminalApi.Controllers
 {
@@ -46,6 +47,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (Exception ex)
             {
+                //_logger.LogError(ex, "Error printing ticket with {ticket}", ticket);
                 return BadRequest($"Error printing ticket: {ex.Message}");
             }
         }
