@@ -12,7 +12,7 @@ namespace BasculaTerminalApi.Controllers
         private readonly IWeightService _weightService = null!;
         private readonly IWeightLogisticService _weightLogisticService = null!;
         private readonly ILogger<WeightController> _logger;
-        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService,ILogger<WeightController> logger)
+        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService, ILogger<WeightController> logger)
         {
             _weightService = weightService;
             _weightLogisticService = weightLogisticService;
@@ -22,13 +22,13 @@ namespace BasculaTerminalApi.Controllers
         [HttpPost]
         public async Task<ActionResult<WeightEntryDto>> Create([FromBody] WeightEntryDto weightEntryDto)
         {
-            return Ok( await _weightService.CreateAsync(weightEntryDto));
+            return Ok(await _weightService.CreateAsync(weightEntryDto));
         }
 
         [HttpGet("ById")]
-        public async Task<ActionResult<WeightEntryDto>> GetById([FromQuery]int id)
+        public async Task<ActionResult<WeightEntryDto>> GetById([FromQuery] int id)
         {
-            return  Ok(await _weightService.GetByIdAsync(id));
+            return Ok(await _weightService.GetByIdAsync(id));
         }
 
         [HttpGet("Pending")]
@@ -43,6 +43,18 @@ namespace BasculaTerminalApi.Controllers
             return Ok(await _weightService.GetAllAsync(top, page));
         }
 
+        [HttpGet("All/ByPartner")]
+        public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllByPartner([FromQuery] int partnerId, [FromQuery] int top = 30, [FromQuery] uint page = 1)
+        {
+            return Ok(await _weightService.GetAllByPartnerAsync(partnerId, top, page));
+        }
+
+        [HttpGet("All/ByDateRange")]
+        public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllByDateRange([FromBody] GetByDateRangeCommand command, [FromQuery] int top = 30, [FromQuery] uint page = 1)
+        {
+            return Ok(await _weightService.GetByDateRange(command.startDate, command.endDate, top, page));
+        }
+
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] WeightEntryDto weightEntryDto)
         {
@@ -52,7 +64,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery]int id)
+        public async Task<IActionResult> Delete([FromQuery] int id)
         {
             try
             {
@@ -72,7 +84,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpDelete("Detail")]
-        public async Task<IActionResult> DeleteDetail([FromQuery]int id)
+        public async Task<IActionResult> DeleteDetail([FromQuery] int id)
         {
             try
             {
@@ -92,7 +104,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPut("CanWeight")]
-        public async Task<ActionResult<bool>> RequestWeight([FromQuery]string deviceId)
+        public async Task<ActionResult<bool>> RequestWeight([FromQuery] string deviceId)
         {
             try
             {
@@ -106,7 +118,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPut("ReleaseWeight")]
-        public async Task<ActionResult<bool>> ReleaseWeight([FromQuery]string deviceId)
+        public async Task<ActionResult<bool>> ReleaseWeight([FromQuery] string deviceId)
         {
             try
             {

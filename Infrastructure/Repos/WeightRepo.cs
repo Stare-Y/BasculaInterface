@@ -38,12 +38,41 @@ namespace Infrastructure.Repos
             return entry;
         }
 
+        public async Task<IEnumerable<WeightEntry>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
+        {
+            DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+            DateTime endDateTime = endDate.ToDateTime(TimeOnly.MaxValue);
+
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Include(w => w.WeightDetails)
+                .OrderByDescending(w => w.ConcludeDate)
+                .Where(w =>
+                    w.CreatedAt > startDateTime &&
+                    w.CreatedAt < endDateTime
+                    )
+                .Skip((int)page - 1)
+                .Take(top)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 30, uint page = 1)
         {
             return await _context.WeightEntries
                 .AsNoTracking()
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
+                .OrderByDescending(w => w.ConcludeDate)
+                .Skip((int)page - 1)
+                .Take(top)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<WeightEntry>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1)
+        {
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Include(w => w.WeightDetails)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
                 .Take(top)
@@ -65,7 +94,7 @@ namespace Infrastructure.Repos
 
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
-            if(weightEntry.Id <= 0)
+            if (weightEntry.Id <= 0)
             {
                 throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
             }
