@@ -15,13 +15,13 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("ByName")]
-        public async Task<ActionResult<IEnumerable<ClienteProveedorDto>>> SearchByName([FromQuery] string name)
+        public async Task<ActionResult<IEnumerable<ClienteProveedorDto>>> SearchByName([FromQuery]string name)
         {
             return Ok(await _clienteProveedorService.SearchByName(name));
         }
 
         [HttpGet("ById")]
-        public async Task<ActionResult<ClienteProveedorDto>> GetById([FromQuery] int id)
+        public async Task<ActionResult<ClienteProveedorDto>> GetById([FromQuery]int id)
         {
             return Ok(await _clienteProveedorService.GetById(id));
         }

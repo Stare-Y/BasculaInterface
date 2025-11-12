@@ -32,16 +32,6 @@ namespace Infrastructure.Service
             return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllAsync(top, page));
         }
 
-        public async Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
-        {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page));
-        }
-
-        public async Task<IEnumerable<WeightEntryDto>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1)
-        {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllByPartnerAsync(partnerId, top, page));
-        }
-
         public async Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1)
         {
             return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetPendingWeights(top, page));
