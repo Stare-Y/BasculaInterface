@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net8.0-android;net8.0-windows10.0.19041.0</TargetFrameworks>
+		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>-->
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 
@@ -55,18 +55,18 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
-		<OutputType>WinExe</OutputType>
+		<!--<OutputType>WinExe</OutputType>-->
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	
 		<!-- Publish as single file and self-contained -->
 		<SelfContained>true</SelfContained>
-		<PublishSingleFile>true</PublishSingleFile>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		
-		<!-- avoid MSIX -->
-		<WindowsPackageType>None</WindowsPackageType>
-		
-		<!-- Name and title-->
+		 <!--avoid MSIX--> 
+		<!--<WindowsPackageType>None</WindowsPackageType>-->
+		<!--<PublishSingleFile>true</PublishSingleFile>-->
+
+		<!--Name and title-->
 		<AssemblyName>BasculaInterface</AssemblyName>
 		<ApplicationTitle>BasculaInterface</ApplicationTitle>
 
