@@ -4,7 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-    Title="Pedidos en Proceso">
+    Title="Pedidos en Proceso"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
     <ContentPage.BindingContext>
         <vm:PendingWeightsViewModel />
     </ContentPage.BindingContext>
@@ -12,7 +14,8 @@
 
     <Grid
         Padding="{OnPlatform WinUI=30}"
-        BackgroundColor="{StaticResource 1}"
+        BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                          Dark={StaticResource BlackTheme}}"
         ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
         ColumnSpacing="{OnPlatform WinUI=30}"
         RowDefinitions="{OnPlatform Android='50,*,10,75'}">
@@ -24,15 +27,19 @@
             IsVisible="{OnPlatform Android=True,
                                    WinUI=False}"
             VerticalOptions="Start"
-            Color="{StaticResource 4}" />
+            Color="{AppThemeBinding Light={StaticResource 4},
+                                    Dark={StaticResource Gray}}" />
 
         <Border
             Padding="10"
-            BackgroundColor="#80D3D3D3"
+            BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                              Dark={StaticResource BlackGray}}"
             IsVisible="{OnPlatform Android=False,
                                    WinUI=True}"
+            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
             StrokeShape="RoundRectangle 30"
             StrokeThickness="0">
+
 
             <Grid
                 Grid.Row="{OnPlatform Android=3}"
@@ -67,6 +74,8 @@
                     x:Name="BtnNewWeighProcess"
                     Grid.Row="{OnPlatform WinUI=0}"
                     Grid.Column="{OnPlatform Android=2}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                      Dark={StaticResource 2}}"
                     Clicked="BtnNewWeighProcess_Clicked"
                     IsVisible="False"
                     Style="{StaticResource BotonPrincipal}"
@@ -111,9 +120,9 @@
             <Border
                 Padding="{OnPlatform WinUI=15}"
                 Stroke="{OnPlatform Android={StaticResource 1},
-                                    WinUI={StaticResource 2}}"
+                                    WinUI={StaticResource BlackTheme}}"
                 StrokeShape="RoundRectangle 30"
-                StrokeThickness="2">
+                StrokeThickness="0">
 
                 <RefreshView
                     x:Name="RefreshViewPendingWeights"
@@ -141,55 +150,68 @@
                                 <DataTemplate>
                                     <Border
                                         x:Name="BtnSeleccionar"
-                                        Padding="12"
+                                        Padding="15"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                                          Dark={StaticResource BlackGray}}"
+                                        HeightRequest="{OnPlatform Android=75,
+                                                                   WinUI=110}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
                                         StrokeShape="RoundRectangle 30"
-                                        StrokeThickness="2">
-                                        <Grid ColumnDefinitions="3*,*">
+                                        StrokeThickness="0">
+                                        <Grid ColumnDefinitions="2.5*,*">
                                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                                 <Label
+                                                    x:Name="lblRazonSocial"
                                                     FontAttributes="Bold"
                                                     FontSize="{OnPlatform WinUI=26,
                                                                           Android=15}"
                                                     HorizontalOptions="Start"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding Partner.RazonSocial}"
-                                                    TextColor="{StaticResource 4}" />
+                                                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                                                Dark={StaticResource 2}}" />
 
                                                 <HorizontalStackLayout>
                                                     <Label
+                                                        x:Name="lblPlacas"
                                                         FontSize="{OnPlatform WinUI=26,
                                                                               Android=12}"
                                                         HorizontalOptions="Start"
                                                         Style="{StaticResource Label}"
                                                         Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0} | '}"
-                                                        TextColor="{StaticResource Black}" />
+                                                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                    Dark={StaticResource 1}}" />
                                                     <Label
+                                                        x:Name="lblNotas"
                                                         FontSize="{OnPlatform WinUI=26,
                                                                               Android=12}"
                                                         HorizontalOptions="Start"
                                                         Style="{StaticResource Label}"
                                                         Text="{Binding WeightEntry.Notes, StringFormat=' Notas: {0}.'}"
-                                                        TextColor="{StaticResource Black}" />
+                                                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                    Dark={StaticResource 1}}" />
                                                 </HorizontalStackLayout>
                                             </VerticalStackLayout>
 
                                             <VerticalStackLayout Grid.Column="1" Spacing="4">
 
                                                 <Label
-                                                    Margin="0,20,0,0"
+                                                    x:Name="lblTara"
+                                                    Margin="0,0,0,0"
                                                     FontAttributes="Bold"
                                                     FontSize="{OnPlatform WinUI=22,
-                                                                          Android=14}"
+                                                                          Android=12}"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0}'}"
-                                                    TextColor="{StaticResource Black}" />
+                                                    Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0} kg'}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}" />
 
                                                 <Label
+                                                    x:Name="lblHistory"
                                                     FontSize="{OnPlatform WinUI=22,
-                                                                          Android=8}"
+                                                                          Android=10}"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding HistoryText}"
@@ -204,14 +226,14 @@
                                                     <VisualState x:Name="Normal" />
                                                     <VisualState x:Name="PointerOver">
                                                         <VisualState.Setters>
-                                                            <Setter Property="BackgroundColor" Value="LightGray" />
+                                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=LightGray, Dark={StaticResource WhiteGray}}" />
                                                             <Setter Property="Stroke" Value="{StaticResource 2}" />
                                                         </VisualState.Setters>
                                                     </VisualState>
 
                                                     <VisualState x:Name="Pressed">
                                                         <VisualState.Setters>
-                                                            <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                                                             <Setter Property="Stroke" Value="{StaticResource 2}" />
                                                         </VisualState.Setters>
                                                     </VisualState>
@@ -231,7 +253,8 @@
                                     HorizontalOptions="Center"
                                     Style="{StaticResource Label}"
                                     Text="No hay pedidos pendientes"
-                                    TextColor="White"
+                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                Dark={StaticResource 1}}"
                                     VerticalOptions="Center" />
 
                             </CollectionView.EmptyView>
@@ -248,18 +271,37 @@
         <Grid
             Grid.Row="{OnPlatform Android=0}"
             Padding="10"
-            BackgroundColor="{StaticResource 4}"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                              Dark={StaticResource 2}}"
+            ColumnDefinitions="Auto, Auto"
+            ColumnSpacing="90"
             HorizontalOptions="Fill"
             IsVisible="{OnPlatform Android=True,
                                    WinUI=False}">
 
+            <Label
+                x:Name="lblRazonSocial"
+                Grid.Column="1"
+                FontAttributes="Bold"
+                FontSize="18"
+                HorizontalOptions="Center"
+                Style="{StaticResource Label}"
+                Text="Lista de Pedidos "
+                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                            Dark={StaticResource 1}}" />
+
+
             <Border
                 x:Name="BtnExitAndroid"
-                BackgroundColor="{StaticResource 4}"
+                Grid.Column="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                  Dark={StaticResource 2}}"
                 HeightRequest="40"
                 HorizontalOptions="Start"
-                Stroke="{StaticResource 4}"
+                Stroke="{AppThemeBinding Light={StaticResource 4},
+                                         Dark={StaticResource 2}}"
                 StrokeShape="RoundRectangle 60"
+                StrokeThickness="2"
                 VerticalOptions="Center"
                 WidthRequest="40">
                 <Border.GestureRecognizers>
@@ -267,11 +309,28 @@
                 </Border.GestureRecognizers>
 
                 <Image
+                    x:Name="BtnBack"
                     Aspect="AspectFit"
                     HeightRequest="30"
                     Source="back.png"
                     WidthRequest="30" />
 
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="BtnBack" Property="Image.Source" Value="back2.png" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
             </Border>
 
         </Grid>
