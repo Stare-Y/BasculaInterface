@@ -14,6 +14,11 @@ public partial class PartnerSelectView : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
+
+        if (string.IsNullOrWhiteSpace(LabelResultado.Text))
+        {
+            LabelResultado.Text = "Sin socio seleccionado";
+        }
     }
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
@@ -98,12 +103,14 @@ public partial class PartnerSelectView : ContentPage
 
     private void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (ResultsCollectionView.SelectedItem is not null)
+        if (e.CurrentSelection.FirstOrDefault() is ClienteProveedorDto socio)
         {
+            LabelResultado.Text = socio.RazonSocial;
             BtnConfirm.IsEnabled = true;
         }
         else
         {
+            LabelResultado.Text = "Ningún producto seleccionado";
             BtnConfirm.IsEnabled = false;
         }
     }

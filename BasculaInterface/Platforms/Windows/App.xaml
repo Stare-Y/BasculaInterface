@@ -11,7 +11,7 @@
                 <Border
                     Margin="0,0,0,0"
                     VerticalAlignment="Stretch"
-                    Background="#14134F"
+                    Background="#C89F69"
                     Canvas.ZIndex="1">
                     <TextBlock
                         HorizontalAlignment="Center"
