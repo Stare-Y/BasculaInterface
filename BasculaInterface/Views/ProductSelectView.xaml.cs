@@ -13,7 +13,12 @@ public partial class ProductSelectView : ContentPage
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
-	}
+
+        if (string.IsNullOrWhiteSpace(LabelResultado.Text))
+        {
+            LabelResultado.Text = "Sin producto seleccionado";
+        }
+    }
 
 	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) { }
 
@@ -54,8 +59,10 @@ public partial class ProductSelectView : ContentPage
         }
     }
 
+
     private void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+
         if (ResultsCollectionView.SelectedItem is not null)
         {
             BtnConfirm.IsEnabled = true;
@@ -63,6 +70,7 @@ public partial class ProductSelectView : ContentPage
             // Marcar el RadioButton del item seleccionado:
             if (e.CurrentSelection.FirstOrDefault() is ProductoDto seleccionado)
             {
+                LabelResultado.Text = seleccionado.Nombre;
                 // busca el contenedor visual del item
                 var container = (sender as CollectionView)?.FindByName<RadioButton>("RadioCheck");
                 if (container != null)
@@ -72,6 +80,7 @@ public partial class ProductSelectView : ContentPage
         else
         {
             BtnConfirm.IsEnabled = false;
+            LabelResultado.Text = "Ningún producto seleccionado";
 
         }
     }

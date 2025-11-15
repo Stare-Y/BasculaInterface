@@ -4,15 +4,21 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-    Title="PartnerSelectView">
+    Title="PartnerSelectView"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
+
     <ContentPage.BindingContext>
         <vm:PartnerSelectorViewModel />
     </ContentPage.BindingContext>
 
     <Grid
-        Padding="10"
-        ColumnSpacing="10"
-        RowDefinitions="Auto,*">
+        Padding="30"
+        BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                          Dark={StaticResource BlackTheme}}"
+        HorizontalOptions="Fill"
+        RowDefinitions="auto,50,*,100"
+        VerticalOptions="Fill">
 
         <!--  Fila de búsqueda  -->
         <Grid
@@ -22,112 +28,293 @@
             RowDefinitions="Auto,Auto"
             RowSpacing="10">
 
-            <!--  Botón Volver (arriba izquierda)  -->
-            <Button
-                x:Name="BtnBack"
-                Grid.Row="0"
-                Grid.Column="0"
-                Clicked="OnBackClicked"
-                HorizontalOptions="Start"
-                Style="{StaticResource HoverButton}"
-                Text="Volver" />
+            <!--  Fila de búsqueda  -->
+            <Grid Grid.Row="0" Padding="10">
 
-            <!--  Botón Confirmar (arriba derecha)  -->
-            <Button
-                x:Name="BtnConfirm"
-                Grid.Row="0"
-                Grid.Column="1"
-                Clicked="OnConfirmClicked"
-                IsEnabled="False"
-                Style="{StaticResource PrimaryButton}"
-                Text="Confirmar" />
-
-            <!--  Barra de búsqueda (ocupa toda la fila 1)  -->
-            <SearchBar
-                x:Name="SearchBar"
-                Grid.Row="1"
-                Grid.ColumnSpan="2"
-                Placeholder="Buscar Socio..."
-                PlaceholderColor="Gray"
-                SearchButtonPressed="SearchBar_SearchButtonPressed" />
+                <!--  Barra de búsqueda  -->
+                <SearchBar
+                    x:Name="SearchBar"
+                    Grid.Row="1"
+                    HorizontalOptions="Fill"
+                    Placeholder="Buscar Socio..."
+                    PlaceholderColor="Gray"
+                    SearchButtonPressed="SearchBar_SearchButtonPressed"
+                    Style="{StaticResource SearchBarDatos}" />
+            </Grid>
         </Grid>
 
-        <!--  Resultados  -->
-        <CollectionView
-            x:Name="ResultsCollectionView"
+        <HorizontalStackLayout
             Grid.Row="1"
-            Margin="0,0,10,0"
-            ItemsSource="{Binding Partners}"
-            SelectionChanged="ResultsCollectionView_SelectionChanged"
-            SelectionMode="Single">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout ItemSpacing="2" Orientation="Vertical" />
-            </CollectionView.ItemsLayout>
+            HorizontalOptions="Center"
+            Spacing="10"
+            VerticalOptions="Center">
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border
-                        Padding="12"
-                        Background="White"
-                        Stroke="#CCC"
-                        StrokeShape="RoundRectangle 3"
-                        StrokeThickness="1">
-                        <Border.Shadow>
-                            <Shadow
-                                Brush="Black"
-                                Opacity="0.1"
-                                Radius="5"
-                                Offset="2,2" />
-                        </Border.Shadow>
+            <Label
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=32}"
+                HorizontalOptions="Center"
+                Style="{StaticResource Label}"
+                Text="Socio seleccionado: "
+                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                            Dark={StaticResource 1}}"
+                VerticalOptions="Center" />
+
+            <Label
+                x:Name="LabelResultado"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=32}"
+                HorizontalOptions="Center"
+                Style="{StaticResource Label}"
+                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                            Dark={StaticResource 2}}"
+                VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+        <!--  Resultados  -->
+
+        <Grid
+            Grid.Row="2"
+            Padding="30"
+            HorizontalOptions="{OnPlatform Android='Center'}"
+            VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+            <CollectionView
+                x:Name="ResultsCollectionView"
+                ItemsSource="{Binding Partners}"
+                SelectionChanged="ResultsCollectionView_SelectionChanged"
+                SelectionMode="Single">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout ItemSpacing="7.5" Orientation="Vertical" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            x:Name="selectedResult"
+                            Padding="15"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                              Dark={StaticResource BlackGray}}"
+                            HeightRequest="{OnPlatform Android=50,
+                                                       WinUI=75}"
+                            Shadow="{StaticResource DefaultShadow}"
+                            Stroke="{OnPlatform Android={StaticResource 4},
+                                                WinUI={StaticResource 1}}"
+                            StrokeShape="RoundRectangle 30"
+                            StrokeThickness="0">
+                            <Grid ColumnDefinitions="30,*,Auto">
+                                <!--  Nombre  -->
+                                <Label
+                                    x:Name="LabelNombre"
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=11,
+                                                          WinUI=25}"
+                                    HorizontalOptions="Start"
+                                    Style="{StaticResource Label}"
+                                    Text="{Binding RazonSocial}"
+                                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                                Dark={StaticResource 2}}"
+                                    VerticalOptions="Center" />
+                            </Grid>
 
 
-                        <Grid ColumnDefinitions="30,*,Auto">
+                            <!--  Estados visuales  -->
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup Name="SelectionStates">
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 4}}" />
+                                            <Setter TargetName="LabelNombre" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 2}, Dark={StaticResource 1}}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
 
-                            <!--  Nombre  -->
-                            <Label
-                                x:Name="LabelNombre"
-                                Grid.Column="1"
-                                FontSize="16"
-                                Text="{Binding RazonSocial}"
-                                TextColor="Black"
-                                VerticalOptions="Center" />
-                        </Grid>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=LightGray, Dark={StaticResource WhiteGray}}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Normal" />
 
-                        <!--  Estados visuales  -->
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroup Name="CommonStates">
-                                <VisualState Name="Normal" />
-                                <VisualState Name="Selected">
-                                    <VisualState.Setters>
 
-                                        <!--<Setter TargetName="LabelNombre"
-                          Property="TextColor"
-                          Value="Blue"/>-->
-                                        <Setter Property="Background" Value="#F0F8FF" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
 
-                                        <Setter Property="Stroke" Value="Blue" />
-                                    </VisualState.Setters>
-                                </VisualState>
+                <CollectionView.EmptyView>
 
-                            </VisualStateGroup>
-                        </VisualStateManager.VisualStateGroups>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
+                    <Grid>
+                        <Label
+                            FontAttributes="Italic"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="No se encontraron clientes con ese nombre."
+                            TextColor="Gray"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </CollectionView.EmptyView>
+            </CollectionView>
 
-            <CollectionView.EmptyView>
+        </Grid>
 
-                <Grid>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,*">
+
+            <Border
+                x:Name="BtnBack"
+                Grid.Column="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                  Dark={StaticResource BlackGray}}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnBackClicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="BackIcon"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=25,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="back2.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=25,
+                                                  WinUI=50}" />
+
                     <Label
-                        FontAttributes="Italic"
-                        FontSize="20"
-                        HorizontalOptions="Center"
-                        Text="No se encontraron clientes con ese nombre."
-                        TextColor="Gray"
-                        VerticalOptions="Center" />
-                </Grid>
-            </CollectionView.EmptyView>
-        </CollectionView>
+                        x:Name="BackLabel"
+                        Margin="{OnPlatform Android='0,-5,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Volver"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="BackIcon" Property="Image.Source" Value="back.png" />
+                                    <Setter TargetName="BackLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="DeleteLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+
+            <Border
+                x:Name="BtnConfirm"
+                Grid.Column="1"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                  Dark={StaticResource BlackGray}}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Center"
+                IsEnabled="False"
+                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                    Android={StaticResource AndroidShadow}}"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=100,
+                                          WinUI=250}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnConfirmClicked" />
+                </Border.GestureRecognizers>
+
+                <VerticalStackLayout
+                    HorizontalOptions="Fill"
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image
+                        x:Name="AddIcon"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=25,
+                                                   WinUI=50}"
+                        HorizontalOptions="Fill"
+                        Source="addproduct.png"
+                        VerticalOptions="Fill"
+                        WidthRequest="{OnPlatform Android=25,
+                                                  WinUI=50}" />
+
+                    <Label
+                        x:Name="AddLabel"
+                        Margin="{OnPlatform Android='0,-5,0,0'}"
+                        FontAttributes="Bold"
+                        FontSize="{OnPlatform Android=8,
+                                              WinUI=16}"
+                        Style="{StaticResource Label}"
+                        Text="Confirmar Producto"
+                        TextColor="{StaticResource Black}" />
+
+                </VerticalStackLayout>
+
+
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter TargetName="AddIcon" Property="Image.Source" Value="addproduct2.png" />
+                                    <Setter TargetName="AddLabel" Property="Label.TextColor" Value="{StaticResource 1}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 1}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    <Setter TargetName="DeleteLabel" Property="Label.TextColor" Value="{StaticResource 4}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
+
+        </Grid>
 
     </Grid>
 </ContentPage>

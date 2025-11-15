@@ -25,6 +25,12 @@
                 Radius="1"
                 Offset="0,4" />
 
+            <Shadow
+                x:Key="AndroidShadow"
+                Opacity="0.0"
+                Radius="0"
+                Offset="0,0" />
+
             <Style x:Key="Logo" TargetType="Image">
                 <Setter Property="Aspect" Value="AspectFill" />
                 <Setter Property="VerticalOptions" Value="Center" />
@@ -338,6 +344,36 @@
                 </Style.Triggers>
 
             </Style>
+
+            <Style x:Key="SearchBarDatos" TargetType="SearchBar">
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
+                <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 1}}" />
+                <Setter Property="FontFamily" Value="Montserrat" />
+                <Setter Property="FontSize" Value="{OnPlatform Android=18, WinUI=24}" />
+                <Setter Property="CancelButtonColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
+
+                <Style.Triggers>
+
+                    <!--  Focused  -->
+                    <Trigger TargetType="SearchBar" Property="IsFocused" Value="True">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 2}, Dark={StaticResource 1}}" />
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 1}}" />
+                    </Trigger>
+
+                    <!--  Not Focused  -->
+                    <Trigger TargetType="SearchBar" Property="IsFocused" Value="False">
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource Black}}" />
+                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
+                        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource Gray}}" />
+                    </Trigger>
+
+                </Style.Triggers>
+
+            </Style>
+
 
         </ResourceDictionary>
     </Application.Resources>
