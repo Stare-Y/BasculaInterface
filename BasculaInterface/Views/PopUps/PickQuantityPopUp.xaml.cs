@@ -4,13 +4,39 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class PickQuantityPopUp : Popup
 {
-    public PickQuantityPopUp(string product = "Elije la cantidad para el producto")
-	{
-		InitializeComponent();
+    private string _product = "Elije la cantidad para el producto";
 
-		ProductNameLabel.Text = product;
-	}
+    public string Product
+    {
+        get => _product;
+        set
+        {
+            _product = value;
+            ProductNameLabel.Text = _product; 
+        }
+    }
 
+    public PickQuantityPopUp()
+    {
+        InitializeComponent();
+        ApplyProductName();
+    }
+
+    public PickQuantityPopUp(string product)
+    {
+        InitializeComponent();
+
+        Product = string.IsNullOrWhiteSpace(product)
+            ? "Elije la cantidad para el producto"
+            : product;
+
+        ApplyProductName();
+    }
+
+    private void ApplyProductName()
+    {
+        ProductNameLabel.Text = Product;
+    }
     protected override void OnParentSet()
     {
         base.OnParentSet();

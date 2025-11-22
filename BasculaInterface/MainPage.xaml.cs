@@ -9,7 +9,7 @@ namespace BasculaInterface
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         private CancellationTokenSource? _cancellationTokenSource = null;
-        private WaitPopUp? _popup;
+        private WaitPopUp _popup;
         public MainPage()
         {
             InitializeComponent();
@@ -30,8 +30,8 @@ namespace BasculaInterface
             {
                 CheckBoxSecondaryTerminal.IsChecked = false;
             }
+            _popup = new WaitPopUp();
         }
-
         protected override void OnAppearing()
         {
             base.OnAppearing();
@@ -47,8 +47,7 @@ namespace BasculaInterface
 
         private void DisplayWaitPopUp(string message = "Cargando, espere")
         {
-            _popup = new WaitPopUp(message);
-
+            _popup.Message = message;
             this.ShowPopup(_popup);
         }
 

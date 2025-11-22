@@ -10,7 +10,8 @@ namespace BasculaInterface.Views;
 public partial class DetailedWeightView : ContentPage
 {
     private bool _entriesChanged = false;
-    private WaitPopUp? _popup;
+    private WaitPopUp? _popup { get; set; }
+    private PickQuantityPopUp _pickPopup { get; set; }
     public DetailedWeightView(DetailedWeightViewModel viewModel)
     {
         InitializeComponent();
@@ -21,9 +22,14 @@ public partial class DetailedWeightView : ContentPage
             BtnNewEntry.IsVisible = false;
             BtnFinishWeight.IsVisible = false;
         }
+        _pickPopup = new PickQuantityPopUp();
+        _popup = new WaitPopUp();
     }
 
-    public DetailedWeightView() { }
+    public DetailedWeightView() {
+        _pickPopup = new PickQuantityPopUp();
+        _popup = new WaitPopUp();
+    }
 
     protected override async void OnAppearing()
     {
@@ -74,7 +80,8 @@ public partial class DetailedWeightView : ContentPage
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
+        if (_popup is null) _popup = new WaitPopUp();
+        _popup.Message = message;
 
         this.ShowPopup(_popup);
     }
@@ -205,8 +212,9 @@ public partial class DetailedWeightView : ContentPage
             {
                 throw new InvalidOperationException("No se ha seleccionado un socio, es necesario para validar si se puede continuar con su pedido.");
             }
-            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
-            var result = await this.ShowPopupAsync(quantityPopUp);
+            /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
+            _pickPopup.Product = product.Nombre;
+            var result = await this.ShowPopupAsync(_pickPopup);
 
             double qty = 0;
 

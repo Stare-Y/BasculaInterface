@@ -19,6 +19,7 @@ public partial class PartnerSelectView : ContentPage
         {
             LabelResultado.Text = "Sin socio seleccionado";
         }
+        _popup = new WaitPopUp();
     }
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
@@ -31,8 +32,8 @@ public partial class PartnerSelectView : ContentPage
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
-
+        if (_popup is null) _popup = new WaitPopUp();
+        _popup.Message = message;
         this.ShowPopup(_popup);
     }
 

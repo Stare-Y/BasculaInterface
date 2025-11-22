@@ -7,7 +7,6 @@
     Title="DetailedWeightView"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
-
     <ContentPage.BindingContext>
         <vm:DetailedWeightViewModel />
     </ContentPage.BindingContext>
@@ -20,6 +19,7 @@
         RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
                                     WinUI='100,Auto,100,*,Auto,Auto'}"
         RowSpacing="15">
+
 
         <Grid
             Grid.Row="0"
