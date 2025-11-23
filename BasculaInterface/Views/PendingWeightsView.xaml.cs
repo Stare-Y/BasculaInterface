@@ -17,6 +17,7 @@ public partial class PendingWeightsView : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+        BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
     }
 
     public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
@@ -35,7 +36,7 @@ public partial class PendingWeightsView : ContentPage
 
                 if (!MauiProgram.IsSecondaryTerminal)
                 {
-                    BtnNewWeighProcess.IsVisible = true;
+                    BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
                     BtnRefresh.IsVisible = true;
                 }
 
@@ -125,7 +126,7 @@ public partial class PendingWeightsView : ContentPage
 
     private async Task Reconect()
     {
-        if(BindingContext is PendingWeightsViewModel viewModel)
+        if (BindingContext is PendingWeightsViewModel viewModel)
         {
             if (EntryHost.Text.Contains("http"))
             {
@@ -198,7 +199,7 @@ public partial class PendingWeightsView : ContentPage
         }
         catch (Exception ex)
         {
-            // Manejar cualquier otra excepción
+            // Manejar cualquier otra excepciï¿½n
             await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
         }
     }
@@ -215,7 +216,7 @@ public partial class PendingWeightsView : ContentPage
             _cancellationTokenSource = null;
             if (string.IsNullOrEmpty(EntryHost.Text))
             {
-                await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
+                await DisplayAlert("Error", "La URL del host no puede estar vacï¿½a.", "OK");
                 return;
             }
             await Reconect();
@@ -228,7 +229,7 @@ public partial class PendingWeightsView : ContentPage
         await BtnExitAndroid.FadeTo(1, 200);
 
         BtnExit.Opacity = 0;
-        await BtnExit.FadeTo(1, 200); 
+        await BtnExit.FadeTo(1, 200);
 
         await Shell.Current.Navigation.PopAsync();
     }
