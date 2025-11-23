@@ -91,6 +91,15 @@
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <AndroidResource Remove="Views\Controls\**" />
+	  <Compile Remove="Views\Controls\**" />
+	  <EmbeddedResource Remove="Views\Controls\**" />
+	  <MauiCss Remove="Views\Controls\**" />
+	  <MauiXaml Remove="Views\Controls\**" />
+	  <None Remove="Views\Controls\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="Config\settings.json" />
@@ -138,10 +147,6 @@
 	  <MauiXaml Update="Views\WeightingScreen.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Views\Controls\" />
 	</ItemGroup>
 
 </Project>
