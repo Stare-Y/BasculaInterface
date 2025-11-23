@@ -28,7 +28,6 @@
                 FontAttributes="Bold"
                 FontSize="{OnPlatform Android=10,
                                       WinUI=22}"
-                Shadow="{StaticResource lblShadow}"
                 Style="{StaticResource Label}"
                 Text="{Binding Estado, StringFormat='Estado: {0}'}"
                 TextColor="{AppThemeBinding Light={StaticResource 4},
@@ -42,7 +41,6 @@
                 FontSize="{OnPlatform Android=15,
                                       WinUI=30}"
                 HorizontalOptions="Center"
-                Shadow="{StaticResource lblShadow}"
                 Style="{StaticResource Label}"
                 Text="{Binding Partner.RazonSocial}"
                 TextColor="{AppThemeBinding Light={StaticResource 4},
@@ -156,7 +154,6 @@
                     FontAttributes="Bold"
                     FontSize="{OnPlatform Android=18,
                                           WinUI=22}"
-                    Shadow="{StaticResource lblShadow}"
                     Style="{StaticResource Label}"
                     Text="{Binding Product.Nombre, StringFormat='Producto: {0}'}"
                     TextColor="{AppThemeBinding Light={StaticResource 4},
@@ -260,13 +257,6 @@
                         VerticalOptions="Center"
                         VerticalTextAlignment="Center">
 
-                        <Label.Shadow>
-                            <Shadow
-                                Brush="{StaticResource Black}"
-                                Opacity="0.5"
-                                Radius="2"
-                                Offset="0,8" />
-                        </Label.Shadow>
                     </Label>
 
                 </Grid>
