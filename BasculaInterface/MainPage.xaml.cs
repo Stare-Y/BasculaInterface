@@ -16,6 +16,8 @@ namespace BasculaInterface
             BindingContext = this;
             CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
             CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
+            CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
+            CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
 
             if (MauiProgram.IsSecondaryTerminal)
             {
@@ -160,6 +162,16 @@ namespace BasculaInterface
         private void CheckBoxRequirePartner_CheckedChanged(object sender, CheckedChangedEventArgs e)
         {
             Preferences.Set("RequirePartner", e.Value);
+        }
+
+        private void CheckBoxOnlyPedidos_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            Preferences.Set("OnlyPedidos", e.Value);
+        }
+
+        private void CheckBoxBypasTurn_CheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            Preferences.Set("BypasTurn", e.Value);
         }
     }
 }
