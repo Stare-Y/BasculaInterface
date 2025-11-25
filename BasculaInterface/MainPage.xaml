@@ -104,6 +104,21 @@
                             Style="{StaticResource Label}"
                             Text="Forzar elegir socio" />
 
+                        <CheckBox x:Name="CheckBoxOnlyPedidos" CheckedChanged="CheckBoxOnlyPedidos_CheckedChanged" />
+
+                        <Label
+                            FontSize="{OnPlatform Android=12,
+                                                  WinUI=22}"
+                            Style="{StaticResource Label}"
+                            Text="Solo Pedidos" />
+
+                        <CheckBox x:Name="CheckBoxBypasTurn" CheckedChanged="CheckBoxBypasTurn_CheckedChanged" />
+
+                        <Label
+                            FontSize="{OnPlatform Android=12,
+                                                  WinUI=22}"
+                            Style="{StaticResource Label}"
+                            Text="Omitir Turno de Bascula" />
 
                     </HorizontalStackLayout>
                 </ScrollView>

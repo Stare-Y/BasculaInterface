@@ -117,6 +117,9 @@ public partial class WeightingScreen : ContentPage
                 BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
                 EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
 
+                if (Preferences.Get("BypasTurn", false))
+                    return;
+
                 _cancellationTokenKeepAlive = new CancellationTokenSource();
                 _ = StartKeepAliveLoop(_cancellationTokenKeepAlive.Token);
             }

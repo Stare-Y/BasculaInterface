@@ -15,6 +15,7 @@ public partial class DetailedWeightView : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
+        BtnNewEntry.IsVisible = !Preferences.Get("OnlyPedidos", false);
         if (MauiProgram.IsSecondaryTerminal)
         {
             BtnNuevoProducto.IsVisible = false;
@@ -104,7 +105,7 @@ public partial class DetailedWeightView : ContentPage
     private async void BtnNewEntry_Clicked(object sender, EventArgs e)
     {
         BtnNewEntry.Opacity = 0;
-        await BtnNewEntry.FadeTo(1, 200); 
+        await BtnNewEntry.FadeTo(1, 200);
 
         DetailedWeightViewModel viewModel = GetViewModel();
 
@@ -121,7 +122,7 @@ public partial class DetailedWeightView : ContentPage
     private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
         BtnFinishWeight.Opacity = 0;
-        await BtnFinishWeight.FadeTo(1, 200); 
+        await BtnFinishWeight.FadeTo(1, 200);
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
@@ -152,7 +153,7 @@ public partial class DetailedWeightView : ContentPage
     private async void BtnPrintTicket_Clicked(object sender, EventArgs e)
     {
         BtnPrintTicket.Opacity = 0;
-        await BtnPrintTicket.FadeTo(1, 200); 
+        await BtnPrintTicket.FadeTo(1, 200);
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
@@ -261,6 +262,10 @@ public partial class DetailedWeightView : ContentPage
 
     private async void CollectionViewWeightDetails_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (Preferences.Get("OnlyPedidos", false))
+        {
+            return;
+        }
         WeightEntryDetailRow? row = (WeightEntryDetailRow)CollectionViewWeightDetails.SelectedItem;
 
         if (BindingContext is not DetailedWeightViewModel viewModel)
@@ -305,7 +310,7 @@ public partial class DetailedWeightView : ContentPage
                     };
                 }
 
-                WeightingScreen weightingScreen = new (viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+                WeightingScreen weightingScreen = new(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
 
@@ -374,7 +379,7 @@ public partial class DetailedWeightView : ContentPage
     private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
         BtnRefresh.Opacity = 0;
-        await BtnRefresh.FadeTo(1, 200); 
+        await BtnRefresh.FadeTo(1, 200);
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
@@ -392,10 +397,10 @@ public partial class DetailedWeightView : ContentPage
         }
 
         bool confirmed = await DisplayAlert("Confirmación", "¿Estás seguro de que deseas eliminar toda la entrada de peso? Esta acción no se puede deshacer.", "No", "Si");
-        
+
         if (confirmed)
             return;
-        
+
         DisplayWaitPopUp("Eliminando entrada de peso, espere...");
         try
         {

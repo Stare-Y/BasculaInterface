@@ -280,7 +280,7 @@
                         FontSize="{OnPlatform Android=8,
                                               WinUI=16}"
                         Style="{StaticResource Label}"
-                        Text="Confirmar Producto"
+                        Text="Confirmar Socio"
                         TextColor="{StaticResource Black}" />
 
                 </VerticalStackLayout>
