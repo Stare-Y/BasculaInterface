@@ -186,7 +186,7 @@
                         FontSize="{OnPlatform Android=14,
                                               WinUI=22}"
                         Style="{StaticResource Label}"
-                        Text="Notas"
+                        Text="Notas" 
                         TextColor="{AppThemeBinding Light={StaticResource 4},
                                                     Dark={StaticResource 2}}" />
                     <Editor
@@ -248,8 +248,9 @@
                         Source="bascula2.gif" />
 
                     <!--  Contenido (texto del peso)  -->
-                    <Label
+                    <Entry
                         x:Name="PesoLabel"
+                        TextChanged="PesoLabel_TextChanged"
                         FontAttributes="Bold"
                         FontSize="48"
                         HorizontalOptions="Center"
@@ -259,7 +260,7 @@
                         VerticalOptions="Center"
                         VerticalTextAlignment="Center">
 
-                    </Label>
+                    </Entry>
 
                 </Grid>
             </Border>
