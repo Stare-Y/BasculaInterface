@@ -430,7 +430,7 @@
                                                                      Dark={StaticResource BlackGray}}"
                                         HeightRequest="{OnPlatform Android=75,
                                                                    WinUI=110}"
-                                        ScaleY="{StaticResource RoundedBorderStyle}"
+                                        Style="{StaticResource RoundedBorderStyle}"
                                         Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"

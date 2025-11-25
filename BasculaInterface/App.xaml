@@ -326,17 +326,17 @@
 
                 <Style.Triggers>
 
-                    <Trigger TargetType="Entry" Property="IsFocused" Value="True">
+                    <Trigger TargetType="Editor" Property="IsFocused" Value="True">
                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource Black}}" />
                     </Trigger>
-                    <Trigger TargetType="Entry" Property="IsFocused" Value="False">
+                    <Trigger TargetType="Editor" Property="IsFocused" Value="False">
                         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 1}}" />
                     </Trigger>
-                    <Trigger TargetType="Entry" Property="IsFocused" Value="True">
+                    <Trigger TargetType="Editor" Property="IsFocused" Value="True">
                         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource Gray}}" />
                     </Trigger>
-                    <Trigger TargetType="Entry" Property="IsFocused" Value="False">
+                    <Trigger TargetType="Editor" Property="IsFocused" Value="False">
                         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
                     </Trigger>
 
