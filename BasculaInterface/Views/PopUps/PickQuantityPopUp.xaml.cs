@@ -1,9 +1,11 @@
-using CommunityToolkit.Maui.Views;
+
 
 namespace BasculaInterface.Views.PopUps;
 
-public partial class PickQuantityPopUp : Popup
+public partial class PickQuantityPopUp : ContentView
 {
+    private TaskCompletionSource<double?> _tcs;
+
     private string _product = "Elije la cantidad para el producto";
 
     public string Product
@@ -12,7 +14,7 @@ public partial class PickQuantityPopUp : Popup
         set
         {
             _product = value;
-            ProductNameLabel.Text = _product; 
+            ProductNameLabel.Text = _product;
         }
     }
 
@@ -37,29 +39,49 @@ public partial class PickQuantityPopUp : Popup
     {
         ProductNameLabel.Text = Product;
     }
-    protected override void OnParentSet()
+
+    // ============================
+    //      SHOW ASYNC (RETORNO)
+    // ============================
+    public Task<double?> ShowAsync(string? message = null)
     {
-        base.OnParentSet();
+        _tcs = new TaskCompletionSource<double?>();
+
+        if (!string.IsNullOrWhiteSpace(message))
+            Product = message;
+
+        this.IsVisible = true;
+
         QuantityEntry.Focus();
+
+        return _tcs.Task;
+    }
+
+    // ============================
+    //             HIDE
+    // ============================
+    private void CloseWithResult(double? quantity)
+    {
+        this.IsVisible = false;
+        _tcs?.TrySetResult(quantity);
     }
 
     private void OnPopupCancelClicked(object sender, EventArgs e)
     {
-        this.Close(null);
+        CloseWithResult(null);
     }
 
     private void OnPopupAcceptClicked(object sender, EventArgs e)
     {
-        if(double.TryParse(QuantityEntry.Text, out double quantity))
-        {
-            this.Close(quantity);
-        }
+        if (double.TryParse(QuantityEntry.Text, out double quantity))
+            CloseWithResult(quantity);
         else
-        {
-            this.Close(null);
-        }
+            CloseWithResult(null);
     }
 
+    // ============================
+    //        VALIDACIÓN
+    // ============================
     private void QuantityEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
         var entry = (Entry)sender;
@@ -67,11 +89,7 @@ public partial class PickQuantityPopUp : Popup
         if (string.IsNullOrEmpty(entry.Text))
             return;
 
-        // Allow digits and ONE dot
         if (!double.TryParse(entry.Text, out _))
-        {
-            // revert to old text if invalid
             entry.Text = e.OldTextValue;
-        }
     }
 }

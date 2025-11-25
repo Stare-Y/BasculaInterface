@@ -9,7 +9,7 @@ namespace BasculaInterface
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         private CancellationTokenSource? _cancellationTokenSource = null;
-        private WaitPopUp _popup;
+        //private WaitPopUp _popup;
         public MainPage()
         {
             InitializeComponent();
@@ -30,7 +30,7 @@ namespace BasculaInterface
             {
                 CheckBoxSecondaryTerminal.IsChecked = false;
             }
-            _popup = new WaitPopUp();
+            //_popup = new WaitPopUp();
         }
         protected override void OnAppearing()
         {
@@ -47,8 +47,10 @@ namespace BasculaInterface
 
         private void DisplayWaitPopUp(string message = "Cargando, espere")
         {
-            _popup.Message = message;
-            this.ShowPopup(_popup);
+            waitPopUp.Show(message);
+
+            //_popup.Message = message;
+            //this.ShowPopup(_popup);
         }
 
         private async Task LogIn()
@@ -104,8 +106,9 @@ namespace BasculaInterface
             }
             finally
             {
-                _popup?.Close();
-                _popup = null;
+                waitPopUp.Hide();
+                //_popup?.Close();
+                //_popup = null;
             }
         }
 
@@ -132,8 +135,9 @@ namespace BasculaInterface
             catch (TaskCanceledException)
             {
                 // La tarea fue cancelada, no hacer nada
-                _popup?.Close();
-                _popup = null;
+                waitPopUp.Hide();
+                //_popup?.Close();
+                //_popup = null
             }
             catch (Exception ex)
             {

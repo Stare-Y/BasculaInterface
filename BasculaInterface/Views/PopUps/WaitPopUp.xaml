@@ -1,4 +1,43 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="BasculaInterface.Views.PopUps.WaitPopUp"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    IsVisible="False">
+
+    <Grid 
+        BackgroundColor="#80000000"
+        VerticalOptions="Fill"
+        HorizontalOptions="Fill"
+        ZIndex="999">
+
+        <VerticalStackLayout
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            Spacing="20">
+
+            <ActivityIndicator
+                  HeightRequest="69"
+                  HorizontalOptions="Center"
+                  IsRunning="True"
+                  VerticalOptions="Center"
+                  WidthRequest="69"
+                  Color="SlateBlue" />
+
+            <Label
+              x:Name="LblMessage"
+              FontSize="Subtitle"
+              HorizontalOptions="Center"
+              Style="{StaticResource Label}"
+              Text="Espera..."
+              TextColor="{AppThemeBinding Light={StaticResource Black},
+                                          Dark={StaticResource 1}}"
+              VerticalOptions="Center" />
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentView>
+    <!--<?xml version="1.0" encoding="utf-8" ?>
 <toolkit:Popup
     x:Class="BasculaInterface.Views.PopUps.WaitPopUp"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -31,4 +70,5 @@
             VerticalOptions="Center" />
 
     </VerticalStackLayout>
-</toolkit:Popup>
+</toolkit:Popup>-->
+

@@ -4,7 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     Title="WeightingScreen"
+    
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
 
@@ -12,8 +14,8 @@
         <vm:BasculaViewModel />
     </ContentPage.BindingContext>
 
-
-    <Grid
+    <Grid>
+        <Grid
         Padding="30"
         RowDefinitions="auto,auto,*,auto,auto"
         RowSpacing="20">
@@ -699,6 +701,11 @@
             </Border>
 
         </Grid>
+
+    </Grid>
+        
+        <components:WaitPopUp x:Name="waitPopUp" />
+        <components:PickQuantityPopUp x:Name="pickPopUp" />
 
     </Grid>
 

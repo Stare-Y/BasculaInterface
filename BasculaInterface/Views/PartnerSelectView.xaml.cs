@@ -7,7 +7,7 @@ namespace BasculaInterface.Views;
 
 public partial class PartnerSelectView : ContentPage
 {
-    private WaitPopUp? _popup;
+    //private WaitPopUp? _popup;
     public Action<ClienteProveedorDto>? OnPartnerSelected;
     // Constructor that accepts a ViewModel
     public PartnerSelectView(PartnerSelectorViewModel viewModel)
@@ -19,7 +19,7 @@ public partial class PartnerSelectView : ContentPage
         {
             LabelResultado.Text = "Sin socio seleccionado";
         }
-        _popup = new WaitPopUp();
+        //_popup = new WaitPopUp();
     }
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
@@ -32,9 +32,10 @@ public partial class PartnerSelectView : ContentPage
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        if (_popup is null) _popup = new WaitPopUp();
-        _popup.Message = message;
-        this.ShowPopup(_popup);
+        waitPopUp.Message = message;
+        //if (_popup is null) _popup = new WaitPopUp();
+        //_popup.Message = message;
+        //this.ShowPopup(_popup);
     }
 
     private async void SearchBar_SearchButtonPressed(object sender, EventArgs e)
@@ -60,7 +61,8 @@ public partial class PartnerSelectView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }
