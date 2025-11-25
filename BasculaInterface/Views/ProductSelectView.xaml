@@ -5,21 +5,21 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
     Title="ProductSelectView"
+     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
 
     <ContentPage.BindingContext>
         <vm:ProductSelectorViewModel />
     </ContentPage.BindingContext>
-
-    <Grid
+    <Grid>
+        <Grid
         Padding="30"
         BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                           Dark={StaticResource BlackTheme}}"
         HorizontalOptions="Fill"
         RowDefinitions="auto,50,*,100"
         VerticalOptions="Fill">
-
         <!--  Fila de búsqueda  -->
         <Grid Grid.Row="0" Padding="10">
 
@@ -303,6 +303,9 @@
             </Border>
 
         </Grid>
+    </Grid>
+        
+        <components:WaitPopUp x:Name="waitPopUp" />
     </Grid>
 
 

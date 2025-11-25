@@ -10,7 +10,7 @@ namespace BasculaInterface.Views;
 
 public partial class PendingWeightsView : ContentPage
 {
-    private WaitPopUp? _popup;
+    //private WaitPopUp? _popup;
     private CancellationTokenSource? _cancellationTokenSource = null;
 
     public PendingWeightsView(PendingWeightsViewModel viewModel)
@@ -20,7 +20,9 @@ public partial class PendingWeightsView : ContentPage
         BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
     }
 
-    public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
+    public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) {
+        //_popup = new WaitPopUp();
+    }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -53,16 +55,19 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
+        waitPopUp.Show(message);
+        //if(_popup is null) _popup = new WaitPopUp();
+        //_popup.Message = message;
 
-        this.ShowPopup(_popup);
+        //this.ShowPopup(_popup);
     }
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -87,7 +92,8 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
 
@@ -120,7 +126,8 @@ public partial class PendingWeightsView : ContentPage
         }
         finally
         {
-            _popup?.Close();
+            waitPopUp.Hide();
+            //_popup?.Close();
         }
     }
 
@@ -170,7 +177,8 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }

@@ -12,12 +12,14 @@ public partial class WeightingScreen : ContentPage
     private bool _taraChanged = false;
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
-    private WaitPopUp? _popup;
+    //private WaitPopUp? _popup { get; set; }
+    private PickQuantityPopUp _pickPopup { get; set; }
     public WeightingScreen(BasculaViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
         PesoLabel.IsEnabled = Preferences.Get("ManualWeight", false);
+        InicializePopUps();
     }
 
     public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
@@ -61,10 +63,18 @@ public partial class WeightingScreen : ContentPage
                 }
             }
         }
+        _pickPopup = new PickQuantityPopUp();
+        //_popup = new WaitPopUp();
     }
 
-    public WeightingScreen() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>()) { }
-
+    public WeightingScreen() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>()) {
+        InicializePopUps();
+    }
+    private void InicializePopUps()
+    {
+        _pickPopup = new PickQuantityPopUp();
+    
+    }
     private async Task KeepWeightAlive()
     {
         if (BindingContext is BasculaViewModel viewModel)
@@ -197,9 +207,9 @@ public partial class WeightingScreen : ContentPage
         {
             try
             {
-                WaitPopUp popup = new WaitPopUp();
-
-                this.ShowPopup(popup);
+                waitPopUp.Show();
+                //if (_popup is null) _popup = new WaitPopUp();
+                //this.ShowPopup(_popup);
                 try
                 {
                     await viewModel.ReleaseSocket();
@@ -211,8 +221,8 @@ public partial class WeightingScreen : ContentPage
                 }
                 finally
                 {
-                    popup.Close();
-                }
+                    waitPopUp.Hide();
+                 }
             }
             catch (Exception ex)
             {
@@ -222,9 +232,11 @@ public partial class WeightingScreen : ContentPage
     }
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
+        waitPopUp.Show(message);
+        //if(_popup is null ) _popup = new WaitPopUp();
+        //_popup.Message = message;
 
-        this.ShowPopup(_popup);
+        //this.ShowPopup(_popup);
     }
 
     private async void BtnCaptureNewWeight_Clicked(object sender, EventArgs e)
@@ -244,8 +256,8 @@ public partial class WeightingScreen : ContentPage
             }
             finally
             {
-                _popup?.Close();
-                _popup = null;
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }
@@ -275,10 +287,9 @@ public partial class WeightingScreen : ContentPage
             BtnPickProduct.IsVisible = false;
 
             await Shell.Current.Navigation.PopModalAsync();
+            _pickPopup.Product = product.Nombre;
 
-            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
-
-            object? quantity = await this.ShowPopupAsync(quantityPopUp);
+            object? quantity = await pickPopUp.ShowAsync(product.Nombre);
 
             if (quantity is double qty)
                 viewModel.ProductQuantity = qty;

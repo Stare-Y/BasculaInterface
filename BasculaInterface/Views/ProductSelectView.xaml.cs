@@ -7,7 +7,7 @@ namespace BasculaInterface.Views;
 
 public partial class ProductSelectView : ContentPage
 {
-    private WaitPopUp? _popup;
+    //private WaitPopUp? _popup;
     public Action<ProductoDto>? OnProductSelected;
     public ProductSelectView(ProductSelectorViewModel viewModel)
 	{
@@ -18,15 +18,20 @@ public partial class ProductSelectView : ContentPage
         {
             LabelResultado.Text = "Sin producto seleccionado";
         }
+        //_popup = new WaitPopUp();
     }
 
-	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) { }
+	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) {
+        //_popup = new WaitPopUp();
+    }
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
+        waitPopUp.Show(message);
+        //if (_popup is null) _popup = new WaitPopUp();
+        //_popup.Message = message;
 
-        this.ShowPopup(_popup);
+        //this.ShowPopup(_popup);
     }
 
     private async void SearchBar_SearchButtonPressed(object sender, EventArgs e)
@@ -54,7 +59,8 @@ public partial class ProductSelectView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }

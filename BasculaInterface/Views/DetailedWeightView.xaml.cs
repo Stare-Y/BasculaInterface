@@ -10,7 +10,7 @@ namespace BasculaInterface.Views;
 public partial class DetailedWeightView : ContentPage
 {
     private bool _entriesChanged = false;
-    private WaitPopUp? _popup;
+
     public DetailedWeightView(DetailedWeightViewModel viewModel)
     {
         InitializeComponent();
@@ -22,9 +22,12 @@ public partial class DetailedWeightView : ContentPage
             BtnNewEntry.IsVisible = false;
             BtnFinishWeight.IsVisible = false;
         }
+     
     }
 
-    public DetailedWeightView() { }
+    public DetailedWeightView() {
+       
+    }
 
     protected override async void OnAppearing()
     {
@@ -75,9 +78,7 @@ public partial class DetailedWeightView : ContentPage
 
     private void DisplayWaitPopUp(string message = "Cargando, espere")
     {
-        _popup = new WaitPopUp(message);
-
-        this.ShowPopup(_popup);
+        waitPopUp.Show(message);
     }
 
 
@@ -143,7 +144,8 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }
@@ -168,7 +170,8 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
     }
@@ -206,8 +209,10 @@ public partial class DetailedWeightView : ContentPage
             {
                 throw new InvalidOperationException("No se ha seleccionado un socio, es necesario para validar si se puede continuar con su pedido.");
             }
-            PickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);
-            var result = await this.ShowPopupAsync(quantityPopUp);
+            /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
+
+            
+            var result = await pickPopUp.ShowAsync(product.Nombre);
 
             double qty = 0;
 
@@ -317,7 +322,8 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                _popup?.Close();
+                waitPopUp.Hide();
+                //_popup?.Close();
             }
         }
         finally
@@ -363,7 +369,8 @@ public partial class DetailedWeightView : ContentPage
                 }
                 finally
                 {
-                    _popup?.Close();
+                    waitPopUp.Hide();
+                    //_popup?.Close();
                 }
             }
         }
@@ -403,7 +410,8 @@ public partial class DetailedWeightView : ContentPage
         }
         finally
         {
-            _popup?.Close();
+            waitPopUp.Hide();
+            //_popup?.Close();
         }
     }
 
