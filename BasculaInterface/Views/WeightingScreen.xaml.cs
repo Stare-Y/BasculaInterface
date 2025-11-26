@@ -91,6 +91,9 @@ public partial class WeightingScreen : ContentPage
 
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
+                    if (Preferences.Get("BypasTurn", false))
+                        return;
+
                     await DisplayAlert("Error", "La báscula dejó de estar disponible", "OK");
                     await Shell.Current.Navigation.PopModalAsync();
                 });
