@@ -1,6 +1,5 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
-using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
 
 namespace BasculaInterface.Views;
@@ -30,19 +29,11 @@ public partial class PartnerSelectView : ContentPage
         SearchBar.Focus();
     }
 
-    private void DisplayWaitPopUp(string message = "Cargando, espere")
-    {
-        waitPopUp.Message = message;
-        //if (_popup is null) _popup = new WaitPopUp();
-        //_popup.Message = message;
-        //this.ShowPopup(_popup);
-    }
-
     private async void SearchBar_SearchButtonPressed(object sender, EventArgs e)
     {
         if(BindingContext is PartnerSelectorViewModel viewModel)
         {
-            DisplayWaitPopUp("Buscando socios, espere");
+            WaitPopUp.Show("Buscando socios, espere");
             try
             {
                 string searchTerm = SearchBar.Text?.Trim() ?? string.Empty;
@@ -61,8 +52,7 @@ public partial class PartnerSelectView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
     }

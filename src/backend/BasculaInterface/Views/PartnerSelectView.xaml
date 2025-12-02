@@ -318,6 +318,6 @@
 
     </Grid>
         
-        <components:WaitPopUp x:Name="waitPopUp" />
+        <components:WaitPopUp x:Name="WaitPopUp" />
     </Grid>
 </ContentPage>

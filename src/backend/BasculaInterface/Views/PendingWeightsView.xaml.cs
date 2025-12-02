@@ -2,7 +2,6 @@ using BasculaInterface.Exceptions;
 using BasculaInterface.Models;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
-using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
 using Core.Application.Services;
 
@@ -20,15 +19,13 @@ public partial class PendingWeightsView : ContentPage
         BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
     }
 
-    public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) {
-        //_popup = new WaitPopUp();
-    }
+    public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         if (BindingContext is PendingWeightsViewModel viewModel)
         {
-            DisplayWaitPopUp("Cargando pesos pendientes, espere");
+            WaitPopUp.Show("Cargando pesos pendientes, espere");
             await Task.Yield();
             try
             {
@@ -55,19 +52,9 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
-    }
-
-    private void DisplayWaitPopUp(string message = "Cargando, espere")
-    {
-        waitPopUp.Show(message);
-        //if(_popup is null) _popup = new WaitPopUp();
-        //_popup.Message = message;
-
-        //this.ShowPopup(_popup);
     }
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -79,7 +66,7 @@ public partial class PendingWeightsView : ContentPage
 
         if (row != null)
         {
-            DisplayWaitPopUp("Cargando detalles del peso, espere");
+            WaitPopUp.Show("Cargando detalles del peso, espere");
             try
             {
                 DetailedWeightViewModel targetViewModel = new DetailedWeightViewModel(MauiProgram.ServiceProvider.GetRequiredService<IApiService>());
@@ -92,8 +79,7 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
 
@@ -105,7 +91,7 @@ public partial class PendingWeightsView : ContentPage
         BtnNewWeighProcess.Opacity = 0;
         await BtnNewWeighProcess.FadeTo(1, 200);
 
-        DisplayWaitPopUp("Preparando bascula, espere...");
+        WaitPopUp.Show("Preparando bascula, espere...");
 
         try
         {
@@ -126,8 +112,7 @@ public partial class PendingWeightsView : ContentPage
         }
         finally
         {
-            waitPopUp.Hide();
-            //_popup?.Close();
+            WaitPopUp.Hide();
         }
     }
 
@@ -144,7 +129,7 @@ public partial class PendingWeightsView : ContentPage
                 Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
             }
 
-            DisplayWaitPopUp("Reconectando, espere");
+            WaitPopUp.Show("Reconectando, espere");
             try
             {
                 await viewModel.LoadPendingWeightsAsync();
@@ -177,8 +162,7 @@ public partial class PendingWeightsView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
     }

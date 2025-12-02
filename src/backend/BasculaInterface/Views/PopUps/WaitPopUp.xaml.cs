@@ -3,7 +3,7 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class WaitPopUp : ContentView
 {
-    private string _message = "Espera...";
+    private string _message = "Porfavor Espere...";
 
     public string Message
     {
@@ -20,10 +20,9 @@ public partial class WaitPopUp : ContentView
         InitializeComponent();
     }
 
-    public void Show(string? message = null)
+    public void Show(string message = "Porfavor Espere...")
     {
-        if (!string.IsNullOrWhiteSpace(message))
-            Message = message;
+        Message = message;
 
         this.IsVisible = true;
     }
