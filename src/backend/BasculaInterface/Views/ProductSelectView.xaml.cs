@@ -21,24 +21,13 @@ public partial class ProductSelectView : ContentPage
         //_popup = new WaitPopUp();
     }
 
-	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) {
-        //_popup = new WaitPopUp();
-    }
-
-    private void DisplayWaitPopUp(string message = "Cargando, espere")
-    {
-        waitPopUp.Show(message);
-        //if (_popup is null) _popup = new WaitPopUp();
-        //_popup.Message = message;
-
-        //this.ShowPopup(_popup);
-    }
+	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) { }
 
     private async void SearchBar_SearchButtonPressed(object sender, EventArgs e)
     {
         if(BindingContext is ProductSelectorViewModel viewModel)
         {
-            DisplayWaitPopUp("Buscando productos, espere");
+            WaitPopUp.Show("Buscando productos, espere");
 
             try
             {
@@ -59,8 +48,7 @@ public partial class ProductSelectView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
     }

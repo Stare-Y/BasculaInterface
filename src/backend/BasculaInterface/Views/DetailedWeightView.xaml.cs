@@ -1,9 +1,7 @@
 using BasculaInterface.Models;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
-using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
-using Microsoft.Maui.Devices;
 
 namespace BasculaInterface.Views;
 
@@ -22,12 +20,9 @@ public partial class DetailedWeightView : ContentPage
             BtnNewEntry.IsVisible = false;
             BtnFinishWeight.IsVisible = false;
         }
-     
     }
 
-    public DetailedWeightView() {
-       
-    }
+    public DetailedWeightView() { }
 
     protected override async void OnAppearing()
     {
@@ -76,12 +71,6 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
-    private void DisplayWaitPopUp(string message = "Cargando, espere")
-    {
-        waitPopUp.Show(message);
-    }
-
-
     private DetailedWeightViewModel GetViewModel()
     {
         if (BindingContext is DetailedWeightViewModel viewModel)
@@ -126,7 +115,7 @@ public partial class DetailedWeightView : ContentPage
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
-            DisplayWaitPopUp("Concluyendo proceso de pesaje, espere...");
+            WaitPopUp.Show("Concluyendo proceso de pesaje, espere...");
             try
             {
                 await viewModel.ConcludeWeightProcess();
@@ -144,8 +133,7 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
     }
@@ -157,7 +145,7 @@ public partial class DetailedWeightView : ContentPage
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
-            DisplayWaitPopUp("Imprimiendo ticket, espere...");
+            WaitPopUp.Show("Imprimiendo ticket, espere...");
             try
             {
                 await viewModel.PrintTicketAsync();
@@ -170,8 +158,7 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
     }
@@ -212,7 +199,7 @@ public partial class DetailedWeightView : ContentPage
             /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
 
             
-            var result = await pickPopUp.ShowAsync(product.Nombre);
+            double? result = await PickPopUp.ShowAsync(product.Nombre);
 
             double qty = 0;
 
@@ -290,7 +277,7 @@ public partial class DetailedWeightView : ContentPage
                 return;
             }
 
-            DisplayWaitPopUp("Preparando bascula, espere...");
+            WaitPopUp.Show("Preparando bascula, espere...");
             try
             {
                 BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
@@ -322,8 +309,7 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
+                WaitPopUp.Hide();
             }
         }
         finally
@@ -341,7 +327,7 @@ public partial class DetailedWeightView : ContentPage
         {
             if (BindingContext is DetailedWeightViewModel viewModel)
             {
-                DisplayWaitPopUp("Eliminando pesada, espere...");
+                WaitPopUp.Show("Eliminando pesada, espere...");
                 try
                 {
 
@@ -369,8 +355,7 @@ public partial class DetailedWeightView : ContentPage
                 }
                 finally
                 {
-                    waitPopUp.Hide();
-                    //_popup?.Close();
+                    WaitPopUp.Hide();
                 }
             }
         }
@@ -401,7 +386,7 @@ public partial class DetailedWeightView : ContentPage
         if (confirmed)
             return;
 
-        DisplayWaitPopUp("Eliminando entrada de peso, espere...");
+        WaitPopUp.Show("Eliminando entrada de peso, espere...");
         try
         {
             await viewModel.DeleteWeightEntry();
@@ -410,9 +395,7 @@ public partial class DetailedWeightView : ContentPage
         }
         finally
         {
-            waitPopUp.Hide();
-            //_popup?.Close();
+            WaitPopUp.Hide();
         }
     }
-
 }
