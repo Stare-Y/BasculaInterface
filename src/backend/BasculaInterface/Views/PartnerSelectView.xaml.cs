@@ -6,9 +6,7 @@ namespace BasculaInterface.Views;
 
 public partial class PartnerSelectView : ContentPage
 {
-    //private WaitPopUp? _popup;
     public Action<ClienteProveedorDto>? OnPartnerSelected;
-    // Constructor that accepts a ViewModel
     public PartnerSelectView(PartnerSelectorViewModel viewModel)
 	{
 		InitializeComponent();
@@ -18,7 +16,6 @@ public partial class PartnerSelectView : ContentPage
         {
             LabelResultado.Text = "Sin socio seleccionado";
         }
-        //_popup = new WaitPopUp();
     }
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }

@@ -9,7 +9,6 @@ namespace BasculaInterface.Views;
 
 public partial class PendingWeightsView : ContentPage
 {
-    //private WaitPopUp? _popup;
     private CancellationTokenSource? _cancellationTokenSource = null;
 
     public PendingWeightsView(PendingWeightsViewModel viewModel)
@@ -59,9 +58,6 @@ public partial class PendingWeightsView : ContentPage
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        //BtnSeleccionar.Opacity = 0; 
-        //await BtnSeleccionar.FadeTo(1, 200);
-
         PendingWeightViewRow? row = (PendingWeightViewRow)PendingWeightsCollectionView.SelectedItem;
 
         if (row != null)
