@@ -7,7 +7,6 @@ namespace BasculaInterface.Views;
 
 public partial class ProductSelectView : ContentPage
 {
-    //private WaitPopUp? _popup;
     public Action<ProductoDto>? OnProductSelected;
     public ProductSelectView(ProductSelectorViewModel viewModel)
 	{
@@ -18,7 +17,6 @@ public partial class ProductSelectView : ContentPage
         {
             LabelResultado.Text = "Sin producto seleccionado";
         }
-        //_popup = new WaitPopUp();
     }
 
 	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) { }
@@ -102,6 +100,4 @@ public partial class ProductSelectView : ContentPage
     {
         await Shell.Current.Navigation.PopModalAsync();
     }
-
-
 }

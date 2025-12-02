@@ -1,6 +1,5 @@
 ﻿using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
-using CommunityToolkit.Maui.Views;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -9,7 +8,6 @@ namespace BasculaInterface
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         private CancellationTokenSource? _cancellationTokenSource = null;
-        //private WaitPopUp _popup;
         public MainPage()
         {
             InitializeComponent();
@@ -32,7 +30,6 @@ namespace BasculaInterface
             {
                 CheckBoxSecondaryTerminal.IsChecked = false;
             }
-            //_popup = new WaitPopUp();
         }
         protected override void OnAppearing()
         {
@@ -47,14 +44,6 @@ namespace BasculaInterface
             }
         }
 
-        private void DisplayWaitPopUp(string message = "Cargando, espere")
-        {
-            waitPopUp.Show(message);
-
-            //_popup.Message = message;
-            //this.ShowPopup(_popup);
-        }
-
         private async Task LogIn()
         {
 
@@ -66,7 +55,6 @@ namespace BasculaInterface
             {
                 Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
             }
-
 
             if (EntryHost.Text == string.Empty)
             {
@@ -108,16 +96,14 @@ namespace BasculaInterface
             }
             finally
             {
-                waitPopUp.Hide();
-                //_popup?.Close();
-                //_popup = null;
+                WaitPopUp.Hide();
             }
         }
 
 
         private async void BtnLogin_Pressed(object sender, EventArgs e)
         {
-            DisplayWaitPopUp("Cargando, por favor espere...");
+            WaitPopUp.Show("Cargando, por favor espere...");
             _cancellationTokenSource = new CancellationTokenSource();
             try
             {
@@ -137,9 +123,7 @@ namespace BasculaInterface
             catch (TaskCanceledException)
             {
                 // La tarea fue cancelada, no hacer nada
-                waitPopUp.Hide();
-                //_popup?.Close();
-                //_popup = null
+                WaitPopUp.Hide();
             }
             catch (Exception ex)
             {

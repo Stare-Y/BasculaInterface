@@ -1,4 +1,3 @@
-
 namespace BasculaInterface.Views.PopUps;
 
 public partial class WaitPopUp : ContentView

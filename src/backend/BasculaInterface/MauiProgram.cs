@@ -1,6 +1,4 @@
-﻿using BasculaInterface.Services;
-using BasculaInterface.Services;
-using BasculaInterface.ViewModels;
+﻿using BasculaInterface.ViewModels;
 using CommunityToolkit.Maui;
 using Core.Application.Services;
 using Infrastructure.Service;
