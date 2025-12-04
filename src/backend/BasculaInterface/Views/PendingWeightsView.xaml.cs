@@ -14,11 +14,13 @@ public partial class PendingWeightsView : ContentPage
     public PendingWeightsView(PendingWeightsViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-        BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
+
+        BindingContext = viewModel 
+            ?? throw new ArgumentNullException(nameof(viewModel));
     }
 
     public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -32,12 +34,13 @@ public partial class PendingWeightsView : ContentPage
 
                 await viewModel.LoadPendingWeightsAsync();
 
-                if (!MauiProgram.IsSecondaryTerminal)
+                if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
                 {
-                    BtnNewWeighProcess.IsVisible = !Preferences.Get("OnlyPedidos", false);
-                    BtnRefresh.IsVisible = true;
+                    BtnNewWeighProcess.IsVisible = false;
                 }
-
+#if ANDROID
+                BtnRefresh.IsVisible = false;
+#endif
                 BtnReconnect.IsVisible = false;
 
                 return;
@@ -93,7 +96,7 @@ public partial class PendingWeightsView : ContentPage
         {
             BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
 
-            if (!await basculaViewModel.CanWeight())
+            if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
             {
                 throw new InvalidOperationException("Bascula ocupada");
             }
@@ -114,52 +117,43 @@ public partial class PendingWeightsView : ContentPage
 
     private async Task Reconect()
     {
-        if (BindingContext is PendingWeightsViewModel viewModel)
+        if (BindingContext is not PendingWeightsViewModel viewModel)
+            return; 
+
+        if (EntryHost.Text.Contains("http"))
         {
-            if (EntryHost.Text.Contains("http"))
-            {
-                Preferences.Set("HostUrl", EntryHost.Text);
-            }
-            else
-            {
-                Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
-            }
+            Preferences.Set("HostUrl", EntryHost.Text);
+        }
+        else
+        {
+            Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
+        }
 
-            WaitPopUp.Show("Reconectando, espere");
-            try
-            {
-                await viewModel.LoadPendingWeightsAsync();
+        WaitPopUp.Show("Reconectando, espere");
+        try
+        {
+            await viewModel.LoadPendingWeightsAsync();
 
-                if (!MauiProgram.IsSecondaryTerminal)
-                {
-                    BtnNewWeighProcess.IsVisible = true;
-                }
+            BtnReconnect.IsVisible = false;
+            BorderEntryHost.IsVisible = false;
 
-                BtnReconnect.IsVisible = false;
-                BorderEntryHost.IsVisible = false;
+        }
+        catch (OriginEmptyException)
+        {
+            await DisplayAlert("Info", "No hay pesos pendientes, puedes crear uno nuevo :D", "OK");
 
-            }
-            catch (OriginEmptyException)
-            {
-                await DisplayAlert("Info", "No hay pesos pendientes, puedes crear uno nuevo :D", "OK");
-                if (!MauiProgram.IsSecondaryTerminal)
-                {
-                    BtnNewWeighProcess.IsVisible = true;
+            BtnReconnect.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
 
-                }
-
-                BtnReconnect.IsVisible = false;
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
-                BtnReconnect.IsVisible = true;
-                BtnNewWeighProcess.IsVisible = false;
-            }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
+            BtnReconnect.IsVisible = true;
+            BtnNewWeighProcess.IsVisible = false;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 

@@ -237,14 +237,34 @@
                     Orientation="Vertical"
                     VerticalOptions="Start">
                     <Label
-                        FontAttributes="Bold"
-                        FontSize="{OnPlatform Android=18,
-                                              WinUI=22}"
-                        Style="{StaticResource Label}"
-                        Text="{Binding Product.Nombre, StringFormat='Producto: {0}'}"
-                        TextColor="{AppThemeBinding Light={StaticResource 4},
-                                                    Dark={StaticResource 2}}"
-                        VerticalTextAlignment="Center" />
+                    FontAttributes="Bold"
+                    FontSize="{OnPlatform Android=18,
+                                          WinUI=22}"
+                    Style="{StaticResource Label}"
+                    Text="{Binding Product.Nombre, StringFormat='Producto: {0}'}"
+                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                Dark={StaticResource 2}}"
+                    VerticalTextAlignment="Center" />
+
+                    <Grid ColumnDefinitions="*,*" Grid.Row="0" x:Name="GridManualToggle" IsVisible="False">
+                        <CheckBox 
+                                IsChecked="False"
+                                x:Name="CheckBoxUseManual"
+                                CheckedChanged="CheckBoxUseManual_CheckedChanged"
+                                Grid.Column="0"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"/>
+                        <Label 
+                                x:Name="LblChckManualWeighjt" 
+                                Text="Manual"
+                                FontSize="21"
+                                HorizontalOptions="Start"
+                                HorizontalTextAlignment="Start"
+                                VerticalOptions="Center"
+                                VerticalTextAlignment="Center"
+                                Grid.Column="1"
+                                TextColor="{StaticResource 1}"/>
+                    </Grid>
                 </StackLayout>
 
                 <!--  NOTAS (arriba derecha)  -->
@@ -274,17 +294,17 @@
                             TextColor="{AppThemeBinding Light={StaticResource 4},
                                                         Dark={StaticResource 2}}" />
                         <Editor
-                            AutoSize="TextChanges"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                              Dark={StaticResource BlackGray}}"
-                            FontSize="{OnPlatform Android=11}"
-                            HeightRequest="{OnPlatform Android=75,
-                                                       WinUI=75}"
-                            HorizontalOptions="Fill"
-                            Placeholder="Ingresa placas"
-                            Style="{StaticResource EditorDatos}"
-                            Text="{Binding WeightEntry.Notes}"
-                            VerticalOptions="Center" />
+                        AutoSize="TextChanges"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                          Dark={StaticResource BlackGray}}"
+                        FontSize="{OnPlatform Android=11}"
+                        HeightRequest="{OnPlatform Android=75,
+                                                   WinUI=75}"
+                        HorizontalOptions="Fill"
+                        Placeholder="Notas..."
+                        Style="{StaticResource EditorDatos}"
+                        Text="{Binding WeightEntry.Notes}"
+                        VerticalOptions="Center" />
 
                     </StackLayout>
 
@@ -332,17 +352,29 @@
                             Source="bascula2.gif" />
 
                         <!--  Contenido (texto del peso)  -->
+                        <Label
+                        x:Name="PesoLabel"
+                        FontAttributes="Bold"
+                        FontSize="48"
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                        Text="{Binding Peso, StringFormat='{0:0.00} Kg'}"
+                        TextColor="{StaticResource 1}"
+                        VerticalOptions="Center"
+                        VerticalTextAlignment="Center"/>
+
                         <Entry
-                            x:Name="PesoLabel"
+                            x:Name="EntryLabel"
+                            IsVisible="False"
                             FontAttributes="Bold"
                             FontSize="48"
                             HorizontalOptions="Center"
                             HorizontalTextAlignment="Center"
                             Text="{Binding Peso, StringFormat='{0:0.00} Kg'}"
-                            TextChanged="PesoLabel_TextChanged"
                             TextColor="{StaticResource 1}"
                             VerticalOptions="Center"
-                            VerticalTextAlignment="Center" />
+                            VerticalTextAlignment="Center"
+                            TextChanged="PesoLabel_TextChanged"/>
 
                     </Grid>
                 </Border>

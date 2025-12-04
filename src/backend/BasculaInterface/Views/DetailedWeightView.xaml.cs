@@ -13,12 +13,16 @@ public partial class DetailedWeightView : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
-        BtnNewEntry.IsVisible = !Preferences.Get("OnlyPedidos", false);
-        if (MauiProgram.IsSecondaryTerminal)
+        if (Preferences.Get("SecondaryTerminal", false))
         {
             BtnNuevoProducto.IsVisible = false;
             BtnNewEntry.IsVisible = false;
-            BtnFinishWeight.IsVisible = false;
+            BtnDeleteEntry.IsVisible = false;
+        }
+        else if (Preferences.Get("OnlyPedidos", false))
+        {
+            BtnNuevoProducto.IsVisible = true;
+            BtnNewEntry.IsVisible = false;
         }
     }
 
@@ -28,46 +32,47 @@ public partial class DetailedWeightView : ContentPage
     {
         base.OnAppearing();
 
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return; 
+
+        if (_entriesChanged)
         {
-            if (_entriesChanged)
+            WaitPopUp.Show("Un momento...");
+            try
             {
-                try
-                {
-                    await viewModel.FetchNewWeightDetails();
-                    _entriesChanged = false;
-                }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
-                    return;
-                }
+                await viewModel.FetchNewWeightDetails();
+                _entriesChanged = false;
             }
-
-            if (!MauiProgram.IsSecondaryTerminal)
+            catch (Exception ex)
             {
-                if (DeviceInfo.Current.Platform != DevicePlatform.Android)
-                {
-                    BtnRefresh.IsVisible = true;
-                }
-
-                BtnDeleteEntry.IsVisible = true;
-                if (viewModel.WeightEntryDetailRows.Count > 0)
-                {
-                    if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
-                    {
-                        BtnFinishWeight.IsVisible = false;
-                    }
-                    else
-                    {
-                        BtnFinishWeight.IsVisible = true;
-                    }
-
-                    return;
-                }
+                await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
+                return;
             }
+            finally
+            {
+                WaitPopUp.Hide();
+            }
+        }
 
+        if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
+        {
+            return;
+        }
+
+        if (viewModel.WeightEntryDetailRows.Count < 1)
+        {
+            if(!Preferences.Get("SecondaryTerminal", false))
+                BtnFinishWeight.IsVisible = true;
+
+            return;
+        }
+        if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+        {
             BtnFinishWeight.IsVisible = false;
+        }
+        else
+        {
+            BtnFinishWeight.IsVisible = true;
         }
     }
 
@@ -97,15 +102,37 @@ public partial class DetailedWeightView : ContentPage
         await BtnNewEntry.ScaleTo(1.1, 100);
         await BtnNewEntry.ScaleTo(1.0, 100);
 
-        DetailedWeightViewModel viewModel = GetViewModel();
-
-        if (viewModel.WeightEntry != null && viewModel.Partner != null)
+        try
         {
-            WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner);
+            WaitPopUp.Show("Preparando bascula...");
 
-            await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+            DetailedWeightViewModel viewModel = GetViewModel();
 
-            _entriesChanged = true;
+            if (viewModel.WeightEntry != null && viewModel.Partner != null)
+            {
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner);
+
+                if (weightingScreen.BindingContext is not BasculaViewModel basculaViewModel)
+                    throw new InvalidOperationException("No se pudo validar el estado de la bascuila en el VM");
+
+                if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
+                {
+                    throw new InvalidOperationException("Bascula ocupada");
+                }
+
+                await Shell.Current.Navigation.PushModalAsync(weightingScreen);
+
+                _entriesChanged = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Error inesperado al tratar de entrar a la bascula: " + ex.Message, "OK");
+            return;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 
@@ -287,7 +314,7 @@ public partial class DetailedWeightView : ContentPage
             {
                 BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
 
-                if (!await basculaViewModel.CanWeight())
+                if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
                 {
                     throw new InvalidOperationException("Bascula ocupada");
                 }

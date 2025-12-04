@@ -381,7 +381,7 @@
                         FontSize="{OnPlatform Android=12,
                                               WinUI=18}"
                         Style="{StaticResource Label}"
-                        Text="{Binding TotalWeight, StringFormat='Peso Total (teorico): {0} kg.'}"
+                        Text="{Binding TotalWeight, StringFormat='Peso Total: {0} kg.'}"
                         TextColor="{AppThemeBinding Light={StaticResource 4},
                                                     Dark={StaticResource 2}}"
                         VerticalTextAlignment="Center" />
@@ -905,7 +905,8 @@
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
                     WidthRequest="{OnPlatform Android=100,
-                                              WinUI=250}">
+                                              WinUI=250}"
+                    IsVisible="False">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnFinishWeight_Clicked" />
                     </Border.GestureRecognizers>

@@ -7,55 +7,54 @@ namespace BasculaInterface.Views;
 public partial class WeightingScreen : ContentPage
 {
     public double Tara { get; set; }
-    private bool _taraChanged = false;
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
     public WeightingScreen(BasculaViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
-        PesoLabel.IsEnabled = Preferences.Get("ManualWeight", false);
+
+        GridManualToggle.IsVisible = Preferences.Get("ManualWeight", false);
     }
 
     public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {
-        if (BindingContext is BasculaViewModel viewModel)
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        viewModel.WeightEntry = weightEntry;
+        viewModel.Partner = partner;
+        viewModel.Product = productoDto;
+
+        if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
         {
-            viewModel.WeightEntry = weightEntry;
-            viewModel.Partner = partner;
-            viewModel.Product = productoDto;
-
-            if (useIncommingTara || !MauiProgram.IsSecondaryTerminal)
+            if (weightEntry.BruteWeight > 0)
             {
-                if (weightEntry.BruteWeight > 0)
-                {
-                    viewModel.SetTara(weightEntry.BruteWeight);
-                }
-                else
-                {
-                    viewModel.SetTara(0);
-                }
+                viewModel.SetTara(weightEntry.BruteWeight);
             }
-            else if(productoDto is not null )
+            else
             {
-                WeightDetailDto weightingDetail = weightEntry.WeightDetails
-                    .FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id) 
-                    ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
+                viewModel.SetTara(0);
+            }
+        }
+        else if (productoDto is not null)
+        {
+            WeightDetailDto weightingDetail = weightEntry.WeightDetails
+                .FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id)
+                ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
-                if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)
-                {
+            if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)
+            {
 
-                    viewModel.SetTara(weightingDetail.SecondaryTare.Value);
-                    _taraChanged = true;
-                }
-                else
-                {
-                    weightingDetail.SecondaryTare = 0;
-                    viewModel.SetTara(0);
-                    GridTaraLabel.IsVisible = false;
-                    GridSetTaraInicial.IsVisible = true;
-                    BtnCaptureNewWeight.IsVisible = false;
-                }
+                viewModel.SetTara(weightingDetail.SecondaryTare.Value);
+            }
+            else
+            {
+                weightingDetail.SecondaryTare = 0;
+                viewModel.SetTara(0);
+                GridTaraLabel.IsVisible = false;
+                GridSetTaraInicial.IsVisible = true;
+                BtnCaptureNewWeight.IsVisible = false;
             }
         }
     }
@@ -64,29 +63,23 @@ public partial class WeightingScreen : ContentPage
     
     private async Task KeepWeightAlive()
     {
-        if (BindingContext is BasculaViewModel viewModel)
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        if (!await viewModel.CanWeight())
         {
-
-            if (!await viewModel.CanWeight())
+            if (_cancellationTokenKeepAlive is not null)
             {
-                if (_cancellationTokenKeepAlive is not null)
-                {
-                    _cancellationTokenKeepAlive.Cancel();
-                    _cancellationTokenKeepAlive.Dispose();
-                    _cancellationTokenKeepAlive = null;
-                }
-
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    if (Preferences.Get("BypasTurn", false))
-                        return;
-
-                    await DisplayAlert("Error", "La báscula dejó de estar disponible", "OK");
-                    await Shell.Current.Navigation.PopModalAsync();
-                });
-
-                return;
+                _cancellationTokenKeepAlive.Cancel();
+                _cancellationTokenKeepAlive.Dispose();
+                _cancellationTokenKeepAlive = null;
             }
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await DisplayAlert("Error", "La báscula dejó de estar disponible", "OK");
+                await Shell.Current.Navigation.PopModalAsync();
+            });
         }
     }
 
@@ -94,30 +87,27 @@ public partial class WeightingScreen : ContentPage
     {
         base.OnAppearing();
 
-        if (BindingContext is BasculaViewModel viewModel)
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        try
         {
-            try
-            {
-                //TaraLabel.BackgroundColor = Colors.LightBlue;
-                //TaraLabel.TextColor = Colors.Black;
+            await viewModel.ConnectSocket();
 
-                await viewModel.ConnectSocket();
+            //BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
+            BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
+            EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
 
-                //BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
-                BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
-                EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
+            if (Preferences.Get("BypasTurn", false))
+                return;
 
-                if (Preferences.Get("BypasTurn", false))
-                    return;
-
-                _cancellationTokenKeepAlive = new CancellationTokenSource();
-                _ = StartKeepAliveLoop(_cancellationTokenKeepAlive.Token);
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", ex.Message, "OK");
-                await Shell.Current.Navigation.PopModalAsync();
-            }
+            _cancellationTokenKeepAlive = new CancellationTokenSource();
+            _ = StartKeepAliveLoop(_cancellationTokenKeepAlive.Token);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+            await Shell.Current.Navigation.PopModalAsync();
         }
     }
 
@@ -197,9 +187,7 @@ public partial class WeightingScreen : ContentPage
         {
             try
             {
-                WaitPopUp.Show();
-                //if (_popup is null) _popup = new WaitPopUp();
-                //this.ShowPopup(_popup);
+                WaitPopUp.Show("Reconectando...");
                 try
                 {
                     await viewModel.ReleaseSocket();
@@ -223,33 +211,33 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnCaptureNewWeight_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is BasculaViewModel viewModel)
-        {
-            WaitPopUp.Show("Capturando peso, espere...");
-            try
-            {
-                await viewModel.CaptureNewWeightEntry();
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
 
-                await Shell.Current.Navigation.PopModalAsync();
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", "Error al capturar el nuevo peso: " + ex.Message, "OK");
-            }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
+        WaitPopUp.Show("Capturando peso, espere...");
+        try
+        {
+            await viewModel.CaptureNewWeightEntry();
+
+            await Shell.Current.Navigation.PopModalAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Error al capturar el nuevo peso: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 
     private void OnPartnerSelected(ClienteProveedorDto partner)
     {
-        if (BindingContext is BasculaViewModel viewModel)
-        {
-            viewModel.Partner = partner;
-            BtnPickPartner.IsVisible = false;
-        }
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        viewModel.Partner = partner;
+        BtnPickPartner.IsVisible = false;
     }
 
     private void BtnPickPartner_Clicked(object sender, EventArgs e)
@@ -261,20 +249,20 @@ public partial class WeightingScreen : ContentPage
 
     private async void OnProductSelected(ProductoDto product)
     {
-        if (BindingContext is BasculaViewModel viewModel)
-        {
-            viewModel.Product = product;
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
 
-            BtnPickProduct.IsVisible = false;
+        viewModel.Product = product;
 
-            await Shell.Current.Navigation.PopModalAsync();
-            PickPopUp.Product = product.Nombre;
+        BtnPickProduct.IsVisible = false;
 
-            object? quantity = await PickPopUp.ShowAsync(product.Nombre);
+        await Shell.Current.Navigation.PopModalAsync();
+        PickPopUp.Product = product.Nombre;
 
-            if (quantity is double qty)
-                viewModel.ProductQuantity = qty;
-        }
+        object? quantity = await PickPopUp.ShowAsync(product.Nombre);
+
+        if (quantity is double qty)
+            viewModel.ProductQuantity = qty;
     }
 
     private void BtnPickProduct_Clicked(object sender, EventArgs e)
@@ -300,8 +288,6 @@ public partial class WeightingScreen : ContentPage
                 if (BindingContext is BasculaViewModel viewModel)
                 {
                     viewModel.SetTaraFromPesoTotal();
-
-                    _taraChanged = true;
                 }
 
                 _cancellationTokenSource?.Cancel();
@@ -333,62 +319,70 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnSetTaraInicial_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is BasculaViewModel viewModel)
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        try
         {
-            try
-            {
-                WeightDetailDto weightingDetail = viewModel.WeightEntry?.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == viewModel.Product?.Id)
-                    ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
+            WeightDetailDto weightingDetail = viewModel.WeightEntry?.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == viewModel.Product?.Id)
+                ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
-                viewModel.SetTaraFromPesoTotal();
+            viewModel.SetTaraFromPesoTotal();
 
-                await viewModel.PutSecondaryTara();
+            await viewModel.PutSecondaryTara();
 
-                _taraChanged = true;
+            GridSetTaraInicial.IsVisible = false;
 
-                GridSetTaraInicial.IsVisible = false;
+            GridTaraLabel.IsVisible = true;
 
-                GridTaraLabel.IsVisible = true;
+            CaptureWeightLabel.Text = "Registrar Peso Final";
 
-                CaptureWeightLabel.Text = "Registrar Peso Final";
+            BtnCaptureNewWeight.IsVisible = true;
 
-                BtnCaptureNewWeight.IsVisible = true;
-
-                await DisplayAlert("Tara Establecida", "La tara se ha restablecido correctamente.", "OK");
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
-            }
+            await DisplayAlert("Tara Establecida", "La tara se ha restablecido correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
         }
     }
 
     private void PesoLabel_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if(Preferences.Get("ManualWeight", false))
+        if(!Preferences.Get("ManualWeight", false))
+            return;
+
+        Entry entry = (Entry)sender;
+
+        if (string.IsNullOrEmpty(entry.Text))
+            return;
+
+
+        // Allow digits and ONE dot
+        if (!double.TryParse(entry.Text, out double manualWeight))
         {
-            var entry = (Entry)sender;
-
-            if (string.IsNullOrEmpty(entry.Text))
-                return;
-
-            if (entry.Text.ToUpper().Contains("KG"))
-                return;
-
-            // Allow digits and ONE dot
-            if (!double.TryParse(entry.Text, out double manualWeight))
-            {
-                // revert to old text if invalid
-                entry.Text = e.OldTextValue;
-                return;
-            }
-            else
-            {
-                if (BindingContext is not BasculaViewModel viewModel)
-                    return;
-
-                viewModel.UpdateWeight(manualWeight, false);
-            }
+            // revert to old text if invalid
+            entry.Text = e.OldTextValue;
+            return;
         }
+        
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        viewModel.UpdateWeight(manualWeight, false);
+    }
+
+    private void CheckBoxUseManual_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        PesoLabel.IsVisible = !e.Value;
+
+        EntryLabel.IsVisible = e.Value;
+
+        EntryLabel.Text = "0.0";
+
+       viewModel.ManualWeighting = e.Value;
     }
 }

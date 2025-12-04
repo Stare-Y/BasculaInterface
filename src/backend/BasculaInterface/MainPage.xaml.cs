@@ -1,7 +1,6 @@
 ﻿using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace BasculaInterface
 {
@@ -11,43 +10,17 @@ namespace BasculaInterface
         public MainPage()
         {
             InitializeComponent();
+
             BindingContext = this;
-            CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
-            CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
-            CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
-            CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
 
-            if (MauiProgram.IsSecondaryTerminal)
-            {
-                CheckBoxSecondaryTerminal.IsChecked = true;
-                CheckBoxManualWeight.IsEnabled = false;
-                CheckBoxRequirePartner.IsEnabled = false;
-
-                CheckBoxManualWeight.IsChecked = false;
-                CheckBoxRequirePartner.IsChecked = false;
-            }
-            else
-            {
-                CheckBoxSecondaryTerminal.IsChecked = false;
-            }
-        }
-        protected override void OnAppearing()
-        {
-            base.OnAppearing();
-            try
-            {
-                EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
-            }
-            catch (Exception ex)
-            {
-                Debug.Write(ex.Message);
-            }
+            LoadPreferences();
         }
 
         private async Task LogIn()
         {
+            SetPreferences();
 
-            if (EntryHost.Text.Contains("http"))
+            if (EntryHost.Text.Contains("http://"))
             {
                 Preferences.Set("HostUrl", EntryHost.Text);
             }
@@ -100,7 +73,6 @@ namespace BasculaInterface
             }
         }
 
-
         private async void BtnLogin_Pressed(object sender, EventArgs e)
         {
             WaitPopUp.Show("Cargando, por favor espere...");
@@ -134,11 +106,7 @@ namespace BasculaInterface
 
         private void CheckBoxSecondaryTerminal_CheckedChanged(object sender, CheckedChangedEventArgs e)
         {
-            MauiProgram.IsSecondaryTerminal = e.Value;
-
             Preferences.Set("SecondaryTerminal", e.Value);
-
-            CheckBoxManualWeight.IsEnabled = !e.Value;
         }
 
         private void CheckBoxManualWeight_CheckedChanged(object sender, CheckedChangedEventArgs e)
@@ -159,6 +127,28 @@ namespace BasculaInterface
         private void CheckBoxBypasTurn_CheckedChanged(object sender, CheckedChangedEventArgs e)
         {
             Preferences.Set("BypasTurn", e.Value);
+        }
+
+        private void LoadPreferences()
+        {
+            CheckBoxSecondaryTerminal.IsChecked = Preferences.Get("SecondaryTerminal", false);
+            CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
+            CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
+            CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
+            CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
+            EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
+
+            //TODO: add this thing to settings lul
+            Preferences.Set("FilterClasif6", true);
+        }
+
+        private void SetPreferences()
+        {
+            Preferences.Set("SecondaryTerminal", CheckBoxSecondaryTerminal.IsChecked);
+            Preferences.Set("ManualWeight", CheckBoxManualWeight.IsChecked);
+            Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
+            Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
+            Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
         }
     }
 }
