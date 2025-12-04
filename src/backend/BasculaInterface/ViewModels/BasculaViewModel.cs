@@ -142,8 +142,13 @@ namespace BasculaInterface.ViewModels
 
         public void UpdateWeight(double lecture)
         {
+            if (ManualWeighting)
+                return;
+
             UpdateWeight(lecture, true);
         }
+
+        public bool ManualWeighting { get; set; } = false;
 
         public void UpdateWeight(double lecture, bool notifyWeightChange = true)
         {

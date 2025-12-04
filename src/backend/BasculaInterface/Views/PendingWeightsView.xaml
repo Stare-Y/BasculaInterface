@@ -68,7 +68,7 @@
                         x:Name="BtnRefresh"
                         Grid.Row="{OnPlatform WinUI=1}"
                         Grid.Column="{OnPlatform Android=1}"
-                        IsVisible="False"
+                        IsVisible="True"
                         Pressed="BtnReconnect_Pressed"
                         Released="BtnReconnect_Released"
                         Style="{StaticResource Boton}"
@@ -81,7 +81,7 @@
                         BackgroundColor="{AppThemeBinding Light={StaticResource 4},
                                                           Dark={StaticResource 2}}"
                         Clicked="BtnNewWeighProcess_Clicked"
-                        IsVisible="False"
+                        IsVisible="True"
                         Style="{StaticResource BotonPrincipal}"
                         Text="Nueva Entrada" />
 

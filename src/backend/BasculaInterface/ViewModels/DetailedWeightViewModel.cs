@@ -10,7 +10,7 @@ namespace BasculaInterface.ViewModels
 {
     public class DetailedWeightViewModel : ViewModelBase
     {
-        public bool IsSecondaryTerminal => MauiProgram.IsSecondaryTerminal;
+        public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;

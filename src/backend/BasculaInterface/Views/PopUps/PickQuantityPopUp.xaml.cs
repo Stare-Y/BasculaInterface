@@ -2,7 +2,7 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class PickQuantityPopUp : ContentView
 {
-    private TaskCompletionSource<double?> _tcs;
+    private TaskCompletionSource<double?> _tcs = null!;
 
     private string _product = "Elije la cantidad para el producto";
 

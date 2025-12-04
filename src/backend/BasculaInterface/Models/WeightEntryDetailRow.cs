@@ -10,7 +10,7 @@
         public string? WeightedBy { get; set; }
         private string _description = string.Empty;
         public int? FK_WeightedProductId { get; set; } = null;
-        public bool IsSecondaryTerminal => MauiProgram.IsSecondaryTerminal;
+        public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public double? RequiredAmount { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
         public string RequiredAmountText => RequiredAmount.HasValue 

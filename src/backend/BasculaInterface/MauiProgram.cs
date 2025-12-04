@@ -10,7 +10,6 @@ public static class MauiProgram
 {
     public static IServiceProvider ServiceProvider { get; set; } = null !;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
-    public static bool IsSecondaryTerminal { get; set; } = false;
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -46,14 +45,7 @@ public static class MauiProgram
                 });
             });
         });
-        IsSecondaryTerminal = Preferences.Get("SecondaryTerminal", false);
 #endif
-
-#if ANDROID
-
-        IsSecondaryTerminal = Preferences.Get("SecondaryTerminal", true);
-#endif
-
 
         Preferences.Set("DeviceName", DeviceInfo.Name);
 
@@ -61,8 +53,6 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
         
-        Preferences.Set("FilterClasif6", true);
-
         builder.Services.AddTransient<BasculaViewModel>();
         builder.Services.AddTransient<PendingWeightsViewModel>();
         builder.Services.AddTransient<ProductSelectorViewModel>();
