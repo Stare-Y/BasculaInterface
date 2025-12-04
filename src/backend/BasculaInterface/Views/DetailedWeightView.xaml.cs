@@ -85,16 +85,17 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnVolver_Clicked(object sender, EventArgs e)
     {
-        BtnVolver.Opacity = 0;
-        await BtnVolver.FadeTo(1, 200);
+        await BtnVolver.ScaleTo(1.1, 100);
+        await BtnVolver.ScaleTo(1.0, 100);
 
         await Shell.Current.Navigation.PopAsync();
     }
 
     private async void BtnNewEntry_Clicked(object sender, EventArgs e)
     {
-        BtnNewEntry.Opacity = 0;
-        await BtnNewEntry.FadeTo(1, 200);
+
+        await BtnNewEntry.ScaleTo(1.1, 100);
+        await BtnNewEntry.ScaleTo(1.0, 100);
 
         DetailedWeightViewModel viewModel = GetViewModel();
 
@@ -110,8 +111,8 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnFinishWeight_Clicked(object sender, EventArgs e)
     {
-        BtnFinishWeight.Opacity = 0;
-        await BtnFinishWeight.FadeTo(1, 200);
+        await BtnFinishWeight.ScaleTo(1.1, 100);
+        await BtnFinishWeight.ScaleTo(1.0, 100);
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
@@ -140,8 +141,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnPrintTicket_Clicked(object sender, EventArgs e)
     {
-        BtnPrintTicket.Opacity = 0;
-        await BtnPrintTicket.FadeTo(1, 200);
+
+        await BtnPrintTicket.ScaleTo(1.1, 100);
+        await BtnPrintTicket.ScaleTo(1.0, 100);
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
@@ -225,6 +227,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
     {
+        await BtnNuevoProducto.ScaleTo(1.1, 100);
+        await BtnNuevoProducto.ScaleTo(1.0, 100);
+
         if (BindingContext is not DetailedWeightViewModel viewModel)
         {
             await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
@@ -320,7 +325,6 @@ public partial class DetailedWeightView : ContentPage
 
     private async void DeleteWeightDetail_Clicked(object sender, EventArgs e)
     {
-        //BtnWeightDetail.Opacity = 0;
         //await BtnWeightDetail.FadeTo(1, 200);
 
         if (sender is Button btn && btn.BindingContext is WeightEntryDetailRow selectedRow)
@@ -363,8 +367,9 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
-        BtnRefresh.Opacity = 0;
-        await BtnRefresh.FadeTo(1, 200);
+        await BtnRefresh.ScaleTo(1.1, 100);
+        await BtnRefresh.ScaleTo(1.0, 100);
+
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
@@ -373,8 +378,8 @@ public partial class DetailedWeightView : ContentPage
 
     private async void BtnDeleteEntry_Clicked(object sender, EventArgs e)
     {
-        BtnDeleteEntry.Opacity = 0;
-        await BtnDeleteEntry.FadeTo(1, 200);
+        await BtnDeleteEntry.ScaleTo(1.1, 100);
+        await BtnDeleteEntry.ScaleTo(1.0, 100);
 
         if (BindingContext is not DetailedWeightViewModel viewModel)
         {

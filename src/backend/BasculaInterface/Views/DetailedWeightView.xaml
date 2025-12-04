@@ -3,8 +3,8 @@
     x:Class="BasculaInterface.Views.DetailedWeightView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
     Title="DetailedWeightView"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
@@ -21,7 +21,7 @@
                                         WinUI='100,Auto,100,*,Auto,Auto'}"
             RowSpacing="15">
 
-       
+
 
             <Grid
                 Grid.Row="0"
@@ -430,12 +430,12 @@
                                                                      Dark={StaticResource BlackGray}}"
                                         HeightRequest="{OnPlatform Android=75,
                                                                    WinUI=110}"
-                                        Style="{StaticResource RoundedBorderStyle}"
                                         Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
                                         StrokeShape="RoundRectangle 30"
-                                        StrokeThickness="0">
+                                        StrokeThickness="0"
+                                        Style="{StaticResource RoundedBorderStyle}">
                                         <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='30,125,50,5,50', WinUI='Auto,*,*,20,*'}">
 
                                             <Grid
@@ -667,7 +667,7 @@
 
                 <Border
                     x:Name="BtnDeleteEntry"
-                    Grid.Column="0"
+                    Grid.Column="2"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
                     HeightRequest="{OnPlatform Android=50,
@@ -743,7 +743,7 @@
 
                 <Border
                     x:Name="BtnNuevoProducto"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
                     HeightRequest="{OnPlatform Android=50,
@@ -818,7 +818,7 @@
 
                 <Border
                     x:Name="BtnNewEntry"
-                    Grid.Column="2"
+                    Grid.Column="1"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
                     HeightRequest="{OnPlatform Android=50,

@@ -96,12 +96,12 @@ public partial class PartnerSelectView : ContentPage
         if (e.CurrentSelection.FirstOrDefault() is ClienteProveedorDto socio)
         {
             LabelResultado.Text = socio.RazonSocial;
-            BtnConfirm.IsEnabled = true;
+            BtnConfirm.IsVisible = true;
         }
         else
         {
             LabelResultado.Text = "Ningún producto seleccionado";
-            BtnConfirm.IsEnabled = false;
+            BtnConfirm.IsVisible = false;
         }
     }
 
