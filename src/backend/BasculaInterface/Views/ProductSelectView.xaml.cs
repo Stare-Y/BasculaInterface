@@ -57,7 +57,7 @@ public partial class ProductSelectView : ContentPage
 
         if (ResultsCollectionView.SelectedItem is not null)
         {
-            BtnConfirm.IsEnabled = true;
+            BtnConfirm.IsVisible = true;
 
             // Marcar el RadioButton del item seleccionado:
             if (e.CurrentSelection.FirstOrDefault() is ProductoDto seleccionado)
@@ -71,7 +71,7 @@ public partial class ProductSelectView : ContentPage
         }
         else
         {
-            BtnConfirm.IsEnabled = false;
+            BtnConfirm.IsVisible = false;
             LabelResultado.Text = "Ningún producto seleccionado";
 
         }
@@ -79,6 +79,9 @@ public partial class ProductSelectView : ContentPage
 
     private async void OnConfirmClicked(object sender, EventArgs e)
     {
+        await BtnConfirm.ScaleTo(1.1, 100);
+        await BtnConfirm.ScaleTo(1.0, 100);
+
         ProductoDto productoDto = (ProductoDto)ResultsCollectionView.SelectedItem;
 
         bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {productoDto.Nombre}?", "No", "Si");
@@ -92,12 +95,17 @@ public partial class ProductSelectView : ContentPage
             ResultsCollectionView.SelectedItems?.Clear();
             ResultsCollectionView.SelectedItem = null;
 
-            BtnConfirm.IsEnabled = false;
+            BtnConfirm.IsVisible = false;
         }
     }
 
     private async void OnBackClicked(object sender, EventArgs e)
     {
+
+        await BtnBack.ScaleTo(1.1, 100);
+        await BtnBack.ScaleTo(1.0, 100);
+
+
         await Shell.Current.Navigation.PopModalAsync();
     }
 }
