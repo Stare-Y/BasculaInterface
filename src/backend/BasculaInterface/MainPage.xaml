@@ -3,9 +3,9 @@
     x:Class="BasculaInterface.MainPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:local="clr-namespace:BasculaInterface"
-    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps">
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels">
 
     <Grid>
 
@@ -80,6 +80,58 @@
                                              WinUI=20}">
 
 
+                        <Border
+                            x:Name="BtnSettings"
+                            Grid.Column="0"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                              Dark={StaticResource BlackGray}}"
+                            HeightRequest="{OnPlatform Android=50,
+                                                       WinUI=100}"
+                            HorizontalOptions="Start"
+                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                            Stroke="{StaticResource 1}"
+                            StrokeShape="RoundRectangle 30"
+                            Style="{StaticResource RoundedBorderStyle}"
+                            WidthRequest="{OnPlatform Android=50,
+                                                      WinUI=100}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="BtnSettings_Tapped" />
+                            </Border.GestureRecognizers>
+
+
+                            <Image
+                                x:Name="imgSettings"
+                                Aspect="AspectFit"
+                                HeightRequest="{OnPlatform Android=40,
+                                                           WinUI=60}"
+                                Source="{AppThemeBinding Light='settings.png',
+                                                         Dark='settings.png'}"
+                                WidthRequest="{OnPlatform Android=40,
+                                                          WinUI=60}" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+
+                                        <VisualState x:Name="Normal" />
+
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                                <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
 
                         <CheckBox x:Name="CheckBoxSecondaryTerminal" CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged" />
 

@@ -183,6 +183,9 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnReconect_Clicked(object sender, EventArgs e)
     {
+        await BtnReconect.ScaleTo(1.1, 100);
+        await BtnReconect.ScaleTo(1.0, 100);
+
         if (BindingContext is BasculaViewModel viewModel)
         {
             try
@@ -211,6 +214,9 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnCaptureNewWeight_Clicked(object sender, EventArgs e)
     {
+        await BtnCaptureNewWeight.ScaleTo(1.1, 100);
+        await BtnCaptureNewWeight.ScaleTo(1.1, 100);
+
         if (BindingContext is not BasculaViewModel viewModel)
             return;
 
@@ -240,11 +246,14 @@ public partial class WeightingScreen : ContentPage
         BtnPickPartner.IsVisible = false;
     }
 
-    private void BtnPickPartner_Clicked(object sender, EventArgs e)
+    private async void BtnPickPartner_Clicked(object sender, EventArgs e)
     {
+        await BtnPickPartner.ScaleTo(1.1, 100);
+        await BtnPickPartner.ScaleTo(1.0, 100);
+
         PartnerSelectView partnerSelectView = new PartnerSelectView();
         partnerSelectView.OnPartnerSelected += OnPartnerSelected;
-        Shell.Current.Navigation.PushModalAsync(partnerSelectView);
+        await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
     }
 
     private async void OnProductSelected(ProductoDto product)
@@ -265,20 +274,26 @@ public partial class WeightingScreen : ContentPage
             viewModel.ProductQuantity = qty;
     }
 
-    private void BtnPickProduct_Clicked(object sender, EventArgs e)
+    private async void BtnPickProduct_Clicked(object sender, EventArgs e)
     {
+        await BtnPickProduct.ScaleTo(1.1, 100);
+        await BtnPickProduct.ScaleTo(1.0, 100);
+
         ProductSelectView productSelectView = new ProductSelectView();
         productSelectView.OnProductSelected += OnProductSelected;
-        Shell.Current.Navigation.PushModalAsync(productSelectView);
+        await Shell.Current.Navigation.PushModalAsync(productSelectView);
     }
 
-    private void BtnBack_Clicked(object sender, EventArgs e)
+    private async void BtnBack_Clicked(object sender, EventArgs e)
     {
-        Shell.Current.Navigation.PopModalAsync();
+        await BtnBack.ScaleTo(1.1, 100);
+        await BtnBack.ScaleTo(1.0, 100);
+
+        await Shell.Current.Navigation.PopModalAsync();
     }
 
     private async void TaraLabel_Pressed(object sender, EventArgs e)
-    {
+    {      
         _cancellationTokenSource = new CancellationTokenSource();
         try
         {
@@ -319,6 +334,9 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnSetTaraInicial_Clicked(object sender, EventArgs e)
     {
+        await BtnSetTaraInicial.ScaleTo(1.1, 100);
+        await BtnSetTaraInicial.ScaleTo(1.0, 100);
+
         if (BindingContext is not BasculaViewModel viewModel)
             return;
 

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BasculaInterface.Views.EditSettingsView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="EditSettingsView">
+
+    <Grid>
+
+        <Image Aspect="AspectFill" Source="background.png" />
+
+        <Grid Padding="{OnPlatform Android=30, WinUI=125}">
+
+            <Border
+                Padding="30"
+                BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                  Dark={StaticResource BlackGray}}"
+                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0">
+
+                <Grid RowDefinitions="auto,2*,auto" RowSpacing="30 ">
+
+
+
+                    <!--  Elementos ocultos opcionales  -->
+                    <StackLayout
+                        Grid.Row="0"
+                        Spacing="15"
+                        VerticalOptions="Start">
+                        <Label
+                            Style="{StaticResource Label}"
+                            Text="Entrada de Host"
+                            TextColor="{AppThemeBinding Light={StaticResource 3},
+                                                        Dark={StaticResource 2}}" />
+                        <Border
+                            x:Name="BorderEntryHost"
+                            HorizontalOptions="Fill"
+                            IsVisible="True"
+                            Style="{StaticResource RoundedBorderStyle}"
+                            VerticalOptions="Center">
+                            <Entry
+                                x:Name="EntryHost"
+                                Placeholder="Ingrese la Direccion del Host..."
+                                Style="{StaticResource EntryDatos}" />
+                        </Border>
+                    </StackLayout>
+
+                    <ScrollView
+                        x:Name="ScrollCheckBox"
+                        Grid.Row="1"
+                        IsVisible="True"
+                        Orientation="Horizontal"
+                        VerticalOptions="Center">
+
+                        <VerticalStackLayout
+                            x:Name="StackCheckBox"
+                            HorizontalOptions="Center"
+                            IsVisible="True"
+                            Spacing="{OnPlatform Android=10,
+                                                 WinUI=20}"
+                            VerticalOptions="Center">
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxSecondaryTerminal"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Usar terminal secundaria" />
+                            </Grid>
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxManualWeight"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxManualWeight_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Capturar peso manualmente" />
+
+                            </Grid>
+
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxRequirePartner"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxRequirePartner_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Forzar elegir socio" />
+
+                            </Grid>
+
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxOnlyPedidos"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxOnlyPedidos_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Solo Pedidos" />
+
+                            </Grid>
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxBypasTurn"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxBypasTurn_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Omitir Turno de Bascula" />
+
+                            </Grid>
+
+                        </VerticalStackLayout>
+
+                    </ScrollView>
+
+                    <Grid
+                        Grid.Row="2"
+                        ColumnDefinitions="*,*"
+                        ColumnSpacing="25"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="End">
+
+                        <!--  Button to go back  -->
+                        <Border
+                            x:Name="BtnCancel"
+                            Grid.Column="0"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                              Dark={StaticResource BlackGray}}"
+                            HeightRequest="{OnPlatform Android=75,
+                                                       WinUI=80}"
+                            HorizontalOptions="Center"
+                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Black},
+                                                     Dark={StaticResource 1}}"
+                            StrokeShape="RoundRectangle 30"
+                            Style="{StaticResource RoundedBorderStyle}"
+                            WidthRequest="{OnPlatform Android=75,
+                                                      WinUI=250}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="BtnCancel_Clicked" />
+                            </Border.GestureRecognizers>
+
+                            <VerticalStackLayout HorizontalOptions="Fill" VerticalOptions="Center">
+
+                                <Image
+                                    x:Name="BackIcon"
+                                    Aspect="AspectFit"
+                                    HeightRequest="{OnPlatform Android=40,
+                                                               WinUI=50}"
+                                    Source="{AppThemeBinding Light='back2.png',
+                                                             Dark='back2.png'}"
+                                    WidthRequest="{OnPlatform Android=40,
+                                                              WinUI=50}" />
+
+                                <Label
+                                    x:Name="BackLabel"
+                                    FontAttributes="Bold"
+                                    FontSize="{OnPlatform Android=10,
+                                                          WinUI=16}"
+                                    Style="{StaticResource Label}"
+                                    Text="Volver"
+                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                Dark={StaticResource Black}}" />
+
+                            </VerticalStackLayout>
+
+
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+
+                                        <VisualState x:Name="Normal" />
+
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 4}}" />
+                                                <Setter TargetName="BackIcon" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back.png'}" />
+                                                <Setter TargetName="BackLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 1}}" />
+                                                <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+
+                        <!--  Button to save current settings  -->
+                        <Border
+                            x:Name="BtnSaveSettings"
+                            Grid.Column="1"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                              Dark={StaticResource BlackGray}}"
+                            HeightRequest="{OnPlatform Android=75,
+                                                       WinUI=80}"
+                            HorizontalOptions="Center"
+                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Black},
+                                                     Dark={StaticResource 1}}"
+                            StrokeShape="RoundRectangle 30"
+                            StrokeThickness="3"
+                            Style="{StaticResource RoundedBorderStyle}"
+                            WidthRequest="{OnPlatform Android=75,
+                                                      WinUI=250}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="BtnSaveSettings_Clicked" />
+                            </Border.GestureRecognizers>
+
+                            <VerticalStackLayout
+                                HorizontalOptions="Fill"
+                                Spacing="5"
+                                VerticalOptions="Center">
+
+                                <Image
+                                    x:Name="CaptureSettingsImage"
+                                    Aspect="AspectFit"
+                                    HeightRequest="{OnPlatform Android=30,
+                                                               WinUI=40}"
+                                    HorizontalOptions="Fill"
+                                    Source="{AppThemeBinding Light='confirm.png',
+                                                             Dark='confirm.png'}"
+                                    VerticalOptions="Fill"
+                                    WidthRequest="{OnPlatform Android=30,
+                                                              WinUI=40}" />
+
+                                <Label
+                                    x:Name="CaptureSettingsLabel"
+                                    FontAttributes="Bold"
+                                    FontSize="{OnPlatform Android=7,
+                                                          WinUI=16}"
+                                    Style="{StaticResource Label}"
+                                    Text="Guardar Configuracion"
+                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                Dark={StaticResource Black}}" />
+
+                            </VerticalStackLayout>
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+
+                                        <VisualState x:Name="Normal" />
+
+                                        <VisualState x:Name="PointerOver">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 4}}" />
+                                                <Setter TargetName="CaptureSettingsImage" Property="Image.Source" Value="{AppThemeBinding Light='confirm2.png', Dark='confirm2.png'}" />
+                                                <Setter TargetName="CaptureSettingsLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 1}}" />
+                                                <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                        <VisualState x:Name="Pressed">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+
+                    </Grid>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

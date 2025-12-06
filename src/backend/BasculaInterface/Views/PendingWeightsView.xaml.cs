@@ -87,8 +87,8 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnNewWeighProcess_Clicked(object sender, EventArgs e)
     {
-        BtnNewWeighProcess.Opacity = 0;
-        await BtnNewWeighProcess.FadeTo(1, 200);
+        await BtnNewWeighProcess.ScaleTo(1.1, 100);
+        await BtnNewWeighProcess.ScaleTo(1.0, 100);
 
         WaitPopUp.Show("Preparando bascula, espere...");
 
@@ -159,8 +159,8 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnReconnect_Pressed(object sender, EventArgs e)
     {
-        BtnRefresh.Opacity = 0;
-        await BtnRefresh.FadeTo(1, 200);
+        await BtnRefresh.ScaleTo(1.1, 100);
+        await BtnRefresh.ScaleTo(1.0, 100);
 
         _cancellationTokenSource = new CancellationTokenSource();
         try
@@ -169,7 +169,6 @@ public partial class PendingWeightsView : ContentPage
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 BorderEntryHost.IsVisible = true;
-
                 _cancellationTokenSource?.Cancel();
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;
@@ -207,11 +206,11 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnExit_Clicked(object sender, EventArgs e)
     {
-        BtnExitAndroid.Opacity = 0;
-        await BtnExitAndroid.FadeTo(1, 200);
+        await BtnExitAndroid.ScaleTo(1.1, 100);
+        await BtnExitAndroid.ScaleTo(1.0, 100);
 
-        BtnExit.Opacity = 0;
-        await BtnExit.FadeTo(1, 200);
+        await BtnExit.ScaleTo(1.1, 100);
+        await BtnExit.ScaleTo(1.0, 100);
 
         await Shell.Current.Navigation.PopAsync();
     }

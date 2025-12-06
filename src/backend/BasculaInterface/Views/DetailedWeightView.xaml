@@ -67,7 +67,6 @@
 
                                 <VisualState x:Name="PointerOver">
                                     <VisualState.Setters>
-                                        <!--<Setter TargetName="ImgBack" Property="Image.Source" Value="back2.png" />-->
                                         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
                                         <Setter Property="Stroke" Value="{StaticResource 2}" />
                                     </VisualState.Setters>
@@ -428,8 +427,8 @@
                                         x:Name="BtnSelectedItem"
                                         Background="{AppThemeBinding Light={StaticResource Gray},
                                                                      Dark={StaticResource BlackGray}}"
-                                        HeightRequest="{OnPlatform Android=75,
-                                                                   WinUI=110}"
+                                        HeightRequest="{OnPlatform Android=85,
+                                                                   WinUI=125}"
                                         Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
@@ -530,13 +529,15 @@
                                                                                 Dark={StaticResource 1}}"
                                                     VerticalTextAlignment="Center" />
 
-
-                                                <!-- IDK WHAT IS THIS SHIT ??? <Label
-                                                FontSize="Subtitle"
-                                                HorizontalTextAlignment="Start"
-                                                Text="{Binding WeightedBy, StringFormat='{0}'}"
-                                                TextColor="Black"
-                                                VerticalTextAlignment="Center" />-->
+                                                <Label
+                                                    FontAttributes="Italic"
+                                                    FontSize="13"
+                                                    HorizontalOptions="Start"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding WeightedBy, StringFormat='Pesado por: {0}'}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}"
+                                                    VerticalTextAlignment="Center" />
 
                                             </VerticalStackLayout>
 
@@ -899,14 +900,14 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Center"
+                    IsVisible="False"
                     Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
                     WidthRequest="{OnPlatform Android=100,
-                                              WinUI=250}"
-                    IsVisible="False">
+                                              WinUI=250}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnFinishWeight_Clicked" />
                     </Border.GestureRecognizers>
