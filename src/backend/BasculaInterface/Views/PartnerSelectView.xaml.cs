@@ -67,13 +67,13 @@ public partial class PartnerSelectView : ContentPage
                 return;
             }
 
-            if (!partner.OrderRequestAllowed)
+            if (!partner.OrderRequestAllowed && !partner.IsProvider)
             {
                 await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, no tiene credito habilitado", "OK");
                 return;
             }
 
-            if (!partner.IgnoreCreditLimit && partner.CreditLimit != 0 && partner.AvailableCredit < 0)
+            if (!partner.IgnoreCreditLimit && partner.CreditLimit != 0 && partner.AvailableCredit < 0 && !partner.IsProvider)
             {
                 await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, excede su limite de credito", "OK");
                 return;

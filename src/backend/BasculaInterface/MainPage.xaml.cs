@@ -1,7 +1,6 @@
 ﻿using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace BasculaInterface
 {
@@ -14,33 +13,13 @@ namespace BasculaInterface
 
             BindingContext = this;
 
-            LoadPreferences();
         }
 
         private async Task LogIn()
         {
-            SetPreferences();
-
-            if (EntryHost.Text.Contains("http://"))
-            {
-                Preferences.Set("HostUrl", EntryHost.Text);
-            }
-            else
-            {
-                Preferences.Set("HostUrl", "http://" + EntryHost.Text + "/");
-            }
-
-            if (EntryHost.Text == string.Empty)
-            {
-                await DisplayAlert("Error", "Por favor, ingrese la URL del host.", "OK");
-                return;
-            }
-
             await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
-            BorderEntryHost.IsVisible = false;
             StackCheckBox.IsVisible = false;
             ScrollCheckBox.IsVisible = false;
-            CheckBoxSecondaryTerminal.IsVisible = false;
         }
 
         private async void BtnLogin_Released(object sender, EventArgs e)
@@ -56,12 +35,10 @@ namespace BasculaInterface
                     _cancellationTokenSource.Dispose();
                     _cancellationTokenSource = null;
 
-                    if (string.IsNullOrEmpty(EntryHost.Text))
-                    {
-                        await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
-                        return;
-                    }
                     await LogIn();
+
+                    StackCheckBox.IsVisible = false;
+                    ScrollCheckBox.IsVisible = false;
                 }
             }
             catch (Exception ex)
@@ -83,10 +60,8 @@ namespace BasculaInterface
                 await Task.Delay(4444, _cancellationTokenSource.Token);
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    BorderEntryHost.IsVisible = true;
                     StackCheckBox.IsVisible = true;
                     ScrollCheckBox.IsVisible = true;
-                    CheckBoxSecondaryTerminal.IsVisible = true;
 
                     _cancellationTokenSource?.Cancel();
                     _cancellationTokenSource?.Dispose();
@@ -105,59 +80,15 @@ namespace BasculaInterface
             }
         }
 
-        private void CheckBoxSecondaryTerminal_CheckedChanged(object sender, CheckedChangedEventArgs e)
-        {
-            Preferences.Set("SecondaryTerminal", e.Value);
-        }
-
-        private void CheckBoxManualWeight_CheckedChanged(object sender, CheckedChangedEventArgs e)
-        {
-            Preferences.Set("ManualWeight", e.Value);
-        }
-
-        private void CheckBoxRequirePartner_CheckedChanged(object sender, CheckedChangedEventArgs e)
-        {
-            Preferences.Set("RequirePartner", e.Value);
-        }
-
-        private void CheckBoxOnlyPedidos_CheckedChanged(object sender, CheckedChangedEventArgs e)
-        {
-            Preferences.Set("OnlyPedidos", e.Value);
-        }
-
-        private void CheckBoxBypasTurn_CheckedChanged(object sender, CheckedChangedEventArgs e)
-        {
-            Preferences.Set("BypasTurn", e.Value);
-        }
-
-        private void LoadPreferences()
-        {
-            CheckBoxSecondaryTerminal.IsChecked = Preferences.Get("SecondaryTerminal", false);
-            CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
-            CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
-            CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
-            CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
-            EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
-
-            //TODO: add this thing to settings lul
-            Preferences.Set("FilterClasif6", true);
-        }
-
-        private void SetPreferences()
-        {
-            Preferences.Set("SecondaryTerminal", CheckBoxSecondaryTerminal.IsChecked);
-            Preferences.Set("ManualWeight", CheckBoxManualWeight.IsChecked);
-            Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
-            Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
-            Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
-        }
-
         private async void BtnSettings_Tapped(object sender, TappedEventArgs e)
         {
             await BtnSettings.ScaleTo(1.1, 100);
             await BtnSettings.ScaleTo(1.0, 100);
 
             await Shell.Current.Navigation.PushModalAsync(new EditSettingsView());
+
+            StackCheckBox.IsVisible = false;
+            ScrollCheckBox.IsVisible = false;
         }
     }
 }

@@ -30,7 +30,8 @@ namespace Infrastructure.Service
                     CreditLimit = client.CLIMITECREDITOCLIENTE,
                     Debt = await _documentRepo.GetClientDebt(client.CIDCLIENTEPROVEEDOR),
                     OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1,
-                    IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1
+                    IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1,
+                    IsProvider = client.CTIPOCLIENTE != 1
                 });
             }
 

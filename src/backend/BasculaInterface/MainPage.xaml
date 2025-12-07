@@ -55,17 +55,6 @@
                 Grid.Row="3"
                 Spacing="10"
                 VerticalOptions="End">
-                <Border
-                    x:Name="BorderEntryHost"
-                    HorizontalOptions="Fill"
-                    IsVisible="False"
-                    Style="{StaticResource RoundedBorderStyle}"
-                    VerticalOptions="Center">
-                    <Entry
-                        x:Name="EntryHost"
-                        Placeholder="Ingrese la Direccion del Host..."
-                        Style="{StaticResource EntryDatos}" />
-                </Border>
 
                 <ScrollView
                     x:Name="ScrollCheckBox"
@@ -132,45 +121,6 @@
                                 </VisualStateGroupList>
                             </VisualStateManager.VisualStateGroups>
                         </Border>
-
-                        <CheckBox x:Name="CheckBoxSecondaryTerminal" CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged" />
-
-                        <Label
-                            FontSize="{OnPlatform Android=12,
-                                                  WinUI=22}"
-                            Style="{StaticResource Label}"
-                            Text="Usar terminal secundaria" />
-                        <CheckBox x:Name="CheckBoxManualWeight" CheckedChanged="CheckBoxManualWeight_CheckedChanged" />
-
-                        <Label
-                            FontSize="{OnPlatform Android=12,
-                                                  WinUI=22}"
-                            Style="{StaticResource Label}"
-                            Text="Capturar peso manualmente" />
-
-                        <CheckBox x:Name="CheckBoxRequirePartner" CheckedChanged="CheckBoxRequirePartner_CheckedChanged" />
-
-                        <Label
-                            FontSize="{OnPlatform Android=12,
-                                                  WinUI=22}"
-                            Style="{StaticResource Label}"
-                            Text="Forzar elegir socio" />
-
-                        <CheckBox x:Name="CheckBoxOnlyPedidos" CheckedChanged="CheckBoxOnlyPedidos_CheckedChanged" />
-
-                        <Label
-                            FontSize="{OnPlatform Android=12,
-                                                  WinUI=22}"
-                            Style="{StaticResource Label}"
-                            Text="Solo Pedidos" />
-
-                        <CheckBox x:Name="CheckBoxBypasTurn" CheckedChanged="CheckBoxBypasTurn_CheckedChanged" />
-
-                        <Label
-                            FontSize="{OnPlatform Android=12,
-                                                  WinUI=22}"
-                            Style="{StaticResource Label}"
-                            Text="Omitir Turno de Bascula" />
 
                     </HorizontalStackLayout>
                 </ScrollView>

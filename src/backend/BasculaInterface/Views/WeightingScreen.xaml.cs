@@ -94,7 +94,7 @@ public partial class WeightingScreen : ContentPage
         {
             await viewModel.ConnectSocket();
 
-            //BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
+            BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
             BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
             EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
 
@@ -265,7 +265,6 @@ public partial class WeightingScreen : ContentPage
 
         BtnPickProduct.IsVisible = false;
 
-        await Shell.Current.Navigation.PopModalAsync();
         PickPopUp.Product = product.Nombre;
 
         object? quantity = await PickPopUp.ShowAsync(product.Nombre);

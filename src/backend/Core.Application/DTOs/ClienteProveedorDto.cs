@@ -10,5 +10,6 @@
         public double AvailableCredit => CreditLimit - Debt;
         public bool OrderRequestAllowed { get; set; } = false;
         public bool IgnoreCreditLimit { get; set; } = false;
+        public bool IsProvider { get; set; }
     }
 }   
