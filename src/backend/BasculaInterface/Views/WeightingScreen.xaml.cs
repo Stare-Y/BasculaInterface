@@ -22,10 +22,12 @@ public partial class WeightingScreen : ContentPage
         }
     }
 
-    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
+    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {
         if (BindingContext is not BasculaViewModel viewModel)
             return;
+        
+        viewModel.Providers = providers;
 
         viewModel.WeightEntry = weightEntry;
         viewModel.Partner = partner;
@@ -100,7 +102,7 @@ public partial class WeightingScreen : ContentPage
             await viewModel.ConnectSocket();
 
             BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
-            BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
+            BtnPickProduct.IsVisible = viewModel.Product is null && ((viewModel.WeightEntry?.TareWeight != 0) || viewModel.Providers);
             EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate) 
                 && !Preferences.Get("SecondaryTerminal", false);
 
@@ -254,10 +256,13 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnPickPartner_Clicked(object sender, EventArgs e)
     {
+        if(BindingContext is not BasculaViewModel viewModel)
+            return;
+
         await BtnPickPartner.ScaleTo(1.1, 100);
         await BtnPickPartner.ScaleTo(1.0, 100);
 
-        PartnerSelectView partnerSelectView = new PartnerSelectView();
+        PartnerSelectView partnerSelectView = new PartnerSelectView(viewModel.Providers);
         partnerSelectView.OnPartnerSelected += OnPartnerSelected;
         await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
     }

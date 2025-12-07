@@ -1,12 +1,14 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
+using Windows.Devices.I2c.Provider;
 
 namespace BasculaInterface.Views;
 
 public partial class PartnerSelectView : ContentPage
 {
     public Action<ClienteProveedorDto>? OnPartnerSelected;
+    private bool _providers = false;
     public PartnerSelectView(PartnerSelectorViewModel viewModel)
 	{
 		InitializeComponent();
@@ -18,7 +20,10 @@ public partial class PartnerSelectView : ContentPage
         }
     }
 
-    public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
+    public PartnerSelectView(bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>())
+    {
+        _providers = providers;
+    }
 
     protected override async void OnAppearing()
     {
@@ -37,7 +42,7 @@ public partial class PartnerSelectView : ContentPage
                 string searchTerm = SearchBar.Text?.Trim() ?? string.Empty;
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
-                    await viewModel.SearchPartners(searchTerm);
+                    await viewModel.SearchPartners(searchTerm, _providers);
                 }
                 else
                 {

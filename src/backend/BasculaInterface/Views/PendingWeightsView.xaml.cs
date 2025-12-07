@@ -17,6 +17,7 @@ public partial class PendingWeightsView : ContentPage
 
         BindingContext = viewModel 
             ?? throw new ArgumentNullException(nameof(viewModel));
+
     }
 
     public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
@@ -36,6 +37,8 @@ public partial class PendingWeightsView : ContentPage
 
                 if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
                 {
+                    GridListTab.IsVisible = false;
+
                     BtnNewWeighProcess.IsVisible = false;
 
                     if(Preferences.Get("OnlyPedidos", false))
@@ -104,7 +107,7 @@ public partial class PendingWeightsView : ContentPage
                 throw new InvalidOperationException("Bascula ocupada");
             }
 
-            WeightingScreen weightingView = new(new WeightEntryDto());
+            WeightingScreen weightingView = new(new WeightEntryDto(), providers: !BtnDescargas.IsEnabled);
 
             await Shell.Current.Navigation.PushModalAsync(weightingView);
         }
@@ -264,6 +267,25 @@ public partial class PendingWeightsView : ContentPage
         finally
         {
             WaitPopUp.Hide();
+        }
+    }
+
+    private void CargasDescargasToggle(object sender, EventArgs e)
+    {
+        if(BindingContext is not PendingWeightsViewModel viewModel)
+            return;
+
+        if (!BtnCargas.IsEnabled)
+        {
+            BtnCargas.IsEnabled = true;
+            BtnDescargas.IsEnabled = false;
+            PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
+        }
+        else
+        {
+            BtnCargas.IsEnabled = false;
+            BtnDescargas.IsEnabled = true;
+            PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsCharge;
         }
     }
 }

@@ -129,14 +129,35 @@
                 Grid.Column="{OnPlatform WinUI=1}"
                 Padding="{OnPlatform Android=30}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+                VerticalOptions="{OnPlatform Android='StartAndExpand'}"
+                RowDefinitions="Auto,*">
+
+                <Grid 
+                    Grid.Row="0"
+                    ColumnDefinitions="*,*"
+                    x:Name="GridListTab">
+                    
+                    <Button 
+                        Grid.Column="0"
+                        IsEnabled="False"
+                        Text="Cargas"
+                        x:Name="BtnCargas"
+                        Clicked="CargasDescargasToggle"/>
+                    <Button 
+                        Grid.Column="1"
+                        Text="Descargas"
+                        x:Name="BtnDescargas"
+                        Clicked="CargasDescargasToggle"/>
+
+                </Grid>
 
                 <Border
                     Padding="{OnPlatform WinUI=15}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0">
+                    StrokeThickness="0"
+                    Grid.Row="1">
 
                     <RefreshView
                         x:Name="RefreshViewPendingWeights"
@@ -146,7 +167,7 @@
                         <CollectionView
                             x:Name="PendingWeightsCollectionView"
                             HorizontalOptions="Center"
-                            ItemsSource="{Binding PendingWeights}"
+                            ItemsSource="{Binding PendingWeightsCharge}"
                             SelectionChanged="PendingWeightsCollectionView_SelectionChanged"
                             SelectionMode="Single"
                             VerticalOptions="Start">

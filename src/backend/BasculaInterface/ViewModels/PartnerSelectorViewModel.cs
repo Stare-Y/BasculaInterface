@@ -18,7 +18,7 @@ namespace BasculaInterface.ViewModels
 
         public PartnerSelectorViewModel() { }
 
-        public async Task SearchPartners(string searchTerm)
+        public async Task SearchPartners(string searchTerm, bool providers = false)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -32,6 +32,8 @@ namespace BasculaInterface.ViewModels
             Partners.Clear();
             foreach (var partner in partners)
             {
+                if(providers && !partner.IsProvider)
+                    continue;
                 Partners.Add(partner);
             }
         }

@@ -5,6 +5,7 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.SignalR.Client;
+using Windows.Devices.I2c.Provider;
 
 namespace BasculaInterface.ViewModels
 {
@@ -241,7 +242,7 @@ namespace BasculaInterface.ViewModels
                 OnPropertyChanged(nameof(Estado));
             }
         }
-
+        public bool Providers { get; set; } = false;
         public async Task CaptureNewWeightEntry()
         {
             ValidateBeforePosting();
@@ -320,10 +321,14 @@ namespace BasculaInterface.ViewModels
 
         private void ValidateBeforePosting()
         {
-            if (Preferences.Get("RequirePartner", false))
+            if (Preferences.Get("RequirePartner", false) || Providers)
             {
                 if(Partner is null || Partner.Id < 1)
                     throw new InvalidOperationException("Es obligatorio especificar al socio.");
+            }
+            if(Providers && (Product is null || Product.Id <= 0))
+            {
+                throw new InvalidOperationException("Es obligatorio especificar el producto para las descargas de proveedores.");
             }
             if (_pesoTotal == 0)
             {
@@ -371,6 +376,20 @@ namespace BasculaInterface.ViewModels
             WeightEntry.RegisteredBy = DeviceInfo.Name;
 
             WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
+            
+            WeightEntry = newEntry;
+
+            if(Product is not null && Product.Id != 0)
+            {
+                WeightEntry.WeightDetails.Add(new WeightDetailDto
+                {
+                    FK_WeightEntryId = WeightEntry.Id,
+                    FK_WeightedProductId = Product?.Id,
+                    RequiredAmount = ProductQuantity,
+                    WeightedBy = DeviceInfo.Name
+                });
+                await PutWeightEntry();
+            }
 
             await PrintTurnAsync(newEntry);
         }
