@@ -84,6 +84,16 @@
                         IsVisible="True"
                         Style="{StaticResource BotonPrincipal}"
                         Text="Nueva Entrada" />
+                    <Button
+                        x:Name="BtnNewWeightLessPedido"
+                        Grid.Row="{OnPlatform WinUI=0}"
+                        Grid.Column="{OnPlatform Android=2}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                          Dark={StaticResource 2}}"
+                        Clicked="OnBtnNewWeighlessProcess_clicked"
+                        IsVisible="False"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Nuevo Pedido sin Pesada" />
 
                     <Button
                         x:Name="BtnExit"

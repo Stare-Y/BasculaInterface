@@ -337,7 +337,7 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
             }
-            if (string.IsNullOrEmpty(WeightEntry.VehiclePlate))
+            if (string.IsNullOrEmpty(WeightEntry.VehiclePlate) && !Preferences.Get("SecondaryTerminal", false))
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }

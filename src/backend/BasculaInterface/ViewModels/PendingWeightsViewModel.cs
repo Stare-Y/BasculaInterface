@@ -3,7 +3,10 @@ using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Weight;
+using iText.StyledXmlParser.Jsoup.Parser;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace BasculaInterface.ViewModels
@@ -81,6 +84,12 @@ namespace BasculaInterface.ViewModels
             PendingWeights.Clear();
             foreach (WeightEntryDto weight in _pendingWeights)
             {
+                if(!(Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false)) && weight.TareWeight <= 0)
+                {
+                    //skip weights with no tare weight
+                    continue;
+                }
+
                 ClienteProveedorDto? partner = _clienteProveedorDtos.FirstOrDefault(p => p.Id == weight.PartnerId);
                 if (partner != null)
                 {
@@ -128,6 +137,38 @@ namespace BasculaInterface.ViewModels
             }
 
             OnCollectionChanged(nameof(_clienteProveedorDtos));
+        }
+
+        private async Task PrintTurnAsync(WeightEntryDto newWeightEntry, ClienteProveedorDto partner)
+        {
+            try
+            {
+                TurnDto turn = await _apiService.GetAsync<TurnDto>($"api/Turn?weightId={newWeightEntry.Id}");
+
+                await _apiService.PostAsync<object>("api/Print/Text", turn.PrintData(partner.RazonSocial));
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error printing turn: " + ex.Message);
+            }
+        }
+
+        public async Task PostNewWeightEntry(WeightEntryDto weightEntry, ClienteProveedorDto partner)
+        {
+            if (_apiService == null)
+            {
+                throw new InvalidOperationException("ApiService is not initialized.");
+            }
+            if (weightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry is not initialized.");
+            }
+
+            weightEntry.RegisteredBy = DeviceInfo.Name;
+
+            WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", weightEntry);
+
+            await PrintTurnAsync(newEntry, partner);
         }
     }
 }

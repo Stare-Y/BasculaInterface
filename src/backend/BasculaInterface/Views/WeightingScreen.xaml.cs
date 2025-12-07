@@ -15,6 +15,11 @@ public partial class WeightingScreen : ContentPage
         BindingContext = viewModel;
 
         GridManualToggle.IsVisible = Preferences.Get("ManualWeight", false);
+
+        if(Preferences.Get("SecondaryTerminal", false))
+        {
+            EntryVehiclePlate.IsEnabled = false;
+        }
     }
 
     public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
@@ -96,7 +101,8 @@ public partial class WeightingScreen : ContentPage
 
             BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
             BtnPickProduct.IsVisible = viewModel.Product is null && (viewModel.WeightEntry?.TareWeight != 0);
-            EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate);
+            EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate) 
+                && !Preferences.Get("SecondaryTerminal", false);
 
             if (Preferences.Get("BypasTurn", false))
                 return;

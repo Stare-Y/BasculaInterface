@@ -56,6 +56,11 @@ public partial class DetailedWeightView : ContentPage
 
         if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
         {
+            if(Preferences.Get("OnlyPedidos", false))
+            {
+                if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1)))
+                    BtnFinishWeight.IsVisible = true;
+            }
             return;
         }
 

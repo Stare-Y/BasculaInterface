@@ -77,7 +77,6 @@
                             HeightRequest="{OnPlatform Android=50,
                                                        WinUI=100}"
                             HorizontalOptions="Start"
-                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                             Stroke="{StaticResource 1}"
                             StrokeShape="RoundRectangle 30"
                             Style="{StaticResource RoundedBorderStyle}"

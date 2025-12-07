@@ -12,7 +12,6 @@ namespace BasculaInterface
             InitializeComponent();
 
             BindingContext = this;
-
         }
 
         private async Task LogIn()

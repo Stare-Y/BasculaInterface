@@ -37,6 +37,9 @@ public partial class PendingWeightsView : ContentPage
                 if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
                 {
                     BtnNewWeighProcess.IsVisible = false;
+
+                    if(Preferences.Get("OnlyPedidos", false))
+                        BtnNewWeightLessPedido.IsVisible = true;
                 }
 #if ANDROID
                 BtnRefresh.IsVisible = false;
@@ -213,5 +216,54 @@ public partial class PendingWeightsView : ContentPage
         await BtnExit.ScaleTo(1.0, 100);
 
         await Shell.Current.Navigation.PopAsync();
+    }
+
+    private async void OnBtnNewWeighlessProcess_clicked(object sender, EventArgs e)
+    {
+        try
+        {
+            PartnerSelectView partnerSelectView = new PartnerSelectView();
+
+            partnerSelectView.OnPartnerSelected += OnWeightlessPedidoPartnerSelected;
+
+            await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cargar la pantalla de seleccion de cliente/proveedor: " + ex.Message, "OK");
+        }
+    }
+
+    private async void OnWeightlessPedidoPartnerSelected(ClienteProveedorDto partner)
+    {
+        if (BindingContext is not PendingWeightsViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Iniciando pedido simple, espere...");
+        try
+        {
+            WeightEntryDto weightEntry = new WeightEntryDto
+            {
+                PartnerId = partner.Id,
+                TareWeight = 0,
+                BruteWeight = 0,
+                CreatedAt = DateTime.Now,
+                RegisteredBy = DeviceInfo.Name
+            };
+
+            await viewModel.PostNewWeightEntry(weightEntry, partner);
+
+            await Task.Delay(500);
+
+            await viewModel.LoadPendingWeightsAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo iniciar el proceso de pesaje: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
     }
 }

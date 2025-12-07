@@ -11,6 +11,6 @@
         public string VehiclePlate { get; set; } = string.Empty;
         public string? Notes { get; set; }
         public string? RegisteredBy { get; set; }
-        public ICollection<WeightDetailDto> WeightDetails { get; set; } = new List<WeightDetailDto>();
+        public ICollection<WeightDetailDto> WeightDetails { get; set; } = [];
     }
 }
