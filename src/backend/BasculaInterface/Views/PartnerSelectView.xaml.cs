@@ -20,9 +20,10 @@ public partial class PartnerSelectView : ContentPage
 
     public PartnerSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>()) { }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
+        await Task.Delay(169);
         SearchBar.Focus();
     }
 
