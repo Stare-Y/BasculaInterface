@@ -50,9 +50,10 @@ namespace Infrastructure.Service
                 RazonSocial = clienteProveedor.CRAZONSOCIAL,
                 RFC = clienteProveedor.CRFC,
                 CreditLimit = clienteProveedor.CLIMITECREDITOCLIENTE,
-                Debt = debt,
+                Debt = await _documentRepo.GetClientDebt(clienteProveedor.CIDCLIENTEPROVEEDOR),
                 OrderRequestAllowed = clienteProveedor.CBANCREDITOYCOBRANZA == 1 && clienteProveedor.CBANVENTACREDITO == 1,
                 IgnoreCreditLimit = clienteProveedor.CBANEXCEDERCREDITO == 1,
+                IsProvider = clienteProveedor.CTIPOCLIENTE != 1
             };
         }
     }

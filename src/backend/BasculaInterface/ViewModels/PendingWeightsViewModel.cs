@@ -13,9 +13,10 @@ namespace BasculaInterface.ViewModels
 {
     public class PendingWeightsViewModel : ViewModelBase
     {
-        private List<WeightEntryDto> _pendingWeights { get; set; } = new List<WeightEntryDto>();
-        private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = new List<ClienteProveedorDto>();
-        public ObservableCollection<PendingWeightViewRow> PendingWeights { get; } = new ObservableCollection<PendingWeightViewRow>();
+        private List<WeightEntryDto> _pendingWeights { get; set; } = [];
+        private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
+        public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; } = [];
+        public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; } = [];
 
         private readonly IApiService _apiService = null!;
 
@@ -81,7 +82,8 @@ namespace BasculaInterface.ViewModels
 
         private void BuildObservableCollection()
         {
-            PendingWeights.Clear();
+            PendingWeightsCharge.Clear();
+            PendingWeightsDischarge.Clear();
             foreach (WeightEntryDto weight in _pendingWeights)
             {
                 if(!(Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false)) && weight.TareWeight <= 0)
@@ -103,12 +105,18 @@ namespace BasculaInterface.ViewModels
                             + weight.TareWeight).ToString()
                             + " kg.";
                     }
-
-                    PendingWeights.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
+                    if(partner.IsProvider)
+                    {
+                        PendingWeightsDischarge.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
+                    }
+                    else
+                    {
+                        PendingWeightsCharge.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
+                    }
                 }
                 else
                 {
-                    PendingWeights.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "Socio no identificado" }, string.Empty));
+                    PendingWeightsCharge.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "Proveedor no identificado" }, string.Empty));
                 }
             }
         }
