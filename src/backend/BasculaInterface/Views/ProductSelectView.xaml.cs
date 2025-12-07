@@ -1,6 +1,5 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
-using CommunityToolkit.Maui.Views;
 using Core.Application.DTOs;
 
 namespace BasculaInterface.Views;
@@ -20,6 +19,13 @@ public partial class ProductSelectView : ContentPage
     }
 
 	public ProductSelectView() : this(MauiProgram.ServiceProvider.GetRequiredService<ProductSelectorViewModel>()) { }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await Task.Delay(169);
+        SearchBar.Focus();
+    }
 
     private async void SearchBar_SearchButtonPressed(object sender, EventArgs e)
     {
