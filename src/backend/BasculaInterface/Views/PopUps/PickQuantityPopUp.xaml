@@ -6,76 +6,79 @@
     IsVisible="False">
 
 
-    <Grid 
-        BackgroundColor="#80000000"
-        VerticalOptions="Fill"
-        HorizontalOptions="Fill"
-        ZIndex="999">
     <Grid
-     x:Name="PopupOverlay"
-     Padding="20"
-     BackgroundColor="{AppThemeBinding Light={StaticResource 4},
-                                       Dark={StaticResource 2}}"
-     MinimumWidthRequest="300"
-    MaximumWidthRequest="350"
-    HorizontalOptions="Center"
-    VerticalOptions="Center"
-    RowDefinitions="Auto,Auto,Auto"
-    RowSpacing="15"
-   >
+        BackgroundColor="#80000000"
+        HorizontalOptions="Fill"
+        VerticalOptions="Fill"
+        ZIndex="999">
+        <Grid
+            x:Name="PopupOverlay"
+            Padding="20"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                              Dark={StaticResource 2}}"
+            HorizontalOptions="Center"
+            MaximumWidthRequest="350"
+            MinimumWidthRequest="300"
+            RowDefinitions="Auto,Auto,Auto"
+            RowSpacing="15"
+            VerticalOptions="Center">
 
-        <!--  Product Name  -->
-        <Label
-         x:Name="ProductNameLabel"
-         Grid.Row="0"
-         FontSize="20"
-         HorizontalOptions="Center"
-         Text="Product Name" />
+            <!--  Product Name  -->
+            <Label
+                x:Name="ProductNameLabel"
+                Grid.Row="0"
+                FontSize="20"
+                HorizontalOptions="Center"
+                Text="Product Name" />
 
-        <!--  Quantity Entry  -->
-        <Entry
-         x:Name="QuantityEntry"
-         Grid.Row="1"
-         HorizontalOptions="Fill"
-         Keyboard="Numeric"
-         Placeholder="Cantidad..."
-         Style="{StaticResource EntryDatos}"
-         TextChanged="QuantityEntry_TextChanged" />
+            <!--  Quantity Entry  -->
+            <Entry
+                x:Name="QuantityEntry"
+                Grid.Row="1"
+                HorizontalOptions="Fill"
+                Keyboard="Numeric"
+                Placeholder="Cantidad..."
+                Style="{StaticResource EntryDatos}"
+                TextChanged="QuantityEntry_TextChanged" />
 
-        <!--  Action Buttons  -->
-        <HorizontalStackLayout
-         Grid.Row="2"
-         HorizontalOptions="Center"
-         Spacing="10">
-            <Button
-             BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
-                                               Dark={StaticResource BlackGray}}"
-             Clicked="OnPopupCancelClicked"
-             CornerRadius="20"
-             FontSize="{OnPlatform Android=12,
-                                   WinUI=18}"
-             HeightRequest="50"
-             Style="{StaticResource Boton}"
-             Text="Cancelar"
-             WidthRequest="150" />
-            <Button
-             BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
-                                               Dark={StaticResource BlackGray}}"
-             Clicked="OnPopupAcceptClicked"
-             CornerRadius="20"
-             FontSize="{OnPlatform Android=12,
-                                   WinUI=18}"
-             HeightRequest="50"
-             Style="{StaticResource Boton}"
-             Text="Continuar"
-             WidthRequest="150" />
-        </HorizontalStackLayout>
-     </Grid>
+            <!--  Action Buttons  -->
+            <HorizontalStackLayout
+                Grid.Row="2"
+                HorizontalOptions="Center"
+                Spacing="10">
+
+                <Button
+                    x:Name="btnCancel"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                      Dark={StaticResource BlackGray}}"
+                    Clicked="OnPopupCancelClicked"
+                    CornerRadius="20"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    HeightRequest="50"
+                    Style="{StaticResource Boton}"
+                    Text="Cancelar"
+                    WidthRequest="150" />
+
+                <Button
+                    x:Name="btnConfirm"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                      Dark={StaticResource BlackGray}}"
+                    Clicked="OnPopupAcceptClicked"
+                    CornerRadius="20"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    HeightRequest="50"
+                    Style="{StaticResource Boton}"
+                    Text="Continuar"
+                    WidthRequest="150" />
+            </HorizontalStackLayout>
+        </Grid>
         <!--  Popup overlay  -->
 
     </Grid>
 </ContentView>
-    
+
 <!--<?xml version="1.0" encoding="utf-8" ?>
 <toolkit:Popup
     x:Class="BasculaInterface.Views.PopUps.PickQuantityPopUp"
@@ -85,8 +88,9 @@
     CanBeDismissedByTappingOutsideOfPopup="False"
     Color="{AppThemeBinding Light={StaticResource Primary},
                             Dark={StaticResource PrimaryDark}}">
-
-    --><!--  Popup overlay  --><!--
+-->
+<!--  Popup overlay  -->
+<!--
     <Grid
         x:Name="PopupOverlay"
         Padding="20"
@@ -96,16 +100,18 @@
         RowDefinitions="Auto,Auto,Auto"
         RowSpacing="15"
         ZIndex="10">
-
-        --><!--  Product Name  --><!--
+-->
+<!--  Product Name  -->
+<!--
         <Label
             x:Name="ProductNameLabel"
             Grid.Row="0"
             FontSize="20"
             HorizontalOptions="Center"
             Text="Product Name" />
-
-        --><!--  Quantity Entry  --><!--
+-->
+<!--  Quantity Entry  -->
+<!--
         <Entry
             x:Name="QuantityEntry"
             Grid.Row="1"
@@ -114,8 +120,9 @@
             Placeholder="Cantidad..."
             Style="{StaticResource EntryDatos}"
             TextChanged="QuantityEntry_TextChanged" />
-
-        --><!--  Action Buttons  --><!--
+-->
+<!--  Action Buttons  -->
+<!--
         <HorizontalStackLayout
             Grid.Row="2"
             HorizontalOptions="Center"

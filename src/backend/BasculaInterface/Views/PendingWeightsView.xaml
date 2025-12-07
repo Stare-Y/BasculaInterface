@@ -3,9 +3,9 @@
     x:Class="BasculaInterface.Views.PendingWeightsView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
     Title="Pedidos en Proceso"
-     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
     <ContentPage.BindingContext>
@@ -154,6 +154,7 @@
                                                                           Dark={StaticResource BlackGray}}"
                                         HeightRequest="{OnPlatform Android=75,
                                                                    WinUI=110}"
+                                        InputTransparent="False"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
                                         StrokeShape="RoundRectangle 30"

@@ -56,6 +56,9 @@ public partial class PartnerSelectView : ContentPage
 
     private async void OnConfirmClicked(object sender, EventArgs e)
     {
+        await BtnConfirm.ScaleTo(1.1, 100);
+        await BtnConfirm.ScaleTo(1.0, 100);
+
         try
         {
             if (ResultsCollectionView.SelectedItem is not ClienteProveedorDto partner)
@@ -107,6 +110,9 @@ public partial class PartnerSelectView : ContentPage
 
     private async void OnBackClicked(object sender, EventArgs e)
     {
+        await BtnBack.ScaleTo(1.1, 100);
+        await BtnBack.ScaleTo(1.0, 100);
+
         await Shell.Current.Navigation.PopAsync();
     }
 }

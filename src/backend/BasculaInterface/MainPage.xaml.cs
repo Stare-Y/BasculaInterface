@@ -1,6 +1,7 @@
 ﻿using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace BasculaInterface
 {
@@ -44,8 +45,8 @@ namespace BasculaInterface
 
         private async void BtnLogin_Released(object sender, EventArgs e)
         {
-            BtnLogIn.Opacity = 0;
-            await BtnLogIn.FadeTo(1, 200);
+            await BtnLogIn.ScaleTo(1.1, 100);
+            await BtnLogIn.ScaleTo(1.0, 100);
 
             try
             {
@@ -149,6 +150,14 @@ namespace BasculaInterface
             Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
             Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
             Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
+        }
+
+        private async void BtnSettings_Tapped(object sender, TappedEventArgs e)
+        {
+            await BtnSettings.ScaleTo(1.1, 100);
+            await BtnSettings.ScaleTo(1.0, 100);
+
+            await Shell.Current.Navigation.PushModalAsync(new EditSettingsView());
         }
     }
 }

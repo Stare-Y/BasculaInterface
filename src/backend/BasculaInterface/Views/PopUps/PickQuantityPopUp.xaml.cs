@@ -64,13 +64,19 @@ public partial class PickQuantityPopUp : ContentView
         _tcs?.TrySetResult(quantity);
     }
 
-    private void OnPopupCancelClicked(object sender, EventArgs e)
+    private async void OnPopupCancelClicked(object sender, EventArgs e)
     {
+        await btnCancel.ScaleTo(1.1, 100);
+        await btnCancel.ScaleTo(1.0, 100);
+
         CloseWithResult(null);
     }
 
-    private void OnPopupAcceptClicked(object sender, EventArgs e)
+    private async void OnPopupAcceptClicked(object sender, EventArgs e)
     {
+        await btnConfirm.ScaleTo(1.1, 100);
+        await btnConfirm.ScaleTo(1.0, 100);
+
         if (double.TryParse(QuantityEntry.Text, out double quantity))
             CloseWithResult(quantity);
         else
