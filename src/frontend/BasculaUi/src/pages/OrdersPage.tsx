@@ -5,38 +5,61 @@ import  type {
   FilterField
 } from "../components/dashboard/ReutilisableTable";
 import  ReutilisableTable from "../components/dashboard/ReutilisableTable";
-export interface Dessert {
-  id: number;
-  name: string;
-  calories: number;
-  fat: number;
-  carbs: number;
-  protein: number;
-}
+import type { WeightEntry } from "../types/WeightEntry";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const columns: Column<Dessert>[] = [
-  { id: "name", label: "Nombre", disablePadding: true },
-  { id: "calories", label: "Calorías", numeric: true },
-  { id: "fat", label: "Grasa (g)", numeric: true },
-  { id: "carbs", label: "Carbs (g)", numeric: true },
-  { id: "protein", label: "Proteína (g)", numeric: true }
+
+
+const columns: Column<WeightEntry>[] = [
+  { id: "id", label: "ID", numeric: true },
+  { id: "vehiclePlate", label: "Placas" },
+  { id: "tareWeight", label: "Peso Tara (kg)", numeric: true },
+  { id: "bruteWeight", label: "Peso Bruto (kg)", numeric: true },
+  { id: "partnerId", label: "Proveedor", numeric: true },
+  { id: "createdAt", label: "Fecha Creación" },
+  { id: "concludeDate", label: "Fecha Finalización" },
+  { id: "registeredBy", label: "Registrado por" }
 ];
 
-const filterFields: FilterField<Dessert>[] = [
-  { id: "name", label: "Nombre", type: "text" },
-  { id: "calories", label: "Calorías exactas", type: "number" }
+const filterFields: FilterField<WeightEntry>[] = [
+  { id: "vehiclePlate", label: "Placas", type: "text" },
+  { id: "partnerId", label: "Proveedor", type: "number" },
+  { id: "createdAt", label: "", type: "date" },
 ];
 
 export default function OrdersPage() {
+  const [rows, setRows] = useState<WeightEntry[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchWeights = async () => {
+      try {
+        const response = await axios.get<WeightEntry[]>(
+          "http://localhost:6969/api/Weight/Pending"
+        );
+
+        setRows(response.data);
+      } catch (error) {
+        console.error("Error cargando pesos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeights();
+  }, []);
+
   return (
     <Box sx={{ p: 2 }}>
-      <ReutilisableTable<Dessert>
-        title="Postres"
+      <ReutilisableTable<WeightEntry>
+        title="Entradas de Peso"
         columns={columns}
         filterFields={filterFields}
-        serverSide
-        // endpoint="/api/desserts"
-        onEditRow={(row) => console.log("Editar fila:", row)}
+        rows={rows}
+        onEditRow={(row) => navigate(`/dashboard/orders/${row.id}`)}
         onDeleteRow={(row) => console.log("Eliminar fila:", row)}
         onDeleteSelected={(ids) => console.log("Eliminar seleccionados:", ids)}
       />

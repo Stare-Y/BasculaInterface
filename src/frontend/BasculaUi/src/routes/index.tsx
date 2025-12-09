@@ -2,33 +2,29 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Im
 import DashboardRoutes from "./DashboardRoutes"; 
 import DashboardLayout from "../layout/DashboardLayout";
 
-// import AuthLayout from 'layout/Auth';
-// import CustomerLayout from 'layout/Customer';
-// import OperativeLayout from 'layout/Operative';
+import type { JSX, ReactNode } from "react";
 
-// import AuthGuard from 'guards/AuthGuard';
-// import GuestGuard from 'guards/GuestGuard';
+export interface AppRoute {
+  path: string;
+  element: ReactNode;
+  children?: AppRoute[];
+}
 
-// // project import
-// import LoginRoutes from './LoginRoutes';
-// import CustomerRoutes from './CustomerRoutes';
-// import OperativeRoutes from './OperativeRoutes';
+export const renderRoutes = (routes: AppRoute[]): JSX.Element[] => {
+  return routes.map((route) => {
+    if (route.children && route.children.length > 0) {
+      return (
+        <Route key={route.path} path={route.path} element={route.element}>
+          {renderRoutes(route.children)}
+        </Route>
+      );
+    }
 
-// Función recursiva para renderizar rutas anidadas
-const renderRoutes = routes => {
-    return routes.map(route => {
-        if (route.children) {
-            return (
-                <Route key={route.path} path={route.path} element={route.element}>
-                    {renderRoutes(route.children)}
-                </Route>
-            );
-        } else {
-            return <Route key={route.path} path={route.path} element={route.element} />;
-        }
-    });
+    return (
+      <Route key={route.path} path={route.path} element={route.element} />
+    );
+  });
 };
-
 // ==============================|| ROUTING RENDER ||============================== //
 
 function AppRoutes() {

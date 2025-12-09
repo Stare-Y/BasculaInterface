@@ -16,8 +16,6 @@ import {
   Checkbox,
   IconButton,
   Tooltip,
-  Switch,
-  FormControlLabel,
   Stack,
   TextField,
   Button,
@@ -28,7 +26,6 @@ import EditSquareIcon from '@mui/icons-material/EditSquare';
 
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
-import axios from "axios";
 export type Order = "asc" | "desc";
 
 export interface Column<T> {
@@ -41,26 +38,16 @@ export interface Column<T> {
 export interface FilterField<T> {
   id: keyof T;
   label: string;
-  type?: "text" | "number";
+  type?: "text" | "number"| "date";
 }
 
 interface ReutilizableTableProps<T extends { id: any }> {
   title?: string;
-  /** Modo client-side: se usa rows tal cual */
   rows?: T[];
-  /** Modo server-side: si es true, se ignora rows y se llama a la API */
-  serverSide?: boolean;
-  /** Endpoint para axios en modo server-side */
-  endpoint?: string;
-  /** Columnas a mostrar */
   columns: Column<T>[];
-  /** Campos que tendrán filtros individuales */
   filterFields?: FilterField<T>[];
-  /** Callback cuando se quiere editar una fila */
   onEditRow?: (row: T) => void;
-  /** Callback cuando se quiere eliminar una fila */
   onDeleteRow?: (row: T) => void;
-  /** Callback cuando se quieren eliminar varios seleccionados */
   onDeleteSelected?: (ids: any[]) => void;
 }
 
@@ -69,8 +56,6 @@ interface ReutilizableTableProps<T extends { id: any }> {
 export default function ReutilizableTable<T extends { id: any }>({
   title = "Tabla",
   rows = [],
-  serverSide = false,
-  endpoint,
   columns,
   filterFields = [],
   onEditRow,
@@ -91,21 +76,13 @@ export default function ReutilizableTable<T extends { id: any }>({
   const [totalRows, setTotalRows] = React.useState(rows.length);
 
   // Sync para modo client-side si cambian las rows props
-  React.useEffect(() => {
-    if (!serverSide) {
-      setInternalRows(rows);
-      setTotalRows(rows.length);
-    }
-  }, [rows, serverSide]);
+
 
   const handleRequestSort = (_: unknown, property: keyof T) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
-    if (!serverSide) {
-      // client-side sort no necesita fetch
-      return;
-    }
+   
   };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,43 +120,11 @@ export default function ReutilizableTable<T extends { id: any }>({
   };
 
   // --------- SERVER SIDE FETCH (axios) ----------
-  const fetchData = React.useCallback(async () => {
-    if (!serverSide || !endpoint) return;
-    try {
-      setLoading(true);
-      const response = await axios.get(endpoint, {
-        params: {
-          page: page + 1, // 1-based
-          pageSize: rowsPerPage,
-          search,
-          sortField: orderBy || undefined,
-          sortOrder: order,
-          ...filters
-        }
-      });
+ 
 
-      // Esperamos que la API responda con { data: T[]; total: number }
-      const { data, total } = response.data;
-      setInternalRows(data);
-      setTotalRows(total);
-      setSelected([]);
-    } catch (error) {
-      console.error("Error cargando datos:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [serverSide, endpoint, page, rowsPerPage, search, orderBy, order, filters]);
-
-  React.useEffect(() => {
-    if (serverSide) {
-      fetchData();
-    }
-  }, [fetchData, serverSide]);
 
   // ---------- CLIENT SIDE PROCESSING ----------
   const processedRows = React.useMemo(() => {
-    if (serverSide) return internalRows;
-
     let temp = [...rows];
 
     // Búsqueda simple: busca en todas las columnas string
@@ -222,12 +167,11 @@ export default function ReutilizableTable<T extends { id: any }>({
 
     setTotalRows(temp.length);
     return temp;
-  }, [rows, columns, search, filters, orderBy, order, serverSide, internalRows]);
+  }, [rows, columns, search, filters, orderBy, order,  internalRows]);
 
   const visibleRows = React.useMemo(() => {
-    if (serverSide) return internalRows;
     return processedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-  }, [processedRows, page, rowsPerPage, serverSide, internalRows]);
+  }, [processedRows, page, rowsPerPage,  internalRows]);
 
   // ---------- HANDLERS UI ----------
   const handleFilterChange = (fieldId: string, value: string) => {
@@ -235,20 +179,15 @@ export default function ReutilizableTable<T extends { id: any }>({
       ...prev,
       [fieldId]: value
     }));
-    if (serverSide) {
-      setPage(0);
-    }
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
-    if (serverSide) {
-      setPage(0);
-    }
+   
   };
 
   const handleExportCSV = () => {
-    const rowsToExport = serverSide ? internalRows : processedRows;
+    const rowsToExport = processedRows;
 
     if (!rowsToExport.length) return;
 
@@ -370,10 +309,10 @@ export default function ReutilizableTable<T extends { id: any }>({
                   <Checkbox
                     color="primary"
                     indeterminate={
-                      numSelected > 0 && numSelected < internalRows.length
+                      numSelected > 0 && numSelected < internalRows?.length
                     }
                     checked={
-                      internalRows.length > 0 && numSelected === internalRows.length
+                      internalRows?.length > 0 && numSelected === internalRows?.length
                     }
                     onChange={handleSelectAllClick}
                   />
@@ -406,7 +345,7 @@ export default function ReutilizableTable<T extends { id: any }>({
             </TableHead>
 
             <TableBody>
-              {visibleRows.map((row, index) => {
+              {visibleRows?.map((row, index) => {
                 const isItemSelected = isSelected(row.id);
                 const labelId = `enhanced-table-checkbox-${index}`;
 

@@ -1,13 +1,23 @@
 
 import OrdersPage from "../pages/OrdersPage";
+import OrderFormPage from "../pages/OrderFormPage";
+
 
 const DashboardRoutes = {
     path: 'Dashboard',
     children: [
         {
+            path: '',
+            element: <div>dashboard xd</div>
+        },
+        {
             path: 'Orders',
             element: <OrdersPage></OrdersPage>
         },
+        {
+            path: "Orders/:id",
+            element: <OrderFormPage />  
+        }
         // {
         //     path: 'contracts',
         //     children: [
