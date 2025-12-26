@@ -3,6 +3,7 @@
     public class ClienteProveedorDto
     {
         public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
         public string RazonSocial { get; set; } = null!;
         public string? RFC { get; set; } = null;
         public double CreditLimit { get; set; }

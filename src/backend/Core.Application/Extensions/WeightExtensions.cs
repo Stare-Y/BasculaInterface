@@ -48,6 +48,7 @@ namespace Core.Application.Extensions
             return new WeightEntryDto
             {
                 Id = weightEntry.Id,
+                ConptaqiComercialFK = weightEntry.ConptaqiComercialFK,
                 PartnerId = weightEntry.PartnerId,
                 TareWeight = weightEntry.TareWeight,
                 BruteWeight = weightEntry.BruteWeight,
@@ -80,6 +81,7 @@ namespace Core.Application.Extensions
             return new WeightEntry
             {
                 Id = weightEntryDto.Id,
+                ConptaqiComercialFK = weightEntryDto.ConptaqiComercialFK,
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
                 BruteWeight = weightEntryDto.BruteWeight,

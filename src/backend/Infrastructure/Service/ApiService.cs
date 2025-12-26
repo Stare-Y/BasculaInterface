@@ -8,10 +8,12 @@ namespace Infrastructure.Service
     public class ApiService : IApiService
     {
         private readonly HttpClient _client;
+        private readonly bool _validateResponse;
 
         public ApiService(HttpClient client)
         {
             _client = client;
+            _validateResponse = false;
         }
 
         public string GetBaseUrl()
@@ -178,8 +180,11 @@ namespace Infrastructure.Service
             });
         }
 
-        public static async Task ValidateResponse(HttpResponseMessage response)
+        private async Task ValidateResponse(HttpResponseMessage response)
         {
+            if (!_validateResponse)
+                return;
+
             if (response == null)
                 throw new ArgumentNullException(nameof(response), "Server response is null");
 

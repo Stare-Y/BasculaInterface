@@ -25,6 +25,7 @@ namespace Infrastructure.Service
                 clientesProveedoresDto.Add(new ClienteProveedorDto
                 {
                     Id = client.CIDCLIENTEPROVEEDOR,
+                    Code = client.CCODIGOCLIENTE,
                     RazonSocial = client.CRAZONSOCIAL,
                     RFC = client.CRFC,
                     CreditLimit = client.CLIMITECREDITOCLIENTE,
@@ -47,6 +48,7 @@ namespace Infrastructure.Service
             return new ClienteProveedorDto
             {
                 Id = clienteProveedor.CIDCLIENTEPROVEEDOR,
+                Code = clienteProveedor.CCODIGOCLIENTE,
                 RazonSocial = clienteProveedor.CRAZONSOCIAL,
                 RFC = clienteProveedor.CRFC,
                 CreditLimit = clienteProveedor.CLIMITECREDITOCLIENTE,

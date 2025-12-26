@@ -130,5 +130,21 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest($"Error releasing weight: {ex.Message}");
             }
         }
+
+        [HttpPost("ContpaqiComercial")]
+        public async Task<IActionResult> SendToContpaqiComercial([FromQuery]int weightId)
+        {
+            try
+            {
+                GenericResponse<int> fKResult = await _weightService.SendToContpaqiComercial(weightId);
+
+                return Ok(fKResult);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error sending document to contpaqi comercial");
+                return BadRequest("Error sending document to contpaqi comercial" + ex.Message);
+            }
+        }
     }
 }

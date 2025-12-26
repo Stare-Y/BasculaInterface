@@ -1,5 +1,6 @@
 ﻿using Core.Application.Services;
 using Core.Application.Settings;
+using Core.Domain.Entities.Base;
 using Core.Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repos;
@@ -18,7 +19,7 @@ namespace BasculaTerminalApi.Service
 
             services.AddBasculaService();
 
-            services.AddRepoServices();
+            services.AddRepoServices(configuration);
 
             return services;
         }
@@ -51,8 +52,10 @@ namespace BasculaTerminalApi.Service
             return services;
         }
 
-        private static IServiceCollection AddRepoServices(this IServiceCollection services)
+        private static IServiceCollection AddRepoServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<ComercialSDKClientSettings>(configuration.GetSection(nameof(ComercialSDKClientSettings)));
+
             services.AddScoped<IWeightRepo, WeightRepo>();
 
             services.AddScoped<IClienteProveedorRepo, ClienteProveedorRepo>();
@@ -68,6 +71,13 @@ namespace BasculaTerminalApi.Service
             services.AddScoped<ITurnService, TurnService>();
 
             services.AddScoped<IDocumentRepo, DocumentRepo>();
+
+            services.AddTransient<IApiService, ApiService>();
+            services.AddHttpClient<IApiService, ApiService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
 
             return services;
         }

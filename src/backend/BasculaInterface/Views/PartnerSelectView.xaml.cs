@@ -1,7 +1,6 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
-using Windows.Devices.I2c.Provider;
 
 namespace BasculaInterface.Views;
 

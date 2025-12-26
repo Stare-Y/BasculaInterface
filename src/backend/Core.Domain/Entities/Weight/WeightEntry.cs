@@ -5,6 +5,7 @@ namespace Core.Domain.Entities.Weight
     public class WeightEntry : BaseEntity
     {
         public int? PartnerId { get; set; }
+        public int? ConptaqiComercialFK { get; set; }
         public double TareWeight { get; set; } = 0;
         public double BruteWeight { get; set; } = 0;
         private DateTime? _concludeDate;

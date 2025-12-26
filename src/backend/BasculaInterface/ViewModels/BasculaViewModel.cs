@@ -5,7 +5,6 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.SignalR.Client;
-using Windows.Devices.I2c.Provider;
 
 namespace BasculaInterface.ViewModels
 {
