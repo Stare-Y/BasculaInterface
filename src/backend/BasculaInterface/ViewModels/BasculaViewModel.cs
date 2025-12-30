@@ -297,7 +297,7 @@ namespace BasculaInterface.ViewModels
 
         public async Task PutSecondaryTara()
         {
-            if (TaraCurrentValue < 1)
+            if (TaraCurrentValue <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(TaraCurrentValue), "Secondary tara cannot be negative or 0.");
             }

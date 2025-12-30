@@ -241,7 +241,7 @@ namespace BasculaInterface.ViewModels
         {
             WeightEntry = weightEntry;
 
-            Partner = partner ?? new ClienteProveedorDto { RazonSocial = "Socio no identificado" };
+            Partner = partner ?? new ClienteProveedorDto { RazonSocial = "No identificado" };
 
             if (WeightEntry == null)
             {

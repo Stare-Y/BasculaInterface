@@ -232,7 +232,6 @@ public partial class DetailedWeightView : ContentPage
             }
             /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
 
-            
             double? result = await PickPopUp.ShowAsync(product.Nombre);
 
             double qty = 0;

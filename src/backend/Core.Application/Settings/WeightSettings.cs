@@ -16,5 +16,6 @@
         public required string CompanyName { get; set; }
         public float TicketWidth { get; set; } = 226.716f;
         public float TicketHeight { get; set; } = 841.8897f;
+        public string WeightSerialRegex { get; set; } = @"[+-]?\d+(\.\d+)?";
     }
 }

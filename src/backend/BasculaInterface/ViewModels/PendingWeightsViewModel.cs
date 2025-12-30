@@ -116,7 +116,7 @@ namespace BasculaInterface.ViewModels
                 }
                 else
                 {
-                    PendingWeightsCharge.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "Proveedor no identificado" }, string.Empty));
+                    PendingWeightsCharge.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "No identificado" }, string.Empty));
                 }
             }
         }

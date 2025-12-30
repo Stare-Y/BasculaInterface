@@ -61,6 +61,7 @@ public partial class PickQuantityPopUp : ContentView
     private void CloseWithResult(double? quantity)
     {
         this.IsVisible = false;
+        QuantityEntry.Text = string.Empty;
         _tcs?.TrySetResult(quantity);
     }
 

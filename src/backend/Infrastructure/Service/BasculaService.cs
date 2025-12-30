@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.IO.Ports;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 
@@ -25,6 +26,9 @@ namespace Infrastructure.Service
         public event EventHandler<OnBasculaReadEventArgs>? OnBasculaRead;
 
         private readonly WeightSettings _printSettings;
+
+        private readonly StringBuilder _buffer = new();
+
 
         public BasculaService(IOptions<WeightSettings> optionsSettings, ILogger<BasculaService> logger)
         {
@@ -67,20 +71,32 @@ namespace Infrastructure.Service
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
-            string readData = sp.ReadExisting();
+            string chunk = sp.ReadExisting();
 
-            double currentWeight = ParseScreenWeight(readData);
+            _buffer.Append(chunk);
 
-            if (currentWeight > -1)
+            while (true)
             {
+                string bufferString = _buffer.ToString();
+                int endOfLineIndex = bufferString.IndexOf("\r\n", StringComparison.Ordinal);
+
+                if (endOfLineIndex < 0)
+                    break;
+
+                string fullLine = bufferString.Substring(0, endOfLineIndex);
+                _buffer.Remove(0, endOfLineIndex + 2);
+
+                double currentWeight = ParseScreenWeight(fullLine);
+
                 OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
             }
         }
 
+
         private double ParseScreenWeight(string value)
         {
             value = value.Replace(" ", "").Trim();
-            var match = Regex.Match(value, @"-?\d+(\.\d+)?");
+            Match match = Regex.Match(value, _printSettings.WeightSerialRegex);
 
             if (match.Success && double.TryParse(match.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
             {
@@ -97,7 +113,9 @@ namespace Infrastructure.Service
                 }
             }
 
-            return -1;
+            _logger.LogWarning($"Lectura inválida de báscula: '{value}'");
+
+            return 0;
         }
     }
 }
