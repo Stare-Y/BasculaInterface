@@ -1,7 +1,6 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace BasculaTerminalApi.Controllers
 {
@@ -41,6 +40,12 @@ namespace BasculaTerminalApi.Controllers
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetAllAsync(top, page));
+        }
+
+        [HttpGet("All/Completed")]
+        public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllComplete([FromQuery] int top = 30, [FromQuery] uint page = 1)
+        {
+            return Ok(await _weightService.GetAllComplete(top, page));
         }
 
         [HttpGet("All/ByPartner")]
@@ -132,7 +137,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPost("ContpaqiComercial")]
-        public async Task<IActionResult> SendToContpaqiComercial([FromQuery]int weightId)
+        public async Task<IActionResult> SendToContpaqiComercial([FromQuery] int weightId)
         {
             try
             {
@@ -140,7 +145,7 @@ namespace BasculaTerminalApi.Controllers
 
                 return Ok(fKResult);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending document to contpaqi comercial");
                 return BadRequest("Error sending document to contpaqi comercial" + ex.Message);

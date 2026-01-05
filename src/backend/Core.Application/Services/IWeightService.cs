@@ -7,6 +7,7 @@ namespace Core.Application.Services
         Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry);
         Task<WeightEntryDto> GetByIdAsync(int id);
         Task<IEnumerable<WeightEntryDto>> GetAllAsync(int top = 30, uint page = 1);
+        Task<IEnumerable<WeightEntryDto>> GetAllComplete(int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntryDto>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1);

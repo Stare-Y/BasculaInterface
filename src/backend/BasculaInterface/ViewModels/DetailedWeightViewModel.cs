@@ -39,7 +39,7 @@ namespace BasculaInterface.ViewModels
             });
         }
 
-        public double TotalCost => WeightEntryDetailRows.Sum(row => 
+        public double TotalCost => WeightEntryDetailRows.Sum(row =>
             {
                 if (row.FK_WeightedProductId.HasValue && row.RequiredAmount.HasValue && row.ProductPrice.HasValue)
                 {
@@ -199,6 +199,11 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry must be set before concluding the weight process.");
             }
 
+            if (WeightEntry.WeightDetails.Count > 1 && (Partner is null || Partner.Id <= 0))
+            {
+                throw new InvalidOperationException("A partner must be selected before concluding the weight process with multiple products.");
+            }
+
             WeightEntry.ConcludeDate = DateTime.Now;
 
             //TODO: Validate tare + weights equal brute weight, maybe validate this from the API side
@@ -222,7 +227,7 @@ namespace BasculaInterface.ViewModels
                 Debug.WriteLine("Error printing ticket: " + ex.Message);
             }
         }
-        
+
         public async Task PrintTurnAsync()
         {
             try
@@ -264,7 +269,7 @@ namespace BasculaInterface.ViewModels
                     Weight = detail.Weight,
                     FK_WeightedProductId = detail.FK_WeightedProductId,
                     ProductPrice = detail.ProductPrice,
-                    WeightedBy = detail.WeightedBy == null 
+                    WeightedBy = detail.WeightedBy == null
                                     ? null
                                     : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,

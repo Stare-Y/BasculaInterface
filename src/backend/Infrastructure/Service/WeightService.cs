@@ -5,7 +5,6 @@ using Core.Application.Services;
 using Core.Domain.Entities.Base;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
-using Infrastructure.Repos;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Service
@@ -48,6 +47,10 @@ namespace Infrastructure.Service
             return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllAsync(top, page));
         }
 
+        public async Task<IEnumerable<WeightEntryDto>> GetAllComplete(int top = 30, uint page = 1)
+        {
+            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllComplete(top, page));
+        }
         public async Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
         {
             return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page));
@@ -90,15 +93,15 @@ namespace Infrastructure.Service
             {
                 throw new InvalidOperationException("At least 1 product needs to be related to be able to make the pedido");
             }
-            if(weightEntry.ConptaqiComercialFK > 0)
+            if (weightEntry.ConptaqiComercialFK > 0)
             {
                 throw new InvalidOperationException("This entry already has a record with contpaq");
             }
             DocumentoDto payload = await BuildContpaqiDocumentDto(weightEntry);
 
             GenericResponse<int> result = await _apiService.PostAsync<GenericResponse<int>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
-            
-            if( result.Data <= 0)
+
+            if (result.Data <= 0)
             {
                 throw new Exception($"Error posting to SDK: {result.Message}");
             }

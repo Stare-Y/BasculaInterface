@@ -16,7 +16,7 @@ public partial class WeightingScreen : ContentPage
 
         GridManualToggle.IsVisible = Preferences.Get("ManualWeight", false);
 
-        if(Preferences.Get("SecondaryTerminal", false))
+        if (Preferences.Get("SecondaryTerminal", false))
         {
             EntryVehiclePlate.IsEnabled = false;
         }
@@ -26,7 +26,7 @@ public partial class WeightingScreen : ContentPage
     {
         if (BindingContext is not BasculaViewModel viewModel)
             return;
-        
+
         viewModel.Providers = providers;
 
         viewModel.WeightEntry = weightEntry;
@@ -67,7 +67,7 @@ public partial class WeightingScreen : ContentPage
     }
 
     public WeightingScreen() : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>()) { }
-    
+
     private async Task KeepWeightAlive()
     {
         if (BindingContext is not BasculaViewModel viewModel)
@@ -103,7 +103,7 @@ public partial class WeightingScreen : ContentPage
 
             BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
             BtnPickProduct.IsVisible = viewModel.Product is null && ((viewModel.WeightEntry?.TareWeight != 0) || viewModel.Providers);
-            EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate) 
+            EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate)
                 && !Preferences.Get("SecondaryTerminal", false);
 
             if (Preferences.Get("BypasTurn", false))
@@ -211,7 +211,7 @@ public partial class WeightingScreen : ContentPage
                 finally
                 {
                     WaitPopUp.Hide();
-                 }
+                }
             }
             catch (Exception ex)
             {
@@ -256,7 +256,7 @@ public partial class WeightingScreen : ContentPage
 
     private async void BtnPickPartner_Clicked(object sender, EventArgs e)
     {
-        if(BindingContext is not BasculaViewModel viewModel)
+        if (BindingContext is not BasculaViewModel viewModel)
             return;
 
         await BtnPickPartner.ScaleTo(1.1, 100);
@@ -289,6 +289,15 @@ public partial class WeightingScreen : ContentPage
         await BtnPickProduct.ScaleTo(1.1, 100);
         await BtnPickProduct.ScaleTo(1.0, 100);
 
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+        {
+            await DisplayAlert("Error", "No se ha seleccionado un socio, eso se debe hacer primero", "OK");
+            return;
+        }
+
         ProductSelectView productSelectView = new ProductSelectView();
         productSelectView.OnProductSelected += OnProductSelected;
         await Shell.Current.Navigation.PushModalAsync(productSelectView);
@@ -303,7 +312,7 @@ public partial class WeightingScreen : ContentPage
     }
 
     private async void TaraLabel_Pressed(object sender, EventArgs e)
-    {      
+    {
         _cancellationTokenSource = new CancellationTokenSource();
         try
         {
@@ -377,7 +386,7 @@ public partial class WeightingScreen : ContentPage
 
     private void PesoLabel_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if(!Preferences.Get("ManualWeight", false))
+        if (!Preferences.Get("ManualWeight", false))
             return;
 
         Entry entry = (Entry)sender;
@@ -393,7 +402,7 @@ public partial class WeightingScreen : ContentPage
             entry.Text = e.OldTextValue;
             return;
         }
-        
+
         if (BindingContext is not BasculaViewModel viewModel)
             return;
 
@@ -409,8 +418,13 @@ public partial class WeightingScreen : ContentPage
 
         EntryLabel.IsVisible = e.Value;
 
-        EntryLabel.Text = "0.0";
+        EntryLabel.Text = string.Empty;
 
-       viewModel.ManualWeighting = e.Value;
+        if (e.Value)
+        {
+            EntryLabel.Focus();
+        }
+
+        viewModel.ManualWeighting = e.Value;
     }
 }

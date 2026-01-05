@@ -33,7 +33,7 @@ public partial class DetailedWeightView : ContentPage
         base.OnAppearing();
 
         if (BindingContext is not DetailedWeightViewModel viewModel)
-            return; 
+            return;
 
         if (_entriesChanged)
         {
@@ -56,17 +56,20 @@ public partial class DetailedWeightView : ContentPage
 
         if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
         {
-            if(Preferences.Get("OnlyPedidos", false))
+            if (Preferences.Get("OnlyPedidos", false))
             {
                 if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1)))
                     BtnFinishWeight.IsVisible = true;
+
+                //if(viewModel.Partner is null || viewModel.Partner.Id <= 0)
+                //    BtnPickPartner.IsVisible = true;
             }
             return;
         }
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {
-            if(!Preferences.Get("SecondaryTerminal", false))
+            if (!Preferences.Get("SecondaryTerminal", false))
                 BtnFinishWeight.IsVisible = true;
 
             return;
@@ -79,6 +82,9 @@ public partial class DetailedWeightView : ContentPage
         {
             BtnFinishWeight.IsVisible = true;
         }
+
+        //if(viewModel.Partner is null || viewModel.Partner.Id <= 0)
+        //    BtnPickPartner.IsVisible = true;
     }
 
     private DetailedWeightViewModel GetViewModel()
@@ -217,6 +223,31 @@ public partial class DetailedWeightView : ContentPage
         return "error generando ticket";
     }
 
+    private async void OnPartnerSelected(ClienteProveedorDto partner)
+    {
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        viewModel.Partner = partner;
+
+        await viewModel.UpdateWeightEntry();
+
+        // BtnPickPartner.IsVisible = false;
+    }
+
+    private async void BtnPickPartner_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not BasculaViewModel viewModel)
+            return;
+
+        // await BtnPickPartner.ScaleTo(1.1, 100);
+        // await BtnPickPartner.ScaleTo(1.0, 100);
+
+        PartnerSelectView partnerSelectView = new PartnerSelectView(viewModel.Providers);
+        partnerSelectView.OnPartnerSelected += OnPartnerSelected;
+        await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
+    }
+
     private async void OnProductSelected(ProductoDto product)
     {
         if (BindingContext is not DetailedWeightViewModel viewModel)
@@ -226,9 +257,9 @@ public partial class DetailedWeightView : ContentPage
         }
         try
         {
-            if (viewModel.Partner is null)
+            if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
             {
-                throw new InvalidOperationException("No se ha seleccionado un socio, es necesario para validar si se puede continuar con su pedido.");
+                throw new InvalidOperationException("No se ha seleccionado un socio, eso se debe hacer primero.");
             }
             /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
 
@@ -245,7 +276,7 @@ public partial class DetailedWeightView : ContentPage
 
             if (!viewModel.Partner.IgnoreCreditLimit && viewModel.Partner.CreditLimit > 0 && composedCost > viewModel.Partner.AvailableCredit)
             {
-                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
+                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad  seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
             }
 
             await viewModel.AddProductToWeightEntry(product, qty);
@@ -264,6 +295,12 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
         {
             await DisplayAlert("Error", "El contexto de enlace no es correcto.", "OK");
+            return;
+        }
+
+        if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+        {
+            await DisplayAlert("Error", "No se ha seleccionado un socio, eso se debe hacer primero", "OK");
             return;
         }
 

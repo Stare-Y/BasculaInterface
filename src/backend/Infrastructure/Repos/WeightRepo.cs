@@ -49,7 +49,8 @@ namespace Infrastructure.Repos
                 .OrderByDescending(w => w.ConcludeDate)
                 .Where(w =>
                     w.CreatedAt > startDateTime &&
-                    w.CreatedAt < endDateTime
+                    w.CreatedAt < endDateTime &&
+                    !w.IsDeleted
                     )
                 .Skip((int)page - 1)
                 .Take(top)
@@ -62,6 +63,20 @@ namespace Infrastructure.Repos
                 .AsNoTracking()
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
+                .Where(w => !w.IsDeleted)
+                .OrderByDescending(w => w.CreatedAt)
+                .Skip((int)page - 1)
+                .Take(top)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<WeightEntry>> GetAllComplete(int top = 30, uint page = 1)
+        {
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
+                .Where(w => !w.IsDeleted && w.ConcludeDate != null)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
                 .Take(top)
