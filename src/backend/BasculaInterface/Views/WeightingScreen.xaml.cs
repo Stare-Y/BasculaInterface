@@ -422,9 +422,32 @@ public partial class WeightingScreen : ContentPage
 
         if (e.Value)
         {
+            EntryLabel.Text = string.Empty;
             EntryLabel.Focus();
         }
 
         viewModel.ManualWeighting = e.Value;
+    }
+
+    private void EntryVehiclePlate_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (sender is Entry entry && e.NewTextValue != null)
+        {
+            var upper = e.NewTextValue.ToUpperInvariant();
+
+            if (entry.Text != upper)
+                entry.Text = upper;
+        }
+    }
+
+    private void Editor_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (sender is Editor entry && e.NewTextValue != null)
+        {
+            var upper = e.NewTextValue.ToUpperInvariant();
+
+            if (entry.Text != upper)
+                entry.Text = upper;
+        }
     }
 }

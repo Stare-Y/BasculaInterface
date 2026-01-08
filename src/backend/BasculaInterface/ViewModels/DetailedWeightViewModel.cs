@@ -167,11 +167,7 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry must be set before updating.");
             }
-            // Validate the weight entry before updating
-            if (WeightEntry.WeightDetails == null || !WeightEntry.WeightDetails.Any())
-            {
-                throw new InvalidOperationException("WeightEntry must have at least one weight detail.");
-            }
+
             // Send the updated weight entry to the API
             await _apiService.PutAsync<object>("api/Weight", WeightEntry);
 

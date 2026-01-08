@@ -98,16 +98,26 @@
                     WidthRequest="{OnPlatform Android=200,
                                               WinUI=450}">
 
+                    <Grid ColumnDefinitions="auto,auto">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="{OnPlatform Android=10,
+                                                  WinUI=24}"
+                            Style="{StaticResource Label}"
+                            Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 2}}"
+                            VerticalTextAlignment="Center"
+                            Grid.Column="0"/>
+                        <Button Grid.Column="1"
+                                x:Name="BtnPickPartner"
+                                Style="{StaticResource Boton}"
+                                Clicked="BtnPickPartner_Clicked"
+                                Text="Elegir" 
+                                IsVisible="False"/>
+                    </Grid>
 
-                    <Label
-                        FontAttributes="Bold"
-                        FontSize="{OnPlatform Android=10,
-                                              WinUI=24}"
-                        Style="{StaticResource Label}"
-                        Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}"
-                        TextColor="{AppThemeBinding Light={StaticResource 4},
-                                                    Dark={StaticResource 2}}"
-                        VerticalTextAlignment="Center" />
+                    
 
                 </Border>
 

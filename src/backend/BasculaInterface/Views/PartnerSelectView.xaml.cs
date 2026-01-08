@@ -19,6 +19,10 @@ public partial class PartnerSelectView : ContentPage
         }
     }
 
+    /// <summary>
+    /// If providers is false, or not provided, it will search for clients. If true, it will search for providers.
+    /// </summary>
+    /// <param name="providers"></param>
     public PartnerSelectView(bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<PartnerSelectorViewModel>())
     {
         _providers = providers;
@@ -88,7 +92,7 @@ public partial class PartnerSelectView : ContentPage
             if (!confirmed)
             {
                 OnPartnerSelected?.Invoke(partner);
-                await Shell.Current.Navigation.PopAsync();
+                await Shell.Current.Navigation.PopModalAsync();
             }
         }
         finally
@@ -118,6 +122,6 @@ public partial class PartnerSelectView : ContentPage
         await BtnBack.ScaleTo(1.1, 100);
         await BtnBack.ScaleTo(1.0, 100);
 
-        await Shell.Current.Navigation.PopAsync();
+        await Shell.Current.Navigation.PopModalAsync();
     }
 }

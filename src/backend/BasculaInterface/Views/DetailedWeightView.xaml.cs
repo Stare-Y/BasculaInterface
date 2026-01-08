@@ -61,8 +61,10 @@ public partial class DetailedWeightView : ContentPage
                 if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1)))
                     BtnFinishWeight.IsVisible = true;
 
-                //if(viewModel.Partner is null || viewModel.Partner.Id <= 0)
-                //    BtnPickPartner.IsVisible = true;
+                if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+                    BtnPickPartner.IsVisible = true;
+                else
+                    BtnPickPartner.IsVisible = false;
             }
             return;
         }
@@ -71,6 +73,11 @@ public partial class DetailedWeightView : ContentPage
         {
             if (!Preferences.Get("SecondaryTerminal", false))
                 BtnFinishWeight.IsVisible = true;
+
+            if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+                BtnPickPartner.IsVisible = true;
+            else
+                BtnPickPartner.IsVisible = false;
 
             return;
         }
@@ -83,8 +90,10 @@ public partial class DetailedWeightView : ContentPage
             BtnFinishWeight.IsVisible = true;
         }
 
-        //if(viewModel.Partner is null || viewModel.Partner.Id <= 0)
-        //    BtnPickPartner.IsVisible = true;
+        if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+            BtnPickPartner.IsVisible = true;
+        else
+            BtnPickPartner.IsVisible = false;
     }
 
     private DetailedWeightViewModel GetViewModel()
@@ -228,22 +237,37 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
+        if(viewModel.WeightEntry is null)
+        {
+            await DisplayAlert("Error", "La entrada de peso no está inicializada.", "OK");
+            return;
+        }
+
         viewModel.Partner = partner;
+        viewModel.WeightEntry.PartnerId = partner.Id;
 
-        await viewModel.UpdateWeightEntry();
+        try
+        {
+            await viewModel.UpdateWeightEntry();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo actualizar la entrada de peso con el socio seleccionado: " + ex.Message, "OK");
+            return;
+        }
 
-        // BtnPickPartner.IsVisible = false;
+        BtnPickPartner.IsVisible = false;
     }
 
     private async void BtnPickPartner_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not BasculaViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
-        // await BtnPickPartner.ScaleTo(1.1, 100);
-        // await BtnPickPartner.ScaleTo(1.0, 100);
+        await BtnPickPartner.ScaleTo(1.1, 100);
+        await BtnPickPartner.ScaleTo(1.0, 100);
 
-        PartnerSelectView partnerSelectView = new PartnerSelectView(viewModel.Providers);
+        PartnerSelectView partnerSelectView = new PartnerSelectView();
         partnerSelectView.OnPartnerSelected += OnPartnerSelected;
         await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
     }
@@ -261,7 +285,6 @@ public partial class DetailedWeightView : ContentPage
             {
                 throw new InvalidOperationException("No se ha seleccionado un socio, eso se debe hacer primero.");
             }
-            /*ickQuantityPopUp quantityPopUp = new PickQuantityPopUp(product.Nombre);*/
 
             double? result = await PickPopUp.ShowAsync(product.Nombre);
 

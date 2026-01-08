@@ -225,6 +225,7 @@
                             Placeholder="Ingresa placas"
                             Style="{StaticResource EntryDatos}"
                             Text="{Binding WeightEntry.VehiclePlate}"
+                            TextChanged="EntryVehiclePlate_TextChanged"
                             VerticalOptions="Center" />
                     </StackLayout>
                 </Border>
@@ -304,7 +305,8 @@
                         Placeholder="Notas..."
                         Style="{StaticResource EditorDatos}"
                         Text="{Binding WeightEntry.Notes}"
-                        VerticalOptions="Center" />
+                        VerticalOptions="Center" 
+                            TextChanged="Editor_TextChanged"/>
 
                     </StackLayout>
 
@@ -374,7 +376,8 @@
                             TextColor="{StaticResource 1}"
                             VerticalOptions="Center"
                             VerticalTextAlignment="Center"
-                            TextChanged="PesoLabel_TextChanged"/>
+                            TextChanged="PesoLabel_TextChanged"
+                            MinimumWidthRequest="100"/>
 
                     </Grid>
                 </Border>
