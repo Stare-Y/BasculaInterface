@@ -57,6 +57,8 @@ public static class MauiProgram
         builder.Services.AddTransient<PendingWeightsViewModel>();
         builder.Services.AddTransient<ProductSelectorViewModel>();
         builder.Services.AddTransient<PartnerSelectorViewModel>();
+        builder.Services.AddTransient<FinishedWeightsViewModel>();
+        builder.Services.AddTransient<ReadOnlyDetailedViewModel>();
         builder.Services.AddTransient<IApiService, ApiService>();
         builder.Services.AddHttpClient<IApiService, ApiService>(client =>
         {

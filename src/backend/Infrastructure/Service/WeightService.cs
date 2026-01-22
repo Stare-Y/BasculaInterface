@@ -81,7 +81,7 @@ namespace Infrastructure.Service
             return _weightRepo.DeleteDetailAsync(id);
         }
 
-        public async Task<GenericResponse<int>> SendToContpaqiComercial(int id)
+        public async Task<GenericResponse<int?>> SendToContpaqiComercial(int id)
         {
             WeightEntryDto weightEntry = await GetByIdAsync(id);
 
@@ -99,7 +99,7 @@ namespace Infrastructure.Service
             }
             DocumentoDto payload = await BuildContpaqiDocumentDto(weightEntry);
 
-            GenericResponse<int> result = await _apiService.PostAsync<GenericResponse<int>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
+            GenericResponse<int?> result = await _apiService.PostAsync<GenericResponse<int?>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
 
             if (result.Data <= 0)
             {

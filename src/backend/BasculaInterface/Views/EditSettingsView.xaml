@@ -172,6 +172,28 @@
                                     Text="Omitir Turno de Bascula" />
 
                             </Grid>
+                            
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxOnlyFinished"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxOnlyFinished_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Ver solo p" />
+
+                            </Grid>
 
                         </VerticalStackLayout>
 

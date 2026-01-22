@@ -10,6 +10,7 @@
         public string? WeightedBy { get; set; }
         public double? SecondaryTare { get; set; } = null;
         public double? RequiredAmount { get; set; } = null;
+        public string? RequiredAmountUnit { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
     }
 }

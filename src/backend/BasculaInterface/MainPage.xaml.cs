@@ -16,7 +16,11 @@ namespace BasculaInterface
 
         private async Task LogIn()
         {
-            await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
+            if(Preferences.Get("OnlyFinished", false))
+                await Shell.Current.Navigation.PushModalAsync(new FinishedWeights());
+            else
+                await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
+
             StackCheckBox.IsVisible = false;
             ScrollCheckBox.IsVisible = false;
         }

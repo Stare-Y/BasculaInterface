@@ -191,7 +191,7 @@ namespace Infrastructure.Service
                 if (detail.RequiredAmount.HasValue)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph($"Solicitado: {detail.RequiredAmount}kg", _settings.SmallFontSize, TextAlignment.LEFT)));
+                        .Add(BuildParagraph($"{(detail.Id)}Solicitado: {detail.RequiredAmount} {detail.RequiredAmountUnit ?? "kg"}", _settings.SmallFontSize, TextAlignment.LEFT)));
                 }
 
                 table.AddCell(new Cell().SetBorder(Border.NO_BORDER)

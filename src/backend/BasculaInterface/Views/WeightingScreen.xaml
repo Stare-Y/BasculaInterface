@@ -15,7 +15,7 @@
 
     <Grid>
         <Grid
-            Padding="30"
+            Padding="10"
             RowDefinitions="auto,auto,*,auto,auto"
             RowSpacing="20">
             <Grid

@@ -141,7 +141,12 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                GenericResponse<int> fKResult = await _weightService.SendToContpaqiComercial(weightId);
+                if(weightId <= 0)
+                {
+                    return BadRequest("Invalid weight ID");
+                }
+
+                GenericResponse<int?> fKResult = await _weightService.SendToContpaqiComercial(weightId);
 
                 return Ok(fKResult);
             }

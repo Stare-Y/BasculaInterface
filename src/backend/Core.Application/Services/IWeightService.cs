@@ -14,6 +14,6 @@ namespace Core.Application.Services
         Task UpdateAsync(WeightEntryDto weightEntry);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);
-        Task<GenericResponse<int>> SendToContpaqiComercial(int id);
+        Task<GenericResponse<int?>> SendToContpaqiComercial(int id);
     }
 }

@@ -35,6 +35,35 @@ public partial class EditSettingsView : ContentPage
     {
         Preferences.Set("BypasTurn", e.Value);
     }
+    private void CheckBoxOnlyFinished_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        Preferences.Set("OnlyFinished", e.Value);
+        if (e.Value)
+        {
+            //uncheck everything else
+            CheckBoxSecondaryTerminal.IsChecked = false;
+            CheckBoxManualWeight.IsChecked = false;
+            CheckBoxRequirePartner.IsChecked = false;
+            CheckBoxOnlyPedidos.IsChecked = false;
+            CheckBoxBypasTurn.IsChecked = false;
+
+            //disable everything else
+            CheckBoxSecondaryTerminal.IsEnabled = false;
+            CheckBoxManualWeight.IsEnabled = false;
+            CheckBoxRequirePartner.IsEnabled = false;
+            CheckBoxOnlyPedidos.IsEnabled = false;
+            CheckBoxBypasTurn.IsEnabled = false;
+        }
+        else
+        {
+            //enable everything else
+            CheckBoxSecondaryTerminal.IsEnabled = true;
+            CheckBoxManualWeight.IsEnabled = true;
+            CheckBoxRequirePartner.IsEnabled = true;
+            CheckBoxOnlyPedidos.IsEnabled = true;
+            CheckBoxBypasTurn.IsEnabled = true;
+        }
+    }
 
     private void LoadPreferences()
     {
@@ -43,6 +72,7 @@ public partial class EditSettingsView : ContentPage
         CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
         CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
         CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
+        CheckBoxOnlyFinished.IsChecked = Preferences.Get("OnlyFinished", false);
         EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
         //TODO: add this thing to settings lul
@@ -56,6 +86,7 @@ public partial class EditSettingsView : ContentPage
         Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
         Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
         Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
+        Preferences.Set("OnlyFinished", CheckBoxOnlyFinished.IsChecked);
     }
 
     private async void BtnCancel_Clicked(object sender, EventArgs e)

@@ -14,7 +14,7 @@
 
     <Grid>
         <Grid
-            Margin="30"
+            Margin="10"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
