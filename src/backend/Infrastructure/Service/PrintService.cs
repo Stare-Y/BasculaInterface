@@ -172,7 +172,7 @@ namespace Infrastructure.Service
                     {
                         ProductoDto product = await _productService
                             .GetByIdAsync(detail.FK_WeightedProductId
-                            ?? throw new InvalidDataException("The product Id is null"));
+                            ?? throw new InvalidDataException("The product Id resulted null"));
 
                         if (product != null)
                         {
@@ -191,7 +191,7 @@ namespace Infrastructure.Service
                 if (detail.RequiredAmount.HasValue)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph($"{(detail.Id)}Solicitado: {detail.RequiredAmount} {detail.RequiredAmountUnit ?? "kg"}", _settings.SmallFontSize, TextAlignment.LEFT)));
+                        .Add(BuildParagraph($"Requerido: {detail.RequiredAmount}", _settings.SmallFontSize, TextAlignment.LEFT)));
                 }
 
                 table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
@@ -201,7 +201,7 @@ namespace Infrastructure.Service
                     .Add(BuildParagraph(detail.Tare.ToString("F2") + "kg", _settings.SmallFontSize, TextAlignment.RIGHT, bold: false)));
 
                 table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Cargado:", _settings.SmallFontSize)));
+                    .Add(BuildParagraph("Post-Procesado:", _settings.SmallFontSize)));
 
                 table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(detail.Weight.ToString("F2") + "kg", _settings.SubTitleFontSize, TextAlignment.RIGHT, bold: true)));
