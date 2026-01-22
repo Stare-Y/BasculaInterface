@@ -30,6 +30,14 @@ namespace Infrastructure.Service
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
+            if(weightEntry.Id > 0)
+            {
+                //this means a currently existing one, is trying to get its initial weight, so, lets update it instead
+
+                await UpdateAsync(weightEntry);
+
+                return weightEntry;
+            }
             WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ConvertToBaseEntry());
 
             return newEntry.ConvertToDto();

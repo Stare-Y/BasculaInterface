@@ -337,10 +337,10 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
-            if (_tara == 0 && WeightEntry.TareWeight != 0)
-            {
-                throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
-            }
+            //if (_tara == 0 && WeightEntry.TareWeight != 0)//IF COMENTED, LOOKS LIKE WE ALLOW WEIGHT PROCESESS WITHOUTT INITIAL WEIGHTS
+            //{
+            //    throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
+            //}
             if (string.IsNullOrEmpty(WeightEntry.VehiclePlate) && !Preferences.Get("SecondaryTerminal", false))
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");

@@ -84,7 +84,7 @@ namespace BasculaInterface.ViewModels
             PendingWeightsDischarge.Clear();
             foreach (WeightEntryDto weight in _pendingWeights)
             {
-                if(!(Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false)) && weight.TareWeight <= 0)
+                if(Preferences.Get("SecondaryTerminal", false))
                 {
                     //skip weights with no tare weight
                     continue;

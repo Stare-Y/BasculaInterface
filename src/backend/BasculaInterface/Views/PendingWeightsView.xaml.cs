@@ -257,8 +257,6 @@ public partial class PendingWeightsView : ContentPage
             await viewModel.PostNewWeightEntry(weightEntry, partner);
 
             await Task.Delay(500);
-
-            await viewModel.LoadPendingWeightsAsync();
         }
         catch (Exception ex)
         {
