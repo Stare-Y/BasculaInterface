@@ -129,35 +129,49 @@
                 Grid.Column="{OnPlatform WinUI=1}"
                 Padding="{OnPlatform Android=30}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}"
-                RowDefinitions="Auto,*">
+                RowDefinitions="Auto,*"
+                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
-                <Grid 
+                <Grid
+                    x:Name="GridListTab"
                     Grid.Row="0"
-                    ColumnDefinitions="*,*"
-                    x:Name="GridListTab">
-                    
-                    <Button 
-                        Grid.Column="0"
-                        IsEnabled="False"
-                        Text="Cargas"
+                    ColumnDefinitions="*,*">
+
+                    <Button
                         x:Name="BtnCargas"
-                        Clicked="CargasDescargasToggle"/>
-                    <Button 
-                        Grid.Column="1"
-                        Text="Descargas"
+                        Grid.Column="0"
+                        Clicked="CargasDescargasToggle"
+                        CornerRadius="20"
+                        HeightRequest="{OnPlatform Android=50,
+                                                   WinUI=60}"
+                        IsEnabled="False"
+                        Shadow="{StaticResource DefaultShadow}"
+                        Style="{StaticResource Boton}"
+                        Text="Cargas"
+                        WidthRequest="{OnPlatform Android=150,
+                                                  WinUI=350}" />
+                    <Button
                         x:Name="BtnDescargas"
-                        Clicked="CargasDescargasToggle"/>
+                        Grid.Column="1"
+                        Clicked="CargasDescargasToggle"
+                        CornerRadius="20"
+                        HeightRequest="{OnPlatform Android=50,
+                                                   WinUI=60}"
+                        Shadow="{StaticResource DefaultShadow}"
+                        Style="{StaticResource Boton}"
+                        Text="Descargas"
+                        WidthRequest="{OnPlatform Android=150,
+                                                  WinUI=350}" />
 
                 </Grid>
 
                 <Border
+                    Grid.Row="1"
                     Padding="{OnPlatform WinUI=15}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0"
-                    Grid.Row="1">
+                    StrokeThickness="0">
 
                     <RefreshView
                         x:Name="RefreshViewPendingWeights"
@@ -183,46 +197,57 @@
                                         Padding="15"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                           Dark={StaticResource BlackGray}}"
-                                        HeightRequest="{OnPlatform Android=75,
-                                                                   WinUI=110}"
                                         InputTransparent="False"
+                                        MaximumHeightRequest="{OnPlatform Android=100,
+                                                                          WinUI=250}"
+                                        MinimumHeightRequest="{OnPlatform Android=75,
+                                                                          WinUI=110}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
                                         StrokeShape="RoundRectangle 30"
                                         StrokeThickness="0">
-                                        <Grid ColumnDefinitions="2.5*,*">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                        <Grid
+                                            ColumnDefinitions="*,auto"
+                                            HorizontalOptions="Fill"
+                                            VerticalOptions="Fill">
+                                            <VerticalStackLayout
+                                                Grid.Column="0"
+                                                HorizontalOptions="Fill"
+                                                Spacing="10">
                                                 <Label
                                                     x:Name="lblRazonSocial"
                                                     FontAttributes="Bold"
                                                     FontSize="{OnPlatform WinUI=26,
                                                                           Android=15}"
                                                     HorizontalOptions="Start"
+                                                    HorizontalTextAlignment="Start"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding Partner.RazonSocial}"
                                                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                 Dark={StaticResource 2}}" />
 
-                                                <HorizontalStackLayout>
-                                                    <Label
-                                                        x:Name="lblPlacas"
-                                                        FontSize="{OnPlatform WinUI=26,
-                                                                              Android=12}"
-                                                        HorizontalOptions="Start"
-                                                        Style="{StaticResource Label}"
-                                                        Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0} | '}"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                                    Dark={StaticResource 1}}" />
-                                                    <Label
-                                                        x:Name="lblNotas"
-                                                        FontSize="{OnPlatform WinUI=26,
-                                                                              Android=12}"
-                                                        HorizontalOptions="Start"
-                                                        Style="{StaticResource Label}"
-                                                        Text="{Binding WeightEntry.Notes, StringFormat=' Notas: {0}.'}"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                                    Dark={StaticResource 1}}" />
-                                                </HorizontalStackLayout>
+                                                <Label
+                                                    x:Name="lblPlacas"
+                                                    FontSize="{OnPlatform WinUI=26,
+                                                                          Android=12}"
+                                                    HorizontalOptions="Start"
+                                                    HorizontalTextAlignment="Start"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0} '}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}" />
+                                                <Label
+                                                    x:Name="lblNotas"
+                                                    FontSize="{OnPlatform WinUI=24,
+                                                                          Android=12}"
+                                                    HorizontalOptions="Start"
+                                                    HorizontalTextAlignment="Start"
+                                                    MaximumWidthRequest="{OnPlatform Android=450,
+                                                                                     WinUI=800}"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding WeightEntry.Notes, StringFormat='Notas: {0}.'}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}" />
                                             </VerticalStackLayout>
 
                                             <VerticalStackLayout Grid.Column="1" Spacing="4">
@@ -279,14 +304,34 @@
 
                             <CollectionView.EmptyView>
 
-                                <Label
-                                    FontSize="Title"
+                                <Grid
+                                    Padding="250"
                                     HorizontalOptions="Center"
-                                    Style="{StaticResource Label}"
-                                    Text="No hay pedidos pendientes"
-                                    TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                Dark={StaticResource 1}}"
-                                    VerticalOptions="Center" />
+                                    RowDefinitions="*,*"
+                                    RowSpacing="50"
+                                    VerticalOptions="Fill">
+
+                                    <Image
+                                        Grid.Row="0"
+                                        Aspect="AspectFill"
+                                        HeightRequest="100"
+                                        HorizontalOptions="Center"
+                                        Source="info.png"
+                                        VerticalOptions="Center"
+                                        WidthRequest="100" />
+
+                                    <Label
+                                        Grid.Row="1"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource Label}"
+                                        Text="No hay pedidos pendientes"
+                                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                    Dark={StaticResource 1}}"
+                                        VerticalOptions="Center" />
+
+                                </Grid>
+
+
 
                             </CollectionView.EmptyView>
 
