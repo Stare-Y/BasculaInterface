@@ -16,6 +16,7 @@ namespace BasculaInterface.ViewModels
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = new ObservableCollection<WeightEntryDetailRow>();
 
+        public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = new ObservableCollection<ExternalTargetBehaviorDto>();
         private readonly IApiService _apiService = null!;
 
         public DetailedWeightViewModel(IApiService apiService)
@@ -159,6 +160,21 @@ namespace BasculaInterface.ViewModels
             OnPropertyChanged(nameof(WeightEntry));
             OnPropertyChanged(nameof(Partner));
             OnPropertyChanged(nameof(TotalWeight));
+        }
+
+        public async Task LoadExternalTargetBehaviors()
+        {
+            ExternalTargetBehaviors.Clear();
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before loading external target behaviors.");
+            }
+            var behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available");
+            foreach (var behavior in behaviors)
+            {
+                ExternalTargetBehaviors.Add(behavior);
+            }
+            OnCollectionChanged(nameof(ExternalTargetBehaviors));
         }
 
         public async Task UpdateWeightEntry()

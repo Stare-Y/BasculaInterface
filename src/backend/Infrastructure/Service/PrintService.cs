@@ -283,7 +283,7 @@ namespace Infrastructure.Service
                 DateTime created = entry.CreatedAt.Value;
                 //created
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Llegada:")));
+                    .Add(BuildParagraph("Llegada:", bold: true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(created.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss"))));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
@@ -293,16 +293,24 @@ namespace Infrastructure.Service
             if (entry.ConcludeDate.HasValue)
             {
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Salida:")));
+                    .Add(BuildParagraph("Salida:", bold:true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(entry.ConcludeDate.Value.ToString("dd-MM-yyyy HH:mm:ss"))));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph()));// Empty row
             }
 
+            if(entry.Notes is not null && entry.Notes.Length > 0)
+            {
+                table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
+                    .Add(BuildParagraph("Notas:", bold:true)));
+                table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
+                    .Add(BuildParagraph(entry.Notes, bold: false)));
+                table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
+                    .Add(BuildParagraph()));// Empty row
+            }
+
             return table;
         }
-
-
     }
 }

@@ -191,7 +191,7 @@
                                                           WinUI=22}"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
-                                    Text="Ver solo p" />
+                                    Text="Ver solo Terminados" />
 
                             </Grid>
 

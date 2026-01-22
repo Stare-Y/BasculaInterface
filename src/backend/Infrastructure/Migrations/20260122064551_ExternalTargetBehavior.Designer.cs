@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WeightDBContext))]
-    partial class WeightDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260122064551_ExternalTargetBehavior")]
+    partial class ExternalTargetBehavior
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,7 +56,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ExternalTargetBehaviors");
+                    b.ToTable("ExternalTargetBehavior");
                 });
 
             modelBuilder.Entity("Core.Domain.Entities.Turns.Turn", b =>
@@ -191,11 +194,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domain.Entities.Weight.WeightEntry", b =>
                 {
-                    b.HasOne("Core.Domain.Entities.Behaviors.ExternalTargetBehavior", "ExternalTargetBehavior")
+                    b.HasOne("Core.Domain.Entities.Behaviors.ExternalTargetBehavior", "ExternalTargetBehaviorNavigation")
                         .WithMany()
                         .HasForeignKey("ExternalTargetBehaviorFK");
 
-                    b.Navigation("ExternalTargetBehavior");
+                    b.Navigation("ExternalTargetBehaviorNavigation");
                 });
 
             modelBuilder.Entity("Core.Domain.Entities.Weight.WeightEntry", b =>

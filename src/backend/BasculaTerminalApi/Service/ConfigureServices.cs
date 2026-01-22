@@ -72,6 +72,8 @@ namespace BasculaTerminalApi.Service
 
             services.AddScoped<IDocumentRepo, DocumentRepo>();
 
+            services.AddScoped<IExternalTargetBehaviorRepo, ExternalTargetBehaviorRepo>();
+
             services.AddTransient<IApiService, ApiService>();
             services.AddHttpClient<IApiService, ApiService>(client =>
             {
@@ -91,6 +93,8 @@ namespace BasculaTerminalApi.Service
             services.AddScoped<IWeightService, WeightService>();
 
             services.AddScoped<IPrintService, PrintService>();
+
+            services.AddScoped<IExternalTargetBehaviorService, ExternalTargetBehaviorService>();
 
             return services;
         }

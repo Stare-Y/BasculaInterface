@@ -41,6 +41,7 @@ public partial class DetailedWeightView : ContentPage
             try
             {
                 await viewModel.FetchNewWeightDetails();
+
                 _entriesChanged = false;
             }
             catch (Exception ex)
@@ -54,6 +55,25 @@ public partial class DetailedWeightView : ContentPage
             }
         }
 
+        WaitPopUp.Show("Un momento...");
+        try
+        {
+            await viewModel.LoadExternalTargetBehaviors();
+
+            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null || viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+            {
+                PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
+            }
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+
         if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
         {
             if (Preferences.Get("OnlyPedidos", false))
@@ -65,9 +85,14 @@ public partial class DetailedWeightView : ContentPage
                     BtnPickPartner.IsVisible = true;
                 else
                     BtnPickPartner.IsVisible = false;
+
+                PickerTargetBehavior.IsEnabled = true;
             }
             return;
         }
+
+        BtnFinishWeight.IsVisible = true;
+        PickerTargetBehavior.IsEnabled = true;
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {
@@ -420,38 +445,38 @@ public partial class DetailedWeightView : ContentPage
 
         if (sender is Button btn && btn.BindingContext is WeightEntryDetailRow selectedRow)
         {
-            if (BindingContext is DetailedWeightViewModel viewModel)
+            if (BindingContext is not DetailedWeightViewModel viewModel)
+                return;
+
+            WaitPopUp.Show("Eliminando pesada, espere...");
+            try
             {
-                WaitPopUp.Show("Eliminando pesada, espere...");
-                try
+
+                await viewModel.RemoveWeightEntryDetail(selectedRow);
+
+                if (viewModel.WeightEntryDetailRows.Count > 0)
                 {
-
-                    await viewModel.RemoveWeightEntryDetail(selectedRow);
-
-                    if (viewModel.WeightEntryDetailRows.Count > 0)
+                    if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
                     {
-                        if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
-                        {
-                            BtnFinishWeight.IsVisible = false;
-                        }
-                        else
-                        {
-                            BtnFinishWeight.IsVisible = true;
-                        }
+                        BtnFinishWeight.IsVisible = false;
                     }
+                    else
+                    {
+                        BtnFinishWeight.IsVisible = true;
+                    }
+                }
 
-                    await DisplayAlert("Éxito", "Registro eliminado correctamente.", "OK");
+                await DisplayAlert("Éxito", "Registro eliminado correctamente.", "OK");
 
-                    _entriesChanged = true;
-                }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", "No se pudo eliminar la pesada: " + ex.Message, "OK");
-                }
-                finally
-                {
-                    WaitPopUp.Hide();
-                }
+                _entriesChanged = true;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudo eliminar la pesada: " + ex.Message, "OK");
+            }
+            finally
+            {
+                WaitPopUp.Hide();
             }
         }
     }
@@ -488,6 +513,32 @@ public partial class DetailedWeightView : ContentPage
             await viewModel.DeleteWeightEntry();
 
             await Shell.Current.Navigation.PopAsync();
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
+    private async void PickerTargetBehavior_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if(BindingContext is not DetailedWeightViewModel viewModel)
+            { return; }
+
+        WaitPopUp.Show("Actualizando Documento Objetivo...");
+        try
+        {
+            ExternalTargetBehaviorDto? selectedItem = PickerTargetBehavior.SelectedItem as ExternalTargetBehaviorDto;
+
+            if (selectedItem is null) { return; }
+
+            viewModel.WeightEntry!.ExternalTargetBehaviorFK = selectedItem.Id;
+
+            await viewModel.UpdateWeightEntry();
+        }
+        catch(Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
         }
         finally
         {

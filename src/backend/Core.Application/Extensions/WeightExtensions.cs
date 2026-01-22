@@ -17,6 +17,7 @@ namespace Core.Application.Extensions
             {
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
+                ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK,
                 BruteWeight = weightEntryDto.BruteWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
                 Notes = weightEntryDto.Notes,
@@ -49,6 +50,8 @@ namespace Core.Application.Extensions
             {
                 Id = weightEntry.Id,
                 ConptaqiComercialFK = weightEntry.ConptaqiComercialFK,
+                ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK,
+                ExternalTargetBehavior = weightEntry.ExternalTargetBehavior is not null ? new ExternalTargetBehaviorDto(weightEntry.ExternalTargetBehavior) : null,
                 PartnerId = weightEntry.PartnerId,
                 TareWeight = weightEntry.TareWeight,
                 BruteWeight = weightEntry.BruteWeight,
@@ -82,6 +85,7 @@ namespace Core.Application.Extensions
             {
                 Id = weightEntryDto.Id,
                 ConptaqiComercialFK = weightEntryDto.ConptaqiComercialFK,
+                ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK,
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
                 BruteWeight = weightEntryDto.BruteWeight,
@@ -115,6 +119,8 @@ namespace Core.Application.Extensions
                 Id = we.Id,
                 PartnerId = we.PartnerId,
                 TareWeight = we.TareWeight,
+                ExternalTargetBehaviorFK = we.ExternalTargetBehaviorFK,
+                ExternalTargetBehavior = we.ExternalTargetBehavior is not null ? new ExternalTargetBehaviorDto(we.ExternalTargetBehavior):null,
                 BruteWeight = we.BruteWeight,
                 ConcludeDate = we.ConcludeDate,
                 CreatedAt = we.CreatedAt,
@@ -153,6 +159,7 @@ namespace Core.Application.Extensions
             weightEntry.Notes = weightEntryDto.Notes;
             weightEntry.VehiclePlate = weightEntryDto.VehiclePlate;
             weightEntry.RegisteredBy = weightEntryDto.RegisteredBy;
+            weightEntry.ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK;
 
             // Update WeightDetails
             var existingDetails = weightEntry.WeightDetails.ToList(); // Get existing details

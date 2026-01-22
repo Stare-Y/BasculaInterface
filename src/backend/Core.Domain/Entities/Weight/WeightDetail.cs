@@ -6,7 +6,6 @@ namespace Core.Domain.Entities.Weight
 {
     public class WeightDetail : BaseEntity
     {
-        [Required]
         public int FK_WeightEntryId { get; set; }
         public double Weight { get; set; } = 0;
         public double Tare { get; set; } = 0;
@@ -17,7 +16,7 @@ namespace Core.Domain.Entities.Weight
         public double? RequiredAmount { get; set; } = null;
 
         [ForeignKey("FK_WeightEntryId")]
-        public WeightEntry WeightEntry { get; set; } = null!;
+        public virtual WeightEntry WeightEntry { get; set; } = null!;
         public override string ToString()
         {
             return $"Weight: {Weight}, Tare: {Tare}, ProductId: {FK_WeightedProductId}, Price: {ProductPrice}";

@@ -6,7 +6,7 @@ namespace Core.Application.DTOs
     public class ProductoDto
     {
         public int Id { get; set; }
-        public string Code { get; set; }
+        public string Code { get; set; } = null!;
         public string Nombre { get; set; } = null!;
         public int IdValorClasificacion6 { get; set; }
         public double Precio { get; set; }

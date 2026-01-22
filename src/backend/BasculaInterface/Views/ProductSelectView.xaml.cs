@@ -58,12 +58,13 @@ public partial class ProductSelectView : ContentPage
     }
 
 
-    private void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
 
         if (ResultsCollectionView.SelectedItem is not null)
         {
             BtnConfirm.IsVisible = true;
+            BtnConfirm.IsEnabled = true;
 
             // Marcar el RadioButton del item seleccionado:
             if (e.CurrentSelection.FirstOrDefault() is ProductoDto seleccionado)
@@ -73,13 +74,29 @@ public partial class ProductSelectView : ContentPage
                 var container = (sender as CollectionView)?.FindByName<RadioButton>("RadioCheck");
                 if (container != null)
                     container.IsChecked = true;
+
+                bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {seleccionado.Nombre}?", "No", "Si");
+                if (!confirmed)
+                {
+                    await Shell.Current.Navigation.PopModalAsync();
+                    OnProductSelected?.Invoke(seleccionado);
+                }
+                else
+                {
+                    ResultsCollectionView.SelectedItems?.Clear();
+                    ResultsCollectionView.SelectedItem = null;
+
+                    BtnConfirm.IsVisible = false;
+                    BtnConfirm.IsEnabled = false;
+                }
             }
         }
         else
         {
             BtnConfirm.IsVisible = false;
-            LabelResultado.Text = "Ningún producto seleccionado";
+            BtnConfirm.IsEnabled = false;
 
+            LabelResultado.Text = "Ningún producto seleccionado";
         }
     }
 
@@ -102,6 +119,7 @@ public partial class ProductSelectView : ContentPage
             ResultsCollectionView.SelectedItem = null;
 
             BtnConfirm.IsVisible = false;
+            BtnConfirm.IsEnabled = false;
         }
     }
 

@@ -3,8 +3,6 @@ using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
-using Core.Domain.Entities.Weight;
-using iText.StyledXmlParser.Jsoup.Parser;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;

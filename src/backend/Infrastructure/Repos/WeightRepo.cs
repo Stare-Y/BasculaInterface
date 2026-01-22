@@ -45,6 +45,7 @@ namespace Infrastructure.Repos
 
             return await _context.WeightEntries
                 .AsNoTracking()
+                .Include(w => w.ExternalTargetBehavior)
                 .Include(w => w.WeightDetails)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Where(w =>
@@ -61,6 +62,7 @@ namespace Infrastructure.Repos
         {
             return await _context.WeightEntries
                 .AsNoTracking()
+                .Include(w => w.ExternalTargetBehavior)
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted)
@@ -74,6 +76,7 @@ namespace Infrastructure.Repos
         {
             return await _context.WeightEntries
                 .AsNoTracking()
+                .Include(w => w.ExternalTargetBehavior)
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted && w.ConcludeDate != null)
@@ -88,6 +91,7 @@ namespace Infrastructure.Repos
             return await _context.WeightEntries
                 .AsNoTracking()
                 .Include(w => w.WeightDetails)
+                .Include(w => w.ExternalTargetBehavior)
                 .OrderByDescending(w => w.ConcludeDate)
                 .Skip((int)page - 1)
                 .Take(top)
@@ -99,6 +103,7 @@ namespace Infrastructure.Repos
             return await _context.WeightEntries
                 .AsNoTracking()
                 .Where(w => w.ConcludeDate == null && !w.IsDeleted)
+                .Include(w => w.ExternalTargetBehavior)
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
                 .OrderByDescending(w => w.ConcludeDate)

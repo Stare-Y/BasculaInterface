@@ -1,6 +1,7 @@
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
+using iText.StyledXmlParser.Jsoup.Parser;
 
 namespace BasculaInterface.Views;
 
@@ -103,17 +104,34 @@ public partial class PartnerSelectView : ContentPage
         }
     }
 
-    private void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.FirstOrDefault() is ClienteProveedorDto socio)
         {
             LabelResultado.Text = socio.RazonSocial;
             BtnConfirm.IsVisible = true;
+            BtnConfirm.IsEnabled = true;
+
+            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {socio.RazonSocial}?", "No", "Si");
+            if (!confirmed)
+            {
+                OnPartnerSelected?.Invoke(socio);
+                await Shell.Current.Navigation.PopModalAsync();
+            }
+            else
+            {
+                ResultsCollectionView.SelectedItems?.Clear();
+                ResultsCollectionView.SelectedItem = null;
+
+                BtnConfirm.IsVisible = false;
+                BtnConfirm.IsEnabled = false;
+            }
         }
         else
         {
-            LabelResultado.Text = "Ningún producto seleccionado";
+            LabelResultado.Text = "Ningún cliente/proveedor seleccionado";
             BtnConfirm.IsVisible = false;
+            BtnConfirm.IsEnabled = false;
         }
     }
 

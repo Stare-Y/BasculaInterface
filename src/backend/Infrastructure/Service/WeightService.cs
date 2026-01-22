@@ -71,6 +71,11 @@ namespace Infrastructure.Service
             await _weightRepo.UpdateAsync(weightEntry.ConvertToBaseEntry());
         }
 
+        public async Task UpdateAsync(WeightEntry weightEntry)
+        {
+            await _weightRepo.UpdateAsync(weightEntry);
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             return await _weightRepo.DeleteAsync(id);
@@ -83,7 +88,7 @@ namespace Infrastructure.Service
 
         public async Task<GenericResponse<int?>> SendToContpaqiComercial(int id)
         {
-            WeightEntryDto weightEntry = await GetByIdAsync(id);
+            WeightEntry weightEntry = await _weightRepo.GetByIdAsync(id);
 
             if (weightEntry.PartnerId <= 0)
             {
@@ -92,6 +97,10 @@ namespace Infrastructure.Service
             if (!weightEntry.WeightDetails.Any(wd => wd.FK_WeightedProductId != null))
             {
                 throw new InvalidOperationException("At least 1 product needs to be related to be able to make the pedido");
+            }
+            if(weightEntry.ExternalTargetBehaviorFK is null || weightEntry.ExternalTargetBehavior is null)
+            {
+                throw new InvalidOperationException("An External Target Behavior is required to post to SDK");
             }
             if (weightEntry.ConptaqiComercialFK > 0)
             {
@@ -115,11 +124,27 @@ namespace Infrastructure.Service
             return result;
         }
 
-        private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntryDto weightEntry)
+        private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntry weightEntry)
         {
+            if(weightEntry.ExternalTargetBehavior is null)
+            {
+                throw new InvalidOperationException("An External Target Behavior is required to build the document");
+            }
+            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetSerie))
+            {
+                throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
+            }
+            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetAlmacen))
+            {
+                throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
+            }
+            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetConcept))
+            {
+                throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
+            }
             ClienteProveedorDto cteProovedor = await _clienteProveedorService.GetById(weightEntry.PartnerId!.Value);
             List<ProductoDto> products = [];
-            foreach (WeightDetailDto weightDetail in weightEntry.WeightDetails)
+            foreach (WeightDetail weightDetail in weightEntry.WeightDetails)
             {
                 if (weightDetail.FK_WeightedProductId == null)
                     continue;
@@ -131,8 +156,9 @@ namespace Infrastructure.Service
 
             return new DocumentoDto
             {
-                CodConcepto = isProvider ? _comercialSDKSettings.ProveedorConcepto : _comercialSDKSettings.DefaultConcepto,
-                Serie = isProvider ? _comercialSDKSettings.ProveedorSerie : _comercialSDKSettings.DefaultSerie,
+                CodConcepto = !isProvider ? weightEntry.ExternalTargetBehavior.TargetConcept 
+                    : throw new NotImplementedException("Can't create documents from providers, just clients for now"),
+                Serie = weightEntry.ExternalTargetBehavior.TargetSerie,
                 Fecha = DateTime.Now,
                 CodigoCteProv = cteProovedor.Code,
                 cObservaciones = "Generado en Bascula CPE",
@@ -140,10 +166,9 @@ namespace Infrastructure.Service
                     new MovimientoDto
                     {
                         CodigoProducto = p.Code,
-                        CodigoAlmacen = isProvider ? _comercialSDKSettings.ProveedorAlmacen : _comercialSDKSettings.DefaultAlmacen,
+                        CodigoAlmacen = weightEntry.ExternalTargetBehavior.TargetAlmacen,
                         Unidades = weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).Weight,
                         Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}"
-
                     }).ToArray()
             };
         }
