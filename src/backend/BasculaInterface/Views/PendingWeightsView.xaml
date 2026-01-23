@@ -141,10 +141,14 @@
                         x:Name="BtnCargas"
                         Grid.Column="0"
                         Clicked="CargasDescargasToggle"
+                        Clicked="CargasDescargasToggle"
                         CornerRadius="20"
                         HeightRequest="{OnPlatform Android=50,
                                                    WinUI=60}"
                         IsEnabled="False"
+                        Text="Cargas" />
+                    <Button
+                        x:Name="BtnDescargas"
                         Shadow="{StaticResource DefaultShadow}"
                         Style="{StaticResource Boton}"
                         Text="Cargas"
@@ -153,6 +157,8 @@
                     <Button
                         x:Name="BtnDescargas"
                         Grid.Column="1"
+                        Clicked="CargasDescargasToggle"
+                        Text="Descargas" />
                         Clicked="CargasDescargasToggle"
                         CornerRadius="20"
                         HeightRequest="{OnPlatform Android=50,
@@ -171,7 +177,9 @@
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
+                    StrokeThickness="0" >
                     StrokeThickness="0">
+                    Grid.Row="1">
 
                     <RefreshView
                         x:Name="RefreshViewPendingWeights"
@@ -328,8 +336,10 @@
                                         TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                     Dark={StaticResource 1}}"
                                         VerticalOptions="Center" />
+                                </Grid>
 
                                 </Grid>
+
 
 
 

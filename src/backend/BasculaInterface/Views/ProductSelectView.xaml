@@ -21,12 +21,13 @@
             RowDefinitions="auto,50,*,100"
             VerticalOptions="Fill">
             <!--  Fila de búsqueda  -->
-            <Grid Grid.Row="0" Padding="10">
+            <Grid Grid.Row="0">
 
                 <!--  Barra de búsqueda (ocupa toda la fila 1)  -->
                 <SearchBar
                     x:Name="SearchBar"
                     Grid.Row="1"
+                    CancelButtonColor="Black"
                     HorizontalOptions="Fill"
                     Placeholder="Buscar Producto..."
                     PlaceholderColor="Gray"
@@ -64,7 +65,7 @@
 
             <Grid
                 Grid.Row="2"
-                Padding="30"
+                Padding="10"
                 HorizontalOptions="{OnPlatform Android='Center'}"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 

@@ -12,100 +12,100 @@
         <vm:DetailedWeightViewModel />
     </ContentPage.BindingContext>
 
-    <Grid>
+    <Grid
+        Margin="30"
+        BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                          Dark={StaticResource BlackTheme}}"
+        RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
+                                    WinUI='100,Auto,100,*,Auto,Auto'}"
+        RowSpacing="15">
+
+
+
         <Grid
-            Margin="10"
-            BackgroundColor="{AppThemeBinding Light={StaticResource 1},
-                                              Dark={StaticResource BlackTheme}}"
-            RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
-                                        WinUI='100,Auto,100,*,Auto,Auto'}"
-            RowSpacing="15">
+            Grid.Row="0"
+            ColumnDefinitions="{OnPlatform Android='*,auto,*',
+                                           WinUI='*,auto,*'}"
+            VerticalOptions="Center">
 
 
+            <Border
+                x:Name="BtnVolver"
+                Grid.Column="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                  Dark={StaticResource BlackGray}}"
+                HeightRequest="{OnPlatform Android=50,
+                                           WinUI=100}"
+                HorizontalOptions="Start"
+                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                    Android={StaticResource AndroidButtons}}"
+                Stroke="{StaticResource 1}"
+                StrokeShape="RoundRectangle 30"
+                Style="{StaticResource RoundedBorderStyle}"
+                WidthRequest="{OnPlatform Android=50,
+                                          WinUI=100}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
+                </Border.GestureRecognizers>
+
+
+                <Image
+                    x:Name="ImgBack"
+                    Aspect="AspectFit"
+                    HeightRequest="{OnPlatform Android=40,
+                                               WinUI=60}"
+                    Source="{AppThemeBinding Light='back2.png',
+                                             Dark='back.png'}"
+                    WidthRequest="{OnPlatform Android=40,
+                                              WinUI=60}" />
+
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+
+                            <VisualState x:Name="Normal" />
+
+                            <VisualState x:Name="PointerOver">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                    <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter TargetName="ImgBack" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back2.png'}" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                </VisualState.Setters>
+                            </VisualState>
+
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Border>
 
             <Grid
-                Grid.Row="0"
-                ColumnDefinitions="{OnPlatform Android='*,225,*',
-                                               WinUI='*,auto,*'}"
-                VerticalOptions="Center">
-
+                Grid.Column="1"
+                ColumnDefinitions="*,auto"
+                ColumnSpacing="15"
+                HorizontalOptions="Fill">
 
                 <Border
-                    x:Name="BtnVolver"
                     Grid.Column="0"
+                    Padding="10"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
-                    HorizontalOptions="Start"
+                    HorizontalOptions="End"
+                    MaximumWidthRequest="{OnPlatform Android=250,
+                                                     WinUI=600}"
+                    MinimumWidthRequest="{OnPlatform Android=100,
+                                                     WinUI=300}"
                     Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
-                    Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=50,
-                                              WinUI=100}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
-                    </Border.GestureRecognizers>
-
-
-                    <Image
-                        x:Name="ImgBack"
-                        Aspect="AspectFit"
-                        HeightRequest="{OnPlatform Android=40,
-                                                   WinUI=60}"
-                        Source="{AppThemeBinding Light='back2.png',
-                                                 Dark='back.png'}"
-                        WidthRequest="{OnPlatform Android=40,
-                                                  WinUI=60}" />
-
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroupList>
-                            <VisualStateGroup x:Name="CommonStates">
-
-                                <VisualState x:Name="Normal" />
-
-                                <VisualState x:Name="PointerOver">
-                                    <VisualState.Setters>
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
-                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
-                                    </VisualState.Setters>
-                                </VisualState>
-
-                                <VisualState x:Name="Pressed">
-                                    <VisualState.Setters>
-                                        <Setter TargetName="ImgBack" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back2.png'}" />
-                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
-                                    </VisualState.Setters>
-                                </VisualState>
-
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </VisualStateManager.VisualStateGroups>
-                </Border>
-
-                <Grid
-                    Grid.Column="1"
-                    ColumnDefinitions="*,auto"
-                    ColumnSpacing="15"
-                    HorizontalOptions="Fill">
-
-                    <Border
-                        Grid.Column="0"
-                        Padding="10"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                          Dark={StaticResource BlackGray}}"
-                        HeightRequest="{OnPlatform Android=50,
-                                                   WinUI=100}"
-                        HorizontalOptions="End"
-                        MaximumWidthRequest="{OnPlatform Android=225,
-                                                         WinUI=600}"
-                        MinimumWidthRequest="{OnPlatform Android=150,
-                                                         WinUI=300}"
-                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
-                        Stroke="{StaticResource 1}"
-                        StrokeShape="RoundRectangle 30"
-                        StrokeThickness="0">
+                    StrokeThickness="0">
 
                         <Label
                             Grid.Column="0"
@@ -120,63 +120,64 @@
 
 
 
-                    </Border>
+                </Border>
 
-                    <Border
-                        x:Name="BtnPickPartner"
-                        Grid.Column="1"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                          Dark={StaticResource BlackGray}}"
-                        HeightRequest="{OnPlatform Android=50,
-                                                   WinUI=100}"
-                        HorizontalOptions="End"
-                        IsVisible="False"
-                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
-                        Stroke="{StaticResource 1}"
-                        StrokeShape="RoundRectangle 30"
-                        Style="{StaticResource RoundedBorderStyle}"
-                        WidthRequest="{OnPlatform Android=50,
-                                                  WinUI=100}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="BtnPickPartner_Clicked" />
-                        </Border.GestureRecognizers>
+                <Border
+                    x:Name="BtnPickPartner"
+                    Grid.Column="1"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                      Dark={StaticResource BlackGray}}"
+                    HeightRequest="{OnPlatform Android=50,
+                                               WinUI=100}"
+                    HorizontalOptions="End"
+                    IsVisible="False"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidButtons}}"
+                    Stroke="{StaticResource 1}"
+                    StrokeShape="RoundRectangle 30"
+                    Style="{StaticResource RoundedBorderStyle}"
+                    WidthRequest="{OnPlatform Android=50,
+                                              WinUI=100}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="BtnPickPartner_Clicked" />
+                    </Border.GestureRecognizers>
 
 
-                        <Image
-                            x:Name="ImgPartner"
-                            Aspect="AspectFit"
-                            HeightRequest="{OnPlatform Android=40,
-                                                       WinUI=60}"
-                            Source="{AppThemeBinding Light='adduser2.png',
-                                                     Dark='adduser.png'}"
-                            WidthRequest="{OnPlatform Android=40,
-                                                      WinUI=60}" />
+                    <Image
+                        x:Name="ImgPartner"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=30,
+                                                   WinUI=60}"
+                        Source="{AppThemeBinding Light='adduser2.png',
+                                                 Dark='adduser.png'}"
+                        WidthRequest="{OnPlatform Android=30,
+                                                  WinUI=60}" />
 
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroupList>
-                                <VisualStateGroup x:Name="CommonStates">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroupList>
+                            <VisualStateGroup x:Name="CommonStates">
 
-                                    <VisualState x:Name="Normal" />
+                                <VisualState x:Name="Normal" />
 
-                                    <VisualState x:Name="PointerOver">
-                                        <VisualState.Setters>
-                                            <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
-                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
-                                            <Setter Property="Stroke" Value="{StaticResource 2}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                    </VisualState.Setters>
+                                </VisualState>
 
-                                    <VisualState x:Name="Pressed">
-                                        <VisualState.Setters>
-                                            <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
-                                            <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
-                                        </VisualState.Setters>
-                                    </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
+                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    </VisualState.Setters>
+                                </VisualState>
 
-                                </VisualStateGroup>
-                            </VisualStateGroupList>
-                        </VisualStateManager.VisualStateGroups>
-                    </Border>
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </VisualStateManager.VisualStateGroups>
+                </Border>
 
                 </Grid>
 
