@@ -14,11 +14,13 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid
-            Padding="30"
+            Padding="{OnPlatform Android=30,
+                                 WinUI=50}"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             HorizontalOptions="Fill"
             RowDefinitions="auto,50,*,100"
+            RowSpacing="25"
             VerticalOptions="Fill">
 
 
@@ -90,7 +92,8 @@
                                                                   Dark={StaticResource BlackGray}}"
                                 HeightRequest="{OnPlatform Android=50,
                                                            WinUI=75}"
-                                Shadow="{StaticResource DefaultShadow}"
+                                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                                    Android={StaticResource AndroidShadow}}"
                                 Stroke="{OnPlatform Android={StaticResource 4},
                                                     WinUI={StaticResource 1}}"
                                 StrokeShape="RoundRectangle 30"
@@ -163,7 +166,7 @@
                                                WinUI=100}"
                     HorizontalOptions="Center"
                     Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                        Android={StaticResource AndroidButtons}}"
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
@@ -185,7 +188,8 @@
                             HeightRequest="{OnPlatform Android=25,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="back2.png"
+                            Source="{AppThemeBinding Light='back2.png',
+                                                     Dark='back.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=25,
                                                       WinUI=50}" />
@@ -198,7 +202,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Volver"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -242,7 +247,7 @@
                     HorizontalOptions="Center"
                     IsVisible="False"
                     Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                        Android={StaticResource AndroidButtons}}"
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
@@ -264,7 +269,8 @@
                             HeightRequest="{OnPlatform Android=25,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="addproduct.png"
+                            Source="{AppThemeBinding Light='addsuer.png',
+                                                     Dark='addsuer2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=25,
                                                       WinUI=50}" />
@@ -277,7 +283,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Confirmar Socio"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 

@@ -27,9 +27,16 @@
 
             <Shadow
                 x:Key="AndroidShadow"
-                Opacity="0.0"
-                Radius="0"
-                Offset="0,0" />
+                Opacity="0.5"
+                Radius="1"
+                Offset="0,1" />
+
+            <Shadow
+                x:Key="AndroidShadowButton"
+                Opacity="0.5"
+                Radius="1"
+                Offset="0,4" />
+
 
             <Style x:Key="Logo" TargetType="Image">
                 <Setter Property="Aspect" Value="AspectFill" />
@@ -359,13 +366,13 @@
 
                     <!--  Focused  -->
                     <Trigger TargetType="SearchBar" Property="IsFocused" Value="True">
-                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 2}, Dark={StaticResource 1}}" />
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 2}, Dark={StaticResource 3}}" />
                         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 1}}" />
                     </Trigger>
 
                     <!--  Not Focused  -->
                     <Trigger TargetType="SearchBar" Property="IsFocused" Value="False">
-                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource Black}}" />
+                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 1}}" />
                         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
                         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource Gray}}" />
                     </Trigger>

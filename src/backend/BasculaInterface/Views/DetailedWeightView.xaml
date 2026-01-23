@@ -12,100 +12,101 @@
         <vm:DetailedWeightViewModel />
     </ContentPage.BindingContext>
 
-    <Grid
-        Margin="30"
-        BackgroundColor="{AppThemeBinding Light={StaticResource 1},
-                                          Dark={StaticResource BlackTheme}}"
-        RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
-                                    WinUI='100,Auto,100,*,Auto,Auto'}"
-        RowSpacing="15">
 
-
+    <Grid>
 
         <Grid
-            Grid.Row="0"
-            ColumnDefinitions="{OnPlatform Android='*,auto,*',
-                                           WinUI='*,auto,*'}"
-            VerticalOptions="Center">
-
-
-            <Border
-                x:Name="BtnVolver"
-                Grid.Column="0"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                  Dark={StaticResource BlackGray}}"
-                HeightRequest="{OnPlatform Android=50,
-                                           WinUI=100}"
-                HorizontalOptions="Start"
-                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                    Android={StaticResource AndroidButtons}}"
-                Stroke="{StaticResource 1}"
-                StrokeShape="RoundRectangle 30"
-                Style="{StaticResource RoundedBorderStyle}"
-                WidthRequest="{OnPlatform Android=50,
-                                          WinUI=100}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
-                </Border.GestureRecognizers>
-
-
-                <Image
-                    x:Name="ImgBack"
-                    Aspect="AspectFit"
-                    HeightRequest="{OnPlatform Android=40,
-                                               WinUI=60}"
-                    Source="{AppThemeBinding Light='back2.png',
-                                             Dark='back.png'}"
-                    WidthRequest="{OnPlatform Android=40,
-                                              WinUI=60}" />
-
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroupList>
-                        <VisualStateGroup x:Name="CommonStates">
-
-                            <VisualState x:Name="Normal" />
-
-                            <VisualState x:Name="PointerOver">
-                                <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
-                                    <Setter Property="Stroke" Value="{StaticResource 2}" />
-                                </VisualState.Setters>
-                            </VisualState>
-
-                            <VisualState x:Name="Pressed">
-                                <VisualState.Setters>
-                                    <Setter TargetName="ImgBack" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back2.png'}" />
-                                    <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
-                                </VisualState.Setters>
-                            </VisualState>
-
-                        </VisualStateGroup>
-                    </VisualStateGroupList>
-                </VisualStateManager.VisualStateGroups>
-            </Border>
+            Margin="30"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                              Dark={StaticResource BlackTheme}}"
+            RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
+                                        WinUI='100,Auto,100,*,Auto,Auto'}"
+            RowSpacing="15">
 
             <Grid
-                Grid.Column="1"
-                ColumnDefinitions="*,auto"
-                ColumnSpacing="15"
-                HorizontalOptions="Fill">
+                Grid.Row="0"
+                ColumnDefinitions="{OnPlatform Android='*,auto,*',
+                                               WinUI='*,auto,*'}"
+                VerticalOptions="Center">
+
 
                 <Border
+                    x:Name="BtnVolver"
                     Grid.Column="0"
-                    Padding="10"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
-                    HorizontalOptions="End"
-                    MaximumWidthRequest="{OnPlatform Android=250,
-                                                     WinUI=600}"
-                    MinimumWidthRequest="{OnPlatform Android=100,
-                                                     WinUI=300}"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    HorizontalOptions="Start"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0">
+                    Style="{StaticResource RoundedBorderStyle}"
+                    WidthRequest="{OnPlatform Android=50,
+                                              WinUI=100}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
+                    </Border.GestureRecognizers>
+
+
+                    <Image
+                        x:Name="ImgBack"
+                        Aspect="AspectFit"
+                        HeightRequest="{OnPlatform Android=40,
+                                                   WinUI=60}"
+                        Source="{AppThemeBinding Light='back2.png',
+                                                 Dark='back.png'}"
+                        WidthRequest="{OnPlatform Android=40,
+                                                  WinUI=60}" />
+
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroupList>
+                            <VisualStateGroup x:Name="CommonStates">
+
+                                <VisualState x:Name="Normal" />
+
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter TargetName="ImgBack" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back2.png'}" />
+                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </VisualStateManager.VisualStateGroups>
+                </Border>
+
+                <Grid
+                    Grid.Column="1"
+                    ColumnDefinitions="*,auto"
+                    ColumnSpacing="15"
+                    HorizontalOptions="Fill">
+
+                    <Border
+                        Grid.Column="0"
+                        Padding="10"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                          Dark={StaticResource BlackGray}}"
+                        HeightRequest="{OnPlatform Android=50,
+                                                   WinUI=100}"
+                        HorizontalOptions="End"
+                        MaximumWidthRequest="{OnPlatform Android=250,
+                                                         WinUI=600}"
+                        MinimumWidthRequest="{OnPlatform Android=100,
+                                                         WinUI=300}"
+                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                        Stroke="{StaticResource 1}"
+                        StrokeShape="RoundRectangle 30"
+                        StrokeThickness="0">
 
                         <Label
                             Grid.Column="0"
@@ -120,64 +121,64 @@
 
 
 
-                </Border>
+                    </Border>
 
-                <Border
-                    x:Name="BtnPickPartner"
-                    Grid.Column="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                      Dark={StaticResource BlackGray}}"
-                    HeightRequest="{OnPlatform Android=50,
-                                               WinUI=100}"
-                    HorizontalOptions="End"
-                    IsVisible="False"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                        Android={StaticResource AndroidButtons}}"
-                    Stroke="{StaticResource 1}"
-                    StrokeShape="RoundRectangle 30"
-                    Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=50,
-                                              WinUI=100}">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="BtnPickPartner_Clicked" />
-                    </Border.GestureRecognizers>
+                    <Border
+                        x:Name="BtnPickPartner"
+                        Grid.Column="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                          Dark={StaticResource BlackGray}}"
+                        HeightRequest="{OnPlatform Android=50,
+                                                   WinUI=100}"
+                        HorizontalOptions="End"
+                        IsVisible="False"
+                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                            Android={StaticResource AndroidShadowButton}}"
+                        Stroke="Transparent"
+                        StrokeShape="RoundRectangle 30"
+                        Style="{StaticResource RoundedBorderStyle}"
+                        WidthRequest="{OnPlatform Android=50,
+                                                  WinUI=100}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="BtnPickPartner_Clicked" />
+                        </Border.GestureRecognizers>
 
 
-                    <Image
-                        x:Name="ImgPartner"
-                        Aspect="AspectFit"
-                        HeightRequest="{OnPlatform Android=30,
-                                                   WinUI=60}"
-                        Source="{AppThemeBinding Light='adduser2.png',
-                                                 Dark='adduser.png'}"
-                        WidthRequest="{OnPlatform Android=30,
-                                                  WinUI=60}" />
+                        <Image
+                            x:Name="ImgPartner"
+                            Aspect="AspectFit"
+                            HeightRequest="{OnPlatform Android=30,
+                                                       WinUI=60}"
+                            Source="{AppThemeBinding Light='adduser.png',
+                                                     Dark='adduser2.png'}"
+                            WidthRequest="{OnPlatform Android=30,
+                                                      WinUI=60}" />
 
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroupList>
-                            <VisualStateGroup x:Name="CommonStates">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
 
-                                <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="Normal" />
 
-                                <VisualState x:Name="PointerOver">
-                                    <VisualState.Setters>
-                                        <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
-                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
-                                    </VisualState.Setters>
-                                </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                            <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
 
-                                <VisualState x:Name="Pressed">
-                                    <VisualState.Setters>
-                                        <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
-                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
-                                    </VisualState.Setters>
-                                </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="ImgPartner" Property="Image.Source" Value="{AppThemeBinding Light='adduser.png', Dark='adduser2.png'}" />
+                                            <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
 
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </VisualStateManager.VisualStateGroups>
-                </Border>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
 
                 </Grid>
 
@@ -252,7 +253,8 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Start"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
@@ -375,6 +377,7 @@
 
                         <Label
                             Grid.Row="0"
+                            Margin="{OnPlatform Android='0,-5,0,0'}"
                             FontAttributes="Bold"
                             FontSize="{OnPlatform Android=11,
                                                   WinUI=20}"
@@ -387,9 +390,9 @@
 
                         <Label
                             Grid.Row="1"
-                            Margin="{OnPlatform Android='0,-10,0,0'}"
+                            Margin="{OnPlatform Android='0,-15,0,0'}"
                             FontAttributes="Bold"
-                            FontSize="{OnPlatform Android=10,
+                            FontSize="{OnPlatform Android=8,
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="{Binding WeightEntry.Notes}"
@@ -422,7 +425,7 @@
                     <Label
                         Grid.Row="0"
                         FontAttributes="Bold"
-                        FontSize="{OnPlatform Android=12,
+                        FontSize="{OnPlatform Android=10,
                                               WinUI=18}"
                         Style="{StaticResource Label}"
                         Text="{Binding WeightEntry.TareWeight, StringFormat='Tara (peso inicial): {0} kg.'}"
@@ -451,7 +454,7 @@
                     <Label
                         Grid.Row="0"
                         FontAttributes="Bold"
-                        FontSize="{OnPlatform Android=12,
+                        FontSize="{OnPlatform Android=10,
                                               WinUI=18}"
                         Style="{StaticResource Label}"
                         Text="{Binding TotalWeight, StringFormat='Peso Total: {0} kg.'}"
@@ -467,28 +470,34 @@
 
             <Grid
                 Grid.Row="3"
-                Margin="0,20,0,0"
-                Padding="{OnPlatform Android=30}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}"
-                RowDefinitions="auto,*">
+                RowDefinitions="auto,*"
+                RowSpacing="15"
+                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
                 <Grid Grid.Row="0">
                     <Picker
                         x:Name="PickerTargetBehavior"
                         Title="Documento objetivo"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                          Dark={StaticResource 2}}"
+                        FontFamily="Montserrat"
+                        FontSize="{OnPlatform Android=14,
+                                              WinUI=24}"
                         IsEnabled="False"
+                        ItemDisplayBinding="{Binding DisplayText}"
                         ItemsSource="{Binding ExternalTargetBehaviors}"
                         SelectedIndexChanged="PickerTargetBehavior_SelectedIndexChanged"
-                        ItemDisplayBinding="{Binding DisplayText}"/>
+                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                    Dark={StaticResource 1}}" />
                 </Grid>
 
                 <Border
+                    Grid.Row="1"
                     Padding="{OnPlatform WinUI=15}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0"
-                    Grid.Row="1">
+                    StrokeThickness="0">
 
 
                     <RefreshView
@@ -515,13 +524,14 @@
                                                                      Dark={StaticResource BlackGray}}"
                                         HeightRequest="{OnPlatform Android=85,
                                                                    WinUI=125}"
-                                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                                        Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                                            Android={StaticResource AndroidShadow}}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
                                         StrokeShape="RoundRectangle 30"
                                         StrokeThickness="0"
                                         Style="{StaticResource RoundedBorderStyle}">
-                                        <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='30,125,50,5,50', WinUI='Auto,*,*,20,*'}">
+                                        <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='40,175,50,5,50', WinUI='Auto,*,*,20,*'}">
 
                                             <Grid
                                                 Grid.Column="0"
@@ -719,10 +729,9 @@
                             <CollectionView.EmptyView>
 
                                 <Grid
-                                    Padding="25"
+                                    Padding="15"
                                     HorizontalOptions="Center"
-                                    RowDefinitions="*,*"
-                                    RowSpacing="50"
+                                    RowDefinitions="auto,*"
                                     VerticalOptions="Fill">
 
                                     <Image
@@ -778,12 +787,13 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Center"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
+                    WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnDeleteEntry_Clicked" />
@@ -800,7 +810,8 @@
                             HeightRequest="{OnPlatform Android=25,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="trash.png"
+                            Source="{AppThemeBinding Light='trash.png',
+                                                     Dark='trash2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=25,
                                                       WinUI=50}" />
@@ -813,7 +824,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Borrar Entrada"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -854,12 +866,13 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Center"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
+                    WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnNuevoProducto_Clicked" />
@@ -876,7 +889,8 @@
                             HeightRequest="{OnPlatform Android=30,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="addproduct.png"
+                            Source="{AppThemeBinding Light='addproduct.png',
+                                                     Dark='addproduct2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=30,
                                                       WinUI=50}" />
@@ -889,7 +903,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Nuevo Producto"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -929,12 +944,13 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Center"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
+                    WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnNewEntry_Clicked" />
@@ -951,7 +967,8 @@
                             HeightRequest="{OnPlatform Android=30,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="addweight.png"
+                            Source="{AppThemeBinding Light='addweight.png',
+                                                     Dark='addweight2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=30,
                                                       WinUI=50}" />
@@ -964,7 +981,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Nueva Entrada"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -1005,12 +1023,13 @@
                                                WinUI=100}"
                     HorizontalOptions="Center"
                     IsVisible="False"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
+                    WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnFinishWeight_Clicked" />
@@ -1027,7 +1046,8 @@
                             HeightRequest="{OnPlatform Android=30,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="finishweight.png"
+                            Source="{AppThemeBinding Light='finishweight.png',
+                                                     Dark='finishweight2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=30,
                                                       WinUI=50}" />
@@ -1040,7 +1060,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Finalizar Peso"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -1072,13 +1093,13 @@
                     </VisualStateManager.VisualStateGroups>
                 </Border>
 
-
             </Grid>
 
-
         </Grid>
+
         <components:WaitPopUp x:Name="WaitPopUp" />
         <components:PickQuantityPopUp x:Name="PickPopUp" />
+
     </Grid>
 
 </ContentPage>
