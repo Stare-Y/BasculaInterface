@@ -16,12 +16,13 @@
     <Grid>
 
         <Grid
-            Margin="30"
+            Margin="{OnPlatform Android=15,
+                                WinUI=30}"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             RowDefinitions="{OnPlatform Android='50,5,50,*,10,Auto',
                                         WinUI='100,Auto,100,*,Auto,Auto'}"
-            RowSpacing="15">
+            RowSpacing="20">
 
             <Grid
                 Grid.Row="0"
@@ -466,18 +467,28 @@
 
             </Grid>
 
-
-
             <Grid
                 Grid.Row="3"
                 HorizontalOptions="{OnPlatform Android='Center'}"
                 RowDefinitions="auto,*"
                 RowSpacing="15"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
-                <Grid Grid.Row="0">
+                <Grid Grid.Row="0" RowDefinitions="*,*">
+
+                    <Label
+                        Grid.Row="0"
+                        FontSize="{OnPlatform Android=14,
+                                              WinUI=24}"
+                        HorizontalOptions="Start"
+                        Style="{StaticResource Label}"
+                        Text="Documento objetivo"
+                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                    Dark={StaticResource 1}}" />
+
+
                     <Picker
                         x:Name="PickerTargetBehavior"
-                        Title="Documento objetivo"
+                        Grid.Row="1"
                         BackgroundColor="{AppThemeBinding Light={StaticResource 4},
                                                           Dark={StaticResource 2}}"
                         FontFamily="Montserrat"
@@ -489,11 +500,13 @@
                         SelectedIndexChanged="PickerTargetBehavior_SelectedIndexChanged"
                         TextColor="{AppThemeBinding Light={StaticResource Black},
                                                     Dark={StaticResource 1}}" />
+
                 </Grid>
 
                 <Border
                     Grid.Row="1"
-                    Padding="{OnPlatform WinUI=15}"
+                    Padding="{OnPlatform WinUI=15,
+                                         Android=0}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
@@ -524,6 +537,8 @@
                                                                      Dark={StaticResource BlackGray}}"
                                         HeightRequest="{OnPlatform Android=85,
                                                                    WinUI=125}"
+                                        MaximumWidthRequest="{OnPlatform Android=500}"
+                                        MinimumWidthRequest="{OnPlatform Android=350}"
                                         Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
                                                             Android={StaticResource AndroidShadow}}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
@@ -531,7 +546,7 @@
                                         StrokeShape="RoundRectangle 30"
                                         StrokeThickness="0"
                                         Style="{StaticResource RoundedBorderStyle}">
-                                        <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='40,175,50,5,50', WinUI='Auto,*,*,20,*'}">
+                                        <Grid Padding="20" ColumnDefinitions="{OnPlatform Android='40,175,60,5,60', WinUI='Auto,*,*,20,*'}">
 
                                             <Grid
                                                 Grid.Column="0"

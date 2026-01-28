@@ -679,7 +679,7 @@
                     Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
                                         Android={StaticResource AndroidShadowButton}}"
                     Stroke="{AppThemeBinding Light={StaticResource 4},
-                                             Dark={StaticResource 3}}"
+                                             Dark={StaticResource 2}}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="3"
                     Style="{StaticResource RoundedBorderStyle}"

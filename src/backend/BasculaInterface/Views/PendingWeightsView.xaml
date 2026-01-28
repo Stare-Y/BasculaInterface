@@ -127,7 +127,7 @@
             <Grid
                 Grid.Row="{OnPlatform Android=1}"
                 Grid.Column="{OnPlatform WinUI=1}"
-                Padding="{OnPlatform Android=30}"
+                Padding="{OnPlatform Android=15}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
                 RowDefinitions="Auto,*"
                 RowSpacing="20"

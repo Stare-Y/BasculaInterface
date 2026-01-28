@@ -14,7 +14,7 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid
-            Padding="{OnPlatform Android=30, WinUI=50}"
+            Padding="{OnPlatform Android=15, WinUI=35}"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             HorizontalOptions="Fill"
