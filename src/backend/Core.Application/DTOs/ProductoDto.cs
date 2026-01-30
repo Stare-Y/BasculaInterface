@@ -9,6 +9,7 @@ namespace Core.Application.DTOs
         public string Code { get; set; } = null!;
         public string Nombre { get; set; } = null!;
         public int IdValorClasificacion6 { get; set; }
+        public bool IsGranel => IdValorClasificacion6 <= 9;
         public double Precio { get; set; }
 
         [SetsRequiredMembers]

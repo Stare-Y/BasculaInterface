@@ -37,7 +37,7 @@ namespace BasculaInterface.ViewModels
             {
                 if (Preferences.Get("FilterClasif6", false))
                 {
-                    if (product.IdValorClasificacion6 == 0)
+                    if (product.IdValorClasificacion6 < 7) // if 9, is unit
                         continue;
                 }
 

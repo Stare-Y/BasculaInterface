@@ -637,7 +637,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=28}"
                                                     Style="{StaticResource Label}"
-                                                    Text="Tara"
+                                                    Text="{Binding TareHeader}"
                                                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                 Dark={StaticResource 2}}" />
 
@@ -645,7 +645,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=26}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding Tare, StringFormat='{}{0:F2} kg'}"
+                                                    Text="{Binding TareValue}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
 
@@ -673,7 +673,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=28}"
                                                     Style="{StaticResource Label}"
-                                                    Text="Peso"
+                                                    Text="{Binding WeightHeader}"
                                                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                 Dark={StaticResource 2}}" />
 
@@ -681,7 +681,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=26}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding Weight, StringFormat='{}{0:F2} kg'}"
+                                                    Text="{Binding WeightValue}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
 

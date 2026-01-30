@@ -1,11 +1,18 @@
-﻿namespace BasculaInterface.Models
+﻿using Microsoft.Identity.Client;
+
+namespace BasculaInterface.Models
 {
     public class WeightEntryDetailRow
     {
         public int Id { get; set; } = 0;
         public int OrderIndex { get; set; } = 0;
         public double Tare { get; set; } = 0;
+        public bool IsGranel { get; set; } = true;
+        public string TareHeader => IsGranel ? "Tara" : string.Empty;
+        public string TareValue => IsGranel ? Tare.ToString() + " kg" : string.Empty;
         public double Weight { get; set; } = 0;
+        public string WeightHeader => IsGranel ? "Peso" : "Unidades";
+        public string WeightValue => IsGranel ? Weight.ToString() + " kg" : RequiredAmount!.Value.ToString();
         public double? SecondaryTare { get; set; }
         public string? WeightedBy { get; set; }
         private string _description = string.Empty;
@@ -13,7 +20,7 @@
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public double? RequiredAmount { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
-        public string RequiredAmountText => RequiredAmount.HasValue 
+        public string RequiredAmountText => RequiredAmount.HasValue && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") 
             : string.Empty;
 

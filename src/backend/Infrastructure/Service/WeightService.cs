@@ -175,10 +175,18 @@ namespace Infrastructure.Service
                     {
                         CodigoProducto = p.Code,
                         CodigoAlmacen = weightEntry.ExternalTargetBehavior.TargetAlmacen,
-                        Unidades = weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).Weight,
+                        Unidades = GetUnidadesFromProductAndDetail( weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id),p),
                         Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}"
                     }).ToArray()
             };
+        }
+
+        private double GetUnidadesFromProductAndDetail(WeightDetail weightDetail, ProductoDto product)
+        {
+            if (product.IsGranel)
+                return weightDetail.Weight;
+            else
+                return weightDetail.RequiredAmount ?? 0;
         }
     }
 }

@@ -113,6 +113,7 @@ namespace BasculaInterface.ViewModels
                 {
                     ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
                     row.Description = product?.Nombre ?? $"Unknown Product ({detail.FK_WeightedProductId})";
+                    row.IsGranel = product?.IsGranel ?? true;
                 }
                 else
                 {
