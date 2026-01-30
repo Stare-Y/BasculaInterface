@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="BasculaInterface.Views.ReadOnlyDetailedWeightView"
-             xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
-             xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
-             Title="Detalles de pesada (solo lectura)"
-             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
-                                  Dark={StaticResource BlackTheme}}">
+<ContentPage
+    x:Class="BasculaInterface.Views.ReadOnlyDetailedWeightView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    Title="Detalles de pesada (solo lectura)"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
     <Grid>
         <Grid
             Margin="10"
@@ -19,57 +20,59 @@
 
 
             <Grid
-    Grid.Row="0"
-    ColumnDefinitions="{OnPlatform Android='50,*,120',
-                                   WinUI='100,*,250'}"
-    VerticalOptions="Center">
+                Grid.Row="0"
+                ColumnDefinitions="{OnPlatform Android='50,*,120',
+                                               WinUI='100,*,250'}"
+                VerticalOptions="Center">
 
-                <!-- BACK BUTTON (unchanged) -->
+                <!--  BACK BUTTON (unchanged)  -->
                 <Border
-        x:Name="BtnVolver"
-        Grid.Column="0"
-        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                          Dark={StaticResource BlackGray}}"
-        HeightRequest="{OnPlatform Android=50, WinUI=100}"
-        WidthRequest="{OnPlatform Android=50, WinUI=100}"
-        Stroke="{StaticResource 1}"
-        StrokeShape="RoundRectangle 30">
+                    x:Name="BtnVolver"
+                    Grid.Column="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                      Dark={StaticResource BlackGray}}"
+                    HeightRequest="{OnPlatform Android=50,
+                                               WinUI=100}"
+                    Stroke="{StaticResource 1}"
+                    StrokeShape="RoundRectangle 30"
+                    WidthRequest="{OnPlatform Android=50,
+                                              WinUI=100}">
 
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="BtnVolver_Clicked" />
                     </Border.GestureRecognizers>
 
-                    <Image
-            Aspect="AspectFit"
-            Source="{AppThemeBinding Light='back2.png', Dark='back.png'}" />
+                    <Image Aspect="AspectFit" Source="{AppThemeBinding Light='back2.png', Dark='back.png'}" />
                 </Border>
 
-                <!-- PARTNER INFO (unchanged binding) -->
+                <!--  PARTNER INFO (unchanged binding)  -->
                 <Border
-        Grid.Column="1"
-        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                          Dark={StaticResource BlackGray}}"
-        StrokeShape="RoundRectangle 30">
+                    Grid.Column="1"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 30">
 
                     <Label
-            FontAttributes="Bold"
-            Style="{StaticResource Label}"
-            Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}"
-            VerticalTextAlignment="Center" />
+                        FontAttributes="Bold"
+                        Style="{StaticResource Label}"
+                        Text="{Binding Partner.RazonSocial, StringFormat='Socio: {0}'}"
+                        VerticalTextAlignment="Center" />
                 </Border>
 
-                <!-- CONTAPAQI BUTTON (NEW) -->
+                <!--  CONTAPAQI BUTTON (NEW)  -->
                 <Button
-    x:Name="BtnContpaqId"
-    Grid.Column="2"
-    Text="Contpaqi"
-    FontAttributes="Bold"
-    BackgroundColor="{StaticResource 4}"
-    TextColor="White"
-    CornerRadius="30"
-    HeightRequest="{OnPlatform Android=50, WinUI=100}"
-    WidthRequest="{OnPlatform Android=120, WinUI=250}"
-    Clicked="BtnContpaqId_Clicked" />
+                    x:Name="BtnContpaqId"
+                    Grid.Column="2"
+                    BackgroundColor="{StaticResource 4}"
+                    Clicked="BtnContpaqId_Clicked"
+                    CornerRadius="30"
+                    FontAttributes="Bold"
+                    HeightRequest="{OnPlatform Android=50,
+                                               WinUI=100}"
+                    Text="Contpaqi"
+                    TextColor="White"
+                    WidthRequest="{OnPlatform Android=120,
+                                              WinUI=250}" />
 
 
             </Grid>
@@ -493,14 +496,31 @@
 
                             <CollectionView.EmptyView>
 
-                                <Label
-                                    FontSize="Title"
+                                <Grid
+                                    Padding="250"
                                     HorizontalOptions="Center"
-                                    Style="{StaticResource Label}"
-                                    Text="No hay Productos Ingresados"
-                                    TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                Dark={StaticResource 1}}"
-                                    VerticalOptions="Center" />
+                                    RowDefinitions="*,*"
+                                    RowSpacing="50"
+                                    VerticalOptions="Fill">
+
+                                    <Image
+                                        Grid.Row="0"
+                                        Aspect="AspectFill"
+                                        HeightRequest="100"
+                                        HorizontalOptions="Center"
+                                        Source="info.png"
+                                        VerticalOptions="Center"
+                                        WidthRequest="100" />
+
+                                    <Label
+                                        Grid.Row="1"
+                                        HorizontalOptions="Center"
+                                        Style="{StaticResource Label}"
+                                        Text="No hay productos ingresados"
+                                        TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                    Dark={StaticResource 1}}"
+                                        VerticalOptions="Center" />
+                                </Grid>
 
                             </CollectionView.EmptyView>
 

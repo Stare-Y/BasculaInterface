@@ -127,9 +127,10 @@
             <Grid
                 Grid.Row="{OnPlatform Android=1}"
                 Grid.Column="{OnPlatform WinUI=1}"
-                Padding="{OnPlatform Android=30}"
+                Padding="{OnPlatform Android=15}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
                 RowDefinitions="Auto,*"
+                RowSpacing="20"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
                 <Grid
@@ -145,11 +146,11 @@
                         HeightRequest="{OnPlatform Android=50,
                                                    WinUI=60}"
                         IsEnabled="False"
-                        Shadow="{StaticResource DefaultShadow}"
                         Style="{StaticResource Boton}"
                         Text="Cargas"
                         WidthRequest="{OnPlatform Android=150,
                                                   WinUI=350}" />
+
                     <Button
                         x:Name="BtnDescargas"
                         Grid.Column="1"
@@ -198,9 +199,9 @@
                                         BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                           Dark={StaticResource BlackGray}}"
                                         InputTransparent="False"
-                                        MaximumHeightRequest="{OnPlatform Android=100,
+                                        MaximumHeightRequest="{OnPlatform Android=250,
                                                                           WinUI=250}"
-                                        MinimumHeightRequest="{OnPlatform Android=75,
+                                        MinimumHeightRequest="{OnPlatform Android=100,
                                                                           WinUI=110}"
                                         Stroke="{OnPlatform Android={StaticResource 4},
                                                             WinUI={StaticResource 1}}"
@@ -328,10 +329,7 @@
                                         TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                     Dark={StaticResource 1}}"
                                         VerticalOptions="Center" />
-
                                 </Grid>
-
-
 
                             </CollectionView.EmptyView>
 

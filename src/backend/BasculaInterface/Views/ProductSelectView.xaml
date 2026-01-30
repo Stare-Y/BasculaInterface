@@ -14,19 +14,21 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid
-            Padding="30"
+            Padding="{OnPlatform Android=15, WinUI=35}"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             HorizontalOptions="Fill"
             RowDefinitions="auto,50,*,100"
+            RowSpacing="25"
             VerticalOptions="Fill">
             <!--  Fila de búsqueda  -->
-            <Grid Grid.Row="0" Padding="10">
+            <Grid Grid.Row="0">
 
                 <!--  Barra de búsqueda (ocupa toda la fila 1)  -->
                 <SearchBar
                     x:Name="SearchBar"
                     Grid.Row="1"
+                    CancelButtonColor="Black"
                     HorizontalOptions="Fill"
                     Placeholder="Buscar Producto..."
                     PlaceholderColor="Gray"
@@ -41,7 +43,7 @@
                 VerticalOptions="Center">
 
                 <Label
-                    FontSize="{OnPlatform Android=20,
+                    FontSize="{OnPlatform Android=12,
                                           WinUI=32}"
                     HorizontalOptions="Center"
                     Style="{StaticResource Label}"
@@ -52,7 +54,7 @@
 
                 <Label
                     x:Name="LabelResultado"
-                    FontSize="{OnPlatform Android=20,
+                    FontSize="{OnPlatform Android=12,
                                           WinUI=32}"
                     HorizontalOptions="Center"
                     Style="{StaticResource Label}"
@@ -64,7 +66,6 @@
 
             <Grid
                 Grid.Row="2"
-                Padding="30"
                 HorizontalOptions="{OnPlatform Android='Center'}"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
@@ -74,7 +75,7 @@
                     SelectionChanged="ResultsCollectionView_SelectionChanged"
                     SelectionMode="Single">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout ItemSpacing="7.5" Orientation="Vertical" />
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
                     </CollectionView.ItemsLayout>
 
                     <CollectionView.ItemTemplate>
@@ -86,7 +87,8 @@
                                                                   Dark={StaticResource BlackGray}}"
                                 HeightRequest="{OnPlatform Android=55,
                                                            WinUI=75}"
-                                Shadow="{StaticResource DefaultShadow}"
+                                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                                    Android={StaticResource AndroidShadow}}"
                                 Stroke="{OnPlatform Android={StaticResource 4},
                                                     WinUI={StaticResource 1}}"
                                 StrokeShape="RoundRectangle 30"
@@ -156,7 +158,8 @@
                     HeightRequest="{OnPlatform Android=50,
                                                WinUI=100}"
                     HorizontalOptions="Center"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
@@ -178,7 +181,8 @@
                             HeightRequest="{OnPlatform Android=25,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="back2.png"
+                            Source="{AppThemeBinding Light='back2.png',
+                                                     Dark='back.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=25,
                                                       WinUI=50}" />
@@ -191,7 +195,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Volver"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 
@@ -234,7 +239,8 @@
                                                WinUI=100}"
                     HorizontalOptions="Center"
                     IsVisible="False"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                        Android={StaticResource AndroidShadowButton}}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
@@ -256,7 +262,8 @@
                             HeightRequest="{OnPlatform Android=25,
                                                        WinUI=50}"
                             HorizontalOptions="Fill"
-                            Source="addproduct.png"
+                            Source="{AppThemeBinding Light='addproduct.png',
+                                                     Dark='addproduct2.png'}"
                             VerticalOptions="Fill"
                             WidthRequest="{OnPlatform Android=25,
                                                       WinUI=50}" />
@@ -269,7 +276,8 @@
                                                   WinUI=16}"
                             Style="{StaticResource Label}"
                             Text="Confirmar Producto"
-                            TextColor="{StaticResource Black}" />
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
                     </VerticalStackLayout>
 

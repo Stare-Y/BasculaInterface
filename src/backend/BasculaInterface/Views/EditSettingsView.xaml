@@ -36,12 +36,17 @@
                                                         Dark={StaticResource 2}}" />
                         <Border
                             x:Name="BorderEntryHost"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                                              Dark={StaticResource BlackTheme}}"
                             HorizontalOptions="Fill"
                             IsVisible="True"
-                            Style="{StaticResource RoundedBorderStyle}"
+                            Stroke="Transparent"
+                            StrokeShape="RoundRectangle 20"
                             VerticalOptions="Center">
                             <Entry
                                 x:Name="EntryHost"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                                                  Dark={StaticResource BlackTheme}}"
                                 Placeholder="Ingrese la Direccion del Host..."
                                 Style="{StaticResource EntryDatos}" />
                         </Border>
@@ -172,7 +177,7 @@
                                     Text="Omitir Turno de Bascula" />
 
                             </Grid>
-                            
+
                             <Grid
                                 ColumnDefinitions="*,*"
                                 ColumnSpacing="35"
@@ -201,6 +206,7 @@
 
                     <Grid
                         Grid.Row="2"
+                        Padding="5"
                         ColumnDefinitions="*,*"
                         ColumnSpacing="25"
                         HorizontalOptions="Fill"
@@ -215,9 +221,9 @@
                             HeightRequest="{OnPlatform Android=75,
                                                        WinUI=80}"
                             HorizontalOptions="Center"
-                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
-                            Stroke="{AppThemeBinding Light={StaticResource Black},
-                                                     Dark={StaticResource 1}}"
+                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                                Android={StaticResource AndroidShadowButton}}"
+                            Stroke="Transparent"
                             StrokeShape="RoundRectangle 30"
                             Style="{StaticResource RoundedBorderStyle}"
                             WidthRequest="{OnPlatform Android=75,
@@ -234,7 +240,7 @@
                                     HeightRequest="{OnPlatform Android=40,
                                                                WinUI=50}"
                                     Source="{AppThemeBinding Light='back2.png',
-                                                             Dark='back2.png'}"
+                                                             Dark='back.png'}"
                                     WidthRequest="{OnPlatform Android=40,
                                                               WinUI=50}" />
 
@@ -246,7 +252,7 @@
                                     Style="{StaticResource Label}"
                                     Text="Volver"
                                     TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                Dark={StaticResource Black}}" />
+                                                                Dark={StaticResource 1}}" />
 
                             </VerticalStackLayout>
 
@@ -261,8 +267,8 @@
                                         <VisualState x:Name="PointerOver">
                                             <VisualState.Setters>
                                                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 4}}" />
-                                                <Setter TargetName="BackIcon" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back.png'}" />
-                                                <Setter TargetName="BackLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 1}}" />
+                                                <Setter TargetName="BackIcon" Property="Image.Source" Value="{AppThemeBinding Light='back.png', Dark='back2.png'}" />
+                                                <Setter TargetName="BackLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource Black}}" />
                                                 <Setter Property="Stroke" Value="{StaticResource 2}" />
                                             </VisualState.Setters>
                                         </VisualState>
@@ -287,9 +293,10 @@
                             HeightRequest="{OnPlatform Android=75,
                                                        WinUI=80}"
                             HorizontalOptions="Center"
-                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
-                            Stroke="{AppThemeBinding Light={StaticResource Black},
-                                                     Dark={StaticResource 1}}"
+                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
+                                                Android={StaticResource AndroidShadowButton}}"
+                            Stroke="{AppThemeBinding Light={StaticResource 4},
+                                                     Dark={StaticResource 2}}"
                             StrokeShape="RoundRectangle 30"
                             StrokeThickness="3"
                             Style="{StaticResource RoundedBorderStyle}"
@@ -311,7 +318,7 @@
                                                                WinUI=40}"
                                     HorizontalOptions="Fill"
                                     Source="{AppThemeBinding Light='confirm.png',
-                                                             Dark='confirm.png'}"
+                                                             Dark='confirm2.png'}"
                                     VerticalOptions="Fill"
                                     WidthRequest="{OnPlatform Android=30,
                                                               WinUI=40}" />
@@ -324,7 +331,7 @@
                                     Style="{StaticResource Label}"
                                     Text="Guardar Configuracion"
                                     TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                Dark={StaticResource Black}}" />
+                                                                Dark={StaticResource 1}}" />
 
                             </VerticalStackLayout>
 
@@ -337,8 +344,8 @@
                                         <VisualState x:Name="PointerOver">
                                             <VisualState.Setters>
                                                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 4}}" />
-                                                <Setter TargetName="CaptureSettingsImage" Property="Image.Source" Value="{AppThemeBinding Light='confirm2.png', Dark='confirm2.png'}" />
-                                                <Setter TargetName="CaptureSettingsLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 1}}" />
+                                                <Setter TargetName="CaptureSettingsImage" Property="Image.Source" Value="{AppThemeBinding Light='confirm2.png', Dark='confirm.png'}" />
+                                                <Setter TargetName="CaptureSettingsLabel" Property="Label.TextColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource Black}}" />
                                                 <Setter Property="Stroke" Value="{StaticResource 2}" />
                                             </VisualState.Setters>
                                         </VisualState>

@@ -71,16 +71,15 @@
 
                         <Border
                             x:Name="BtnSettings"
-                            Grid.Column="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"
-                            HeightRequest="{OnPlatform Android=50,
+                            HeightRequest="{OnPlatform Android=75,
                                                        WinUI=100}"
-                            HorizontalOptions="Start"
+                            HorizontalOptions="Center"
                             Stroke="{StaticResource 1}"
                             StrokeShape="RoundRectangle 30"
                             Style="{StaticResource RoundedBorderStyle}"
-                            WidthRequest="{OnPlatform Android=50,
+                            WidthRequest="{OnPlatform Android=75,
                                                       WinUI=100}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="BtnSettings_Tapped" />
@@ -90,11 +89,11 @@
                             <Image
                                 x:Name="imgSettings"
                                 Aspect="AspectFit"
-                                HeightRequest="{OnPlatform Android=40,
+                                HeightRequest="{OnPlatform Android=50,
                                                            WinUI=60}"
                                 Source="{AppThemeBinding Light='settings.png',
                                                          Dark='settings.png'}"
-                                WidthRequest="{OnPlatform Android=40,
+                                WidthRequest="{OnPlatform Android=50,
                                                           WinUI=60}" />
 
                             <VisualStateManager.VisualStateGroups>
