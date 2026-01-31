@@ -8,6 +8,10 @@
     Title="Detalles de pesada (solo lectura)"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
+
+    <ContentPage.BindingContext>
+        <vm:ReadOnlyDetailedViewModel />
+    </ContentPage.BindingContext>
     <Grid>
         <Grid
             Margin="10"
@@ -315,14 +319,30 @@
                 Grid.Row="3"
                 Padding="{OnPlatform Android=30}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+                VerticalOptions="{OnPlatform Android='StartAndExpand'}"
+                RowDefinitions="auto,*">
+                <Picker
+                    x:Name="PickerTargetBehavior"
+                    Grid.Row="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                      Dark={StaticResource 2}}"
+                    FontFamily="Montserrat"
+                    FontSize="{OnPlatform Android=14,
+                                          WinUI=24}"
+                    IsEnabled="False"
+                    ItemDisplayBinding="{Binding DisplayText}"
+                    ItemsSource="{Binding ExternalTargetBehaviors}"
+                    SelectedIndexChanged="PickerTargetBehavior_SelectedIndexChanged"
+                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                Dark={StaticResource 1}}" />
 
                 <Border
                     Padding="{OnPlatform WinUI=15}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
                     StrokeShape="RoundRectangle 30"
-                    StrokeThickness="0">
+                    StrokeThickness="0"
+                    Grid.Row="1">
 
 
                     <RefreshView
@@ -388,7 +408,7 @@
                                                     FontSize="{OnPlatform Android=8,
                                                                           WinUI=20}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding RequiredAmountText, StringFormat='{0} kg. '}"
+                                                    Text="{Binding RequiredAmountText}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}"
                                                     VerticalTextAlignment="Center" />
@@ -416,7 +436,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=28}"
                                                     Style="{StaticResource Label}"
-                                                    Text="Tara"
+                                                    Text="{Binding TareHeader}"
                                                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                 Dark={StaticResource 2}}" />
 
@@ -424,7 +444,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=26}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding Tare, StringFormat='{}{0:F2} kg'}"
+                                                    Text="{Binding TareValue}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
 
@@ -436,7 +456,7 @@
                                                                       WinUI=26}"
                                                 InputTransparent="True"
                                                 Style="{StaticResource Label}"
-                                                Text="+"
+                                                Text=""
                                                 TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                             Dark={StaticResource 2}}" />
 
@@ -452,7 +472,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=28}"
                                                     Style="{StaticResource Label}"
-                                                    Text="Peso"
+                                                    Text="{Binding WeightHeader}"
                                                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                 Dark={StaticResource 2}}" />
 
@@ -460,7 +480,7 @@
                                                     FontSize="{OnPlatform Android=10,
                                                                           WinUI=26}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding Weight, StringFormat='{}{0:F2} kg'}"
+                                                    Text="{Binding WeightValue}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
 

@@ -94,9 +94,11 @@ namespace Infrastructure.Service
             return _weightRepo.DeleteDetailAsync(id);
         }
 
-        public async Task<GenericResponse<int?>> SendToContpaqiComercial(int id)
+        public async Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id)
         {
             WeightEntry weightEntry = await _weightRepo.GetByIdAsync(id);
+
+            Console.WriteLine($"Sending WeightEntry to contpaq: {weightEntry}");
 
             if (weightEntry.PartnerId <= 0)
             {
@@ -118,9 +120,9 @@ namespace Infrastructure.Service
 
             GenericResponse<int?> result = await _apiService.PostAsync<GenericResponse<int?>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
 
-            if (result.Data <= 0)
+            if (result.Data is null || result.Data <= 0)
             {
-                throw new Exception($"Error posting to SDK: {result.Message}");
+                return new GenericResponse<ContpaqiComercialResult> { Message = $"Error posting to SDK: {result.Message}" };
             }
 
             weightEntry.ConptaqiComercialFK = result.Data;
@@ -129,7 +131,7 @@ namespace Infrastructure.Service
 
             await UpdateAsync(weightEntry);
 
-            return result;
+            return new GenericResponse<ContpaqiComercialResult> { Data = new ContpaqiComercialResult { ResultingId = result.Data!.Value}, Message = "Document Generated"};
         }
 
         private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntry weightEntry)

@@ -21,7 +21,7 @@ namespace Core.Domain.Entities.Weight
         public ICollection<WeightDetail> WeightDetails { get; set; } = [];
         public override string ToString()
         {
-            return $"Brute: {BruteWeight}, Plate: {VehiclePlate}, Partner: {PartnerId}";
+            return $"ID: {Id}, Brute: {BruteWeight}, Plate: {VehiclePlate}, Partner: {PartnerId}, ExternalTargetBehavior: {ExternalTargetBehavior}.";
         }
     }
 }

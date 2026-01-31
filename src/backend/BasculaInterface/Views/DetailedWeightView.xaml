@@ -635,7 +635,7 @@
                                                     FontSize="{OnPlatform Android=8,
                                                                           WinUI=20}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding RequiredAmountText, StringFormat='{0} kg. '}"
+                                                    Text="{Binding RequiredAmountText}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}"
                                                     VerticalTextAlignment="Center" />
@@ -645,7 +645,7 @@
                                                     FontSize="13"
                                                     HorizontalOptions="Start"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding WeightedBy, StringFormat='Pesado por: {0}'}"
+                                                    Text="{Binding WeightedBy}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}"
                                                     VerticalTextAlignment="Center" />
@@ -683,7 +683,7 @@
                                                                       WinUI=26}"
                                                 InputTransparent="True"
                                                 Style="{StaticResource Label}"
-                                                Text="+"
+                                                Text=""
                                                 TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                             Dark={StaticResource 2}}" />
 

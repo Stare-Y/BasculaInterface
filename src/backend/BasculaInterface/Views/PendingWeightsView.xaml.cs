@@ -286,4 +286,9 @@ public partial class PendingWeightsView : ContentPage
             PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsCharge;
         }
     }
+
+    private async void BtnFinished_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushModalAsync(new FinishedWeights());
+    }
 }

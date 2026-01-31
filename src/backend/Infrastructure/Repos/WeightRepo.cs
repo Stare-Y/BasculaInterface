@@ -28,6 +28,7 @@ namespace Infrastructure.Repos
                 .AsNoTracking()
                 .Include(w => w.WeightDetails
                 .Where(wd => !wd.IsDeleted))
+                .Include(wd => wd.ExternalTargetBehavior)
                 .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
 
             if (entry == null)
@@ -118,7 +119,10 @@ namespace Infrastructure.Repos
             {
                 throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
             }
+
             WeightEntry existingEntry = await GetByIdAsync(weightEntry.Id);
+
+            weightEntry.CreatedAt = existingEntry.CreatedAt;
 
             _context.WeightEntries.Update(weightEntry);
 

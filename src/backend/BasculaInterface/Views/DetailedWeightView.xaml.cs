@@ -78,7 +78,7 @@ public partial class DetailedWeightView : ContentPage
         {
             if (Preferences.Get("OnlyPedidos", false))
             {
-                if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1)))
+                if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1 && row.IsGranel)))
                     BtnFinishWeight.IsVisible = true;
 
                 if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
@@ -106,7 +106,7 @@ public partial class DetailedWeightView : ContentPage
 
             return;
         }
-        if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1))
+        if (viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1 && row.IsGranel))
         {
             BtnFinishWeight.IsVisible = false;
         }
@@ -388,9 +388,10 @@ public partial class DetailedWeightView : ContentPage
                 return;
 
             if (row.Tare > 0)
-            {
                 return;
-            }
+
+            if (!row.IsGranel)
+                return;
 
             if (!string.IsNullOrEmpty(row.WeightedBy) && row.WeightedBy != DeviceInfo.Name)
             {

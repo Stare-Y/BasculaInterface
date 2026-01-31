@@ -216,12 +216,12 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("A partner must be selected before concluding the weight process with multiple products.");
             }
 
-            WeightEntry.ConcludeDate = DateTime.Now;
+            WeightEntry.ConcludeDate = DateTime.UtcNow;
 
             //TODO: Validate tare + weights equal brute weight, maybe validate this from the API side
 
             // Send the updated weight entry to the API
-            await _apiService.PutAsync<object>("api/Weight", WeightEntry);
+            await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
         }
 
         public async Task PrintTicketAsync()
@@ -292,6 +292,7 @@ namespace BasculaInterface.ViewModels
                 {
                     ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
                     row.Description = product?.Nombre ?? $"Unknown Product ({detail.FK_WeightedProductId})";
+                    row.IsGranel = product!.IsGranel;
                 }
                 else
                 {

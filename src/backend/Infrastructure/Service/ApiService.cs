@@ -13,7 +13,7 @@ namespace Infrastructure.Service
         public ApiService(HttpClient client)
         {
             _client = client;
-            _validateResponse = false;
+            _validateResponse = true;
         }
 
         public string GetBaseUrl()

@@ -1,4 +1,5 @@
 ﻿using Core.Application.DTOs;
+using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -63,9 +64,17 @@ namespace BasculaTerminalApi.Controllers
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] WeightEntryDto weightEntryDto)
         {
-            await _weightService.UpdateAsync(weightEntryDto);
+            try
+            {
+                await _weightService.UpdateAsync(weightEntryDto);
 
-            return Ok("Update Successful :D");
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success"});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = $"Error updating entry: {ex.Message}" });
+            }
+
         }
 
         [HttpDelete]
@@ -146,7 +155,7 @@ namespace BasculaTerminalApi.Controllers
                     return BadRequest("Invalid weight ID");
                 }
 
-                GenericResponse<int?> fKResult = await _weightService.SendToContpaqiComercial(weightId);
+                GenericResponse<ContpaqiComercialResult> fKResult = await _weightService.SendToContpaqiComercial(weightId);
 
                 return Ok(fKResult);
             }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Identity.Client;
+﻿using Microsoft.IdentityModel.Tokens;
 
 namespace BasculaInterface.Models
 {
@@ -11,17 +11,22 @@ namespace BasculaInterface.Models
         public string TareHeader => IsGranel ? "Tara" : string.Empty;
         public string TareValue => IsGranel ? Tare.ToString() + " kg" : string.Empty;
         public double Weight { get; set; } = 0;
-        public string WeightHeader => IsGranel ? "Peso" : "Unidades";
+        public string WeightHeader => IsGranel ? "Peso" : "Cantidad";
         public string WeightValue => IsGranel ? Weight.ToString() + " kg" : RequiredAmount!.Value.ToString();
         public double? SecondaryTare { get; set; }
-        public string? WeightedBy { get; set; }
+        private string? _weightedBy;
+        public string? WeightedBy 
+        {
+            get => _weightedBy.IsNullOrEmpty() ? string.Empty : $"Pesado por: {_weightedBy}"; 
+            set => _weightedBy = value; 
+        }
         private string _description = string.Empty;
         public int? FK_WeightedProductId { get; set; } = null;
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public double? RequiredAmount { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
         public string RequiredAmountText => RequiredAmount.HasValue && IsGranel
-            ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") 
+            ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
             : string.Empty;
 
         public string Description

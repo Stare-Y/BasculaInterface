@@ -1,4 +1,5 @@
 using BasculaInterface.ViewModels;
+using Core.Application.DTOs;
 
 namespace BasculaInterface.Views;
 
@@ -31,6 +32,15 @@ public partial class ReadOnlyDetailedWeightView : ContentPage
 				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ConptaqiComercialFK.Value.ToString();
 				BtnContpaqId.IsEnabled = false;
             }
+
+            await viewModel.LoadExternalTargetBehaviors();
+
+            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null || viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+            {
+                PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
+            }
+
+            PickerTargetBehavior.IsEnabled = viewModel.WeightEntry.ConptaqiComercialFK is null;
         }
         catch (Exception ex)
         {
@@ -116,9 +126,35 @@ public partial class ReadOnlyDetailedWeightView : ContentPage
         await BtnRefresh.ScaleTo(1.1, 100);
         await BtnRefresh.ScaleTo(1.0, 100);
 
-        if (BindingContext is DetailedWeightViewModel viewModel)
+        if (BindingContext is ReadOnlyDetailedViewModel viewModel)
         {
             viewModel.IsRefreshing = true;
+        }
+    }
+
+    private async void PickerTargetBehavior_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (BindingContext is not ReadOnlyDetailedViewModel viewModel)
+        { return; }
+
+        WaitPopUp.Show("Actualizando Documento Objetivo...");
+        try
+        {
+            ExternalTargetBehaviorDto? selectedItem = PickerTargetBehavior.SelectedItem as ExternalTargetBehaviorDto;
+
+            if (selectedItem is null) { return; }
+
+            viewModel.WeightEntry!.ExternalTargetBehaviorFK = selectedItem.Id;
+
+            await viewModel.UpdateWeightEntry();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
+using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,6 +16,8 @@ namespace BasculaInterface.ViewModels
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = new ObservableCollection<WeightEntryDetailRow>();
         private readonly IApiService _apiService = null!;
+        public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = new ObservableCollection<ExternalTargetBehaviorDto>();
+        public ReadOnlyDetailedViewModel() { }
         public ReadOnlyDetailedViewModel(IApiService apiService)
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
@@ -60,6 +63,34 @@ namespace BasculaInterface.ViewModels
             }
         }
 
+        public async Task UpdateWeightEntry()
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before updating.");
+            }
+
+            // Send the updated weight entry to the API
+            await _apiService.PutAsync<object>("api/Weight", WeightEntry);
+
+            await FetchNewWeightDetails();
+        }
+
+        public async Task LoadExternalTargetBehaviors()
+        {
+            ExternalTargetBehaviors.Clear();
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before loading external target behaviors.");
+            }
+            var behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available");
+            foreach (var behavior in behaviors)
+            {
+                ExternalTargetBehaviors.Add(behavior);
+            }
+            OnCollectionChanged(nameof(ExternalTargetBehaviors));
+        }
+
         public async Task<string> SendToContpaqiComercial()
         {
             if (WeightEntry == null)
@@ -67,9 +98,12 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry must be set before sending to Contpaqi Comercial.");
             }
 
-            GenericResponse<int?>  response = await _apiService.PostAsync<GenericResponse<int?>>($"api/Weight/ContpaqiComercial?weightId={WeightEntry.Id}", WeightEntry);
+            GenericResponse<ContpaqiComercialResult> response = await _apiService.PostAsync<GenericResponse<ContpaqiComercialResult>>($"api/Weight/ContpaqiComercial?weightId={WeightEntry.Id}", WeightEntry);
 
-            WeightEntry.ConptaqiComercialFK = response.Data;
+            if (response.Data is null)
+                throw new InvalidOperationException($"Resultado nulo ({response.Message}).");
+
+            WeightEntry.ConptaqiComercialFK = response.Data.ResultingId;
 
             OnPropertyChanged(nameof(WeightEntry));
 

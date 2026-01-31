@@ -1,4 +1,5 @@
 ﻿using Core.Application.DTOs;
+using Core.Application.DTOs.ContpaqiComercial;
 
 namespace Core.Application.Services
 {
@@ -14,6 +15,6 @@ namespace Core.Application.Services
         Task UpdateAsync(WeightEntryDto weightEntry);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);
-        Task<GenericResponse<int?>> SendToContpaqiComercial(int id);
+        Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
     }
 }

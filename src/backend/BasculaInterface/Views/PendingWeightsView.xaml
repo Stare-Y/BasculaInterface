@@ -50,7 +50,7 @@
                     Grid.Column="{OnPlatform WinUI=0}"
                     ColumnDefinitions="{OnPlatform Android='*,*,*'}"
                     ColumnSpacing="15"
-                    RowDefinitions="{OnPlatform WinUI='*,*,*,*'}"
+                    RowDefinitions="{OnPlatform WinUI='*,*,*,*,*'}"
                     RowSpacing="15">
 
 
@@ -96,8 +96,16 @@
                         Text="Nuevo Pedido sin Pesada" />
 
                     <Button
-                        x:Name="BtnExit"
+                        x:Name="BtnFinished"
                         Grid.Row="{OnPlatform WinUI=3}"
+                        Clicked="BtnFinished_Clicked"
+                        IsVisible="{OnPlatform Android=False}"
+                        Style="{StaticResource Boton}"
+                        Text="Ver Finalizados" />
+                    
+                    <Button
+                        x:Name="BtnExit"
+                        Grid.Row="{OnPlatform WinUI=4}"
                         Clicked="BtnExit_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"

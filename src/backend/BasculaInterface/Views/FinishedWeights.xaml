@@ -79,7 +79,7 @@
                         Clicked="BtnExit_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"
-                        Text="Salir" />
+                        Text="Volver" />
 
                 </Grid>
             </Border>
