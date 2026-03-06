@@ -1,6 +1,7 @@
 ﻿using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
+using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -222,6 +223,38 @@ namespace BasculaInterface.ViewModels
 
             // Send the updated weight entry to the API
             await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
+
+            if(Partner is not null && !Partner.IsProvider)
+            {
+                try
+                {
+                    await SendToContpaqiComercial();
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine("Error sending to contpaq: " + ex.Message);
+                }
+                //TODO: send 2 contpaq and then print with generated folio.
+            }
+        }
+
+        public async Task<string> SendToContpaqiComercial()
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before sending to Contpaqi Comercial.");
+            }
+
+            GenericResponse<ContpaqiComercialResult> response = await _apiService.PostAsync<GenericResponse<ContpaqiComercialResult>>($"api/Weight/ContpaqiComercial?weightId={WeightEntry.Id}", WeightEntry);
+
+            if (response.Data is null)
+                throw new InvalidOperationException($"Resultado nulo ({response.Message}).");
+
+            WeightEntry.ConptaqiComercialFK = response.Data.ResultingId;
+
+            OnPropertyChanged(nameof(WeightEntry));
+
+            return response.Message ?? "Enviado a Contpaqi Comercial correctamente.";
         }
 
         public async Task PrintTicketAsync()

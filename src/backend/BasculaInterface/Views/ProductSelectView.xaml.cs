@@ -57,7 +57,6 @@ public partial class ProductSelectView : ContentPage
         }
     }
 
-
     private async void ResultsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
 

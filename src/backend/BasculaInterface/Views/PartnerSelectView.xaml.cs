@@ -108,6 +108,18 @@ public partial class PartnerSelectView : ContentPage
     {
         if (e.CurrentSelection.FirstOrDefault() is ClienteProveedorDto socio)
         {
+            if (!socio.OrderRequestAllowed && !socio.IsProvider)
+            {
+                await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, no tiene credito habilitado", "OK");
+                return;
+            }
+
+            if (!socio.IgnoreCreditLimit && socio.CreditLimit != 0 && socio.AvailableCredit < 0 && !socio.IsProvider)
+            {
+                await DisplayAlert("Error", "El socio seleccionado no puede solicitar pedidos, excede su limite de credito", "OK");
+                return;
+            }
+
             LabelResultado.Text = socio.RazonSocial;
             BtnConfirm.IsVisible = true;
             BtnConfirm.IsEnabled = true;

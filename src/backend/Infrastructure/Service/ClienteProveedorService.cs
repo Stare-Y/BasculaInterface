@@ -40,7 +40,7 @@ namespace Infrastructure.Service
                     RFC = client.CRFC,
                     CreditLimit = client.CLIMITECREDITOCLIENTE,
                     Debt = await _documentRepo.GetClientDebt(client.CIDCLIENTEPROVEEDOR),
-                    OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1,
+                    OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1 && client.CESTATUS == 1,
                     IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1,
                     IsProvider = client.CTIPOCLIENTE != 1
                 });

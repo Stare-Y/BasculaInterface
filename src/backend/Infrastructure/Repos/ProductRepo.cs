@@ -18,7 +18,7 @@ namespace Infrastructure.Repos
 
             return await _context.Productos
                 .AsNoTracking()
-                .Where(p => p.CNOMBREPRODUCTO.Contains(name))
+                .Where(p => p.CNOMBREPRODUCTO.Contains(name) || p.CCODIGOPRODUCTO.Contains(name))
                 .Skip((page - 1) * sizePage)    
                 .Take(sizePage)                  
                 .OrderBy(p => p.CNOMBREPRODUCTO) 

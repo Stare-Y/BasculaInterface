@@ -395,7 +395,6 @@
                             FontAttributes="Bold"
                             FontSize="{OnPlatform Android=8,
                                                   WinUI=16}"
-                            Style="{StaticResource Entry}"
                             Text="{Binding WeightEntry.Notes}"
                             TextColor="{AppThemeBinding Light={StaticResource Black},
                                                         Dark={StaticResource 1}}"

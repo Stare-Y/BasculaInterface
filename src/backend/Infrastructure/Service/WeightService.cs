@@ -176,7 +176,7 @@ namespace Infrastructure.Service
                     new MovimientoDto
                     {
                         CodigoProducto = p.Code,
-                        CodigoAlmacen = weightEntry.ExternalTargetBehavior.TargetAlmacen,
+                        CodigoAlmacen = p.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
                         Unidades = GetUnidadesFromProductAndDetail( weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id),p),
                         Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}"
                     }).ToArray()
