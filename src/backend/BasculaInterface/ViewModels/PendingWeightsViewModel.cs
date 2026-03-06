@@ -13,8 +13,8 @@ namespace BasculaInterface.ViewModels
     {
         private List<WeightEntryDto> _pendingWeights { get; set; } = [];
         private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
-        public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; } = [];
-        public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; } = [];
+        public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; set; } = [];
+        public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; set; } = [];
 
         private readonly IApiService _apiService = null!;
 
@@ -82,6 +82,7 @@ namespace BasculaInterface.ViewModels
         {
             PendingWeightsCharge.Clear();
             PendingWeightsDischarge.Clear();
+
             foreach (WeightEntryDto weight in _pendingWeights)
             {
                 if(Preferences.Get("SecondaryTerminal", false))
@@ -117,6 +118,17 @@ namespace BasculaInterface.ViewModels
                     PendingWeightsCharge.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "No identificado" }, string.Empty));
                 }
             }
+
+            PendingWeightsCharge = new(
+                PendingWeightsCharge.OrderByDescending(w => w.WeightEntry.CreatedAt)
+            );
+
+            PendingWeightsDischarge = new(
+                PendingWeightsDischarge.OrderByDescending(w => w.WeightEntry.CreatedAt)
+            );
+
+            OnPropertyChanged(nameof(PendingWeightsCharge));
+            OnPropertyChanged(nameof(PendingWeightsDischarge));
         }
 
         private async Task LoadClienteProveedorAsync()
