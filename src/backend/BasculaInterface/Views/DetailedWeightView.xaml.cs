@@ -28,6 +28,25 @@ public partial class DetailedWeightView : ContentPage
 
     public DetailedWeightView() { }
 
+    protected override async void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+        {
+            return;
+        }
+
+        try
+        {
+            await viewModel.UpdateWeightEntry();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron guardar los cambios en la entrada de peso: " + ex.Message, "OK");
+            return;
+        }
+    }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -65,7 +84,7 @@ public partial class DetailedWeightView : ContentPage
                 PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
         }
@@ -262,7 +281,7 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
-        if(viewModel.WeightEntry is null)
+        if (viewModel.WeightEntry is null)
         {
             await DisplayAlert("Error", "La entrada de peso no está inicializada.", "OK");
             return;
@@ -523,8 +542,8 @@ public partial class DetailedWeightView : ContentPage
 
     private async void PickerTargetBehavior_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if(BindingContext is not DetailedWeightViewModel viewModel)
-            { return; }
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+        { return; }
 
         WaitPopUp.Show("Actualizando Documento Objetivo...");
         try
@@ -537,7 +556,7 @@ public partial class DetailedWeightView : ContentPage
 
             await viewModel.UpdateWeightEntry();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await DisplayAlert("Error", ex.Message, "OK");
         }

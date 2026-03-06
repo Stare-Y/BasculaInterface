@@ -14,9 +14,19 @@ namespace Infrastructure.Service
             _clienteProveedorRepo = clienteProveedorRepo;
             _documentRepo = documentRepo;
         }
-        public async Task<IEnumerable<ClienteProveedorDto>> SearchByName(string name)
+
+        public async Task<IEnumerable<ClienteProveedorDto>> SearchByName(string query)
         {
-            IEnumerable<ClienteProveedor> clientesProveedores = await _clienteProveedorRepo.SearchByName(name);
+            IEnumerable<ClienteProveedor> clientesProveedores;
+
+            if (int.TryParse(query, out int code))
+            {
+                clientesProveedores = await _clienteProveedorRepo.SearchByCode(query);
+            }
+            else
+            {
+                clientesProveedores = await _clienteProveedorRepo.SearchByName(query);
+            }
 
             List<ClienteProveedorDto> clientesProveedoresDto = [];
 

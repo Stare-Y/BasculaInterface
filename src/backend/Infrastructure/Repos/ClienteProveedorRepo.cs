@@ -15,12 +15,24 @@ namespace Infrastructure.Repos
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int page = 1,int sizePage = 50, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int page = 1, int sizePage = 50, CancellationToken cancellationToken = default)
         {
             return await _context.ClientesProveedores
                 .AsNoTracking()
                 .Where(
                 cp => cp.CRAZONSOCIAL.Contains(name))
+                .Skip((page - 1) * sizePage)
+                .Take(sizePage)
+                .OrderBy(p => p.CRAZONSOCIAL)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<ClienteProveedor>> SearchByCode(string code, int page = 1, int sizePage = 50, CancellationToken cancellationToken = default)
+        {
+            return await _context.ClientesProveedores
+                .AsNoTracking()
+                .Where(
+                cp => cp.CCODIGOCLIENTE.Contains(code))
                 .Skip((page - 1) * sizePage)
                 .Take(sizePage)
                 .OrderBy(p => p.CRAZONSOCIAL)

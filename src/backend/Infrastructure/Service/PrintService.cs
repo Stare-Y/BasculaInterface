@@ -191,7 +191,7 @@ namespace Infrastructure.Service
                 if (detail.RequiredAmount.HasValue)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph($"Requerido: {detail.RequiredAmount}", _settings.SmallFontSize, TextAlignment.LEFT)));
+                        .Add(BuildParagraph($"Requerido: {detail.RequiredAmount}{(detail.Weight > 0 ? $" kg ~ {(int)(detail.RequiredAmount % 25)} costales" : string.Empty)}", _settings.SmallFontSize, TextAlignment.LEFT)));
                 }
 
                 table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
@@ -293,17 +293,17 @@ namespace Infrastructure.Service
             if (entry.ConcludeDate.HasValue)
             {
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Salida:", bold:true)));
+                    .Add(BuildParagraph("Salida:", bold: true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(entry.ConcludeDate.Value.ToString("dd-MM-yyyy HH:mm:ss"))));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph()));// Empty row
             }
 
-            if(entry.Notes is not null && entry.Notes.Length > 0)
+            if (entry.Notes is not null && entry.Notes.Length > 0)
             {
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Notas:", bold:true)));
+                    .Add(BuildParagraph("Notas:", bold: true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(entry.Notes, bold: false)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)

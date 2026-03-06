@@ -12,5 +12,6 @@ namespace Core.Domain.Interfaces
         /// <exception cref="KeyNotFoundException"></exception>
         Task<IEnumerable<ClienteProveedor>> SearchByName(string name, int page = 1, int sizePage = 50, CancellationToken cancellationToken = default);
         Task<ClienteProveedor> GetById(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ClienteProveedor>> SearchByCode(string code, int page = 1, int sizePage = 50, CancellationToken cancellationToken = default);
     }
 }

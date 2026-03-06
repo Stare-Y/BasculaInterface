@@ -389,13 +389,13 @@
                             VerticalOptions="Start"
                             VerticalTextAlignment="Start" />
 
-                        <Label
+                        <Entry
                             Grid.Row="1"
                             Margin="{OnPlatform Android='0,-15,0,0'}"
                             FontAttributes="Bold"
                             FontSize="{OnPlatform Android=8,
                                                   WinUI=16}"
-                            Style="{StaticResource Label}"
+                            Style="{StaticResource Entry}"
                             Text="{Binding WeightEntry.Notes}"
                             TextColor="{AppThemeBinding Light={StaticResource Black},
                                                         Dark={StaticResource 1}}"
