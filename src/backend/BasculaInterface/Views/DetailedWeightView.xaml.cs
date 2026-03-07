@@ -133,6 +133,30 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
+    private async void OnSaveNotesClicked(object sender, EventArgs e)
+    {
+        await BtnSaveNotes.ScaleTo(1.1, 100);
+        await BtnSaveNotes.ScaleTo(1.0, 100);
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        if (viewModel.WeightEntry is null)
+            return;
+
+        try
+        {
+            await viewModel.UpdateWeightEntry();
+            BtnSaveNotes.IsVisible = false;
+            await DisplayAlert("Éxito", "Notas guardadas correctamente.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron guardar las notas: " + ex.Message, "OK");
+            return;
+        }
+    }
+
     private async void BtnVolver_Clicked(object sender, EventArgs e)
     {
         await BtnVolver.ScaleTo(1.1, 100);
@@ -141,22 +165,6 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
         {
             return;
-        }
-
-        try
-        {
-            WaitPopUp.Show("Un momento...");
-
-            await viewModel.UpdateWeightEntry();
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", "No se pudieron guardar los cambios en la entrada de peso: " + ex.Message, "OK");
-            return;
-        }
-        finally
-        {
-            WaitPopUp.Hide();
         }
 
         await Shell.Current.Navigation.PopAsync();
@@ -209,16 +217,6 @@ public partial class DetailedWeightView : ContentPage
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
-            try
-            {
-                WaitPopUp.Show("Un momento...");
-
-                await viewModel.UpdateWeightEntry();
-            }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
 
             WaitPopUp.Show("Concluyendo proceso de pesaje, espere...");
             try
@@ -243,6 +241,18 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
+    private async void OnNotesTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        if (viewModel.WeightEntry is null)
+            return;
+
+        viewModel.WeightEntry.Notes = e.NewTextValue;
+        BtnSaveNotes.IsVisible = true;
+    }
+
     private async void BtnPrintTicket_Clicked(object sender, EventArgs e)
     {
         await BtnPrintTicket.ScaleTo(1.1, 100);
@@ -250,17 +260,6 @@ public partial class DetailedWeightView : ContentPage
 
         if (BindingContext is DetailedWeightViewModel viewModel)
         {
-            try
-            {
-                WaitPopUp.Show("Un momento...");
-
-                await viewModel.UpdateWeightEntry();
-            }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
-
             WaitPopUp.Show("Imprimiendo ticket, espere...");
             try
             {
@@ -331,17 +330,6 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
-        try
-        {
-            WaitPopUp.Show("Un momento...");
-
-            await viewModel.UpdateWeightEntry();
-        }
-        finally
-        {
-            WaitPopUp.Hide();
-        }
-
         await BtnPickPartner.ScaleTo(1.1, 100);
         await BtnPickPartner.ScaleTo(1.0, 100);
 
@@ -403,17 +391,6 @@ public partial class DetailedWeightView : ContentPage
         {
             await DisplayAlert("Error", "No se ha seleccionado un socio, eso se debe hacer primero", "OK");
             return;
-        }
-
-        try
-        {
-            WaitPopUp.Show("Un momento...");
-
-            await viewModel.UpdateWeightEntry();
-        }
-        finally
-        {
-            WaitPopUp.Hide();
         }
 
         try
@@ -512,17 +489,6 @@ public partial class DetailedWeightView : ContentPage
         {
             if (BindingContext is not DetailedWeightViewModel viewModel)
                 return;
-
-            try
-            {
-                WaitPopUp.Show("Un momento...");
-
-                await viewModel.UpdateWeightEntry();
-            }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
 
             WaitPopUp.Show("Eliminando pesada, espere...");
             try
