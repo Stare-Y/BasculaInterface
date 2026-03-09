@@ -3,6 +3,7 @@ using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Weight;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,6 +17,7 @@ namespace BasculaInterface.ViewModels
         private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; set; } = [];
+        public ObservableCollection<ExternalTargetBehaviorDto> AvailableDocumentTypes { get; set; } = [];
 
         private readonly IApiService _apiService = null!;
 
@@ -79,7 +81,28 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        private void BuildObservableCollection()
+        public void ShowDocumentsWithId(int desiredId = 0)
+        {
+            BuildObservableCollection(desiredId);
+        }
+
+        public async Task LoadExternalTargetBehaviors()
+        {
+            AvailableDocumentTypes.Clear();
+
+            List<ExternalTargetBehaviorDto> behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available");
+
+            AvailableDocumentTypes.Add( new ExternalTargetBehaviorDto { Id = 0, TargetName = "Mostrar Todos" } );
+
+            foreach (var behavior in behaviors)
+            {
+                AvailableDocumentTypes.Add(behavior);
+            }
+
+            OnCollectionChanged(nameof(AvailableDocumentTypes));
+        }
+
+        private void BuildObservableCollection(int externalPreferedId = 0)
         {
             PendingWeightsCharge.Clear();
             PendingWeightsDischarge.Clear();
@@ -105,7 +128,11 @@ namespace BasculaInterface.ViewModels
                             + weight.TareWeight).ToString()
                             + " kg.";
                     }
-                    if(partner.IsProvider)
+
+                    if (!(externalPreferedId == 0 || ((weight.ExternalTargetBehaviorFK is null && !Preferences.Get("FilterNull", true)) || weight.ExternalTargetBehaviorFK == externalPreferedId)))
+                        continue;
+
+                    if (partner.IsProvider)
                     {
                         PendingWeightsDischarge.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
                     }
@@ -116,6 +143,9 @@ namespace BasculaInterface.ViewModels
                 }
                 else
                 {
+                    if (!(externalPreferedId == 0 || ((weight.ExternalTargetBehaviorFK is null && !Preferences.Get("FilterNull", true)) || weight.ExternalTargetBehaviorFK == externalPreferedId)))
+                        continue;
+
                     PendingWeightsCharge.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "No identificado" }, string.Empty));
                 }
             }

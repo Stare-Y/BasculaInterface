@@ -17,9 +17,9 @@ namespace BasculaInterface.ViewModels
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
         public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
-        public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = new ObservableCollection<WeightEntryDetailRow>();
+        public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = [];
 
-        public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = new ObservableCollection<ExternalTargetBehaviorDto>();
+        public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = [];
         private readonly IApiService _apiService = null!;
 
         public DetailedWeightViewModel(IApiService apiService)

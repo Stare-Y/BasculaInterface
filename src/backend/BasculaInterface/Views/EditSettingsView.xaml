@@ -199,6 +199,72 @@
                                     Text="Ver solo Terminados" />
 
                             </Grid>
+                            
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxShowDocumentTypes"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxShowDocumentTypes_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Mostrar filtro de tipos de documento" />
+
+                            </Grid>
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxFilterNull"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxDontFilterNull_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Filtrar Nulos (si marcado, al filtrar, los nulos no apareceran)" />
+
+                            </Grid>
+                            
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <Entry
+                                    x:Name="EntryDocumentTypes"
+                                    Grid.Column="0"
+                                    HorizontalOptions="Start"
+                                    Placeholder="Id de documento preferido"
+                                    TextChanged="EntryDocumentTypes_TextChanged" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Id de tipo de documento por default" />
+
+                            </Grid>
 
                         </VerticalStackLayout>
 

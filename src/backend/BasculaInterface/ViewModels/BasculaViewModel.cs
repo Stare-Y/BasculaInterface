@@ -350,6 +350,10 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }
+
+            string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
+            int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
+            WeightEntry.ExternalTargetBehaviorFK = preferedExternalTypeId;
         }
 
         private async Task PrintTurnAsync(WeightEntryDto newWeightEntry)
@@ -395,7 +399,8 @@ namespace BasculaInterface.ViewModels
                 await PutWeightEntry();
             }
 
-            await PrintTurnAsync(newEntry);
+            if(printTurn)
+                await PrintTurnAsync(newEntry);
         }
 
         private async Task PutWeightEntry()

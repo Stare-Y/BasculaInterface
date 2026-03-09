@@ -73,6 +73,9 @@ public partial class EditSettingsView : ContentPage
         CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
         CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
         CheckBoxOnlyFinished.IsChecked = Preferences.Get("OnlyFinished", false);
+        CheckBoxShowDocumentTypes.IsChecked = Preferences.Get("ShowDocumentTypeFilter", false);
+        EntryDocumentTypes.Text = Preferences.Get("PreferedDocumentType", string.Empty);
+        CheckBoxFilterNull.IsChecked = Preferences.Get("FilterNull", false);
         EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
         //TODO: add this thing to settings lul
@@ -87,6 +90,9 @@ public partial class EditSettingsView : ContentPage
         Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
         Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
         Preferences.Set("OnlyFinished", CheckBoxOnlyFinished.IsChecked);
+        Preferences.Set("ShowDocumentTypeFilter", CheckBoxShowDocumentTypes.IsChecked);
+        Preferences.Set("PreferedDocumentType", EntryDocumentTypes.Text);
+        Preferences.Set("FilterNull", CheckBoxFilterNull.IsChecked);
     }
 
     private async void BtnCancel_Clicked(object sender, EventArgs e)
@@ -102,7 +108,7 @@ public partial class EditSettingsView : ContentPage
         await BtnSaveSettings.ScaleTo(1.1, 100);
         await BtnSaveSettings.ScaleTo(1.0, 100);
 
-        WaitPopUp.Show("Guardando configuración, espere");
+        WaitPopUp.Show("Guardando configuraciï¿½n, espere");
         try
         {
             if (EntryHost.Text.Contains("http://"))
@@ -124,7 +130,7 @@ public partial class EditSettingsView : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", "Error al tratar de guardar la configuración: " + ex.Message, "OK");
+            await DisplayAlert("Error", "Error al tratar de guardar la configuraciï¿½n: " + ex.Message, "OK");
         }
         finally
         {
@@ -132,5 +138,31 @@ public partial class EditSettingsView : ContentPage
         }
 
         await Shell.Current.Navigation.PopAsync();
+    }
+
+    private void CheckBoxShowDocumentTypes_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        Preferences.Set("ShowDocumentTypeFilter", e.Value);
+    }
+
+    private void EntryDocumentTypes_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        Entry entry = (Entry)sender;
+
+        if (string.IsNullOrEmpty(entry.Text))
+            return;
+
+        if (!int.TryParse(entry.Text, out _))
+        {
+            entry.Text = e.OldTextValue;
+            return;
+        }
+
+        Preferences.Set("PreferedDocumentType", entry.Text);
+    }
+
+    private void CheckBoxDontFilterNull_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        Preferences.Set("FilterNull", e.Value);
     }
 }

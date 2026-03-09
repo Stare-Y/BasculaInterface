@@ -25,43 +25,70 @@ public partial class PendingWeightsView : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (BindingContext is PendingWeightsViewModel viewModel)
+        if (BindingContext is not PendingWeightsViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Cargando pesos pendientes, espere");
+        await Task.Yield();
+        try
         {
-            WaitPopUp.Show("Cargando pesos pendientes, espere");
-            await Task.Yield();
-            try
+            EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
+
+            await viewModel.LoadPendingWeightsAsync();
+
+            if(Preferences.Get("ShowDocumentTypeFilter", false))
             {
-                EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
+                await viewModel.LoadExternalTargetBehaviors();
 
-                await viewModel.LoadPendingWeightsAsync();
+                PickerDocumentType.IsVisible = true;
 
-                if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
+                PickerDocumentType.SelectedIndex = 0;
+            }
+
+            if(Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
+            {
+                int preferedId = int.TryParse(preferedDocumentType, out int result) ? result : 0;
+
+                var index = viewModel.AvailableDocumentTypes.ToList().FindIndex(d => d.Id == preferedId);
+
+
+                if (PickerDocumentType.IsVisible)
                 {
-                    GridListTab.IsVisible = false;
+                    if (index >= 0)
+                        PickerDocumentType.SelectedIndex = index;
 
-                    BtnNewWeighProcess.IsVisible = false;
-
-                    if(Preferences.Get("OnlyPedidos", false))
-                        BtnNewWeightLessPedido.IsVisible = true;
+                    return;
                 }
-#if ANDROID
-                BtnRefresh.IsVisible = false;
-#endif
-                BtnReconnect.IsVisible = false;
 
-                return;
+                viewModel.ShowDocumentsWithId(preferedId);
             }
-            catch (Exception ex)
+
+            if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
             {
-                await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
-                BtnReconnect.IsVisible = true;
-                BtnRefresh.IsVisible = false;
+                GridListTab.IsVisible = false;
+
                 BtnNewWeighProcess.IsVisible = false;
+
+                if(Preferences.Get("OnlyPedidos", false))
+                    BtnNewWeightLessPedido.IsVisible = true;
             }
-            finally
-            {
-                WaitPopUp.Hide();
-            }
+#if ANDROID
+            BtnRefresh.IsVisible = false;
+#endif
+            BtnReconnect.IsVisible = false;
+
+            return;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
+            BtnReconnect.IsVisible = true;
+            BtnRefresh.IsVisible = false;
+            BtnNewWeighProcess.IsVisible = false;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 
@@ -139,6 +166,34 @@ public partial class PendingWeightsView : ContentPage
         try
         {
             await viewModel.LoadPendingWeightsAsync();
+
+            if (Preferences.Get("ShowDocumentTypeFilter", false))
+            {
+                await viewModel.LoadExternalTargetBehaviors();
+
+                PickerDocumentType.IsVisible = true;
+
+                PickerDocumentType.SelectedIndex = 0;
+            }
+
+            if (Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
+            {
+                int preferedId = int.TryParse(preferedDocumentType, out int result) ? result : 0;
+
+                var index = viewModel.AvailableDocumentTypes.ToList().FindIndex(d => d.Id == preferedId);
+
+
+                if (PickerDocumentType.IsVisible)
+                {
+                    if (index >= 0)
+                        PickerDocumentType.SelectedIndex = index;
+
+                    return;
+                }
+
+                viewModel.ShowDocumentsWithId(preferedId);
+            }
+
 
             BtnReconnect.IsVisible = false;
             BorderEntryHost.IsVisible = false;
@@ -245,13 +300,16 @@ public partial class PendingWeightsView : ContentPage
         WaitPopUp.Show("Iniciando pedido simple, espere...");
         try
         {
-            WeightEntryDto weightEntry = new WeightEntryDto
+            string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
+            int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
+            WeightEntryDto weightEntry = new ()
             {
                 PartnerId = partner.Id,
                 TareWeight = 0,
                 BruteWeight = 0,
                 CreatedAt = DateTime.Now,
-                RegisteredBy = DeviceInfo.Name
+                RegisteredBy = DeviceInfo.Name,
+                ExternalTargetBehaviorFK = preferedExternalTypeId
             };
 
             await viewModel.PostNewWeightEntry(weightEntry, partner);
@@ -290,5 +348,16 @@ public partial class PendingWeightsView : ContentPage
     private async void BtnFinished_Clicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PushModalAsync(new FinishedWeights());
+    }
+
+    private void PickerDocumentType_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (BindingContext is not PendingWeightsViewModel viewModel)
+            return;
+
+        if (PickerDocumentType.SelectedItem is ExternalTargetBehaviorDto selectedDocumentType)
+        {
+            viewModel.ShowDocumentsWithId(selectedDocumentType.Id);
+        }
     }
 }

@@ -137,7 +137,7 @@
                 Grid.Column="{OnPlatform WinUI=1}"
                 Padding="{OnPlatform Android=15}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                RowDefinitions="Auto,*"
+                RowDefinitions="Auto,Auto,*"
                 RowSpacing="20"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
@@ -174,8 +174,19 @@
 
                 </Grid>
 
+                <Grid Grid.Row="1">
+                    <Picker 
+                        x:Name="PickerDocumentType"
+                        ItemsSource="{Binding AvailableDocumentTypes}"
+                        ItemDisplayBinding="{Binding DisplayText}"
+                        IsVisible="False"
+                        SelectedIndexChanged="PickerDocumentType_SelectedIndexChanged">
+                        
+                    </Picker>
+                </Grid>
+
                 <Border
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Padding="{OnPlatform WinUI=15}"
                     Stroke="{OnPlatform Android={StaticResource 1},
                                         WinUI={StaticResource BlackTheme}}"
@@ -281,6 +292,15 @@
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding HistoryText}"
                                                     TextColor="{StaticResource 2}" />
+
+                                                <Label
+                                                    Text="{Binding WeightEntry.CreatedAt, StringFormat='{0:dd/MM HH:mm}'}"
+                                                    HorizontalOptions="End"
+                                                    Style="{StaticResource Label}"
+                                                    FontSize="{OnPlatform WinUI=20,
+                                                                          Android=10}"
+                                                    VerticalOptions="Center"
+                                                    />
 
                                             </VerticalStackLayout>
                                         </Grid>

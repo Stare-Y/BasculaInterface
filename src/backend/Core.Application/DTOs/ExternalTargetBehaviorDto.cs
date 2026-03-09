@@ -7,7 +7,7 @@ namespace Core.Application.DTOs
         public int Id { get; set; }
         public string? TargetSerie { get; set; }
         public string? TargetName { get; set; }
-        public string DisplayText => $"{TargetSerie} - {TargetName}";
+        public string DisplayText => TargetSerie is null ? TargetName ?? "Unknown" : $"{TargetSerie} - {TargetName}";
         public ExternalTargetBehaviorDto(ExternalTargetBehavior externalTargetBehavior)
         {
             if (externalTargetBehavior == null)

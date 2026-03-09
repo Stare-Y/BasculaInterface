@@ -496,16 +496,28 @@
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
                 <Grid Grid.Row="0" RowDefinitions="*,*">
 
-                    <Label
-                        Grid.Row="0"
-                        FontSize="{OnPlatform Android=14,
-                                              WinUI=24}"
-                        HorizontalOptions="Start"
-                        Style="{StaticResource Label}"
-                        Text="Documento objetivo"
-                        TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                    Dark={StaticResource 1}}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                            Grid.Row="0">
+                        <Label
+                            Grid.Column="0"
+                            FontSize="{OnPlatform Android=14,
+                                                  WinUI=24}"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Documento objetivo"
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
 
+                        <Label
+                            Grid.Column="2"
+                            FontSize="{OnPlatform Android=14,
+                                                  WinUI=24}"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="{Binding WeightEntry.CreatedAt, StringFormat='{0:dd/MM HH:mm}'}"
+                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                        Dark={StaticResource 1}}" />
+                    </Grid>
 
                     <Picker
                         x:Name="PickerTargetBehavior"

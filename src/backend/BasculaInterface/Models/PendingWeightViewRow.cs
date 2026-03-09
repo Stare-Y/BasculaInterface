@@ -4,6 +4,7 @@ namespace BasculaInterface.Models
 {
     public class PendingWeightViewRow
     {
+        public bool IsVisible { get; set; } = true;
         public WeightEntryDto WeightEntry { get; set; }
         public ClienteProveedorDto Partner { get; set; }
         public string HistoryText { get; set; } = string.Empty;

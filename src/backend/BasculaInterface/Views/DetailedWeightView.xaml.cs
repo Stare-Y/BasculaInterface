@@ -251,7 +251,7 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
-    private async void OnNotesTextChanged(object sender, TextChangedEventArgs e)
+    private void OnNotesTextChanged(object sender, TextChangedEventArgs e)
     {
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
