@@ -242,7 +242,7 @@ namespace BasculaInterface.ViewModels
             }
         }
         public bool Providers { get; set; } = false;
-        public async Task CaptureNewWeightEntry()
+        public async Task CaptureNewWeightEntry(bool printTurn = false)
         {
             ValidateBeforePosting();
 
@@ -252,7 +252,12 @@ namespace BasculaInterface.ViewModels
                 WeightEntry.BruteWeight = _pesoTotal;
                 WeightEntry.PartnerId = Partner?.Id;
 
-                await PostNewWeightEntry();
+                if (WeightEntry.WeightDetails.Any())
+                {
+                    WeightEntry.BruteWeight = _pesoTotal + WeightEntry.WeightDetails.Sum(w => w.Weight);
+                }
+
+                await PostNewWeightEntry(printTurn);
 
                 return;
             }
@@ -361,7 +366,7 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        private async Task PostNewWeightEntry()
+        private async Task PostNewWeightEntry(bool printTurn = false)
         {
             if (_apiService == null)
             {

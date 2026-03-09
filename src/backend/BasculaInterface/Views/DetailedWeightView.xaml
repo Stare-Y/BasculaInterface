@@ -374,23 +374,42 @@
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0">
 
-                    <Grid RowDefinitions="25,*,25">
+                    <Grid RowDefinitions="25,*">
 
-                        <Label
-                            Grid.Row="0"
-                            Margin="{OnPlatform Android='0,-5,0,0'}"
-                            FontAttributes="Bold"
-                            FontSize="{OnPlatform Android=11,
-                                                  WinUI=20}"
-                            Style="{StaticResource Label}"
-                            Text="Notas"
-                            TextColor="{AppThemeBinding Light={StaticResource 4},
-                                                        Dark={StaticResource 2}}"
-                            VerticalOptions="Start"
-                            VerticalTextAlignment="Start" />
+                        <Grid ColumnDefinitions="auto,auto">
+                            <Label
+                                Grid.Column="0"
+                                Margin="{OnPlatform Android='0,-5,0,0'}"
+                                FontAttributes="Bold"
+                                FontSize="{OnPlatform Android=11,
+                                                      WinUI=20}"
+                                Style="{StaticResource Label}"
+                                Text="Chofer"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 2}}"
+                                VerticalOptions="Start"
+                                VerticalTextAlignment="Start" />
+                            <Button
+                                x:Name="BtnSaveNotes"
+                                Grid.Column="1"
+                                Text="Guardar"
+                                Padding="{OnPlatform Android='5,0', WinUI='10,5'}"
+                                MinimumHeightRequest="10"
+                                MaximumHeightRequest="20"
+                                VerticalOptions="Start"
+                                FontAttributes="Bold"
+                                FontSize="{OnPlatform Android=8,
+                                                      WinUI=14}"
+                                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                   Dark={StaticResource 1}}"
+                                IsVisible="false"
+                                Clicked="OnSaveNotesClicked"/>
+                        </Grid>
+
+
 
                         <Entry
-                            Grid.Row="1"
+                            Grid.Row="2"
                             Margin="{OnPlatform Android='0,-15,0,0'}"
                             FontAttributes="Bold"
                             FontSize="{OnPlatform Android=8,
@@ -400,22 +419,10 @@
                                                         Dark={StaticResource 1}}"
                             VerticalOptions="Start"
                             VerticalTextAlignment="Start" 
-                            TextChanged="OnNotesTextChanged"/>
+                            TextChanged="OnNotesTextChanged"
+                            IsEnabled="{OnPlatform Android=false, WinUI=true}"/>
 
-                        <Button
-                            x:Name="BtnSaveNotes"
-                            Text="Guardar"
-                            Grid.Row="2"
-                            Margin="{OnPlatform Android='0,-15,0,0'}"
-                            FontAttributes="Bold"
-                            FontSize="{OnPlatform Android=8,
-                                                  WinUI=16}"
-                            Command="{Binding SaveNotesCommand}"
-                            TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                        Dark={StaticResource 1}}"
-                            VerticalOptions="Start"
-                            IsVisible ="false"
-                            Clicked="OnSaveNotesClicked"/>
+
 
                     </Grid>
 
@@ -633,7 +640,7 @@
                                                         FontSize="{OnPlatform Android=11,
                                                                               WinUI=25}"
                                                         Style="{StaticResource Label}"
-                                                        Text="{Binding OrderIndex, StringFormat='{0}.- '}"
+                                                        Text="{Binding OrderIndex, StringFormat='{0}. '}"
                                                         TextColor="{AppThemeBinding Light={StaticResource 4},
                                                                                     Dark={StaticResource 2}}" />
                                                     <Label

@@ -161,7 +161,7 @@
                                                                               Android=12}"
                                                         HorizontalOptions="Start"
                                                         Style="{StaticResource Label}"
-                                                        Text="{Binding WeightEntry.Notes, StringFormat=' Notas: {0}.'}"
+                                                        Text="{Binding WeightEntry.Notes, StringFormat=' Chofer: {0}.'}"
                                                         TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                     Dark={StaticResource 1}}" />
                                                 </HorizontalStackLayout>

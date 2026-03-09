@@ -174,7 +174,7 @@ public partial class PendingWeightsView : ContentPage
             await Task.Delay(4444, _cancellationTokenSource.Token);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                BorderEntryHost.IsVisible = true;
+                //BorderEntryHost.IsVisible = true;
                 _cancellationTokenSource?.Cancel();
                 _cancellationTokenSource?.Dispose();
                 _cancellationTokenSource = null;

@@ -34,6 +34,8 @@ namespace BasculaInterface.ViewModels
             {
                 if(providers && !partner.IsProvider)
                     continue;
+
+                partner.RazonSocial = string.IsNullOrEmpty(partner.Code) ? partner.RazonSocial : partner.Code + " - " + partner.RazonSocial;
                 Partners.Add(partner);
             }
         }

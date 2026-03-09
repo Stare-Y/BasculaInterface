@@ -37,7 +37,10 @@ public partial class WeightingScreen : ContentPage
         {
             if (weightEntry.BruteWeight > 0)
             {
-                viewModel.SetTara(weightEntry.BruteWeight);
+                if (productoDto is null)
+                    viewModel.SetTara(0);
+                else
+                    viewModel.SetTara(weightEntry.BruteWeight);
             }
             else
             {
@@ -228,10 +231,12 @@ public partial class WeightingScreen : ContentPage
         if (BindingContext is not BasculaViewModel viewModel)
             return;
 
+        bool printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
+
         WaitPopUp.Show("Capturando peso, espere...");
         try
         {
-            await viewModel.CaptureNewWeightEntry();
+            await viewModel.CaptureNewWeightEntry(printTurn);
 
             await Shell.Current.Navigation.PopModalAsync();
         }

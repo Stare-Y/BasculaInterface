@@ -89,8 +89,8 @@ public partial class PartnerSelectView : ContentPage
                 return;
             }
 
-            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {partner.RazonSocial}?", "No", "Si");
-            if (!confirmed)
+            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {partner.RazonSocial}?", "Si", "No");
+            if (confirmed)
             {
                 OnPartnerSelected?.Invoke(partner);
                 await Shell.Current.Navigation.PopModalAsync();

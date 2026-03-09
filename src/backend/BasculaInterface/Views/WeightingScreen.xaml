@@ -296,7 +296,7 @@
                             FontSize="{OnPlatform Android=14,
                                                   WinUI=22}"
                             Style="{StaticResource Label}"
-                            Text="Notas"
+                            Text="Chofer"
                             TextColor="{AppThemeBinding Light={StaticResource 4},
                                                         Dark={StaticResource 2}}" />
                         <Editor

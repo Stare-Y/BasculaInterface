@@ -3,6 +3,7 @@ using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -149,6 +150,7 @@ namespace BasculaInterface.ViewModels
                     ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={weight.PartnerId.Value}");
                     if (partner != null)
                     {
+                        partner.RazonSocial = partner.Code.IsNullOrEmpty() ? partner.RazonSocial : $"{partner.Code} - {partner.RazonSocial}";
                         _clienteProveedorDtos.Add(partner);
                     }
                 }

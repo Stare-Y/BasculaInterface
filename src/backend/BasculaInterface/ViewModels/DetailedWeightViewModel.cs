@@ -3,6 +3,8 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
+using iText.Pdfua.Checkers.Utils.Ua2;
+using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -156,6 +158,7 @@ namespace BasculaInterface.ViewModels
             if (WeightEntry.PartnerId.HasValue && WeightEntry.PartnerId.Value > 0)
             {
                 Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={WeightEntry.PartnerId.Value}");
+                Partner.RazonSocial = Partner.Code.IsNullOrEmpty() ? Partner.RazonSocial : $"{Partner.Code} - {Partner.RazonSocial}";
             }
 
             OnPropertyChanged(nameof(WeightEntry));
@@ -324,8 +327,17 @@ namespace BasculaInterface.ViewModels
                 if (detail.FK_WeightedProductId is not null)
                 {
                     ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
-                    row.Description = product?.Nombre ?? $"Unknown Product ({detail.FK_WeightedProductId})";
-                    row.IsGranel = product!.IsGranel;
+                    
+                    if(product is null || product.Nombre.IsNullOrEmpty())
+                    {
+                        row.Description = $"Unknown Product ({detail.FK_WeightedProductId})";
+                        row.IsGranel = false;
+                    }
+                    else
+                    {
+                        row.Description = $"{product.Code} - {product.Nombre}";
+                        row.IsGranel = product!.IsGranel;
+                    }
                 }
                 else
                 {

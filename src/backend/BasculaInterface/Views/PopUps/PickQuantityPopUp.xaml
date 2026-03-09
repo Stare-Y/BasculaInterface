@@ -19,7 +19,7 @@
             HorizontalOptions="Center"
             MaximumWidthRequest="350"
             MinimumWidthRequest="300"
-            RowDefinitions="Auto,Auto,Auto"
+            RowDefinitions="Auto,Auto,Auto,Auto"
             RowSpacing="15"
             VerticalOptions="Center">
 
@@ -32,18 +32,47 @@
                 Text="Product Name" />
 
             <!--  Quantity Entry  -->
-            <Entry
-                x:Name="QuantityEntry"
-                Grid.Row="1"
+            <Grid 
+                    ColumnDefinitions="Auto,Auto"
+                    HorizontalOptions="Fill"
+                    Grid.Row="1">
+                <Label
+                    Grid.Row="0"
+                    FontSize="20"
+                    HorizontalOptions="Center"
+                    Text="Kilos: " />
+                <Entry
+                    x:Name="QuantityEntry"
+                    HorizontalOptions="Fill"
+                    Keyboard="Numeric"
+                    Placeholder="Cantidad en kilos..."
+                    TextChanged="QuantityEntry_TextChanged" />
+            </Grid>
+
+            <Grid 
+                ColumnDefinitions="Auto,Auto"
                 HorizontalOptions="Fill"
-                Keyboard="Numeric"
-                Placeholder="Cantidad..."
-                Style="{StaticResource EntryDatos}"
-                TextChanged="QuantityEntry_TextChanged" />
+                Grid.Row="2">
+                <Label
+                    Grid.Row="0"
+                    FontSize="20"
+                    HorizontalOptions="Center"
+                    Text="Costales: " />
+
+
+                <!--  Costales Entry  -->
+                <Entry
+                    x:Name="CostalesEntry"
+                    Grid.Row="2"
+                    HorizontalOptions="Fill"
+                    Keyboard="Numeric"
+                    Placeholder="Cantidad en Costales"
+                    TextChanged="CostalesEntry_TextChanged"/>
+            </Grid>
 
             <!--  Action Buttons  -->
             <HorizontalStackLayout
-                Grid.Row="2"
+                Grid.Row="3"
                 HorizontalOptions="Center"
                 Spacing="10">
 

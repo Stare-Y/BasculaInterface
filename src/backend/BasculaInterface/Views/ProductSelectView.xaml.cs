@@ -74,8 +74,8 @@ public partial class ProductSelectView : ContentPage
                 if (container != null)
                     container.IsChecked = true;
 
-                bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {seleccionado.Nombre}?", "No", "Si");
-                if (!confirmed)
+                bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar {seleccionado.Nombre}?", "Si", "No");
+                if (confirmed)
                 {
                     await Shell.Current.Navigation.PopModalAsync();
                     OnProductSelected?.Invoke(seleccionado);

@@ -1,6 +1,7 @@
 ﻿using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 
 namespace BasculaInterface.ViewModels
@@ -40,6 +41,8 @@ namespace BasculaInterface.ViewModels
                     if (product.IdValorClasificacion6 < 7) // if 9, is unit
                         continue;
                 }
+
+                product.Nombre = product.Code.IsNullOrEmpty() ? product.Nombre : product.Code + " - " + product.Nombre;
 
                 Products.Add(product);
             }

@@ -31,7 +31,7 @@ namespace BasculaInterface.Models
 
         public string Description
         {
-            get => _description.Length > 13 ? _description.Substring(0, 13) : _description;
+            get => _description;
             set => _description = value ?? string.Empty;
         }
     }

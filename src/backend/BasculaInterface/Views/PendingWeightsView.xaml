@@ -254,7 +254,7 @@
                                                     MaximumWidthRequest="{OnPlatform Android=450,
                                                                                      WinUI=800}"
                                                     Style="{StaticResource Label}"
-                                                    Text="{Binding WeightEntry.Notes, StringFormat='Notas: {0}.'}"
+                                                    Text="{Binding WeightEntry.Notes, StringFormat='Chofer: {0}.'}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
                                             </VerticalStackLayout>

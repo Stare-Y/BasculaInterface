@@ -85,16 +85,45 @@ public partial class PickQuantityPopUp : ContentView
     }
 
     // ============================
-    //        VALIDACIÓN
+    //        VALIDACIï¿½N
     // ============================
     private void QuantityEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
         var entry = (Entry)sender;
 
         if (string.IsNullOrEmpty(entry.Text))
+        {
+            CostalesEntry.Text = string.Empty;
             return;
+        }
 
-        if (!double.TryParse(entry.Text, out _))
+        if (double.TryParse(entry.Text, out double value))
+        {
+            CostalesEntry.Text = ((int)(value / 25)).ToString();
+        }
+        else
+        {
             entry.Text = e.OldTextValue;
+        }
+    }
+
+    private void CostalesEntry_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        var entry = (Entry)sender;
+
+        if (string.IsNullOrEmpty(entry.Text))
+        {
+            QuantityEntry.Text = string.Empty;
+            return;
+        }
+
+        if (double.TryParse(entry.Text, out double value))
+        {
+            QuantityEntry.Text = (value * 25).ToString();
+        }
+        else
+        {
+            entry.Text = e.OldTextValue;
+        }
     }
 }

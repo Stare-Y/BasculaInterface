@@ -32,6 +32,7 @@ public partial class DetailedWeightView : ContentPage
     {
         base.OnAppearing();
 
+
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
@@ -51,6 +52,8 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
+                BtnSaveNotes.IsVisible = false;
+
                 WaitPopUp.Hide();
             }
         }
@@ -71,6 +74,8 @@ public partial class DetailedWeightView : ContentPage
         }
         finally
         {
+            BtnSaveNotes.IsVisible = false;
+
             WaitPopUp.Hide();
         }
 
@@ -96,7 +101,7 @@ public partial class DetailedWeightView : ContentPage
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {
-            if (!Preferences.Get("SecondaryTerminal", false))
+            if (Preferences.Get("SecondaryTerminal", false))
                 BtnFinishWeight.IsVisible = true;
 
             if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
@@ -143,9 +148,10 @@ public partial class DetailedWeightView : ContentPage
 
         if (viewModel.WeightEntry is null)
             return;
-
         try
         {
+            WaitPopUp.Show("Momento...");
+
             await viewModel.UpdateWeightEntry();
             BtnSaveNotes.IsVisible = false;
             await DisplayAlert("Éxito", "Notas guardadas correctamente.", "OK");
@@ -154,6 +160,10 @@ public partial class DetailedWeightView : ContentPage
         {
             await DisplayAlert("Error", "No se pudieron guardar las notas: " + ex.Message, "OK");
             return;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 
@@ -393,6 +403,15 @@ public partial class DetailedWeightView : ContentPage
             return;
         }
 
+        if(
+            viewModel.WeightEntry is not null && 
+            (viewModel.WeightEntry.ExternalTargetBehaviorFK is null || 
+            viewModel.WeightEntry.ExternalTargetBehaviorFK <= 0))
+        {
+            await DisplayAlert("Error", "Primero selecciona el TIPO DE DOCUMENTO", "Ok");
+            return;
+        }
+
         try
         {
             ProductSelectView productSelectView = new ProductSelectView();
@@ -434,7 +453,10 @@ public partial class DetailedWeightView : ContentPage
             if (!row.IsGranel)
                 return;
 
-            if (Preferences.Get("BypasTurn", false) || (!string.IsNullOrEmpty(row.WeightedBy) && row.WeightedBy.Trim().ToLower() != DeviceInfo.Name.Trim().ToLower()))
+            if (
+                !Preferences.Get("BypasTurn", false) && 
+                ((!string.IsNullOrEmpty(row.WeightedBy) || !string.IsNullOrWhiteSpace(row.WeightedBy)) && 
+                row.WeightedBy.Trim().ToLower() != DeviceInfo.Name.Trim().ToLower()))
             {
                 await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
                 return;
