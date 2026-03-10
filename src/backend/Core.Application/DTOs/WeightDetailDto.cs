@@ -6,6 +6,7 @@
         public int FK_WeightEntryId { get; set; }
         public double Tare { get; set; } = 0;
         public double Weight { get; set; } = 0;
+        public int? Costales { get; set; } = null;
         public int? FK_WeightedProductId { get; set; }
         public string? WeightedBy { get; set; }
         public double? SecondaryTare { get; set; } = null;

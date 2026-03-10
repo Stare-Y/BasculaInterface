@@ -4,7 +4,7 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class PickQuantityPopUp : ContentView
 {
-    private TaskCompletionSource<double?> _tcs = null!;
+    private TaskCompletionSource<Dictionary<double, int?>> _tcs = null!;
 
     private string _product = "Elije la cantidad para el producto";
 
@@ -43,9 +43,9 @@ public partial class PickQuantityPopUp : ContentView
     // ============================
     //      SHOW ASYNC (RETORNO)
     // ============================
-    public Task<double?> ShowAsync(string? message = null)
+    public Task<Dictionary<double, int?>> ShowAsync(string? message = null)
     {
-        _tcs = new TaskCompletionSource<double?>();
+        _tcs = new TaskCompletionSource<Dictionary<double, int?>>();
 
         if (!string.IsNullOrWhiteSpace(message))
             Product = message;
@@ -60,11 +60,15 @@ public partial class PickQuantityPopUp : ContentView
     // ============================
     //             HIDE
     // ============================
-    private void CloseWithResult(double? quantity)
+    private void CloseWithResult(double? quantity, int? costales)
     {
         this.IsVisible = false;
         QuantityEntry.Text = string.Empty;
-        _tcs?.TrySetResult(quantity);
+        _tcs?.TrySetResult(
+            new Dictionary<double, int?>
+            {
+                { quantity ?? 0, costales }
+            });
     }
 
     private async void OnPopupCancelClicked(object sender, EventArgs e)
@@ -72,26 +76,44 @@ public partial class PickQuantityPopUp : ContentView
         await btnCancel.ScaleTo(1.1, 100);
         await btnCancel.ScaleTo(1.0, 100);
 
-        CloseWithResult(null);
+        CloseWithResult(null, null);
     }
 
     private async void OnPopupAcceptClicked(object sender, EventArgs e)
     {
+        if(string.IsNullOrWhiteSpace(QuantityEntry.Text))
+        {
+            LblKilos.TextColor = Colors.Red;
+            return;
+        }
         await btnConfirm.ScaleTo(1.1, 100);
         await btnConfirm.ScaleTo(1.0, 100);
 
+        int? costales = int.TryParse(CostalesEntry.Text, out int parsedCostales) ? parsedCostales : (int?)null;
+
         if (double.TryParse(QuantityEntry.Text, out double quantity))
-            CloseWithResult(quantity);
+            CloseWithResult(quantity, costales);
         else
-            CloseWithResult(null);
+            CloseWithResult(null, null);
     }
 
     // ============================
-    //        VALIDACI�N
+    //        VALIDACION
     // ============================
     private void QuantityEntry_TextChanged(object sender, TextChangedEventArgs e)
     {
-        var entry = (Entry)sender;
+        Entry entry = (Entry)sender;
+
+        if (string.IsNullOrEmpty(entry.Text))
+            return;
+
+        if (!double.TryParse(entry.Text, out _))
+            entry.Text = e.OldTextValue;
+    }
+
+    private void CostalesEntry_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        Entry entry = (Entry)sender;
 
         if (string.IsNullOrEmpty(entry.Text))
             return;

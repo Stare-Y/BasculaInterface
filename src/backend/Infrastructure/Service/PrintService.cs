@@ -9,6 +9,7 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
 namespace Infrastructure.Service
@@ -191,7 +192,7 @@ namespace Infrastructure.Service
                 if (detail.RequiredAmount.HasValue)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph($"Requerido: {detail.RequiredAmount}{(detail.Weight > 0 ? $" kg ~ {(int)(detail.RequiredAmount / 25)} costales" : string.Empty)}", _settings.SmallFontSize, TextAlignment.LEFT)));
+                        .Add(BuildParagraph($"Requerido: {detail.RequiredAmount} kg{(detail.Costales > 0 ? $" ~ {detail.Costales} costales." : ".")}", _settings.SmallFontSize, TextAlignment.LEFT)));
                 }
 
                 if(detail.Tare > 0)
@@ -258,6 +259,16 @@ namespace Infrastructure.Service
                         .Add(BuildParagraph(partner.IsProvider ? "Proveedor:" : "Socio:")));
                     table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(partner.RazonSocial, bold: true)));
+                    
+
+                    if (!entry.ContpaqiComercialFolio.IsNullOrEmpty())
+                    {
+                        table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
+                       .Add(BuildParagraph("Folio Comercial:")));
+                        table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
+                            .Add(BuildParagraph(entry.ContpaqiComercialFolio ?? "Unknown", bold: true)));
+                    }
+
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph()));// Empty row
                 }

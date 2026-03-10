@@ -17,6 +17,8 @@ namespace Core.Application.Extensions
             {
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
+                ConptaqiComercialFK = weightEntryDto.ConptaqiComercialFK,
+                ContpaqiComercialFolio = weightEntryDto.ContpaqiComercialFolio,
                 ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK,
                 BruteWeight = weightEntryDto.BruteWeight,
                 ConcludeDate = weightEntryDto.ConcludeDate,
@@ -33,7 +35,8 @@ namespace Core.Application.Extensions
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
                     RequiredAmount = wd.RequiredAmount,
-                    ProductPrice = wd.ProductPrice
+                    ProductPrice = wd.ProductPrice,
+                    Costales = wd.Costales,
                 })]
             };
 
@@ -50,6 +53,7 @@ namespace Core.Application.Extensions
             {
                 Id = weightEntry.Id,
                 ConptaqiComercialFK = weightEntry.ConptaqiComercialFK,
+                ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio,
                 ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK,
                 ExternalTargetBehavior = weightEntry.ExternalTargetBehavior is not null ? new ExternalTargetBehaviorDto(weightEntry.ExternalTargetBehavior) : null,
                 PartnerId = weightEntry.PartnerId,
@@ -70,7 +74,8 @@ namespace Core.Application.Extensions
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
                     RequiredAmount = wd.RequiredAmount,
-                    ProductPrice = wd.ProductPrice
+                    ProductPrice = wd.ProductPrice,
+                    Costales = wd.Costales,
                 })]
             };
         }
@@ -85,6 +90,7 @@ namespace Core.Application.Extensions
             {
                 Id = weightEntryDto.Id,
                 ConptaqiComercialFK = weightEntryDto.ConptaqiComercialFK,
+                ContpaqiComercialFolio = weightEntryDto.ContpaqiComercialFolio,
                 ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK,
                 PartnerId = weightEntryDto.PartnerId,
                 TareWeight = weightEntryDto.TareWeight,
@@ -103,7 +109,8 @@ namespace Core.Application.Extensions
                     WeightedBy = wd.WeightedBy,
                     SecondaryTare = wd.SecondaryTare,
                     RequiredAmount = wd.RequiredAmount,
-                    ProductPrice = wd.ProductPrice
+                    ProductPrice = wd.ProductPrice,
+                    Costales = wd.Costales
                 })]
             };
         }
@@ -119,6 +126,8 @@ namespace Core.Application.Extensions
                 Id = we.Id,
                 PartnerId = we.PartnerId,
                 TareWeight = we.TareWeight,
+                ConptaqiComercialFK = we.ConptaqiComercialFK,
+                ContpaqiComercialFolio = we.ContpaqiComercialFolio,
                 ExternalTargetBehaviorFK = we.ExternalTargetBehaviorFK,
                 ExternalTargetBehavior = we.ExternalTargetBehavior is not null ? new ExternalTargetBehaviorDto(we.ExternalTargetBehavior):null,
                 BruteWeight = we.BruteWeight,
@@ -137,7 +146,8 @@ namespace Core.Application.Extensions
                     SecondaryTare = wd.SecondaryTare,
                     WeightedBy = wd.WeightedBy,
                     RequiredAmount = wd.RequiredAmount,
-                    ProductPrice = wd.ProductPrice
+                    ProductPrice = wd.ProductPrice,
+                    Costales = wd.Costales
                 })]
             });
         }
@@ -160,6 +170,8 @@ namespace Core.Application.Extensions
             weightEntry.VehiclePlate = weightEntryDto.VehiclePlate;
             weightEntry.RegisteredBy = weightEntryDto.RegisteredBy;
             weightEntry.ExternalTargetBehaviorFK = weightEntryDto.ExternalTargetBehaviorFK;
+            weightEntry.ConptaqiComercialFK = weightEntryDto.ConptaqiComercialFK;
+            weightEntry.ContpaqiComercialFolio = weightEntryDto.ContpaqiComercialFolio;
 
             // Update WeightDetails
             var existingDetails = weightEntry.WeightDetails.ToList(); // Get existing details
@@ -178,6 +190,7 @@ namespace Core.Application.Extensions
                     existingDetail.WeightedBy = updatedDetail.WeightedBy;
                     existingDetail.RequiredAmount = updatedDetail.RequiredAmount;
                     existingDetail.ProductPrice = updatedDetail.ProductPrice;
+                    existingDetail.Costales = updatedDetail.Costales;
                 }
             }
 
@@ -194,7 +207,8 @@ namespace Core.Application.Extensions
                         SecondaryTare = newDetail.SecondaryTare,
                         WeightedBy = newDetail.WeightedBy,
                         RequiredAmount = newDetail.RequiredAmount,
-                        ProductPrice = newDetail.ProductPrice
+                        ProductPrice = newDetail.ProductPrice,
+                        Costales = newDetail.Costales,
                     });
                 }
             }

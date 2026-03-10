@@ -24,9 +24,14 @@ namespace BasculaInterface.Models
         public int? FK_WeightedProductId { get; set; } = null;
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public double? RequiredAmount { get; set; } = null;
+        public int? Costales { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
         public string RequiredAmountText => RequiredAmount.HasValue && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
+            : string.Empty;
+
+        public string RequiredCostalesText => Costales.HasValue
+            ? "Costales: " + Costales.Value.ToString()
             : string.Empty;
 
         public string Description

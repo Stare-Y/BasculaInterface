@@ -19,7 +19,7 @@
             HorizontalOptions="Center"
             MaximumWidthRequest="350"
             MinimumWidthRequest="300"
-            RowDefinitions="Auto,Auto,Auto"
+            RowDefinitions="Auto,Auto,Auto,Auto"
             RowSpacing="15"
             VerticalOptions="Center">
 
@@ -37,6 +37,7 @@
                     HorizontalOptions="Fill"
                     Grid.Row="1">
                 <Label
+                    x:Name="LblKilos"
                     Grid.Row="0"
                     FontSize="20"
                     HorizontalOptions="Center"
@@ -47,6 +48,24 @@
                     Keyboard="Numeric"
                     Placeholder="Cantidad en kilos..."
                     TextChanged="QuantityEntry_TextChanged" />
+            </Grid>
+
+            <!--  Quantity Entry  -->
+            <Grid 
+                     ColumnDefinitions="Auto,Auto"
+                     HorizontalOptions="Fill"
+                     Grid.Row="2">
+                <Label
+                     Grid.Row="0"
+                     FontSize="20"
+                     HorizontalOptions="Center"
+                     Text="Kilos: " />
+                <Entry
+                     x:Name="CostalesEntry"
+                     HorizontalOptions="Fill"
+                     Keyboard="Numeric"
+                     Placeholder="Cantidad en Costales..."
+                     TextChanged="CostalesEntry_TextChanged" />
             </Grid>
 
             <!--  Action Buttons  -->

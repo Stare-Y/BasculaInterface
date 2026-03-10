@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public int? PartnerId { get; set; }
         public int? ConptaqiComercialFK { get; set; }
+        public string? ContpaqiComercialFolio { get; set; } = null;
         public int? ExternalTargetBehaviorFK { get; set; }
         public double TareWeight { get; set; } = 0; //initial weight
         public double BruteWeight { get; set; } = 0; //final weight

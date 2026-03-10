@@ -1,5 +1,6 @@
 using BasculaInterface.ViewModels;
 using Core.Application.DTOs;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BasculaInterface.Views;
 
@@ -27,9 +28,9 @@ public partial class ReadOnlyDetailedWeightView : ContentPage
 		{
 			await viewModel.FetchNewWeightDetails();
 
-			if(viewModel.WeightEntry is not null && viewModel.WeightEntry.ConptaqiComercialFK.HasValue)
+			if(viewModel.WeightEntry is not null && !viewModel.WeightEntry.ContpaqiComercialFolio.IsNullOrEmpty())
 			{
-				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ConptaqiComercialFK.Value.ToString();
+				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ContpaqiComercialFolio;
 				BtnContpaqId.IsEnabled = false;
             }
 
@@ -67,7 +68,7 @@ public partial class ReadOnlyDetailedWeightView : ContentPage
 
 			if (viewModel.WeightEntry is not null && viewModel.WeightEntry.ConptaqiComercialFK.HasValue)
 			{
-				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ConptaqiComercialFK.Value.ToString();
+				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ContpaqiComercialFolio;
 				BtnContpaqId.IsEnabled = false;
             }
 

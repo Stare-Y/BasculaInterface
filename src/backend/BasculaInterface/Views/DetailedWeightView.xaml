@@ -674,6 +674,15 @@
                                                     VerticalTextAlignment="Center" />
 
                                                 <Label
+                                                    FontSize="{OnPlatform Android=8,
+                                                                          WinUI=20}"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding RequiredCostalesText}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}"
+                                                    VerticalTextAlignment="Center" />
+
+                                                <Label
                                                     FontAttributes="Italic"
                                                     FontSize="13"
                                                     HorizontalOptions="Start"

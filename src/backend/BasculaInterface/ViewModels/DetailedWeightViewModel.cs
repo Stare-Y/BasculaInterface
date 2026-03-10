@@ -66,7 +66,7 @@ namespace BasculaInterface.ViewModels
 
         public ICommand? RefreshCommand { get; }
 
-        public async Task AddProductToWeightEntry(ProductoDto product, double qty = 0)
+        public async Task AddProductToWeightEntry(ProductoDto product, double qty = 0, int? costales = null)
         {
             if (WeightEntry == null)
             {
@@ -81,7 +81,8 @@ namespace BasculaInterface.ViewModels
                 FK_WeightedProductId = product.Id,
                 Tare = 0, // Default tare value, can be adjusted later
                 Weight = 0, // Default weight value, can be adjusted later
-                RequiredAmount = qty
+                RequiredAmount = qty,
+                Costales = costales
             };
             WeightEntry.WeightDetails.Add(newDetail);
             await UpdateWeightEntry();
@@ -254,6 +255,7 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException($"Resultado nulo ({response.Message}).");
 
             WeightEntry.ConptaqiComercialFK = response.Data.ResultingId;
+            WeightEntry.ContpaqiComercialFolio = response.Data.ResultingFolio;
 
             OnPropertyChanged(nameof(WeightEntry));
 
@@ -321,7 +323,8 @@ namespace BasculaInterface.ViewModels
                                     ? null
                                     : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,
-                    RequiredAmount = detail.RequiredAmount
+                    RequiredAmount = detail.RequiredAmount,
+                    Costales = detail.Costales
                 };
 
                 if (detail.FK_WeightedProductId is not null)

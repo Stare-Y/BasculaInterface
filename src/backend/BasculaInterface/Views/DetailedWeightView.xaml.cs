@@ -362,11 +362,11 @@ public partial class DetailedWeightView : ContentPage
                 throw new InvalidOperationException("No se ha seleccionado un socio, eso se debe hacer primero.");
             }
 
-            double? result = await PickPopUp.ShowAsync(product.Nombre);
+            Dictionary<double,int?> result = await PickPopUp.ShowAsync(product.Nombre);
 
             double qty = 0;
 
-            if (result is double pickedQty)
+            if (result.Keys.First() is double pickedQty)
             {
                 qty = pickedQty;
             }
@@ -378,7 +378,7 @@ public partial class DetailedWeightView : ContentPage
                 throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad  seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
             }
 
-            await viewModel.AddProductToWeightEntry(product, qty);
+            await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
         }
         catch (Exception ex)
         {
