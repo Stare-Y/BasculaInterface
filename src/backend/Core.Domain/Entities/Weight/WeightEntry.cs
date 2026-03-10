@@ -8,6 +8,7 @@ namespace Core.Domain.Entities.Weight
     {
         public int? PartnerId { get; set; }
         public int? ConptaqiComercialFK { get; set; }
+        public string? ContpaqiComercialFolio { get; set; }
         public int? ExternalTargetBehaviorFK { get; set; }
         [ForeignKey(nameof(ExternalTargetBehaviorFK))]
         public virtual ExternalTargetBehavior? ExternalTargetBehavior { get; set; }

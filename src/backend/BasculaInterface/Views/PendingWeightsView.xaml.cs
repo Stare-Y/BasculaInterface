@@ -56,8 +56,6 @@ public partial class PendingWeightsView : ContentPage
                 {
                     if (index >= 0)
                         PickerDocumentType.SelectedIndex = index;
-
-                    return;
                 }
 
                 viewModel.ShowDocumentsWithId(preferedId);

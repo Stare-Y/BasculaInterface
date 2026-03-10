@@ -118,20 +118,21 @@ namespace Infrastructure.Service
             }
             DocumentoDto payload = await BuildContpaqiDocumentDto(weightEntry);
 
-            GenericResponse<int?> result = await _apiService.PostAsync<GenericResponse<int?>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
+            GenericResponse<ContpaqiComercialResult> result = await _apiService.PostAsync<GenericResponse<ContpaqiComercialResult>>(_comercialSDKSettings.ApiUrl + "/ComercialSDK/Document", new { Document = payload, Empresa = _comercialSDKSettings.TargetEmpresa });
 
-            if (result.Data is null || result.Data <= 0)
+            if (result.Data is null || result.Data.ResultingId <= 0)
             {
                 return new GenericResponse<ContpaqiComercialResult> { Message = $"Error posting to SDK: {result.Message}" };
             }
 
-            weightEntry.ConptaqiComercialFK = result.Data;
+            weightEntry.ConptaqiComercialFK = result.Data.ResultingId;
+            weightEntry.ContpaqiComercialFolio = result.Data.ResultingFolio;
             Console.WriteLine($"Received Notes: {result.Message}");
-            weightEntry.Notes += result.Message;
+            weightEntry.Notes += " " + result.Message;
 
             await UpdateAsync(weightEntry);
 
-            return new GenericResponse<ContpaqiComercialResult> { Data = new ContpaqiComercialResult { ResultingId = result.Data!.Value}, Message = "Document Generated"};
+            return result;
         }
 
         private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntry weightEntry)
