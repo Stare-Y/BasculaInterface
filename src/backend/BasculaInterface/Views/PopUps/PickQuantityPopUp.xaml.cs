@@ -1,3 +1,5 @@
+using Microsoft.IdentityModel.Tokens;
+
 namespace BasculaInterface.Views.PopUps;
 
 public partial class PickQuantityPopUp : ContentView
@@ -92,38 +94,9 @@ public partial class PickQuantityPopUp : ContentView
         var entry = (Entry)sender;
 
         if (string.IsNullOrEmpty(entry.Text))
-        {
-            CostalesEntry.Text = string.Empty;
             return;
-        }
 
-        if (double.TryParse(entry.Text, out double value))
-        {
-            CostalesEntry.Text = ((int)(value / 25)).ToString();
-        }
-        else
-        {
+        if (!double.TryParse(entry.Text, out _))
             entry.Text = e.OldTextValue;
-        }
-    }
-
-    private void CostalesEntry_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        var entry = (Entry)sender;
-
-        if (string.IsNullOrEmpty(entry.Text))
-        {
-            QuantityEntry.Text = string.Empty;
-            return;
-        }
-
-        if (double.TryParse(entry.Text, out double value))
-        {
-            QuantityEntry.Text = (value * 25).ToString();
-        }
-        else
-        {
-            entry.Text = e.OldTextValue;
-        }
     }
 }
