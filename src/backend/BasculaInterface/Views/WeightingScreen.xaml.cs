@@ -33,7 +33,7 @@ public partial class WeightingScreen : ContentPage
         viewModel.Partner = partner;
         viewModel.Product = productoDto;
 
-        if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
+        if (useIncommingTara && !Preferences.Get("SecondaryTerminal", false))
         {
             if (weightEntry.BruteWeight > 0)
             {
