@@ -20,21 +20,37 @@ namespace Infrastructure.Service
         private readonly ILogger<PrintService> _logger;
         private readonly IClienteProveedorService _clienteService;
         private readonly IProductService _productService;
+        private readonly IWeightService _weightService;
 
         private readonly PdfFont _regularFont = PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.COURIER);
         private readonly PdfFont _boldFont = PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.COURIER_BOLD);
-        public PrintService(IOptions<WeightSettings> printSettings, ILogger<PrintService> logger, IClienteProveedorService clienteService, IProductService productService)
+        public PrintService(IOptions<WeightSettings> printSettings, ILogger<PrintService> logger, IClienteProveedorService clienteService, IProductService productService, IWeightService weightService)
         {
             _settings = printSettings.Value;
             _logger = logger;
             _clienteService = clienteService;
             _productService = productService;
+            _weightService = weightService;
         }
 
         public async Task Print(WeightEntryDto entry)
         {
             try
             {
+                try//try get newest before printing
+                {
+                    WeightEntryDto? latestEntry = await _weightService.GetByIdAsync(entry.Id);
+
+                    if (latestEntry != null)
+                    {
+                        entry = latestEntry;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching latest weight entry data before printing. Proceeding with provided data.");
+                }
+
                 iText.Kernel.Geom.PageSize pageSize = new(_settings.TicketWidth, _settings.TicketHeight);
                 // Create a temp PDF
                 string filePath = Path.GetTempFileName() + ".pdf";
@@ -177,7 +193,7 @@ namespace Infrastructure.Service
 
                         if (product != null)
                         {
-                            productName =  product.Code + " - "+ product.Nombre;
+                            productName = product.Code + " - " + product.Nombre;
                         }
                     }
                     catch (Exception ex)
@@ -195,7 +211,7 @@ namespace Infrastructure.Service
                         .Add(BuildParagraph($"Requerido: {detail.RequiredAmount} kg{(detail.Costales > 0 ? $" ~ {detail.Costales} costales." : ".")}", _settings.SmallFontSize, TextAlignment.LEFT)));
                 }
 
-                if(detail.Tare > 0)
+                if (detail.Tare > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph($"Peso Anterior:", _settings.SmallFontSize)));
@@ -204,7 +220,7 @@ namespace Infrastructure.Service
                         .Add(BuildParagraph(detail.Tare.ToString("F2") + "kg", _settings.SmallFontSize, TextAlignment.RIGHT, bold: false)));
                 }
 
-                if(detail.Weight > 0)
+                if (detail.Weight > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph("Peso Real:", _settings.SmallFontSize)));
@@ -259,7 +275,7 @@ namespace Infrastructure.Service
                         .Add(BuildParagraph(partner.IsProvider ? "Proveedor:" : "Socio:")));
                     table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(partner.RazonSocial, bold: true)));
-                    
+
 
                     if (!entry.ContpaqiComercialFolio.IsNullOrEmpty())
                     {
