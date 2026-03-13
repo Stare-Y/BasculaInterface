@@ -231,7 +231,10 @@ public partial class WeightingScreen : ContentPage
         if (BindingContext is not BasculaViewModel viewModel)
             return;
 
-        bool printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
+        bool printTurn = false;
+
+        if (viewModel.WeightEntry!.BruteWeight <= 0)
+            printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
 
         WaitPopUp.Show("Capturando peso, espere...");
         try

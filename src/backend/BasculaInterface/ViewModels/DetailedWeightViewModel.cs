@@ -228,18 +228,22 @@ namespace BasculaInterface.ViewModels
             // Send the updated weight entry to the API
             await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
 
-            if(Partner is not null && !Partner.IsProvider)
+            if (Partner is not null && !Partner.IsProvider)
             {
                 try
                 {
                     await SendToContpaqiComercial();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.WriteLine("Error sending to contpaq: " + ex.Message);
                 }
                 //TODO: send 2 contpaq and then print with generated folio.
             }
+
+            await Task.Delay(500); // Small delay to ensure the weight entry is updated before fetching new details
+
+            await PrintTicketAsync();
         }
 
         public async Task<string> SendToContpaqiComercial()
@@ -330,8 +334,8 @@ namespace BasculaInterface.ViewModels
                 if (detail.FK_WeightedProductId is not null)
                 {
                     ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
-                    
-                    if(product is null || product.Nombre.IsNullOrEmpty())
+
+                    if (product is null || product.Nombre.IsNullOrEmpty())
                     {
                         row.Description = $"Unknown Product ({detail.FK_WeightedProductId})";
                         row.IsGranel = false;

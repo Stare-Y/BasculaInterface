@@ -233,8 +233,6 @@ public partial class DetailedWeightView : ContentPage
             {
                 await viewModel.ConcludeWeightProcess();
 
-                await viewModel.PrintTicketAsync();
-
                 await DisplayAlert("Éxito", "Proceso de pesaje concluido correctamente.", "OK");
 
                 await Shell.Current.Navigation.PopAsync();
@@ -362,7 +360,7 @@ public partial class DetailedWeightView : ContentPage
                 throw new InvalidOperationException("No se ha seleccionado un socio, eso se debe hacer primero.");
             }
 
-            Dictionary<double,int?> result = await PickPopUp.ShowAsync(product.Nombre);
+            Dictionary<double, int?> result = await PickPopUp.ShowAsync(product.Nombre);
 
             double qty = 0;
 
@@ -403,9 +401,9 @@ public partial class DetailedWeightView : ContentPage
             return;
         }
 
-        if(
-            viewModel.WeightEntry is not null && 
-            (viewModel.WeightEntry.ExternalTargetBehaviorFK is null || 
+        if (
+            viewModel.WeightEntry is not null &&
+            (viewModel.WeightEntry.ExternalTargetBehaviorFK is null ||
             viewModel.WeightEntry.ExternalTargetBehaviorFK <= 0))
         {
             await DisplayAlert("Error", "Primero selecciona el TIPO DE DOCUMENTO", "Ok");
@@ -454,8 +452,8 @@ public partial class DetailedWeightView : ContentPage
                 return;
 
             if (
-                !Preferences.Get("BypasTurn", false) && 
-                ((!string.IsNullOrEmpty(row.WeightedBy) || !string.IsNullOrWhiteSpace(row.WeightedBy)) && 
+                !Preferences.Get("BypasTurn", false) &&
+                ((!string.IsNullOrEmpty(row.WeightedBy) || !string.IsNullOrWhiteSpace(row.WeightedBy)) &&
                 row.WeightedBy.Trim().ToLower() != DeviceInfo.Name.Trim().ToLower()))
             {
                 await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
