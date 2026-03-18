@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Importa Navigate
 import DashboardRoutes from "./DashboardRoutes"; 
 import DashboardLayout from "../layout/DashboardLayout";
+import { Outlet } from 'react-router-dom';
 
 import type { JSX, ReactNode } from "react";
 
@@ -38,6 +39,7 @@ function AppRoutes() {
                         <DashboardLayout/>
                     }
                 >
+                    
                     {renderRoutes(DashboardRoutes.children)}
                 </Route>
 

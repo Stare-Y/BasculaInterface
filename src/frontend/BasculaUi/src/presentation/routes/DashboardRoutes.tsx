@@ -8,7 +8,7 @@ const DashboardRoutes = {
     children: [
         {
             path: '',
-            element: <div>dashboard xd</div>
+            element: <div>dashboard</div>
         },
         {
             path: 'Orders',
