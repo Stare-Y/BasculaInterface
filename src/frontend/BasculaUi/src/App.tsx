@@ -1,6 +1,6 @@
 import { useState ,useEffect} from 'react'
 import './App.css'
-import AppRoutes from './routes';
+import AppRoutes from './presentation/routes/index';
 import { ThemeProvider } from '@emotion/react';
 import theme from "./theme";
 
