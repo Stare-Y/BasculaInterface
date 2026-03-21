@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 
 namespace BasculaInterface;
+
 public static class MauiProgram
 {
-    public static IServiceProvider ServiceProvider { get; set; } = null !;
+    public static IServiceProvider ServiceProvider { get; set; } = null!;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
     public static MauiApp CreateMauiApp()
     {
@@ -52,7 +53,7 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        
+
         builder.Services.AddTransient<BasculaViewModel>();
         builder.Services.AddTransient<PendingWeightsViewModel>();
         builder.Services.AddTransient<ProductSelectorViewModel>();
@@ -67,7 +68,10 @@ public static class MauiProgram
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
         //build service provider
-        ServiceProvider = builder.Services.BuildServiceProvider();
-        return builder.Build();
+        MauiApp app = builder.Build();
+
+        ServiceProvider = app.Services;
+
+        return app;
     }
 }

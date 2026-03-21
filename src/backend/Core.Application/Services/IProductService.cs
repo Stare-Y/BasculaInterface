@@ -12,5 +12,7 @@ namespace Core.Application.Services
         Task<IEnumerable<ProductoDto>> SearchByNameAsync(string name, int page, int sizePage);
 
         Task<ProductoDto> GetByIdAsync(int id);
+
+        Task<IEnumerable<ProductoDto>> GetByMultipleIdsAsync(int[] ids);
     }
 }

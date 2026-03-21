@@ -12,5 +12,7 @@ namespace Core.Domain.Interfaces
         Task<IEnumerable<Producto>> SearchByNameAsync(string name, int page, int sizePage);
 
         Task<Producto> GetByIdAsync(int id);
+
+        Task<IEnumerable<Producto>> GetByMultipleIdsAsync(int[] ids);
     }
 }

@@ -15,7 +15,7 @@ public partial class PendingWeightsView : ContentPage
     {
         InitializeComponent();
 
-        BindingContext = viewModel 
+        BindingContext = viewModel
             ?? throw new ArgumentNullException(nameof(viewModel));
 
     }
@@ -25,6 +25,8 @@ public partial class PendingWeightsView : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+
         if (BindingContext is not PendingWeightsViewModel viewModel)
             return;
 
@@ -36,7 +38,7 @@ public partial class PendingWeightsView : ContentPage
 
             await viewModel.LoadPendingWeightsAsync();
 
-            if(Preferences.Get("ShowDocumentTypeFilter", false))
+            if (Preferences.Get("ShowDocumentTypeFilter", false))
             {
                 await viewModel.LoadExternalTargetBehaviors();
 
@@ -45,7 +47,7 @@ public partial class PendingWeightsView : ContentPage
                 PickerDocumentType.SelectedIndex = 0;
             }
 
-            if(Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
+            if (Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
             {
                 int preferedId = int.TryParse(preferedDocumentType, out int result) ? result : 0;
 
@@ -67,7 +69,7 @@ public partial class PendingWeightsView : ContentPage
 
                 BtnNewWeighProcess.IsVisible = false;
 
-                if(Preferences.Get("OnlyPedidos", false))
+                if (Preferences.Get("OnlyPedidos", false))
                     BtnNewWeightLessPedido.IsVisible = true;
             }
 #if ANDROID
@@ -107,8 +109,13 @@ public partial class PendingWeightsView : ContentPage
 
                 await Shell.Current.Navigation.PushAsync(targetView);
             }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudieron cargar los detalles del peso: " + ex.Message, "OK");
+            }
             finally
             {
+                PendingWeightsCollectionView.SelectedItem = null;
                 WaitPopUp.Hide();
             }
         }
@@ -149,7 +156,7 @@ public partial class PendingWeightsView : ContentPage
     private async Task Reconect()
     {
         if (BindingContext is not PendingWeightsViewModel viewModel)
-            return; 
+            return;
 
         if (EntryHost.Text.Contains("http"))
         {
@@ -300,7 +307,7 @@ public partial class PendingWeightsView : ContentPage
         {
             string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
             int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
-            WeightEntryDto weightEntry = new ()
+            WeightEntryDto weightEntry = new()
             {
                 PartnerId = partner.Id,
                 TareWeight = 0,
@@ -326,7 +333,7 @@ public partial class PendingWeightsView : ContentPage
 
     private void CargasDescargasToggle(object sender, EventArgs e)
     {
-        if(BindingContext is not PendingWeightsViewModel viewModel)
+        if (BindingContext is not PendingWeightsViewModel viewModel)
             return;
 
         if (!BtnCargas.IsEnabled)

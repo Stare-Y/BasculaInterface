@@ -13,11 +13,11 @@ namespace Infrastructure.Service
             _productRepo = productRepo;
         }
 
-        public async Task<IEnumerable<ProductoDto>> SearchByNameAsync(string name, int page,int sizePage)
+        public async Task<IEnumerable<ProductoDto>> SearchByNameAsync(string name, int page, int sizePage)
         {
-            IEnumerable<Producto> productos = await _productRepo.SearchByNameAsync(name,page,sizePage);
+            IEnumerable<Producto> productos = await _productRepo.SearchByNameAsync(name, page, sizePage);
 
-            return productos.Select(p => new ProductoDto (p));
+            return productos.Select(p => new ProductoDto(p));
         }
 
         public async Task<ProductoDto> GetByIdAsync(int id)
@@ -25,6 +25,13 @@ namespace Infrastructure.Service
             Producto producto = await _productRepo.GetByIdAsync(id);
 
             return new ProductoDto(producto);
+        }
+
+        public async Task<IEnumerable<ProductoDto>> GetByMultipleIdsAsync(int[] ids)
+        {
+            IEnumerable<Producto> productos = await _productRepo.GetByMultipleIdsAsync(ids);
+
+            return productos.Select(p => new ProductoDto(p));
         }
     }
 }
