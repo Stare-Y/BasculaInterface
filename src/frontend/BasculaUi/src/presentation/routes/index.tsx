@@ -4,6 +4,7 @@ import DashboardLayout from "../layout/DashboardLayout";
 import { Outlet } from 'react-router-dom';
 
 import type { JSX, ReactNode } from "react";
+import MainPage from '../components/Main Page/MainPage';
 
 export interface AppRoute {
   path: string;
@@ -32,6 +33,8 @@ function AppRoutes() {
     return (
         <BrowserRouter>
             <Routes>
+
+                <Route path="/" element={<MainPage />} /> 
                 {/* Rutas públicas (LoginRoutes) */}
                 <Route
                     path={DashboardRoutes.path}
