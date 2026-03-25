@@ -1,31 +1,125 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace BasculaInterface.Models
 {
-    public class WeightEntryDetailRow
+    public class WeightEntryDetailRow : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public int Id { get; set; } = 0;
         public int OrderIndex { get; set; } = 0;
-        public double Tare { get; set; } = 0;
+
+        private double _tare = 0;
+        public double Tare
+        {
+            get => _tare;
+            set
+            {
+                if (_tare != value)
+                {
+                    _tare = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(TareValue));
+                }
+            }
+        }
+
         public bool IsGranel { get; set; } = true;
         public string TareHeader => IsGranel ? "Tara" : string.Empty;
         public string TareValue => IsGranel ? Tare.ToString() + " kg" : string.Empty;
-        public double Weight { get; set; } = 0;
-        public string WeightHeader => IsGranel ? "Peso" : "Cantidad";
-        public string WeightValue => IsGranel ? Weight.ToString() + " kg" : RequiredAmount!.Value.ToString();
-        public double? SecondaryTare { get; set; }
-        private string? _weightedBy;
-        public string? WeightedBy 
+
+        private double _weight = 0;
+        public double Weight
         {
-            get => _weightedBy.IsNullOrEmpty() ? string.Empty : $"Pesado por: {_weightedBy}"; 
-            set => _weightedBy = value; 
+            get => _weight;
+            set
+            {
+                if (_weight != value)
+                {
+                    _weight = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(WeightValue));
+                }
+            }
         }
+
+        public string WeightHeader => IsGranel ? "Peso" : "Cantidad";
+        public string WeightValue => IsGranel ? Weight.ToString() + " kg" : RequiredAmount?.ToString() ?? "0";
+
+        private double? _secondaryTare;
+        public double? SecondaryTare
+        {
+            get => _secondaryTare;
+            set
+            {
+                if (_secondaryTare != value)
+                {
+                    _secondaryTare = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string? _weightedBy;
+        public string? WeightedByDecorated
+        {
+            get => _weightedBy.IsNullOrEmpty() ? string.Empty : $"Pesado por: {_weightedBy}";
+            set
+            {
+                if (_weightedBy != value)
+                {
+                    _weightedBy = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(WeightedBy));
+                }
+            }
+        }
+
+        public string? WeightedBy => _weightedBy;
         private string _description = string.Empty;
         public int? FK_WeightedProductId { get; set; } = null;
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
-        public double? RequiredAmount { get; set; } = null;
-        public int? Costales { get; set; } = null;
+
+        private double? _requiredAmount = null;
+        public double? RequiredAmount
+        {
+            get => _requiredAmount;
+            set
+            {
+                if (_requiredAmount != value)
+                {
+                    _requiredAmount = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(RequiredAmountText));
+                    OnPropertyChanged(nameof(WeightValue));
+                }
+            }
+        }
+
+        private int? _costales = null;
+        public int? Costales
+        {
+            get => _costales;
+            set
+            {
+                if (_costales != value)
+                {
+                    _costales = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(RequiredCostalesText));
+                }
+            }
+        }
+
         public double? ProductPrice { get; set; } = null;
+
         public string RequiredAmountText => RequiredAmount.HasValue && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
             : string.Empty;

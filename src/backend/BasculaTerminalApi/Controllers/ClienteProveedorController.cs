@@ -25,5 +25,11 @@ namespace BasculaTerminalApi.Controllers
         {
             return Ok(await _clienteProveedorService.GetById(id));
         }
+
+        [HttpGet("ByMultipleIds")]
+        public async Task<ActionResult<IEnumerable<ClienteProveedorDto>>> GetByMultipleIds([FromQuery] int[] ids)
+        {
+            return Ok(await _clienteProveedorService.GetByMultipleIds(ids));
+        }
     }
 }

@@ -266,6 +266,37 @@
 
                             </Grid>
 
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
+                                <Picker
+                                    x:Name="PickerTheme"
+                                    Grid.Column="0"
+                                    HorizontalOptions="Start"
+                                    SelectedIndexChanged="PickerTheme_SelectedIndexChanged"
+                                    WidthRequest="{OnPlatform Android=120, WinUI=200}">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>Sistema</x:String>
+                                            <x:String>Claro</x:String>
+                                            <x:String>Oscuro</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                </Picker>
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Tema de la aplicación" />
+
+                            </Grid>
+
                         </VerticalStackLayout>
 
                     </ScrollView>

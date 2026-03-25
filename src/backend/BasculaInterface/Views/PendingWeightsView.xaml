@@ -5,12 +5,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    xmlns:models="clr-namespace:BasculaInterface.Models"
     Title="Pedidos en Proceso"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
-    <ContentPage.BindingContext>
-        <vm:PendingWeightsViewModel />
-    </ContentPage.BindingContext>
 
     <Grid>
 
@@ -201,7 +199,6 @@
                         <CollectionView
                             x:Name="PendingWeightsCollectionView"
                             HorizontalOptions="Center"
-                            ItemsSource="{Binding PendingWeightsCharge}"
                             SelectionChanged="PendingWeightsCollectionView_SelectionChanged"
                             SelectionMode="Single"
                             VerticalOptions="Start">
@@ -211,7 +208,7 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="models:PendingWeightViewRow">
                                     <Border
                                         x:Name="BtnSeleccionar"
                                         Padding="15"
@@ -300,6 +297,7 @@
                                                     FontSize="{OnPlatform WinUI=20,
                                                                           Android=10}"
                                                     VerticalOptions="Center"
+                                                    TextColor="Orange"
                                                     />
 
                                             </VerticalStackLayout>

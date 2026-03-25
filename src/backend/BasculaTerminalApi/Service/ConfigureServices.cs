@@ -46,7 +46,12 @@ namespace BasculaTerminalApi.Service
                     throw new InvalidDataException("Couldn't load ContpaqSQLConnection conn string.");
                 }
 
-                sp.UseSqlServer(connectionString);
+                sp.UseSqlServer(connectionString, options =>
+                {
+                    // Use compatibility level 120 (SQL Server 2014) to avoid OPENJSON in Contains() queries
+                    // This generates traditional IN (val1, val2, ...) clauses instead
+                    options.UseCompatibilityLevel(120);
+                });
             });
 
             return services;

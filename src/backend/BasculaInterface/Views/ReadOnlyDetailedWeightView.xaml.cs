@@ -6,54 +6,73 @@ namespace BasculaInterface.Views;
 
 public partial class ReadOnlyDetailedWeightView : ContentPage
 {
+	private CancellationTokenSource? _cts;
+
 	public ReadOnlyDetailedWeightView(ReadOnlyDetailedViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
-    }
+	}
 	public ReadOnlyDetailedWeightView()
 	{
 		InitializeComponent();
-    }
-	
+	}
+
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
 		if (BindingContext is not ReadOnlyDetailedViewModel viewModel)
 			return;
 
+		_cts?.Cancel();
+		_cts = new CancellationTokenSource();
+		var token = _cts.Token;
+
 		WaitPopUp.Show("Un momento porfavor...");
 
 		try
 		{
-			await viewModel.FetchNewWeightDetails();
+			await viewModel.FetchNewWeightDetails(token);
 
 			if(viewModel.WeightEntry is not null && !viewModel.WeightEntry.ContpaqiComercialFolio.IsNullOrEmpty())
 			{
 				BtnContpaqId.Text = "Contpaqi: " + viewModel.WeightEntry.ContpaqiComercialFolio;
 				BtnContpaqId.IsEnabled = false;
-            }
+			}
 
-            await viewModel.LoadExternalTargetBehaviors();
+			await viewModel.LoadExternalTargetBehaviors(token);
 
-            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null || viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
-            {
-                PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
-            }
+			if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+			{
+				PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
+			}
 
-            PickerTargetBehavior.IsEnabled = viewModel.WeightEntry.ConptaqiComercialFK is null;
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
-            return;
-        }
-        finally
-        {
-            WaitPopUp.Hide();
-        }
+			PickerTargetBehavior.IsEnabled = viewModel.WeightEntry.ConptaqiComercialFK is null;
+		}
+		catch (OperationCanceledException)
+		{
+			// Navigation cancelled, ignore
+			return;
+		}
+		catch (Exception ex)
+		{
+			await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
+			return;
+		}
+		finally
+		{
+			WaitPopUp.Hide();
+		}
 
-    }
+	}
+
+	protected override void OnDisappearing()
+	{
+		base.OnDisappearing();
+		_cts?.Cancel();
+		_cts?.Dispose();
+		_cts = null;
+	}
 
     private async void BtnContpaqId_Clicked(object sender, EventArgs e)
     {

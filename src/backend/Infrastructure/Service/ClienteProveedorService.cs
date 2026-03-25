@@ -68,5 +68,33 @@ namespace Infrastructure.Service
                 IsProvider = clienteProveedor.CTIPOCLIENTE != 1
             };
         }
+
+        public async Task<IEnumerable<ClienteProveedorDto>> GetByMultipleIds(int[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+                return [];
+
+            IEnumerable<ClienteProveedor> clientesProveedores = await _clienteProveedorRepo.GetByMultipleIds(ids);
+
+            List<ClienteProveedorDto> result = [];
+
+            foreach (ClienteProveedor client in clientesProveedores)
+            {
+                result.Add(new ClienteProveedorDto
+                {
+                    Id = client.CIDCLIENTEPROVEEDOR,
+                    Code = client.CCODIGOCLIENTE,
+                    RazonSocial = client.CRAZONSOCIAL,
+                    RFC = client.CRFC,
+                    CreditLimit = client.CLIMITECREDITOCLIENTE,
+                    Debt = await _documentRepo.GetClientDebt(client.CIDCLIENTEPROVEEDOR),
+                    OrderRequestAllowed = client.CBANCREDITOYCOBRANZA == 1 && client.CBANVENTACREDITO == 1 && client.CESTATUS == 1,
+                    IgnoreCreditLimit = client.CBANEXCEDERCREDITO == 1,
+                    IsProvider = client.CTIPOCLIENTE != 1
+                });
+            }
+
+            return result;
+        }
     }
 }

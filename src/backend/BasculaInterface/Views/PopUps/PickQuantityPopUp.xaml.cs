@@ -22,6 +22,7 @@ public partial class PickQuantityPopUp : ContentView
     {
         InitializeComponent();
         ApplyProductName();
+        SubscribeToKeyboardEvents();
     }
 
     public PickQuantityPopUp(string product)
@@ -33,7 +34,45 @@ public partial class PickQuantityPopUp : ContentView
             : product;
 
         ApplyProductName();
+        SubscribeToKeyboardEvents();
     }
+
+    private void SubscribeToKeyboardEvents()
+    {
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
+    }
+
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (!this.IsVisible)
+            return;
+
+        if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            OnPopupCancelClicked(btnCancel, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
 
     private void ApplyProductName()
     {
@@ -120,5 +159,17 @@ public partial class PickQuantityPopUp : ContentView
 
         if (!double.TryParse(entry.Text, out _))
             entry.Text = e.OldTextValue;
+    }
+
+    private void QuantityEntry_Completed(object sender, EventArgs e)
+    {
+        // Move focus to the next entry
+        CostalesEntry.Focus();
+    }
+
+    private void CostalesEntry_Completed(object sender, EventArgs e)
+    {
+        // Trigger confirm when Enter is pressed on the last entry
+        OnPopupAcceptClicked(btnConfirm, EventArgs.Empty);
     }
 }

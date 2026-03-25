@@ -75,6 +75,8 @@ namespace Infrastructure.Service
 
             _buffer.Append(chunk);
 
+            bool processedWithDelimiter = false;
+
             while (true)
             {
                 string bufferString = _buffer.ToString();
@@ -89,6 +91,23 @@ namespace Infrastructure.Service
                 double currentWeight = ParseScreenWeight(fullLine);
 
                 OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
+                processedWithDelimiter = true;
+            }
+
+            // If we processed lines with delimiters, remaining data is likely partial - wait for more
+            if (processedWithDelimiter)
+                return;
+
+            // No delimiter found at all - try to parse directly using regex (for scales without delimiters)
+            string remainingData = _buffer.ToString();
+            if (!string.IsNullOrWhiteSpace(remainingData))
+            {
+                double currentWeight = ParseScreenWeight(remainingData);
+                if (currentWeight > 0)
+                {
+                    _buffer.Clear();
+                    OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
+                }
             }
         }
 

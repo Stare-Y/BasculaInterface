@@ -78,6 +78,9 @@ public partial class EditSettingsView : ContentPage
         CheckBoxFilterNull.IsChecked = Preferences.Get("FilterNull", false);
         EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
+        // Load theme preference (0 = System, 1 = Light, 2 = Dark)
+        PickerTheme.SelectedIndex = Preferences.Get("AppTheme", 0);
+
         //TODO: add this thing to settings lul
         Preferences.Set("FilterClasif6", true);
     }
@@ -164,5 +167,20 @@ public partial class EditSettingsView : ContentPage
     private void CheckBoxDontFilterNull_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         Preferences.Set("FilterNull", e.Value);
+    }
+
+    private void PickerTheme_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (PickerTheme.SelectedIndex < 0)
+            return;
+
+        Preferences.Set("AppTheme", PickerTheme.SelectedIndex);
+
+        Application.Current!.UserAppTheme = PickerTheme.SelectedIndex switch
+        {
+            1 => AppTheme.Light,
+            2 => AppTheme.Dark,
+            _ => AppTheme.Unspecified // System default
+        };
     }
 }

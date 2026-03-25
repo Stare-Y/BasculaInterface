@@ -33,7 +33,7 @@ public partial class WeightingScreen : ContentPage
         viewModel.Partner = partner;
         viewModel.Product = productoDto;
 
-        if (useIncommingTara && !Preferences.Get("SecondaryTerminal", false))
+        if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
         {
             if (weightEntry.BruteWeight > 0)
             {
@@ -448,14 +448,19 @@ public partial class WeightingScreen : ContentPage
         }
     }
 
-    private void Editor_TextChanged(object sender, TextChangedEventArgs e)
+    private void EntryNotes_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (sender is Editor entry && e.NewTextValue != null)
+        if (sender is Entry entry && e.NewTextValue != null)
         {
             var upper = e.NewTextValue.ToUpperInvariant();
 
             if (entry.Text != upper)
                 entry.Text = upper;
         }
+    }
+
+    private void EntryNotes_Completed(object sender, EventArgs e)
+    {
+        EntryVehiclePlate.Focus();
     }
 }

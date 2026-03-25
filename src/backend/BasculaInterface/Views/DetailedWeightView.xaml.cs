@@ -8,16 +8,22 @@ namespace BasculaInterface.Views;
 public partial class DetailedWeightView : ContentPage
 {
     private bool _entriesChanged = false;
+    private bool _isInitializing = false;
+    private CancellationTokenSource? _cts;
 
     public DetailedWeightView(DetailedWeightViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        SubscribeToKeyboardEvents();
+
         if (Preferences.Get("SecondaryTerminal", false))
         {
             BtnNuevoProducto.IsVisible = false;
             BtnNewEntry.IsVisible = false;
             BtnDeleteEntry.IsVisible = false;
+            BtnPrintTicket.IsVisible = false;
+            EntryNotes.IsEnabled = false;
         }
         else if (Preferences.Get("OnlyPedidos", false))
         {
@@ -28,6 +34,49 @@ public partial class DetailedWeightView : ContentPage
 
     public DetailedWeightView() { }
 
+    private void SubscribeToKeyboardEvents()
+    {
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
+    }
+
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        // Don't handle keys when popup is visible
+        if (PickPopUp.IsVisible)
+            return;
+
+        if (e.Key == Windows.System.VirtualKey.F1 && BtnNuevoProducto.IsVisible)
+        {
+            BtnNuevoProducto_Clicked(BtnNuevoProducto, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            BtnVolver_Clicked(BtnVolver, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -36,14 +85,22 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         if (_entriesChanged)
         {
             WaitPopUp.Show("Un momento...");
             try
             {
-                await viewModel.FetchNewWeightDetails();
+                await viewModel.FetchNewWeightDetails(token);
 
                 _entriesChanged = false;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
             }
             catch (Exception ex)
             {
@@ -61,12 +118,19 @@ public partial class DetailedWeightView : ContentPage
         WaitPopUp.Show("Un momento...");
         try
         {
-            await viewModel.LoadExternalTargetBehaviors();
+            await viewModel.LoadExternalTargetBehaviors(token);
 
-            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null || viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
             {
+                // Set flag to prevent SelectedIndexChanged from triggering API calls
+                _isInitializing = true;
                 PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
+                _isInitializing = false;
             }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
         }
         catch (Exception ex)
         {
@@ -92,7 +156,12 @@ public partial class DetailedWeightView : ContentPage
                     BtnPickPartner.IsVisible = false;
 
                 PickerTargetBehavior.IsEnabled = true;
+
+                return;
             }
+
+            PickerTargetBehavior.IsVisible = false;
+
             return;
         }
 
@@ -124,6 +193,52 @@ public partial class DetailedWeightView : ContentPage
             BtnPickPartner.IsVisible = true;
         else
             BtnPickPartner.IsVisible = false;
+
+        // Workaround for MAUI CollectionView first item sizing bug
+        await ForceCollectionViewRelayout();
+    }
+
+    /// <summary>
+    /// Forces the CollectionView to re-measure all items.
+    /// This is a workaround for a known MAUI bug where the first item 
+    /// in a CollectionView renders with incorrect dimensions.
+    /// </summary>
+    private async Task ForceCollectionViewRelayout()
+    {
+        // Small delay to let the layout system settle
+        await Task.Delay(100);
+
+        // Force re-layout by refreshing the ItemsSource binding
+        await Dispatcher.DispatchAsync(() =>
+        {
+            var viewModel = GetViewModel();
+            if (viewModel.WeightEntryDetailRows.Count > 0)
+            {
+                // Save current source and reassign to force re-measure
+                var source = CollectionViewWeightDetails.ItemsSource;
+                CollectionViewWeightDetails.ItemsSource = null;
+                CollectionViewWeightDetails.ItemsSource = source;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Handles the Loaded event for the CollectionView.
+    /// Forces a re-layout to fix first item sizing issues.
+    /// </summary>
+    private async void CollectionViewWeightDetails_Loaded(object? sender, EventArgs e)
+    {
+#if ANDROID
+        await ForceCollectionViewRelayout();
+#endif
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 
     private DetailedWeightViewModel GetViewModel()
@@ -376,7 +491,16 @@ public partial class DetailedWeightView : ContentPage
                 throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad  seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
             }
 
-            await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
+            // Show loading screen while adding product and refreshing data
+            WaitPopUp.Show("Agregando producto...");
+            try
+            {
+                await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
+            }
+            finally
+            {
+                WaitPopUp.Hide();
+            }
         }
         catch (Exception ex)
         {
@@ -584,6 +708,10 @@ public partial class DetailedWeightView : ContentPage
 
     private async void PickerTargetBehavior_SelectedIndexChanged(object sender, EventArgs e)
     {
+        // Skip if we're programmatically setting the picker during initialization
+        if (_isInitializing)
+            return;
+
         if (BindingContext is not DetailedWeightViewModel viewModel)
         { return; }
 

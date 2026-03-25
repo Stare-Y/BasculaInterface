@@ -13,5 +13,6 @@ namespace Core.Application.Services
         /// <exception cref="KeyNotFoundException"></exception>
         Task<IEnumerable<ClienteProveedorDto>> SearchByName(string name);
         Task<ClienteProveedorDto> GetById(int id);
+        Task<IEnumerable<ClienteProveedorDto>> GetByMultipleIds(int[] ids);
     }
 }
