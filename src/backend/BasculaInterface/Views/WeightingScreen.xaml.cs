@@ -273,6 +273,7 @@ public partial class WeightingScreen : ContentPage
             printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
 
         WaitPopUp.Show("Capturando peso, espere...");
+
         try
         {
             await viewModel.CaptureNewWeightEntry(printTurn);
@@ -405,6 +406,8 @@ public partial class WeightingScreen : ContentPage
 
         try
         {
+            WaitPopUp.Show("Estableciendo tara, espere...");
+
             WeightDetailDto weightingDetail = viewModel.WeightEntry?.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == viewModel.Product?.Id)
                 ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
@@ -425,6 +428,10 @@ public partial class WeightingScreen : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 

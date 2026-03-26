@@ -134,6 +134,16 @@ namespace Infrastructure.Repos
 
             weightEntry.CreatedAt = existingEntry.CreatedAt;
 
+            // Preserve CreatedAt for existing WeightDetails
+            foreach (var detail in weightEntry.WeightDetails)
+            {
+                var existingDetail = existingEntry.WeightDetails.FirstOrDefault(d => d.Id == detail.Id);
+                if (existingDetail != null)
+                {
+                    detail.CreatedAt = existingDetail.CreatedAt;
+                }
+            }
+
             _context.WeightEntries.Update(weightEntry);
 
             await _context.SaveChangesAsync();

@@ -273,6 +273,12 @@ namespace BasculaInterface.ViewModels
             {
                 // If the product already exists, update the weight
                 WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
+
+                if(_diferenciaAbs <= 0)
+                {
+                    throw new InvalidOperationException($"La diferencia de la tara es 0 \n(Tara inicial: {existingDetail.SecondaryTare} peso final: {_pesoTotal}) \nDESTARA Y CAPTURA DE NUEVO");
+                }
+
                 existingDetail.Weight = _diferenciaAbs;
                 existingDetail.Tare = WeightEntry.BruteWeight;
                 existingDetail.WeightedBy = DeviceInfo.Name;
