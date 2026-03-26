@@ -12,5 +12,6 @@
         public double? SecondaryTare { get; set; } = null;
         public double? RequiredAmount { get; set; } = null;
         public double? ProductPrice { get; set; } = null;
+        public DateTime? LastUpdated { get; set; } = null;
     }
 }

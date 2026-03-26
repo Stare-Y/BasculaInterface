@@ -134,13 +134,28 @@ namespace Infrastructure.Repos
 
             weightEntry.CreatedAt = existingEntry.CreatedAt;
 
-            // Preserve CreatedAt for existing WeightDetails
+            // Preserve CreatedAt for existing WeightDetails and set LastUpdated if changed
             foreach (var detail in weightEntry.WeightDetails)
             {
                 var existingDetail = existingEntry.WeightDetails.FirstOrDefault(d => d.Id == detail.Id);
                 if (existingDetail != null)
                 {
                     detail.CreatedAt = existingDetail.CreatedAt;
+
+                    // Set LastUpdated if any tracked property has changed
+                    if (HasDetailChanged(existingDetail, detail))
+                    {
+                        detail.LastUpdated = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        detail.LastUpdated = existingDetail.LastUpdated;
+                    }
+                }
+                else
+                {
+                    // New detail being added - no LastUpdated yet (will be set on first update)
+                    detail.LastUpdated = null;
                 }
             }
 
@@ -171,6 +186,18 @@ namespace Infrastructure.Repos
             weightDetail.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        private static bool HasDetailChanged(WeightDetail existing, WeightDetail incoming)
+        {
+            return existing.Weight != incoming.Weight ||
+                   existing.Tare != incoming.Tare ||
+                   existing.FK_WeightedProductId != incoming.FK_WeightedProductId ||
+                   existing.ProductPrice != incoming.ProductPrice ||
+                   existing.WeightedBy != incoming.WeightedBy ||
+                   existing.SecondaryTare != incoming.SecondaryTare ||
+                   existing.RequiredAmount != incoming.RequiredAmount ||
+                   existing.Costales != incoming.Costales;
         }
     }
 }

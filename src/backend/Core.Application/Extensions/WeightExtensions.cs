@@ -37,6 +37,7 @@ namespace Core.Application.Extensions
                     RequiredAmount = wd.RequiredAmount,
                     ProductPrice = wd.ProductPrice,
                     Costales = wd.Costales,
+                    LastUpdated = wd.LastUpdated
                 })]
             };
 
@@ -76,6 +77,7 @@ namespace Core.Application.Extensions
                     RequiredAmount = wd.RequiredAmount,
                     ProductPrice = wd.ProductPrice,
                     Costales = wd.Costales,
+                    LastUpdated = wd.LastUpdated
                 })]
             };
         }
@@ -110,7 +112,8 @@ namespace Core.Application.Extensions
                     SecondaryTare = wd.SecondaryTare,
                     RequiredAmount = wd.RequiredAmount,
                     ProductPrice = wd.ProductPrice,
-                    Costales = wd.Costales
+                    Costales = wd.Costales,
+                    LastUpdated = wd.LastUpdated
                 })]
             };
         }
@@ -147,7 +150,8 @@ namespace Core.Application.Extensions
                     WeightedBy = wd.WeightedBy,
                     RequiredAmount = wd.RequiredAmount,
                     ProductPrice = wd.ProductPrice,
-                    Costales = wd.Costales
+                    Costales = wd.Costales,
+                    LastUpdated = wd.LastUpdated
                 })]
             });
         }
