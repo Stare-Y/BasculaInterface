@@ -81,7 +81,8 @@
                         Clicked="BtnNewWeighProcess_Clicked"
                         IsVisible="True"
                         Style="{StaticResource BotonPrincipal}"
-                        Text="Nueva Entrada" />
+                        Text="Nueva Entrada"
+                        ToolTipProperties.Text="Nueva Entrada (F5)" />
                     <Button
                         x:Name="BtnNewWeightLessPedido"
                         Grid.Row="{OnPlatform WinUI=0}"
@@ -91,7 +92,8 @@
                         Clicked="OnBtnNewWeighlessProcess_clicked"
                         IsVisible="False"
                         Style="{StaticResource BotonPrincipal}"
-                        Text="Nuevo Pedido sin Pesada" />
+                        Text="Nuevo Pedido sin Pesada"
+                        ToolTipProperties.Text="Nuevo Pedido sin Pesada (F8)" />
 
                     <Button
                         x:Name="BtnFinished"
@@ -99,7 +101,8 @@
                         Clicked="BtnFinished_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"
-                        Text="Ver Finalizados" />
+                        Text="Ver Finalizados"
+                        ToolTipProperties.Text="Ver Finalizados (F6)" />
                     
                     <Button
                         x:Name="BtnExit"
@@ -107,7 +110,8 @@
                         Clicked="BtnExit_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"
-                        Text="Salir" />
+                        Text="Salir"
+                        ToolTipProperties.Text="Salir (Esc)" />
 
                     <!--  What is this?  -->
                     <Border

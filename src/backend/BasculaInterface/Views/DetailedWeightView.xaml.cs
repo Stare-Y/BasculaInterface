@@ -486,9 +486,34 @@ public partial class DetailedWeightView : ContentPage
 
             double composedCost = (qty * product.Precio) + viewModel.TotalCost;
 
-            if (!viewModel.Partner.IgnoreCreditLimit && viewModel.Partner.CreditLimit > 0 && composedCost > viewModel.Partner.AvailableCredit)
+            // Quick local check - skip API call if partner ignores credit limit or has no limit
+            if (viewModel.Partner.IgnoreCreditLimit || viewModel.Partner.CreditLimit <= 0)
             {
-                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad  seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
+                // Partner ignores credit limit or has no limit configured, skip validation
+            }
+            else
+            {
+                // First do a quick local check against available credit
+                if (composedCost > viewModel.Partner.AvailableCredit)
+                {
+                    throw new InvalidOperationException("No hay suficiente crédito para agregar este producto.");
+                }
+
+                // If local check passes, validate with API (considers other pending weight entries)
+                WaitPopUp.Show("Validando credito...");
+                try
+                {
+                    CreditValidationResponse creditValidation = await viewModel.ValidatePartnerCreditAsync(qty * product.Precio);
+
+                    if (!creditValidation.IsValid)
+                    {
+                        throw new InvalidOperationException("No hay suficiente crédito para agregar este producto.");
+                    }
+                }
+                finally
+                {
+                    WaitPopUp.Hide();
+                }
             }
 
             // Show loading screen while adding product and refreshing data

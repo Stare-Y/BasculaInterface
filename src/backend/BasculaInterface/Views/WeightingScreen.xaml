@@ -272,7 +272,7 @@
                             HorizontalOptions="Start"
                             HorizontalTextAlignment="Start"
                             Text="Manual"
-                            TextColor="{StaticResource 1}"
+                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
                             VerticalOptions="Center"
                             VerticalTextAlignment="Center" />
                     </Grid>
@@ -545,6 +545,7 @@
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
+                    ToolTipProperties.Text="Elegir Socio (F2)"
                     WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>
@@ -694,6 +695,7 @@
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="3"
                     Style="{StaticResource RoundedBorderStyle}"
+                    ToolTipProperties.Text="Confirmar Entrada (F12)"
                     WidthRequest="{OnPlatform Android=75,
                                               WinUI=250}">
                     <Border.GestureRecognizers>

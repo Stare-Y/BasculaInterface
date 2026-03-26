@@ -113,6 +113,16 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<WeightEntry>> GetPendingWeightsByPartnerAsync(int partnerId)
+        {
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Where(w => w.PartnerId == partnerId && w.ConcludeDate == null && !w.IsDeleted)
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
+                .ToListAsync();
+        }
+
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
             if (weightEntry.Id <= 0)

@@ -16,5 +16,6 @@ namespace Core.Application.Services
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
+        Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
     }
 }

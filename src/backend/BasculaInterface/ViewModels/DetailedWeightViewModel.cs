@@ -349,6 +349,26 @@ namespace BasculaInterface.ViewModels
             }
         }
 
+        /// <summary>
+        /// Validates if the partner has sufficient credit for the requested amount,
+        /// considering all pending weight entries.
+        /// </summary>
+        /// <param name="requestedAmount">The amount to validate (e.g., qty * product.Precio)</param>
+        /// <returns>CreditValidationResponse with validation results</returns>
+        /// <exception cref="InvalidOperationException">Thrown when Partner is not set</exception>
+        public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(double requestedAmount)
+        {
+            if (Partner is null || Partner.Id <= 0)
+            {
+                throw new InvalidOperationException("No se ha seleccionado un socio para validar el crédito.");
+            }
+
+            CreditValidationResponse response = await _apiService.GetAsync<CreditValidationResponse>(
+                $"api/Weight/ValidateCredit?partnerId={Partner.Id}&requestedAmount={requestedAmount}");
+
+            return response;
+        }
+
         public async Task LoadProductsAsync(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, CancellationToken cancellationToken = default)
         {
             WeightEntry = weightEntry;

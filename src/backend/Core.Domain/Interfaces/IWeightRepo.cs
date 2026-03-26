@@ -11,6 +11,7 @@ namespace Core.Domain.Interfaces
         Task<IEnumerable<WeightEntry>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntry>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntry>> GetPendingWeights(int top = 30, uint page = 1);
+        Task<IEnumerable<WeightEntry>> GetPendingWeightsByPartnerAsync(int partnerId);
         Task UpdateAsync(WeightEntry weightEntry);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);

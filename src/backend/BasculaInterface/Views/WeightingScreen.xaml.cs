@@ -20,7 +20,43 @@ public partial class WeightingScreen : ContentPage
         {
             EntryVehiclePlate.IsEnabled = false;
         }
+
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
     }
+
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.F2)
+        {
+            BtnPickPartner_Clicked(BtnPickPartner, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F12)
+        {
+            BtnCaptureNewWeight_Clicked(BtnCaptureNewWeight, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
 
     public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {

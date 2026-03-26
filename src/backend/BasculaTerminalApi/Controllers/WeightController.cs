@@ -165,5 +165,54 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest("Error sending document to contpaqi comercial" + ex.Message);
             }
         }
+
+        [HttpGet("ValidateCredit")]
+        public async Task<ActionResult<CreditValidationResponse>> ValidatePartnerCredit(
+            [FromQuery] int partnerId,
+            [FromQuery] double requestedAmount)
+        {
+            try
+            {
+                if (partnerId <= 0)
+                {
+                    return BadRequest(new CreditValidationResponse
+                    {
+                        IsValid = false,
+                        Message = "ID de socio inválido."
+                    });
+                }
+
+                if (requestedAmount < 0)
+                {
+                    return BadRequest(new CreditValidationResponse
+                    {
+                        IsValid = false,
+                        Message = "El monto solicitado no puede ser negativo."
+                    });
+                }
+
+                CreditValidationResponse result = await _weightService.ValidatePartnerCreditAsync(partnerId, requestedAmount);
+
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Partner with ID {PartnerId} not found", partnerId);
+                return NotFound(new CreditValidationResponse
+                {
+                    IsValid = false,
+                    Message = $"Socio con ID {partnerId} no encontrado."
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating credit for partner {PartnerId}", partnerId);
+                return BadRequest(new CreditValidationResponse
+                {
+                    IsValid = false,
+                    Message = $"Error validando crédito: {ex.Message}"
+                });
+            }
+        }
     }
 }

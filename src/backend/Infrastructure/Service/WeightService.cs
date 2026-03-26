@@ -191,5 +191,78 @@ namespace Infrastructure.Service
             else
                 return weightDetail.RequiredAmount ?? 0;
         }
+
+        public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount)
+        {
+            // Fetch the partner to get their credit information
+            ClienteProveedorDto partner = await _clienteProveedorService.GetById(partnerId);
+
+            // If partner ignores credit limit, always return valid
+            if (partner.IgnoreCreditLimit)
+            {
+                return new CreditValidationResponse
+                {
+                    IsValid = true,
+                    AvailableCredit = partner.AvailableCredit,
+                    RequestedAmount = requestedAmount,
+                    PendingEntriesCost = 0,
+                    RemainingCredit = partner.AvailableCredit - requestedAmount,
+                    Message = "Crédito válido."
+                };
+            }
+
+            // If partner has no credit limit set, they can't make purchases on credit
+            if (partner.CreditLimit <= 0)
+            {
+                return new CreditValidationResponse
+                {
+                    IsValid = false,
+                    AvailableCredit = 0,
+                    RequestedAmount = requestedAmount,
+                    PendingEntriesCost = 0,
+                    RemainingCredit = 0,
+                    Message = "El socio no tiene límite de crédito configurado."
+                };
+            }
+
+            // Get all pending (not finished) weight entries for this partner
+            IEnumerable<WeightEntry> pendingEntries = await _weightRepo.GetPendingWeightsByPartnerAsync(partnerId);
+
+            // Calculate the total cost of pending entries
+            // If weight is already measured (Weight > 0), use Weight * Price
+            // Otherwise, use RequiredAmount * Price
+            double pendingEntriesCost = 0;
+            foreach (WeightEntry entry in pendingEntries)
+            {
+                foreach (WeightDetail detail in entry.WeightDetails)
+                {
+                    if (detail.FK_WeightedProductId.HasValue && detail.ProductPrice.HasValue)
+                    {
+                        // Use actual weight if measured, otherwise use required amount
+                        double quantity = detail.Weight > 0 
+                            ? detail.Weight 
+                            : (detail.RequiredAmount ?? 0);
+
+                        pendingEntriesCost += detail.ProductPrice.Value * quantity;
+                    }
+                }
+            }
+
+            // Calculate remaining credit after considering pending entries and requested amount
+            double remainingCredit = partner.AvailableCredit - requestedAmount - pendingEntriesCost;
+            bool isValid = remainingCredit >= 0;
+
+            return new CreditValidationResponse
+            {
+                IsValid = isValid,
+                AvailableCredit = partner.AvailableCredit,
+                RequestedAmount = requestedAmount,
+                PendingEntriesCost = pendingEntriesCost,
+                RemainingCredit = remainingCredit,
+                Message = isValid
+                    ? "Crédito válido."
+                    : "Crédito insuficiente."
+            };
+        }
     }
 }

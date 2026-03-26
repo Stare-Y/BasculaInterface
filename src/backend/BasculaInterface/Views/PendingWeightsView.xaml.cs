@@ -22,7 +22,53 @@ public partial class PendingWeightsView : ContentPage
 
         // Subscribe to Loaded event for first-time initialization
         this.Loaded += OnPageLoaded;
+
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
     }
+
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.F5 && BtnNewWeighProcess.IsVisible)
+        {
+            BtnNewWeighProcess_Clicked(BtnNewWeighProcess, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F6 && BtnFinished.IsVisible)
+        {
+            BtnFinished_Clicked(BtnFinished, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F8 && BtnNewWeightLessPedido.IsVisible)
+        {
+            OnBtnNewWeighlessProcess_clicked(BtnNewWeightLessPedido, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            BtnExit_Clicked(BtnExit, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
 
     public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
 
