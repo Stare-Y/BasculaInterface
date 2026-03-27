@@ -161,7 +161,10 @@ public partial class PendingWeightsView : ContentPage
                 BtnFinished.IsVisible = false;
 
                 if (Preferences.Get("OnlyPedidos", false))
+                {
                     BtnNewWeightLessPedido.IsVisible = true;
+                    BtnFinished.IsVisible = true;
+                }
             }
 #if ANDROID
             BtnRefresh.IsVisible = false;
@@ -444,6 +447,8 @@ public partial class PendingWeightsView : ContentPage
             };
 
             await viewModel.PostNewWeightEntry(weightEntry, partner);
+
+            await Reconect();
 
             await Task.Delay(500);
         }

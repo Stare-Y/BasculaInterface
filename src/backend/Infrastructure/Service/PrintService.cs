@@ -274,7 +274,7 @@ namespace Infrastructure.Service
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(partner.IsProvider ? "Proveedor:" : "Socio:")));
                     table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph(partner.RazonSocial, bold: true)));
+                        .Add(BuildParagraph(partner.Code + " - " + partner.RazonSocial, bold: true)));
 
 
                     if (!entry.ContpaqiComercialFolio.IsNullOrEmpty())
