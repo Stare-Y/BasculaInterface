@@ -274,7 +274,7 @@ namespace BasculaInterface.ViewModels
                 // If the product already exists, update the weight
                 WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
 
-                if(_diferenciaAbs <= 0)
+                if (_diferenciaAbs <= 0)
                 {
                     throw new InvalidOperationException($"La diferencia de la tara es 0 \n(Tara inicial: {existingDetail.SecondaryTare} peso final: {_pesoTotal}) \nDESTARA Y CAPTURA DE NUEVO");
                 }
@@ -289,7 +289,7 @@ namespace BasculaInterface.ViewModels
 
                 return;
             }
-            
+
             // If the product does not exist, add a new detail
             WeightEntry.WeightDetails.Add(new WeightDetailDto
             {
@@ -333,10 +333,10 @@ namespace BasculaInterface.ViewModels
         {
             if (Preferences.Get("RequirePartner", false) || Providers)
             {
-                if(Partner is null || Partner.Id < 1)
+                if (Partner is null || Partner.Id < 1)
                     throw new InvalidOperationException("Es obligatorio especificar al socio.");
             }
-            if(Providers && (Product is null || Product.Id <= 0))
+            if (Providers && (Product is null || Product.Id <= 0))
             {
                 throw new InvalidOperationException("Es obligatorio especificar el producto para las descargas de proveedores.");
             }
@@ -356,10 +356,6 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }
-
-            string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
-            int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
-            WeightEntry.ExternalTargetBehaviorFK = preferedExternalTypeId;
         }
 
         private async Task PrintTurnAsync(WeightEntryDto newWeightEntry)
@@ -390,10 +386,10 @@ namespace BasculaInterface.ViewModels
             WeightEntry.RegisteredBy = DeviceInfo.Name;
 
             WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
-            
+
             WeightEntry = newEntry;
 
-            if(Product is not null && Product.Id != 0)
+            if (Product is not null && Product.Id != 0)
             {
                 WeightEntry.WeightDetails.Add(new WeightDetailDto
                 {
@@ -405,7 +401,7 @@ namespace BasculaInterface.ViewModels
                 await PutWeightEntry();
             }
 
-            if(printTurn)
+            if (printTurn)
                 await PrintTurnAsync(newEntry);
         }
 

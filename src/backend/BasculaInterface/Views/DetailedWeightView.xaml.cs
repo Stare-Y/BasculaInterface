@@ -115,50 +115,51 @@ public partial class DetailedWeightView : ContentPage
             }
         }
 
-        WaitPopUp.Show("Un momento...");
-        try
+        // Only fetch and set the picker if it doesn't already have a valid selection.
+        // This avoids re-triggering SelectedIndexChanged when coming back from a modal.
+        if (PickerTargetBehavior.SelectedIndex < 0 || viewModel.ExternalTargetBehaviors.Count == 0)
         {
-            // Set flag BEFORE loading behaviors to prevent any spurious
-            // SelectedIndexChanged events while the Picker's ItemsSource is being populated.
-            _isInitializing = true;
-
-            await viewModel.LoadExternalTargetBehaviors(token);
-
-            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+            WaitPopUp.Show("Un momento...");
+            try
             {
-                // Use SelectedIndex instead of SelectedItem — MAUI Picker
-                // does not reliably match by reference with SelectedItem.
-                int targetId = viewModel.WeightEntry!.ExternalTargetBehaviorFK.Value;
-                int index = -1;
-                for (int i = 0; i < viewModel.ExternalTargetBehaviors.Count; i++)
+                _isInitializing = true;
+
+                await viewModel.LoadExternalTargetBehaviors(token);
+
+                if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
                 {
-                    if (viewModel.ExternalTargetBehaviors[i].Id == targetId)
+                    int targetId = viewModel.WeightEntry!.ExternalTargetBehaviorFK.Value;
+                    int index = -1;
+                    for (int i = 0; i < viewModel.ExternalTargetBehaviors.Count; i++)
                     {
-                        index = i;
-                        break;
+                        if (viewModel.ExternalTargetBehaviors[i].Id == targetId)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    if (index >= 0)
+                    {
+                        PickerTargetBehavior.SelectedIndex = index;
                     }
                 }
-
-                if (index >= 0)
-                {
-                    PickerTargetBehavior.SelectedIndex = index;
-                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
-        }
-        finally
-        {
-            _isInitializing = false;
-            BtnSaveNotes.IsVisible = false;
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
+            }
+            finally
+            {
+                _isInitializing = false;
+                BtnSaveNotes.IsVisible = false;
 
-            WaitPopUp.Hide();
+                WaitPopUp.Hide();
+            }
         }
 
         if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
