@@ -6,10 +6,16 @@
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
     xmlns:models="clr-namespace:BasculaInterface.Models"
+    xmlns:local="clr-namespace:BasculaInterface.Resources.Converters"
     Title="Pedidos en Proceso"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <Grid>
 
         <Grid
@@ -295,7 +301,7 @@
                                                     TextColor="{StaticResource 2}" />
 
                                                 <Label
-                                                    Text="{Binding WeightEntry.CreatedAt, StringFormat='{0:dd/MM HH:mm}'}"
+                                                    Text="{Binding WeightEntry.CreatedAt, Converter={StaticResource UtcToLocalConverter}, StringFormat='{0:dd/MM HH:mm}'}"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
                                                     FontSize="{OnPlatform WinUI=20,
