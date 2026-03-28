@@ -118,14 +118,31 @@ public partial class DetailedWeightView : ContentPage
         WaitPopUp.Show("Un momento...");
         try
         {
+            // Set flag BEFORE loading behaviors to prevent any spurious
+            // SelectedIndexChanged events while the Picker's ItemsSource is being populated.
+            _isInitializing = true;
+
             await viewModel.LoadExternalTargetBehaviors(token);
 
             if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
             {
-                // Set flag to prevent SelectedIndexChanged from triggering API calls
-                _isInitializing = true;
-                PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
-                _isInitializing = false;
+                // Use SelectedIndex instead of SelectedItem — MAUI Picker
+                // does not reliably match by reference with SelectedItem.
+                int targetId = viewModel.WeightEntry!.ExternalTargetBehaviorFK.Value;
+                int index = -1;
+                for (int i = 0; i < viewModel.ExternalTargetBehaviors.Count; i++)
+                {
+                    if (viewModel.ExternalTargetBehaviors[i].Id == targetId)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index >= 0)
+                {
+                    PickerTargetBehavior.SelectedIndex = index;
+                }
             }
         }
         catch (OperationCanceledException)
@@ -138,6 +155,7 @@ public partial class DetailedWeightView : ContentPage
         }
         finally
         {
+            _isInitializing = false;
             BtnSaveNotes.IsVisible = false;
 
             WaitPopUp.Hide();
