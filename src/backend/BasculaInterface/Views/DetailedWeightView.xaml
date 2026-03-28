@@ -5,6 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    xmlns:local="clr-namespace:BasculaInterface.Resources.Converters"
+    
     Title="DetailedWeightView"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
@@ -12,6 +14,11 @@
         <vm:DetailedWeightViewModel />
     </ContentPage.BindingContext>
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid>
 
@@ -511,7 +518,7 @@
                                                   WinUI=24}"
                             HorizontalOptions="Center"
                             Style="{StaticResource Label}"
-                            Text="{Binding WeightEntry.CreatedAt, StringFormat='{0:dd/MM HH:mm}'}"
+                            Text="{Binding WeightEntry.CreatedAt, Converter={StaticResource UtcToLocalConverter}, StringFormat='{0:dd/MM HH:mm}'}"
                             TextColor="{AppThemeBinding Light={StaticResource Black},
                                                         Dark={StaticResource 1}}" />
                     </Grid>
