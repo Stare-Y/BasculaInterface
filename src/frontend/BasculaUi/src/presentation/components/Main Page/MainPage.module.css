@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* ─── Tokens ─────────────────────────────────────────────── */
+:root {
+  --color-bg:      #F4F4F2;
+  --color-surface: #ffffff;
+  --color-navy:    #14134F;
+  --color-gold:    #C89F69;
+  --color-peach:   #FEBC9C;
+  --color-border:  #e4e4e2;
+  --color-muted:   #9a9a9a;
+}
+
+/* ─── Página ─────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  font-family: 'Outfit', sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 2.5rem 1.75rem;
+  position: relative;
+}
+
+.accentLine {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gold) 0%, var(--color-peach) 100%);
+}
+
+/* ─── Header ─────────────────────────────────────────────── */
+.header {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0.5px solid var(--color-gold);
+  border-radius: 3px;
+  padding: 3px 10px;
+  font-family: 'Outfit', monospace;
+  font-size: 10px;
+  color: var(--color-gold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.title span {
+  color: var(--color-gold);
+}
+
+.subtitle {
+  font-size: 13.5px;
+  color: var(--color-muted);
+  margin-top: 0.35rem;
+  font-weight: 300;
+}
+
+/* ─── Grid ───────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  flex: 1;
+}
+
+/* ─── Tarjeta base ───────────────────────────────────────── */
+.card {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1.35rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--color-gold);
+  box-shadow: 0 2px 16px rgba(20, 19, 79, 0.06);
+}
+
+.cardAccent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.card:hover .cardAccent {
+  opacity: 1;
+}
+
+/* ─── Variantes ──────────────────────────────────────────── */
+.card_gold .cardAccent     { background: var(--color-gold); }
+.card_gold .cardIcon       { background: rgba(200, 159, 105, 0.1); color: var(--color-gold); }
+.card_gold .cardBtn        { color: var(--color-gold); border-color: rgba(200, 159, 105, 0.4); }
+.card_gold .cardBtn:hover  { background: rgba(200, 159, 105, 0.08); }
+
+.card_peach .cardAccent    { background: var(--color-peach); }
+.card_peach .cardIcon      { background: rgba(20, 19, 79, 0.07); color: var(--color-navy); }
+.card_peach .cardBtn       { color: var(--color-navy); border-color: rgba(20, 19, 79, 0.2); }
+.card_peach .cardBtn:hover { background: rgba(20, 19, 79, 0.05); }
+
+/* ─── Internos de tarjeta ────────────────────────────────── */
+.cardIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.cardLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  margin-bottom: 0.3rem;
+}
+
+.cardDesc {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.55;
+  margin-bottom: 1.1rem;
+}
+
+.cardBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Outfit', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 0.5px solid;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.cornerMark {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-family: 'Outfit', monospace;
+  font-size: 9px;
+  color: #ddd;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.divider {
+  height: 0.5px;
+  background: var(--color-border);
+  margin: 1.5rem 0 1rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerText {
+  font-family: 'Outfit', monospace;
+  font-size: 9px;
+  color: #ccc;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', monospace;
+  font-size: 9px;
+  color: var(--color-gold);
+  letter-spacing: 0.04em;
+}
+
+.statusDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  animation: pulse 2s infinite;
+}

@@ -1,69 +1,47 @@
+// src/presentation/pages/MainPage/MainPage.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
-
-const sections = [
-  {
-    label: 'Órdenes',
-    description: 'Gestiona las órdenes activas y su historial',
-    icon: 'pi pi-list',
-    path: '/Dashboard/Orders',
-    color: '#4f46e5',
-  },
-  {
-    label: 'Dashboard',
-    description: 'Vista general del sistema',
-    icon: 'pi pi-th-large',
-    path: '/Dashboard',
-    color: '#0ea5e9',
-  },
-  // Agrega más secciones aquí
-];
+import { useMainSections } from './useMainSections';
+import { SectionCard } from './SectionCard';
+import styles from './MainPage.module.css';
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const sections = useMainSections();
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
-      background: 'var(--surface-ground)',
-    }}>
-      <h1 style={{ marginBottom: '0.5rem' }}>Sistema de Básculas</h1>
-      <p style={{ color: 'var(--text-color-secondary)', marginBottom: '2.5rem' }}>
-        Selecciona una sección para comenzar
-      </p>
+    <div className={styles.page}>
+      <div className={styles.gridBg} />
+      <div className={styles.accentLine} />
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '1.5rem',
-        width: '100%',
-        maxWidth: '800px',
-      }}>
+      <header className={styles.header}>
+        <div className={styles.badge}>
+          <span className={styles.dot} />
+          Sistema Activo
+        </div>
+        <h1 className={styles.title}>
+          Sistema de <span>Básculas</span>
+        </h1>
+        <p className={styles.subtitle}>Selecciona una sección para comenzar</p>
+      </header>
+
+      <div className={styles.grid}>
         {sections.map((section) => (
-          <Card
+          <SectionCard
             key={section.path}
-            style={{ cursor: 'pointer', textAlign: 'center' }}
+            section={section}
             onClick={() => navigate(section.path)}
-          >
-            <i
-              className={section.icon}
-              style={{ fontSize: '2.5rem', color: section.color, marginBottom: '1rem', display: 'block' }}
-            />
-            <h3 style={{ margin: '0 0 0.5rem' }}>{section.label}</h3>
-            <p style={{ color: 'var(--text-color-secondary)', fontSize: '0.875rem', margin: '0 0 1rem' }}>
-              {section.description}
-            </p>
-            <Button label="Ir" icon="pi pi-arrow-right" iconPos="right" size="small" />
-          </Card>
+          />
         ))}
       </div>
+
+      <footer className={styles.footer}>
+        <span className={styles.footerText}>Báscula Interface v1.0</span>
+        <div className={styles.statusBar}>
+          <span className={styles.statusDot} />
+          Sistema en línea
+        </div>
+      </footer>
     </div>
   );
 };

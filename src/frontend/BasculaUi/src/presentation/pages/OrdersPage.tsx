@@ -5,7 +5,7 @@ import  type {
   FilterField
 } from "../components/dashboard/ReutilisableTable";
 import  ReutilisableTable from "../components/dashboard/ReutilisableTable";
-import type { WeightEntry } from "../types/WeightEntry";
+import type { WeightEntry } from "../../domain/types/WeightEntry";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
