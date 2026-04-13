@@ -61,7 +61,7 @@ public partial class DetailedWeightView : ContentPage
     private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
         // Don't handle keys when popup is visible
-        if (PickPopUp.IsVisible)
+        if (PickPopUp.IsVisible || NotesPopUp.IsVisible)
             return;
 
         if (e.Key == Windows.System.VirtualKey.F1 && BtnNuevoProducto.IsVisible)
@@ -328,7 +328,12 @@ public partial class DetailedWeightView : ContentPage
 
             if (viewModel.WeightEntry != null && viewModel.Partner != null)
             {
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner);
+                string? detailNotes = await NotesPopUp.ShowAsync("Notas para la pesada");
+
+                if (detailNotes is null)
+                    return;
+
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner, detailNotes: detailNotes);
 
                 if (weightingScreen.BindingContext is not BasculaViewModel basculaViewModel)
                     throw new InvalidOperationException("No se pudo validar el estado de la bascuila en el VM");

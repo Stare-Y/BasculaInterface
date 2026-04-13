@@ -1183,6 +1183,7 @@
 
         <components:WaitPopUp x:Name="WaitPopUp" />
         <components:PickQuantityPopUp x:Name="PickPopUp" />
+        <components:PickNotesPopUp x:Name="NotesPopUp" />
 
     </Grid>
 

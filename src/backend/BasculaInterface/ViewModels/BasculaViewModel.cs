@@ -5,12 +5,14 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BasculaInterface.ViewModels
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public class BasculaViewModel : ViewModelBase
     {
+        public string? DetailNotes { get; set; } = null;
         public int? TargetWeightDetail {  get; set; } = null;
         private WeightEntryDto? _weightEntry;
         public WeightEntryDto? WeightEntry
@@ -299,7 +301,8 @@ namespace BasculaInterface.ViewModels
                 Weight = _diferenciaAbs,
                 FK_WeightedProductId = Product?.Id,
                 RequiredAmount = ProductQuantity,
-                WeightedBy = DeviceInfo.Name
+                WeightedBy = DeviceInfo.Name,
+                Notes = DetailNotes
             });
 
             WeightEntry.BruteWeight = _pesoTotal;
@@ -401,7 +404,8 @@ namespace BasculaInterface.ViewModels
                     FK_WeightEntryId = WeightEntry.Id,
                     FK_WeightedProductId = Product?.Id,
                     RequiredAmount = ProductQuantity,
-                    WeightedBy = DeviceInfo.Name
+                    WeightedBy = DeviceInfo.Name,
+                    Notes = DetailNotes,
                 });
                 await PutWeightEntry();
             }

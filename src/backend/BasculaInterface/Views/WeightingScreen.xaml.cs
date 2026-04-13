@@ -58,7 +58,7 @@ public partial class WeightingScreen : ContentPage
     }
 #endif
 
-    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, int? targetWeightDetail = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
+    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, string? detailNotes = null, int? targetWeightDetail = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {
         if (BindingContext is not BasculaViewModel viewModel)
             return;

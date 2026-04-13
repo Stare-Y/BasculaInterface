@@ -63,8 +63,8 @@
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		
 		 <!--avoid MSIX--> 
-		<WindowsPackageType>None</WindowsPackageType>
-		<PublishSingleFile>true</PublishSingleFile>
+		<!--<WindowsPackageType>None</WindowsPackageType>
+		<PublishSingleFile>true</PublishSingleFile>-->
 
 		<!--Name and title-->
 		<AssemblyName>BasculaInterface</AssemblyName>
@@ -139,6 +139,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\PendingWeightsView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\PopUps\PickNotesPopUp.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\PopUps\PickQuantityPopUp.xaml">

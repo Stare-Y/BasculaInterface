@@ -201,6 +201,10 @@ namespace Infrastructure.Service
                         _logger.LogError(ex, "Error fetching product info for printing");
                     }
                 }
+                else
+                {
+                    productName = detail.Notes ?? productName;
+                }
 
                 table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(productName, _settings.SubTitleFontSize, TextAlignment.CENTER, bold: true)));
