@@ -120,7 +120,7 @@ namespace BasculaInterface.Models
 
         public double? ProductPrice { get; set; } = null;
 
-        public string RequiredAmountText => RequiredAmount.HasValue && IsGranel
+        public string RequiredAmountText => RequiredAmount > 0 && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
             : string.Empty;
 

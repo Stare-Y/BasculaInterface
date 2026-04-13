@@ -328,12 +328,19 @@ public partial class DetailedWeightView : ContentPage
 
             if (viewModel.WeightEntry != null && viewModel.Partner != null)
             {
-                string? detailNotes = await NotesPopUp.ShowAsync("Notas para la pesada");
+                string? detailNotes = null;
 
-                if (detailNotes is null)
-                    return;
+                if(viewModel.Partner.Id <= 0)
+                {
+                    detailNotes = await NotesPopUp.ShowAsync("Que se esta pesando?");
+                    if (detailNotes == null)
+                    {
+                        // User cancelled the prompt
+                        return;
+                    }
+                }
 
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner, detailNotes: detailNotes);
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner, detailNotes: detailNotes, useIncommingTara: viewModel.Partner.Id <= 0);
 
                 if (weightingScreen.BindingContext is not BasculaViewModel basculaViewModel)
                     throw new InvalidOperationException("No se pudo validar el estado de la bascuila en el VM");
@@ -618,7 +625,7 @@ public partial class DetailedWeightView : ContentPage
             if (row is null)
                 return;
 
-            if (row.Tare > 0)
+            if (row.Tare > 0 ||row.Weight > 0)
                 return;
 
             if (!row.IsGranel)

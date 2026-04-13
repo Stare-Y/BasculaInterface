@@ -397,7 +397,7 @@ namespace BasculaInterface.ViewModels
 
             WeightEntry = newEntry;
 
-            if (Product is not null && Product.Id != 0)
+            if (Product is not null && Product.Id > 0)
             {
                 WeightEntry.WeightDetails.Add(new WeightDetailDto
                 {

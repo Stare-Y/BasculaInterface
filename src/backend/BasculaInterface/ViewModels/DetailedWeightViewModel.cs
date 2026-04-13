@@ -389,7 +389,7 @@ namespace BasculaInterface.ViewModels
 
             // Batch fetch all products to avoid N+1 queries
             int[] productIds = WeightEntry.WeightDetails
-                .Where(d => d.FK_WeightedProductId.HasValue)
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId > 0)
                 .Select(d => d.FK_WeightedProductId!.Value)
                 .Distinct()
                 .ToArray();
@@ -424,7 +424,7 @@ namespace BasculaInterface.ViewModels
                     Costales = detail.Costales
                 };
 
-                if (detail.FK_WeightedProductId is not null && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))
+                if (detail.FK_WeightedProductId > 0 && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))
                 {
                     if (product is null || product.Nombre.IsNullOrEmpty())
                     {
@@ -437,14 +437,9 @@ namespace BasculaInterface.ViewModels
                         row.IsGranel = product!.IsGranel;
                     }
                 }
-                else if (detail.FK_WeightedProductId is not null)
-                {
-                    row.Description = $"Unknown Product ({detail.FK_WeightedProductId})";
-                    row.IsGranel = false;
-                }
                 else
                 {
-                    row.Description = "Peso Libre";
+                    row.Description = string.IsNullOrEmpty(detail.Notes) ? "Peso Libre" : detail.Notes;
                 }
 
                 WeightEntryDetailRows.Add(row);

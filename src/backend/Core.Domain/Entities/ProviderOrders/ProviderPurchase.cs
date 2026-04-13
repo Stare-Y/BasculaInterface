@@ -6,12 +6,14 @@ namespace Core.Domain.Entities.ProviderOrders
 {
     public class ProviderPurchase : BaseEntity
     {
-        public int ProviderId { get; set; }
+        public required int ProviderId { get; set; }
         public DateTime? LastUpdated { get; set; }
-        public int ProductId { get; set; }
-        public decimal RequiredAmount { get; set; }
+        public required int ProductId { get; set; }
+        public required decimal RequiredAmount { get; set; }
+        public decimal? RealAmount { get; set; } 
         public string? Notes { get; set; }
         public int? WeightEntryId { get; set; }
+
 
         [ForeignKey(nameof(WeightEntryId))]
         public virtual WeightEntry? WeightEntry { get; set; }

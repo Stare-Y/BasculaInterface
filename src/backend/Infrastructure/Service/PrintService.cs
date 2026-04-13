@@ -177,13 +177,13 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph("Productos de pedido:")));
+                .Add(BuildParagraph("Productos:")));
 
             foreach (WeightDetailDto detail in entry.WeightDetails)
             {
                 string productName = "Pesada libre";
 
-                if (detail.FK_WeightedProductId.HasValue)
+                if (detail.FK_WeightedProductId > 0)
                 {
                     try
                     {
@@ -209,7 +209,7 @@ namespace Infrastructure.Service
                 table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(productName, _settings.SubTitleFontSize, TextAlignment.CENTER, bold: true)));
 
-                if (detail.RequiredAmount.HasValue)
+                if (detail.RequiredAmount > 0)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph($"Requerido: {detail.RequiredAmount} kg{(detail.Costales > 0 ? $" ~ {detail.Costales} costales." : ".")}", _settings.SmallFontSize, TextAlignment.LEFT)));
@@ -218,7 +218,7 @@ namespace Infrastructure.Service
                 if (detail.Tare > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph($"Peso Anterior:", _settings.SmallFontSize)));
+                    .Add(BuildParagraph($"Tara:", _settings.SmallFontSize)));
 
                     table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(detail.Tare.ToString("F2") + "kg", _settings.SmallFontSize, TextAlignment.RIGHT, bold: false)));
@@ -227,7 +227,7 @@ namespace Infrastructure.Service
                 if (detail.Weight > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Peso Real:", _settings.SmallFontSize)));
+                    .Add(BuildParagraph("Neto:", _settings.SmallFontSize)));
 
                     table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                             .Add(BuildParagraph(detail.Weight.ToString("F2") + "kg", _settings.SubTitleFontSize, TextAlignment.RIGHT, bold: true)));
@@ -263,13 +263,13 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph(_settings.CompanyName, _settings.TitleFontSize, TextAlignment.CENTER, true)));
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph("Detalle de Pedido", _settings.SubTitleFontSize, TextAlignment.CENTER)));
+                .Add(BuildParagraph($"Pesada {entry.Id}", _settings.SubTitleFontSize, TextAlignment.CENTER)));
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph()));// Empty row
 
             //partner
-            if (entry.PartnerId.HasValue)
+            if (entry.PartnerId > 0)
             {
                 try
                 {
@@ -310,7 +310,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 1).SetBorder(Border.NO_BORDER)
-            .Add(BuildParagraph("TARA:")));
+            .Add(BuildParagraph("TARA INICIAL:")));
 
             table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.TareWeight.ToString("F2") + "kg", textAlignment: TextAlignment.RIGHT, bold: true)));

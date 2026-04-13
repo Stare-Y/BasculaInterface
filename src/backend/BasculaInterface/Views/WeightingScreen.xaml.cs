@@ -69,13 +69,19 @@ public partial class WeightingScreen : ContentPage
         viewModel.Partner = partner;
         viewModel.Product = productoDto;
         viewModel.TargetWeightDetail = targetWeightDetail;
+        viewModel.DetailNotes = detailNotes;
+
+        if(!string.IsNullOrEmpty(detailNotes))
+        {
+            viewModel.Product = new ProductoDto { Nombre = detailNotes };
+        }
 
         if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
         {
             if (weightEntry.BruteWeight > 0)
             {
                 if (productoDto is null)
-                    viewModel.SetTara(0);
+                    viewModel.SetTara(useIncommingTara ? weightEntry.BruteWeight : 0);
                 else
                     viewModel.SetTara(weightEntry.BruteWeight);
             }
