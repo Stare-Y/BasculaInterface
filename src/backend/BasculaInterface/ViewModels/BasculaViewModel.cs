@@ -11,6 +11,7 @@ namespace BasculaInterface.ViewModels
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public class BasculaViewModel : ViewModelBase
     {
+        public int? TargetWeightDetail {  get; set; } = null;
         private WeightEntryDto? _weightEntry;
         public WeightEntryDto? WeightEntry
         {
@@ -269,10 +270,10 @@ namespace BasculaInterface.ViewModels
 
             WeightEntry.PartnerId = Partner?.Id;
 
-            if (WeightEntry.WeightDetails.Any(w => w.FK_WeightedProductId == Product?.Id))
+            if (TargetWeightDetail.HasValue && WeightEntry.WeightDetails.Any(w => w.Id == TargetWeightDetail.Value))
             {
                 // If the product already exists, update the weight
-                WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
+                WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.Id == TargetWeightDetail.Value);
 
                 if (_diferenciaAbs <= 0)
                 {
@@ -316,7 +317,11 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
-            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(w => w.FK_WeightedProductId == Product?.Id);
+            if(TargetWeightDetail == null)
+            {
+                throw new InvalidOperationException("TargetWeightDetail must be set to update the secondary tara.");
+            }
+            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(w => w.Id == TargetWeightDetail.Value);
             if (detail != null)
             {
                 detail.SecondaryTare = TaraCurrentValue;

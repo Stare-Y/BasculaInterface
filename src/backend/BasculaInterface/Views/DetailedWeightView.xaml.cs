@@ -648,7 +648,7 @@ public partial class DetailedWeightView : ContentPage
                     };
                 }
 
-                WeightingScreen weightingScreen = new(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+                WeightingScreen weightingScreen = new(viewModel.WeightEntry!, viewModel.Partner, producto, targetWeightDetail: row.Id, useIncommingTara: false);
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
 
