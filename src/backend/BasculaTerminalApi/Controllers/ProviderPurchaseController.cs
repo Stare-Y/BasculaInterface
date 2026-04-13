@@ -93,6 +93,30 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
+        [HttpPost("CreateWeightEntry")]
+        public async Task<ActionResult<WeightEntryDto>> CreateWeightEntry([FromQuery] int purchaseId)
+        {
+            try
+            {
+                return Ok(await _providerPurchaseService.CreateWeightEntryAsync(purchaseId));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Provider purchase with ID {Id} not found", purchaseId);
+                return NotFound(new GenericResponse<string> { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Cannot create weight entry for provider purchase {Id}", purchaseId);
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating weight entry for provider purchase {Id}", purchaseId);
+                return BadRequest(new GenericResponse<string> { Message = $"Error creating weight entry: {ex.Message}" });
+            }
+        }
+
         [HttpDelete]
         public async Task<IActionResult> Delete([FromQuery] int id)
         {

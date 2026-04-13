@@ -52,6 +52,20 @@ namespace Infrastructure.Repos
             }
         }
 
+        public async Task<ProviderPurchase?> GetByWeightEntryIdAsync(int weightEntryId)
+        {
+            try
+            {
+                return await _context.ProviderPurchases
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(pp => pp.WeightEntryId == weightEntryId && !pp.IsDeleted);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error retrieving ProviderPurchase by WeightEntryId {weightEntryId}: {ex.Message}", ex);
+            }
+        }
+
         public async Task<IEnumerable<ProviderPurchase>> GetAllAsync(int top = 30, uint page = 1)
         {
             try
@@ -94,9 +108,25 @@ namespace Infrastructure.Repos
         {
             try
             {
-                providerPurchase.LastUpdated = DateTime.UtcNow;
-                _context.ProviderPurchases.Update(providerPurchase);
+                var existing = await _context.ProviderPurchases
+                    .FirstOrDefaultAsync(pp => pp.Id == providerPurchase.Id && !pp.IsDeleted)
+                    ?? throw new KeyNotFoundException($"ProviderPurchase with ID {providerPurchase.Id} not found.");
+
+                existing.ProviderId = providerPurchase.ProviderId;
+                existing.ProductId = providerPurchase.ProductId;
+                existing.RequiredAmount = providerPurchase.RequiredAmount;
+                existing.RealAmount = providerPurchase.RealAmount;
+                existing.Notes = providerPurchase.Notes;
+                existing.WeightEntryId = providerPurchase.WeightEntryId;
+                existing.Concluded = providerPurchase.Concluded;
+                existing.ExpectedArrival = providerPurchase.ExpectedArrival;
+                existing.LastUpdated = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
             }
             catch (DbUpdateConcurrencyException ex)
             {

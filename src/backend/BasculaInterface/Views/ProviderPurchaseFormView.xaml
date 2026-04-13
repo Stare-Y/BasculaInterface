@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BasculaInterface.Views.ProviderPurchaseFormView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
+    xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    Title="Pedido a Proveedor"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
+
+    <Grid>
+        <ScrollView
+            Padding="20">
+
+            <VerticalStackLayout
+                Spacing="20">
+
+                <Label
+                    x:Name="LblTitle"
+                    FontAttributes="Bold"
+                    FontSize="28"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource Label}"
+                    Text="Nuevo Pedido"
+                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                Dark={StaticResource 2}}" />
+
+                <!-- Provider -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                        <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                Style="{StaticResource Label}"
+                                Text="Proveedor"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 1}}" />
+                            <Label
+                                x:Name="LblProviderName"
+                                FontSize="16"
+                                Style="{StaticResource Label}"
+                                Text="Sin proveedor seleccionado" />
+                        </VerticalStackLayout>
+                        <Button
+                            x:Name="BtnPickProvider"
+                            Grid.Column="1"
+                            Clicked="BtnPickProvider_Clicked"
+                            Style="{StaticResource Boton}"
+                            Text="Seleccionar"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Product -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                        <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                Style="{StaticResource Label}"
+                                Text="Producto"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 1}}" />
+                            <Label
+                                x:Name="LblProductName"
+                                FontSize="16"
+                                Style="{StaticResource Label}"
+                                Text="Sin producto seleccionado" />
+                        </VerticalStackLayout>
+                        <Button
+                            x:Name="BtnPickProduct"
+                            Grid.Column="1"
+                            Clicked="BtnPickProduct_Clicked"
+                            Style="{StaticResource Boton}"
+                            Text="Seleccionar"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Amount -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Cantidad Requerida (kg)"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 1}}" />
+                        <Entry
+                            x:Name="EntryRequiredAmount"
+                            Keyboard="Numeric"
+                            Placeholder="0.00" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Expected arrival -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Fecha Esperada de Llegada"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 1}}" />
+                        <DatePicker
+                            x:Name="DatePickerExpectedArrival" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Notes -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Notas"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 1}}" />
+                        <Editor
+                            x:Name="EditorNotes"
+                            HeightRequest="100"
+                            Placeholder="Notas opcionales..." />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Create weight entry -->
+                <Button
+                    x:Name="BtnCreateWeightEntry"
+                    Clicked="BtnCreateWeightEntry_Clicked"
+                    HorizontalOptions="Fill"
+                    IsVisible="False"
+                    Style="{StaticResource BotonPrincipal}"
+                    Text="Iniciar Pesaje" />
+
+                <!-- Action buttons -->
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="15"
+                    HorizontalOptions="Fill">
+
+                    <Button
+                        x:Name="BtnSave"
+                        Grid.Column="0"
+                        Clicked="BtnSave_Clicked"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Guardar" />
+
+                    <Button
+                        x:Name="BtnDelete"
+                        Grid.Column="1"
+                        BackgroundColor="DarkRed"
+                        Clicked="BtnDelete_Clicked"
+                        IsVisible="False"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Eliminar"
+                        TextColor="White" />
+
+                    <Button
+                        x:Name="BtnCancel"
+                        Grid.Column="2"
+                        Clicked="BtnCancel_Clicked"
+                        Style="{StaticResource Boton}"
+                        Text="Cancelar" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <components:WaitPopUp x:Name="WaitPopUp" />
+    </Grid>
+</ContentPage>

@@ -153,6 +153,12 @@
 	  <MauiXaml Update="Views\ProductSelectView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\ProviderPurchaseFormView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ProviderPurchaseListView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\ReadOnlyDetailedWeightView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

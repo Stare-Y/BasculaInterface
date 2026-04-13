@@ -13,6 +13,8 @@ namespace Core.Domain.Entities.ProviderOrders
         public decimal? RealAmount { get; set; } 
         public string? Notes { get; set; }
         public int? WeightEntryId { get; set; }
+        public bool Concluded { get; set; } = false;
+        public DateTime ExpectedArrival { get; set; } = DateTime.Now.AddDays(7);
 
 
         [ForeignKey(nameof(WeightEntryId))]

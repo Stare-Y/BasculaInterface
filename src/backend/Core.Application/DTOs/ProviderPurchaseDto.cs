@@ -8,8 +8,11 @@ namespace Core.Application.DTOs
         public int ProviderId { get; set; }
         public int ProductId { get; set; }
         public decimal RequiredAmount { get; set; }
+        public decimal? RealAmount { get; set; }
         public string? Notes { get; set; }
         public int? WeightEntryId { get; set; }
+        public bool Concluded { get; set; }
+        public DateTime ExpectedArrival { get; set; }
         public DateTime? LastUpdated { get; set; }
         public DateTime? CreatedAt { get; set; }
 
@@ -24,8 +27,11 @@ namespace Core.Application.DTOs
             ProviderId = entity.ProviderId;
             ProductId = entity.ProductId;
             RequiredAmount = entity.RequiredAmount;
+            RealAmount = entity.RealAmount;
             Notes = entity.Notes;
             WeightEntryId = entity.WeightEntryId;
+            Concluded = entity.Concluded;
+            ExpectedArrival = entity.ExpectedArrival;
             LastUpdated = entity.LastUpdated;
             CreatedAt = entity.CreatedAt;
         }
@@ -38,8 +44,11 @@ namespace Core.Application.DTOs
                 ProviderId = ProviderId,
                 ProductId = ProductId,
                 RequiredAmount = RequiredAmount,
+                RealAmount = RealAmount,
                 Notes = Notes,
                 WeightEntryId = WeightEntryId,
+                Concluded = Concluded,
+                ExpectedArrival = ExpectedArrival,
                 LastUpdated = LastUpdated
             };
         }

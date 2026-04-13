@@ -4,6 +4,7 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using System.Threading.Tasks;
 
 namespace BasculaInterface.Views;
 
@@ -471,12 +472,14 @@ public partial class PendingWeightsView : ContentPage
         {
             BtnCargas.IsEnabled = true;
             BtnDescargas.IsEnabled = false;
+            BtnComprasProveedor.IsVisible = true;
             PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
         }
         else
         {
             BtnCargas.IsEnabled = false;
             BtnDescargas.IsEnabled = true;
+            BtnComprasProveedor.IsVisible = false;
             PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsCharge;
         }
     }
@@ -495,5 +498,10 @@ public partial class PendingWeightsView : ContentPage
         {
             viewModel.ShowDocumentsWithId(selectedDocumentType.Id);
         }
+    }
+
+    private async void BtnComprasProveedor_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushModalAsync(new ProviderPurchaseListView());
     }
 }

@@ -14,8 +14,9 @@ namespace Infrastructure.Service
         private readonly IApiService _apiService;
         private readonly IClienteProveedorService _clienteProveedorService;
         private readonly IProductService _productService;
+        private readonly IProviderPurchaseService _providerPurchaseService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
-        public WeightService(IWeightRepo weightRepo, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options)
+        public WeightService(IWeightRepo weightRepo, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IProviderPurchaseService providerPurchaseService)
         {
             _weightRepo = weightRepo;
 
@@ -26,6 +27,8 @@ namespace Infrastructure.Service
             _clienteProveedorService = clienteProveedorService;
 
             _productService = productService;
+
+            _providerPurchaseService = providerPurchaseService;
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
@@ -76,11 +79,17 @@ namespace Infrastructure.Service
         public async Task UpdateAsync(WeightEntryDto weightEntry)
         {
             await _weightRepo.UpdateAsync(weightEntry.ToEntity());
+
+            if (weightEntry.ConcludeDate.HasValue)
+                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntry.Id);
         }
 
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
             await _weightRepo.UpdateAsync(weightEntry);
+
+            if (weightEntry.ConcludeDate.HasValue)
+                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntry.Id);
         }
 
         public async Task<bool> DeleteAsync(int id)

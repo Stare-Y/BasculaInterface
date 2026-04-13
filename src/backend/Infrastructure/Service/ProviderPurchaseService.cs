@@ -1,5 +1,6 @@
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
 
 namespace Infrastructure.Service
@@ -7,10 +8,12 @@ namespace Infrastructure.Service
     public class ProviderPurchaseService : IProviderPurchaseService
     {
         private readonly IProviderPurchaseRepo _providerPurchaseRepo;
+        private readonly IWeightRepo _weightRepo;
 
-        public ProviderPurchaseService(IProviderPurchaseRepo providerPurchaseRepo)
+        public ProviderPurchaseService(IProviderPurchaseRepo providerPurchaseRepo, IWeightRepo weightRepo)
         {
             _providerPurchaseRepo = providerPurchaseRepo;
+            _weightRepo = weightRepo;
         }
 
         public async Task<ProviderPurchaseDto> CreateAsync(ProviderPurchaseDto dto)
@@ -46,6 +49,47 @@ namespace Infrastructure.Service
         public async Task<bool> DeleteAsync(int id)
         {
             return await _providerPurchaseRepo.DeleteAsync(id);
+        }
+
+        public async Task<WeightEntryDto> CreateWeightEntryAsync(int purchaseId)
+        {
+            var purchase = await _providerPurchaseRepo.GetByIdAsync(purchaseId);
+
+            if (purchase.WeightEntryId.HasValue)
+                throw new InvalidOperationException($"El pedido #{purchase.Id} ya tiene una entrada de peso asignada (ID: {purchase.WeightEntryId}).");
+
+            var weightEntry = new WeightEntry
+            {
+                PartnerId = purchase.ProviderId,
+                TareWeight = 0,
+                BruteWeight = 0,
+                WeightDetails =
+                [
+                    new WeightDetail
+                    {
+                        FK_WeightedProductId = purchase.ProductId,
+                        RequiredAmount = (double)purchase.RequiredAmount
+                    }
+                ]
+            };
+
+            WeightEntry created = await _weightRepo.CreateAsync(weightEntry);
+
+            purchase.WeightEntryId = created.Id;
+            await _providerPurchaseRepo.UpdateAsync(purchase);
+
+            return new WeightEntryDto(created);
+        }
+
+        public async Task ConcludeByWeightEntryAsync(int weightEntryId)
+        {
+            var purchase = await _providerPurchaseRepo.GetByWeightEntryIdAsync(weightEntryId);
+
+            if (purchase is null || purchase.Concluded)
+                return;
+
+            purchase.Concluded = true;
+            await _providerPurchaseRepo.UpdateAsync(purchase);
         }
     }
 }

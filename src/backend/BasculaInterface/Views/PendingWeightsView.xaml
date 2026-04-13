@@ -102,6 +102,15 @@
                         ToolTipProperties.Text="Nuevo Pedido sin Pesada (F8)" />
 
                     <Button
+                        x:Name="BtnComprasProveedor"
+                        Grid.Row="{OnPlatform WinUI=2}"
+                        Clicked="BtnComprasProveedor_Clicked"
+                        IsVisible="False"
+                        Style="{StaticResource Boton}"
+                        Text="Compras"
+                        ToolTipProperties.Text="Ver Compras" />
+
+                    <Button
                         x:Name="BtnFinished"
                         Grid.Row="{OnPlatform WinUI=3}"
                         Clicked="BtnFinished_Clicked"

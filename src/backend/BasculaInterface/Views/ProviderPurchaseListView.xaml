@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BasculaInterface.Views.ProviderPurchaseListView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
+    xmlns:models="clr-namespace:BasculaInterface.Models"
+    Title="Pedidos a Proveedores"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
+
+    <Grid>
+        <Grid
+            Padding="{OnPlatform WinUI=30}"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                              Dark={StaticResource BlackTheme}}"
+            ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
+            ColumnSpacing="{OnPlatform WinUI=30}"
+            RowDefinitions="{OnPlatform Android='50,*,10,75'}">
+
+            <!-- Side panel (WinUI) / Bottom bar (Android) -->
+            <Border
+                Padding="10"
+                BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                  Dark={StaticResource BlackGray}}"
+                IsVisible="{OnPlatform Android=False,
+                                       WinUI=True}"
+                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0">
+
+                <Grid
+                    RowDefinitions="*,*,*"
+                    RowSpacing="15">
+
+                    <Button
+                        x:Name="BtnCreate"
+                        Grid.Row="0"
+                        Clicked="BtnCreate_Clicked"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Nuevo Pedido" />
+
+                    <Button
+                        x:Name="BtnRefresh"
+                        Grid.Row="1"
+                        Clicked="BtnRefresh_Clicked"
+                        Style="{StaticResource Boton}"
+                        Text="Actualizar" />
+
+                    <Button
+                        x:Name="BtnBack"
+                        Grid.Row="2"
+                        Clicked="BtnBack_Clicked"
+                        Style="{StaticResource Boton}"
+                        Text="Regresar" />
+                </Grid>
+            </Border>
+
+            <!-- Content area -->
+            <Grid
+                Grid.Row="{OnPlatform Android=1}"
+                Grid.Column="{OnPlatform WinUI=1}"
+                Padding="{OnPlatform Android=15}"
+                HorizontalOptions="{OnPlatform Android='Center'}"
+                RowDefinitions="Auto,*"
+                RowSpacing="20"
+                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+
+                <Label
+                    Grid.Row="0"
+                    FontAttributes="Bold"
+                    FontSize="{OnPlatform WinUI=28, Android=18}"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource Label}"
+                    Text="Pedidos Pendientes a Proveedores"
+                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                Dark={StaticResource 2}}" />
+
+                <Border
+                    Grid.Row="1"
+                    Padding="{OnPlatform WinUI=15}"
+                    Stroke="{OnPlatform Android={StaticResource 1},
+                                        WinUI={StaticResource BlackTheme}}"
+                    StrokeShape="RoundRectangle 30"
+                    StrokeThickness="0">
+
+                    <CollectionView
+                        x:Name="PurchasesCollectionView"
+                        HorizontalOptions="Center"
+                        SelectionChanged="PurchasesCollectionView_SelectionChanged"
+                        SelectionMode="Single"
+                        VerticalOptions="Start">
+
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:ProviderPurchaseViewRow">
+                                <Border
+                                    Padding="15"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                                      Dark={StaticResource BlackGray}}"
+                                    MaximumHeightRequest="{OnPlatform Android=200, WinUI=200}"
+                                    MinimumHeightRequest="{OnPlatform Android=80, WinUI=90}"
+                                    Stroke="{OnPlatform Android={StaticResource 4},
+                                                        WinUI={StaticResource 1}}"
+                                    StrokeShape="RoundRectangle 30"
+                                    StrokeThickness="0">
+                                    <Grid
+                                        ColumnDefinitions="*,auto"
+                                        HorizontalOptions="Fill"
+                                        VerticalOptions="Fill">
+                                        <VerticalStackLayout
+                                            Grid.Column="0"
+                                            HorizontalOptions="Fill"
+                                            Spacing="8">
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="{OnPlatform WinUI=24, Android=15}"
+                                                HorizontalOptions="Start"
+                                                HorizontalTextAlignment="Start"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding ProviderName}"
+                                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                                            Dark={StaticResource 2}}" />
+
+                                            <Label
+                                                FontSize="{OnPlatform WinUI=20, Android=12}"
+                                                HorizontalOptions="Start"
+                                                HorizontalTextAlignment="Start"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding ProductName}"
+                                                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                            Dark={StaticResource 1}}" />
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="{OnPlatform WinUI=22, Android=13}"
+                                                HorizontalOptions="End"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding AmountText}"
+                                                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                            Dark={StaticResource 1}}" />
+
+                                            <Label
+                                                FontSize="{OnPlatform WinUI=18, Android=11}"
+                                                HorizontalOptions="End"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding ExpectedArrivalText, StringFormat='Llegada: {0}'}"
+                                                TextColor="Orange" />
+
+                                            <Label
+                                                FontAttributes="Italic"
+                                                FontSize="{OnPlatform WinUI=16, Android=11}"
+                                                HorizontalOptions="End"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding StatusText}"
+                                                TextColor="{Binding StatusColor}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal" />
+                                                <VisualState x:Name="PointerOver">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=LightGray, Dark={StaticResource WhiteGray}}" />
+                                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Pressed">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
+                                                        <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                        <CollectionView.EmptyView>
+                            <Grid
+                                Padding="50"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center">
+                                <Label
+                                    FontSize="{OnPlatform WinUI=24, Android=16}"
+                                    HorizontalOptions="Center"
+                                    Style="{StaticResource Label}"
+                                    Text="No hay pedidos registrados"
+                                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                                Dark={StaticResource Gray}}" />
+                            </Grid>
+                        </CollectionView.EmptyView>
+
+                    </CollectionView>
+                </Border>
+            </Grid>
+
+            <!-- Android bottom bar -->
+            <Grid
+                Grid.Row="{OnPlatform Android=3}"
+                ColumnDefinitions="*,*,*"
+                ColumnSpacing="10"
+                IsVisible="{OnPlatform Android=True, WinUI=False}"
+                Padding="10,0">
+
+                <Button
+                    x:Name="BtnCreateAndroid"
+                    Grid.Column="0"
+                    Clicked="BtnCreate_Clicked"
+                    Style="{StaticResource BotonPrincipal}"
+                    Text="Nuevo" />
+
+                <Button
+                    x:Name="BtnRefreshAndroid"
+                    Grid.Column="1"
+                    Clicked="BtnRefresh_Clicked"
+                    Style="{StaticResource Boton}"
+                    Text="Actualizar" />
+
+                <Button
+                    x:Name="BtnBackAndroid"
+                    Grid.Column="2"
+                    Clicked="BtnBack_Clicked"
+                    Style="{StaticResource Boton}"
+                    Text="Regresar" />
+            </Grid>
+        </Grid>
+
+        <components:WaitPopUp x:Name="WaitPopUp" />
+    </Grid>
+</ContentPage>
