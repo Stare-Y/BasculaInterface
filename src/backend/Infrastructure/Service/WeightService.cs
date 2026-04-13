@@ -1,6 +1,5 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
-using Core.Application.Extensions;
 using Core.Application.Services;
 using Core.Domain.Entities.Base;
 using Core.Domain.Entities.Weight;
@@ -38,45 +37,45 @@ namespace Infrastructure.Service
 
                 return weightEntry;
             }
-            WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ConvertToBaseEntry());
+            WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ToEntity());
 
-            return newEntry.ConvertToDto();
+            return new WeightEntryDto(newEntry);
         }
 
         public async Task<WeightEntryDto> GetByIdAsync(int id)
         {
             WeightEntry entry = await _weightRepo.GetByIdAsync(id);
 
-            return entry.ConvertToDto();
+            return new WeightEntryDto(entry);
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllAsync(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllAsync(top, page));
+            return (await _weightRepo.GetAllAsync(top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllComplete(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllComplete(top, page));
+            return (await _weightRepo.GetAllComplete(top, page)).Select(we => new WeightEntryDto(we));
         }
         public async Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page));
+            return (await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllByPartnerAsync(partnerId, top, page));
+            return (await _weightRepo.GetAllByPartnerAsync(partnerId, top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetPendingWeights(top, page));
+            return (await _weightRepo.GetPendingWeights(top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task UpdateAsync(WeightEntryDto weightEntry)
         {
-            await _weightRepo.UpdateAsync(weightEntry.ConvertToBaseEntry());
+            await _weightRepo.UpdateAsync(weightEntry.ToEntity());
         }
 
         public async Task UpdateAsync(WeightEntry weightEntry)

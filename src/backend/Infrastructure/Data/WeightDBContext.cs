@@ -1,4 +1,5 @@
 ﻿using Core.Domain.Entities.Behaviors;
+using Core.Domain.Entities.ProviderOrders;
 using Core.Domain.Entities.Turns;
 using Core.Domain.Entities.Weight;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace Infrastructure.Data
         public DbSet<WeightDetail> WeightDetails { get; set; } = null!;
         public DbSet<ExternalTargetBehavior> ExternalTargetBehaviors { get; set; } = null!;
         public DbSet<Turn> Turns { get; set; } = null!;
+        public DbSet<ProviderPurchase> ProviderPurchases { get; set; } = null!;
         public WeightDBContext(DbContextOptions<WeightDBContext> options)
             : base(options)
         {
