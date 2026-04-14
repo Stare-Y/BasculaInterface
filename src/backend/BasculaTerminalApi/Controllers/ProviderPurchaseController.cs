@@ -94,11 +94,11 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPost("CreateWeightEntry")]
-        public async Task<ActionResult<WeightEntryDto>> CreateWeightEntry([FromQuery] int purchaseId)
+        public async Task<ActionResult<WeightEntryDto>> CreateWeightEntry([FromQuery] int purchaseId, [FromQuery] string externalTarget)
         {
             try
             {
-                return Ok(await _providerPurchaseService.CreateWeightEntryAsync(purchaseId));
+                return Ok(await _providerPurchaseService.CreateWeightEntryAsync(purchaseId, externalTarget));
             }
             catch (KeyNotFoundException ex)
             {

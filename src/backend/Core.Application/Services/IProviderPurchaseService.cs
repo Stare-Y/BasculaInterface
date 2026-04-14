@@ -10,7 +10,8 @@ namespace Core.Application.Services
         Task<IEnumerable<ProviderPurchaseDto>> GetByProviderIdAsync(int providerId, int top = 30, uint page = 1);
         Task UpdateAsync(ProviderPurchaseDto dto);
         Task<bool> DeleteAsync(int id);
-        Task<WeightEntryDto> CreateWeightEntryAsync(int purchaseId);
+        Task<WeightEntryDto> CreateWeightEntryAsync(int purchaseId, string externalTarget);
         Task ConcludeByWeightEntryAsync(int weightEntryId);
+        Task<ProviderPurchaseDto?> GetByWeightEntryIdAsync(int weightEntryId);
     }
 }

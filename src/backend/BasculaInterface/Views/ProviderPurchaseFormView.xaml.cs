@@ -32,7 +32,43 @@ public partial class ProviderPurchaseFormView : ContentPage
         }
 
         LblTitle.Text = "Editar Pedido";
-        BtnDelete.IsVisible = true;
+
+        bool isConcluded = ViewModel.Purchase.Concluded;
+        bool hasWeightEntry = ViewModel.Purchase.WeightEntryId.HasValue;
+
+        // Show status
+        LblStatus.IsVisible = true;
+        if (isConcluded)
+        {
+            LblStatus.Text = "Completado";
+            LblStatus.TextColor = Colors.Green;
+        }
+        else if (hasWeightEntry)
+        {
+            LblStatus.Text = "En pesaje";
+            LblStatus.TextColor = Colors.Orange;
+        }
+        else
+        {
+            LblStatus.Text = "Pendiente";
+            LblStatus.TextColor = Colors.Gray;
+        }
+
+        // Delete is hidden when concluded or when related to a weight entry
+        BtnDelete.IsVisible = !isConcluded && !hasWeightEntry;
+
+        // When concluded, make everything read-only
+        if (isConcluded)
+        {
+            BtnPickProvider.IsEnabled = false;
+            BtnPickProduct.IsEnabled = false;
+            EntryRequiredAmount.IsEnabled = false;
+            EntryPrice.IsEnabled = false;
+            DatePickerExpectedArrival.IsEnabled = false;
+            EditorNotes.IsEnabled = false;
+            BtnSave.IsVisible = false;
+            BtnCreateWeightEntry.IsVisible = false;
+        }
 
         WaitPopUp.Show("Cargando datos, espere");
         try
@@ -44,10 +80,11 @@ public partial class ProviderPurchaseFormView : ContentPage
             LblProductName.Text = ViewModel.SelectedProduct?.Nombre ?? "Producto no encontrado";
 
             EntryRequiredAmount.Text = ViewModel.Purchase.RequiredAmount.ToString("F2");
+            EntryPrice.Text = ViewModel.Purchase.Price?.ToString("F2") ?? string.Empty;
             DatePickerExpectedArrival.Date = ViewModel.Purchase.ExpectedArrival.ToLocalTime();
             EditorNotes.Text = ViewModel.Purchase.Notes ?? string.Empty;
 
-            if (!ViewModel.Purchase.WeightEntryId.HasValue)
+            if (!isConcluded && !hasWeightEntry)
                 BtnCreateWeightEntry.IsVisible = true;
         }
         catch (Exception ex)
@@ -144,7 +181,14 @@ public partial class ProviderPurchaseFormView : ContentPage
             return;
         }
 
+        if (!decimal.TryParse(EntryPrice.Text, out decimal price) || price < 0)
+        {
+            await DisplayAlert("Error", "Ingrese un precio válido.", "OK");
+            return;
+        }
+
         ViewModel.Purchase.RequiredAmount = amount;
+        ViewModel.Purchase.Price = price;
         ViewModel.Purchase.ExpectedArrival = DatePickerExpectedArrival.Date.ToUniversalTime();
         ViewModel.Purchase.Notes = string.IsNullOrWhiteSpace(EditorNotes.Text) ? null : EditorNotes.Text.Trim();
 

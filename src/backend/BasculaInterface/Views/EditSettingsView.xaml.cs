@@ -75,6 +75,7 @@ public partial class EditSettingsView : ContentPage
         CheckBoxOnlyFinished.IsChecked = Preferences.Get("OnlyFinished", false);
         CheckBoxShowDocumentTypes.IsChecked = Preferences.Get("ShowDocumentTypeFilter", false);
         EntryDocumentTypes.Text = Preferences.Get("PreferedDocumentType", string.Empty);
+        EntryPurchaseExternalTarget.Text = Preferences.Get("PurchaseExternalTarget", string.Empty);
         CheckBoxFilterNull.IsChecked = Preferences.Get("FilterNull", false);
         EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
@@ -95,6 +96,7 @@ public partial class EditSettingsView : ContentPage
         Preferences.Set("OnlyFinished", CheckBoxOnlyFinished.IsChecked);
         Preferences.Set("ShowDocumentTypeFilter", CheckBoxShowDocumentTypes.IsChecked);
         Preferences.Set("PreferedDocumentType", EntryDocumentTypes.Text);
+        Preferences.Set("PurchaseExternalTarget", EntryPurchaseExternalTarget.Text);
         Preferences.Set("FilterNull", CheckBoxFilterNull.IsChecked);
     }
 
@@ -182,5 +184,21 @@ public partial class EditSettingsView : ContentPage
             2 => AppTheme.Dark,
             _ => AppTheme.Unspecified // System default
         };
+    }
+
+    private void EntryPurchaseExternalTarget_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        Entry entry = (Entry)sender;
+
+        if (string.IsNullOrEmpty(entry.Text))
+            return;
+
+        if (!int.TryParse(entry.Text, out _))
+        {
+            entry.Text = e.OldTextValue;
+            return;
+        }
+
+        Preferences.Set("PurchaseExternalTarget", entry.Text);
     }
 }

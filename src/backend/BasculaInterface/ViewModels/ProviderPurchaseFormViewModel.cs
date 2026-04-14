@@ -117,7 +117,7 @@ namespace BasculaInterface.ViewModels
         public async Task<WeightEntryDto> CreateWeightEntryAsync(CancellationToken cancellationToken = default)
         {
             return await _apiService.PostAsync<WeightEntryDto>(
-                $"api/ProviderPurchase/CreateWeightEntry?purchaseId={Purchase.Id}", new { }, cancellationToken);
+                $"api/ProviderPurchase/CreateWeightEntry?purchaseId={Purchase.Id}&externalTarget={Preferences.Get("PurchaseExternalTarget", string.Empty)}", new { }, cancellationToken);
         }
     }
 }

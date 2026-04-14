@@ -2,6 +2,7 @@ using Core.Application.DTOs;
 using Core.Application.Services;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Service
 {
@@ -9,11 +10,15 @@ namespace Infrastructure.Service
     {
         private readonly IProviderPurchaseRepo _providerPurchaseRepo;
         private readonly IWeightRepo _weightRepo;
+        private readonly IExternalTargetBehaviorRepo _externalTargetBehaviorRepo;
+        private readonly ILogger<ProviderPurchaseService> _logger;
 
-        public ProviderPurchaseService(IProviderPurchaseRepo providerPurchaseRepo, IWeightRepo weightRepo)
+        public ProviderPurchaseService(IProviderPurchaseRepo providerPurchaseRepo, IWeightRepo weightRepo, IExternalTargetBehaviorRepo externalTargetBehaviorRepo, ILogger<ProviderPurchaseService> logger)
         {
             _providerPurchaseRepo = providerPurchaseRepo;
             _weightRepo = weightRepo;
+            _externalTargetBehaviorRepo = externalTargetBehaviorRepo;
+            _logger = logger;
         }
 
         public async Task<ProviderPurchaseDto> CreateAsync(ProviderPurchaseDto dto)
@@ -51,18 +56,34 @@ namespace Infrastructure.Service
             return await _providerPurchaseRepo.DeleteAsync(id);
         }
 
-        public async Task<WeightEntryDto> CreateWeightEntryAsync(int purchaseId)
+        public async Task<WeightEntryDto> CreateWeightEntryAsync(int purchaseId, string externalTarget)
         {
             var purchase = await _providerPurchaseRepo.GetByIdAsync(purchaseId);
 
             if (purchase.WeightEntryId.HasValue)
                 throw new InvalidOperationException($"El pedido #{purchase.Id} ya tiene una entrada de peso asignada (ID: {purchase.WeightEntryId}).");
 
+            int? externalTargetBehaviorId = null;
+            if (int.TryParse(externalTarget, out int behaviorId))
+            {
+                try
+                {
+                    var behavior = await _externalTargetBehaviorRepo.GetByIdAsync(behaviorId);
+                    if (behavior.Hidden)
+                        externalTargetBehaviorId = behavior.Id;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to retrieve ExternalTargetBehavior with ID {BehaviorId}", behaviorId);
+                }
+            }
+
             var weightEntry = new WeightEntry
             {
                 PartnerId = purchase.ProviderId,
                 TareWeight = 0,
                 BruteWeight = 0,
+                ExternalTargetBehaviorFK = externalTargetBehaviorId,
                 WeightDetails =
                 [
                     new WeightDetail
@@ -79,6 +100,12 @@ namespace Infrastructure.Service
             await _providerPurchaseRepo.UpdateAsync(purchase);
 
             return new WeightEntryDto(created);
+        }
+
+        public async Task<ProviderPurchaseDto?> GetByWeightEntryIdAsync(int weightEntryId)
+        {
+            var purchase = await _providerPurchaseRepo.GetByWeightEntryIdAsync(weightEntryId);
+            return purchase is null ? null : new ProviderPurchaseDto(purchase);
         }
 
         public async Task ConcludeByWeightEntryAsync(int weightEntryId)

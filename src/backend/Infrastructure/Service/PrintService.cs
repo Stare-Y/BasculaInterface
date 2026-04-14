@@ -332,7 +332,7 @@ namespace Infrastructure.Service
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph("Salida:", bold: true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph(entry.ConcludeDate.Value.ToString("dd-MM-yyyy HH:mm:ss"))));
+                    .Add(BuildParagraph(entry.ConcludeDate.Value.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss"))));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph()));// Empty row
             }

@@ -1,6 +1,5 @@
 using BasculaInterface.Models;
 using BasculaInterface.ViewModels;
-using Core.Application.DTOs;
 using Core.Application.Services;
 
 namespace BasculaInterface.Views;
@@ -51,6 +50,7 @@ public partial class ProviderPurchaseListView : ContentPage
         {
             await viewModel.LoadPurchasesAsync();
             PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            UpdatePaginationControls(viewModel);
         }
         catch (Exception ex)
         {
@@ -60,6 +60,13 @@ public partial class ProviderPurchaseListView : ContentPage
         {
             WaitPopUp.Hide();
         }
+    }
+
+    private void UpdatePaginationControls(ProviderPurchaseListViewModel viewModel)
+    {
+        BtnPrevPage.IsEnabled = viewModel.CanGoBack;
+        BtnNextPage.IsEnabled = viewModel.CanGoForward;
+        LblPage.Text = viewModel.PageText;
     }
 
     private async void PurchasesCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -108,6 +115,50 @@ public partial class ProviderPurchaseListView : ContentPage
     private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
         await LoadDataAsync();
+    }
+
+    private async void BtnPrevPage_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not ProviderPurchaseListViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Cargando pedidos, espere");
+        try
+        {
+            await viewModel.GoToPreviousPageAsync();
+            PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            UpdatePaginationControls(viewModel);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pedidos: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
+    private async void BtnNextPage_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not ProviderPurchaseListViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Cargando pedidos, espere");
+        try
+        {
+            await viewModel.GoToNextPageAsync();
+            PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            UpdatePaginationControls(viewModel);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pedidos: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
     }
 
     private async void BtnBack_Clicked(object sender, EventArgs e)

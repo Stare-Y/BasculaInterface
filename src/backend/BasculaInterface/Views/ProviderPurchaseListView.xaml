@@ -62,7 +62,7 @@
                 Grid.Column="{OnPlatform WinUI=1}"
                 Padding="{OnPlatform Android=15}"
                 HorizontalOptions="{OnPlatform Android='Center'}"
-                RowDefinitions="Auto,*"
+                RowDefinitions="Auto,*,Auto"
                 RowSpacing="20"
                 VerticalOptions="{OnPlatform Android='StartAndExpand'}">
 
@@ -202,6 +202,37 @@
 
                     </CollectionView>
                 </Border>
+
+                <!-- Pagination -->
+                <HorizontalStackLayout
+                    Grid.Row="2"
+                    HorizontalOptions="Center"
+                    Spacing="15"
+                    VerticalOptions="End">
+                    <Button
+                        x:Name="BtnPrevPage"
+                        Clicked="BtnPrevPage_Clicked"
+                        IsEnabled="False"
+                        Style="{StaticResource Boton}"
+                        Text="◀ Anterior"
+                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                    <Label
+                        x:Name="LblPage"
+                        FontSize="{OnPlatform WinUI=20, Android=14}"
+                        HorizontalOptions="Center"
+                        Style="{StaticResource Label}"
+                        Text="Página 1"
+                        TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                    Dark={StaticResource 2}}"
+                        VerticalOptions="Center" />
+                    <Button
+                        x:Name="BtnNextPage"
+                        Clicked="BtnNextPage_Clicked"
+                        IsEnabled="False"
+                        Style="{StaticResource Boton}"
+                        Text="Siguiente ▶"
+                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                </HorizontalStackLayout>
             </Grid>
 
             <!-- Android bottom bar -->

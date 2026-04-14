@@ -235,6 +235,25 @@ namespace BasculaInterface.ViewModels
             OnCollectionChanged(nameof(ExternalTargetBehaviors));
         }
 
+        /// <summary>
+        /// Attempts to retrieve an external target behavior by its ID from the API.
+        /// If found, adds it to the local list and returns its index.
+        /// If not found or an error occurs, returns -1.
+        /// </summary>
+        public async Task<int> ResolveExternalTargetBehaviorByIdAsync(int targetId, CancellationToken cancellationToken = default)
+        {
+            var behavior = await _apiService.GetAsync<ExternalTargetBehaviorDto>(
+                $"api/ExternalTargetBehavior/ById?id={targetId}", cancellationToken);
+
+            if (behavior is null || behavior.Id <= 0)
+                return -1;
+
+            ExternalTargetBehaviors.Add(behavior);
+            OnCollectionChanged(nameof(ExternalTargetBehaviors));
+
+            return ExternalTargetBehaviors.Count - 1;
+        }
+
         public async Task UpdateWeightEntry()
         {
             if (WeightEntry == null)
@@ -281,7 +300,7 @@ namespace BasculaInterface.ViewModels
             // Send the updated weight entry to the API
             await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
 
-            if (Partner is not null && !Partner.IsProvider)
+            if (Partner is not null && WeightEntry.ExternalTargetBehaviorFK > 0)
             {
                 try
                 {

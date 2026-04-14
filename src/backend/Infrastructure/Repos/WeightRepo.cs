@@ -130,36 +130,64 @@ namespace Infrastructure.Repos
                 throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
             }
 
-            WeightEntry existingEntry = await GetByIdAsync(weightEntry.Id);
+            // Load existing entry as TRACKED to apply only changed properties
+            // This avoids _context.Update() which marks ALL properties as Modified
+            // and can cause change-tracker side effects with related entities (e.g. ProviderPurchase)
+            WeightEntry existingEntry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(wd => !wd.IsDeleted))
+                .Include(w => w.ExternalTargetBehavior)
+                .FirstOrDefaultAsync(w => w.Id == weightEntry.Id && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
 
-            weightEntry.CreatedAt = existingEntry.CreatedAt;
+            // Apply scalar property changes to the tracked entity
+            existingEntry.PartnerId = weightEntry.PartnerId;
+            existingEntry.ConptaqiComercialFK = weightEntry.ConptaqiComercialFK;
+            existingEntry.ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio;
+            existingEntry.ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK;
+            existingEntry.TareWeight = weightEntry.TareWeight;
+            existingEntry.BruteWeight = weightEntry.BruteWeight;
+            existingEntry.ConcludeDate = weightEntry.ConcludeDate;
+            existingEntry.VehiclePlate = weightEntry.VehiclePlate;
+            existingEntry.Notes = weightEntry.Notes;
+            existingEntry.RegisteredBy = weightEntry.RegisteredBy;
 
-            // Preserve CreatedAt for existing WeightDetails and set LastUpdated if changed
-            foreach (var detail in weightEntry.WeightDetails)
+            // Update existing details and add new ones
+            foreach (var incomingDetail in weightEntry.WeightDetails)
             {
-                var existingDetail = existingEntry.WeightDetails.FirstOrDefault(d => d.Id == detail.Id);
+                var existingDetail = existingEntry.WeightDetails.FirstOrDefault(d => d.Id == incomingDetail.Id);
                 if (existingDetail != null)
                 {
-                    detail.CreatedAt = existingDetail.CreatedAt;
-
                     // Set LastUpdated if any tracked property has changed
-                    if (HasDetailChanged(existingDetail, detail))
+                    if (HasDetailChanged(existingDetail, incomingDetail))
                     {
-                        detail.LastUpdated = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        detail.LastUpdated = existingDetail.LastUpdated;
+                        existingDetail.Weight = incomingDetail.Weight;
+                        existingDetail.Tare = incomingDetail.Tare;
+                        existingDetail.SecondaryTare = incomingDetail.SecondaryTare;
+                        existingDetail.FK_WeightedProductId = incomingDetail.FK_WeightedProductId;
+                        existingDetail.ProductPrice = incomingDetail.ProductPrice;
+                        existingDetail.WeightedBy = incomingDetail.WeightedBy;
+                        existingDetail.RequiredAmount = incomingDetail.RequiredAmount;
+                        existingDetail.Costales = incomingDetail.Costales;
+                        existingDetail.Notes = incomingDetail.Notes;
+                        existingDetail.LastUpdated = DateTime.UtcNow;
                     }
                 }
                 else
                 {
-                    // New detail being added - no LastUpdated yet (will be set on first update)
-                    detail.LastUpdated = null;
+                    // New detail being added
+                    incomingDetail.LastUpdated = null;
+                    existingEntry.WeightDetails.Add(incomingDetail);
                 }
             }
 
-            _context.WeightEntries.Update(weightEntry);
+            // Remove details that are no longer present
+            foreach (var existingDetail in existingEntry.WeightDetails.ToList())
+            {
+                if (!weightEntry.WeightDetails.Any(d => d.Id == existingDetail.Id))
+                {
+                    existingDetail.IsDeleted = true;
+                }
+            }
 
             await _context.SaveChangesAsync();
         }

@@ -162,6 +162,9 @@ namespace Infrastructure.Service
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
             ClienteProveedorDto cteProovedor = await _clienteProveedorService.GetById(weightEntry.PartnerId!.Value);
+            ProviderPurchaseDto? purchase = await _providerPurchaseService.GetByWeightEntryIdAsync(weightEntry.Id);
+            double purchasePrice = (double)(purchase?.Price ?? 0);
+
             List<ProductoDto> products = [];
             foreach (WeightDetail weightDetail in weightEntry.WeightDetails)
             {
@@ -175,8 +178,7 @@ namespace Infrastructure.Service
 
             return new DocumentoDto
             {
-                CodConcepto = !isProvider ? weightEntry.ExternalTargetBehavior.TargetConcept 
-                    : throw new NotImplementedException("Can't create documents from providers, just clients for now"),
+                CodConcepto = weightEntry.ExternalTargetBehavior.TargetConcept,
                 Serie = weightEntry.ExternalTargetBehavior.TargetSerie,
                 Fecha = DateTime.Now,
                 CodigoCteProv = cteProovedor.Code,
@@ -187,7 +189,8 @@ namespace Infrastructure.Service
                         CodigoProducto = p.Code,
                         CodigoAlmacen = p.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
                         Unidades = GetUnidadesFromProductAndDetail( weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id),p),
-                        Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}"
+                        Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}",
+                        Precio = purchasePrice
                     }).ToArray()
             };
         }

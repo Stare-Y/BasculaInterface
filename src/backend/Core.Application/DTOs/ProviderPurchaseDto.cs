@@ -8,6 +8,7 @@ namespace Core.Application.DTOs
         public int ProviderId { get; set; }
         public int ProductId { get; set; }
         public decimal RequiredAmount { get; set; }
+        public decimal? Price { get; set; }
         public decimal? RealAmount { get; set; }
         public string? Notes { get; set; }
         public int? WeightEntryId { get; set; }
@@ -27,6 +28,7 @@ namespace Core.Application.DTOs
             ProviderId = entity.ProviderId;
             ProductId = entity.ProductId;
             RequiredAmount = entity.RequiredAmount;
+            Price = entity.Price;
             RealAmount = entity.RealAmount;
             Notes = entity.Notes;
             WeightEntryId = entity.WeightEntryId;
@@ -44,6 +46,7 @@ namespace Core.Application.DTOs
                 ProviderId = ProviderId,
                 ProductId = ProductId,
                 RequiredAmount = RequiredAmount,
+                Price = Price,
                 RealAmount = RealAmount,
                 Notes = Notes,
                 WeightEntryId = WeightEntryId,

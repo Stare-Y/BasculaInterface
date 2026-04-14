@@ -272,6 +272,29 @@
                                 HorizontalOptions="Fill"
                                 VerticalOptions="Center">
 
+                                <Entry
+                                    x:Name="EntryPurchaseExternalTarget"
+                                    Grid.Column="0"
+                                    HorizontalOptions="Start"
+                                    Placeholder="Id de documento Compras"
+                                    TextChanged="EntryPurchaseExternalTarget_TextChanged" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Id de tipo de documento para compras" />
+
+                            </Grid>
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Center">
+
                                 <Picker
                                     x:Name="PickerTheme"
                                     Grid.Column="0"

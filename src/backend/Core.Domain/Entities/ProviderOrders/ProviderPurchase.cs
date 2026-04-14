@@ -9,6 +9,7 @@ namespace Core.Domain.Entities.ProviderOrders
         public required int ProviderId { get; set; }
         public DateTime? LastUpdated { get; set; }
         public required int ProductId { get; set; }
+        public decimal? Price { get; set; }
         public required decimal RequiredAmount { get; set; }
         public decimal? RealAmount { get; set; } 
         public string? Notes { get; set; }

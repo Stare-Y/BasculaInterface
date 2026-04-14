@@ -26,6 +26,13 @@
                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                 Dark={StaticResource 2}}" />
 
+                <Label
+                    x:Name="LblStatus"
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    HorizontalOptions="Start"
+                    IsVisible="False" />
+
                 <!-- Provider -->
                 <Border
                     Padding="15"
@@ -90,28 +97,55 @@
                     </Grid>
                 </Border>
 
-                <!-- Amount -->
-                <Border
-                    Padding="15"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
-                                                      Dark={StaticResource BlackGray}}"
-                    StrokeShape="RoundRectangle 15"
-                    StrokeThickness="0">
-                    <VerticalStackLayout Spacing="10">
-                        <Label
-                            FontAttributes="Bold"
-                            FontSize="20"
-                            HorizontalOptions="Start"
-                            Style="{StaticResource Label}"
-                            Text="Cantidad Requerida (kg)"
-                            TextColor="{AppThemeBinding Light={StaticResource 4},
-                                                        Dark={StaticResource 1}}" />
-                        <Entry
-                            x:Name="EntryRequiredAmount"
-                            Keyboard="Numeric"
-                            Placeholder="0.00" />
-                    </VerticalStackLayout>
-                </Border>
+                <!-- Amount & Price -->
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="10">
+                    <Border
+                        Grid.Column="0"
+                        Padding="15"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                          Dark={StaticResource BlackGray}}"
+                        StrokeShape="RoundRectangle 15"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                HorizontalOptions="Start"
+                                Style="{StaticResource Label}"
+                                Text="Cantidad (kg)"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 1}}" />
+                            <Entry
+                                x:Name="EntryRequiredAmount"
+                                Keyboard="Numeric"
+                                Placeholder="0.00" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border
+                        Grid.Column="1"
+                        Padding="15"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                          Dark={StaticResource BlackGray}}"
+                        StrokeShape="RoundRectangle 15"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                HorizontalOptions="Start"
+                                Style="{StaticResource Label}"
+                                Text="Precio Unitario"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 1}}" />
+                            <Entry
+                                x:Name="EntryPrice"
+                                Keyboard="Numeric"
+                                Placeholder="0.00" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
 
                 <!-- Expected arrival -->
                 <Border

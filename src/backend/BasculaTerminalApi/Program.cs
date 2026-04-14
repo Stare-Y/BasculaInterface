@@ -8,8 +8,8 @@ using Serilog;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-        .WriteTo.Console(
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console(
         outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
     )
     .WriteTo.File("logs/log-.txt",

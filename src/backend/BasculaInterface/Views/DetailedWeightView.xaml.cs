@@ -7,6 +7,7 @@ namespace BasculaInterface.Views;
 
 public partial class DetailedWeightView : ContentPage
 {
+    private bool _keepExternalTargetBehaviorDisabled = false;
     private bool _entriesChanged = false;
     private bool _isInitializing = false;
     private CancellationTokenSource? _cts;
@@ -143,6 +144,33 @@ public partial class DetailedWeightView : ContentPage
                     {
                         PickerTargetBehavior.SelectedIndex = index;
                     }
+                    else
+                    {
+                        // Not found in the available list — try fetching by ID
+                        try
+                        {
+                            int resolvedIndex = await viewModel.ResolveExternalTargetBehaviorByIdAsync(targetId, token);
+                            if (resolvedIndex >= 0)
+                            {
+                                PickerTargetBehavior.SelectedIndex = resolvedIndex;
+                                PickerTargetBehavior.IsEnabled = false;
+                            }
+                            else
+                            {
+                                PickerTargetBehavior.IsEnabled = false;
+                                await DisplayAlert("Aviso", "El documento objetivo previamente seleccionado ya no es válido.", "OK");
+                            }
+                        }
+                        catch
+                        {
+                            PickerTargetBehavior.IsEnabled = false;
+                            await DisplayAlert("Aviso", "El documento objetivo previamente seleccionado ya no es válido.", "OK");
+                        }
+                        finally
+                        {
+                            _keepExternalTargetBehaviorDisabled = true;
+                        }
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -174,7 +202,7 @@ public partial class DetailedWeightView : ContentPage
                 else
                     BtnPickPartner.IsVisible = false;
 
-                PickerTargetBehavior.IsEnabled = true;
+                PickerTargetBehavior.IsEnabled = true && !_keepExternalTargetBehaviorDisabled;
 
                 return;
             }
@@ -185,7 +213,7 @@ public partial class DetailedWeightView : ContentPage
         }
 
         BtnFinishWeight.IsVisible = true;
-        PickerTargetBehavior.IsEnabled = true;
+        PickerTargetBehavior.IsEnabled = true && !_keepExternalTargetBehaviorDisabled;
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {

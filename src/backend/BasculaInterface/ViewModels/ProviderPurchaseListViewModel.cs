@@ -9,8 +9,25 @@ namespace BasculaInterface.ViewModels
     public class ProviderPurchaseListViewModel : ViewModelBase
     {
         private readonly IApiService _apiService;
+        private const int PageSize = 30;
 
         public ObservableCollection<ProviderPurchaseViewRow> Purchases { get; set; } = [];
+
+        private uint _currentPage = 1;
+        public uint CurrentPage
+        {
+            get => _currentPage;
+            private set
+            {
+                _currentPage = value;
+                OnPropertyChanged(nameof(CurrentPage));
+                OnPropertyChanged(nameof(PageText));
+            }
+        }
+
+        public string PageText => $"Página {CurrentPage}";
+        public bool CanGoBack => CurrentPage > 1;
+        public bool CanGoForward { get; private set; }
 
         public ProviderPurchaseListViewModel(IApiService apiService)
         {
@@ -20,7 +37,11 @@ namespace BasculaInterface.ViewModels
         public async Task LoadPurchasesAsync(CancellationToken cancellationToken = default)
         {
             List<ProviderPurchaseDto> purchases = await _apiService.GetAsync<List<ProviderPurchaseDto>>(
-                "api/ProviderPurchase/All", cancellationToken);
+                $"api/ProviderPurchase/All?top={PageSize}&page={CurrentPage}", cancellationToken);
+
+            CanGoForward = purchases.Count >= PageSize;
+            OnPropertyChanged(nameof(CanGoForward));
+            OnPropertyChanged(nameof(CanGoBack));
 
             int[] providerIds = purchases
                 .Select(p => p.ProviderId)
@@ -57,7 +78,9 @@ namespace BasculaInterface.ViewModels
 
             Purchases.Clear();
 
-            foreach (var purchase in purchases.OrderByDescending(p => p.ExpectedArrival))
+            foreach (var purchase in purchases
+                .OrderBy(p => p.Concluded)
+                .ThenBy(p => p.CreatedAt))
             {
                 string providerName = providerNames.TryGetValue(purchase.ProviderId, out var pn) ? pn : "Desconocido";
                 string productName = productNames.TryGetValue(purchase.ProductId, out var prn) ? prn : "Desconocido";
@@ -66,6 +89,20 @@ namespace BasculaInterface.ViewModels
             }
 
             OnPropertyChanged(nameof(Purchases));
+        }
+
+        public async Task GoToNextPageAsync(CancellationToken cancellationToken = default)
+        {
+            if (!CanGoForward) return;
+            CurrentPage++;
+            await LoadPurchasesAsync(cancellationToken);
+        }
+
+        public async Task GoToPreviousPageAsync(CancellationToken cancellationToken = default)
+        {
+            if (!CanGoBack) return;
+            CurrentPage--;
+            await LoadPurchasesAsync(cancellationToken);
         }
 
         public async Task DeletePurchaseAsync(int id, CancellationToken cancellationToken = default)
