@@ -80,7 +80,7 @@ namespace BasculaInterface.ViewModels
 
             foreach (var purchase in purchases
                 .OrderBy(p => p.Concluded)
-                .ThenBy(p => p.CreatedAt))
+                .ThenBy(p => p.ExpectedArrival))
             {
                 string providerName = providerNames.TryGetValue(purchase.ProviderId, out var pn) ? pn : "Desconocido";
                 string productName = productNames.TryGetValue(purchase.ProductId, out var prn) ? prn : "Desconocido";
