@@ -574,8 +574,8 @@
                                 <DataTemplate>
                                     <Border
                                         x:Name="BtnSelectedItem"
-                                        Background="{AppThemeBinding Light={StaticResource Gray},
-                                                                     Dark={StaticResource BlackGray}}"
+                                        Background="{AppThemeBinding Light={StaticResource RowPending},
+                                                                     Dark={StaticResource RowPendingDark}}"
                                         MinimumHeightRequest="{OnPlatform WinUI=125}"
                                         MaximumWidthRequest="{OnPlatform Android=600}"
                                         MinimumWidthRequest="{OnPlatform Android=370}"
@@ -586,6 +586,12 @@
                                         StrokeShape="{OnPlatform Android='RoundRectangle 15', WinUI='RoundRectangle 30'}"
                                         StrokeThickness="0"
                                         Style="{StaticResource RoundedBorderStyle}">
+
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsRowComplete}" Value="True">
+                                                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource RowComplete}, Dark={StaticResource RowCompleteDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
 
                                         <!-- Android: 2-row layout; WinUI: single-row layout -->
                                         <Grid Padding="{OnPlatform Android='10,10,10,12', WinUI=20}" 

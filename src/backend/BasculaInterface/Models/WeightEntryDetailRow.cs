@@ -27,6 +27,7 @@ namespace BasculaInterface.Models
                     _tare = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(TareValue));
+                    OnPropertyChanged(nameof(IsRowComplete));
                 }
             }
         }
@@ -46,6 +47,7 @@ namespace BasculaInterface.Models
                     _weight = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(WeightValue));
+                    OnPropertyChanged(nameof(IsRowComplete));
                 }
             }
         }
@@ -130,9 +132,12 @@ namespace BasculaInterface.Models
                 {
                     _isLoaded = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsRowComplete));
                 }
             }
         }
+
+        public bool IsRowComplete => !IsGranel || (Weight > 0 && Tare > 0 && IsLoaded);
 
         public string RequiredAmountText => RequiredAmount > 0 && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
