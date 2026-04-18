@@ -17,6 +17,7 @@ namespace Core.Domain.Entities.Weight
         public int? Costales { get; set; } = null;
         public DateTime? LastUpdated { get; set; } = null;
         public string? Notes { get; set; } = null;
+        public bool IsLoaded { get; set; } = true;
 
         [ForeignKey("FK_WeightEntryId")]
         public virtual WeightEntry WeightEntry { get; set; } = null!;
