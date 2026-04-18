@@ -279,6 +279,7 @@ namespace BasculaInterface.ViewModels
 
             detail.IsLoaded = true;
 
+            detail.Tare = WeightEntry.BruteWeight;
             await UpdateWeightEntry();
 
             row.IsLoaded = true;
