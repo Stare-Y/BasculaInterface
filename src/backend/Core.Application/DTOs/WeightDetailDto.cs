@@ -20,7 +20,7 @@ namespace Core.Application.DTOs
         /// <summary>
         /// If false, dont count its weight in the total and next weight entries.
         /// </summary>
-        public bool IsLoaded { get; set; } = true;
+        public bool IsLoaded { get; set; }
 
         public WeightDetailDto() { }
 
