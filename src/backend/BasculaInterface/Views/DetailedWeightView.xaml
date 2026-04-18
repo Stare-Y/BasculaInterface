@@ -650,8 +650,7 @@
 
                                                 <!-- Mark as Loaded Button -->
                                                 <Button
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource 4},
-                                                                                      Dark={StaticResource 2}}"
+                                                    BackgroundColor="OrangeRed"
                                                     BorderWidth="0"
                                                     Clicked="MarkAsLoaded_Clicked"
                                                     HeightRequest="{OnPlatform Android=50,
@@ -673,7 +672,7 @@
                                                                 </VisualState>
                                                                 <VisualState x:Name="PressedLoaded">
                                                                     <VisualState.Setters>
-                                                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                                                        <Setter Property="BackgroundColor" Value="DarkGreen" />
                                                                     </VisualState.Setters>
                                                                 </VisualState>
                                                             </VisualStateGroup>
