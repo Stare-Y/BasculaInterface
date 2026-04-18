@@ -28,6 +28,7 @@ public partial class FinishedWeights : ContentPage
             try
             {
                 await viewModel.LoadPendingWeightsAsync();
+                UpdatePaginationControls(viewModel);
 
 #if ANDROID
                 BtnRefresh.IsVisible = false;
@@ -136,6 +137,7 @@ public partial class FinishedWeights : ContentPage
         try
         {
             await viewModel.LoadPendingWeightsAsync();
+            UpdatePaginationControls(viewModel);
 
             BtnReconnect.IsVisible = false;
         }
@@ -150,6 +152,55 @@ public partial class FinishedWeights : ContentPage
             await DisplayAlert("Error", "No se pudieron cargar los pesos pendientes: " + ex.Message, "OK");
 
             BtnReconnect.IsVisible = true;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
+    private void UpdatePaginationControls(FinishedWeightsViewModel viewModel)
+    {
+        BtnPrevPage.IsEnabled = viewModel.CanGoBack;
+        BtnNextPage.IsEnabled = viewModel.CanGoForward;
+        LblPage.Text = viewModel.PageText;
+    }
+
+    private async void BtnPrevPage_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not FinishedWeightsViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Cargando pesos terminados, espere");
+        try
+        {
+            await viewModel.GoToPreviousPageAsync();
+            UpdatePaginationControls(viewModel);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pesos finalizados: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
+    private async void BtnNextPage_Clicked(object sender, EventArgs e)
+    {
+        if (BindingContext is not FinishedWeightsViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Cargando pesos terminados, espere");
+        try
+        {
+            await viewModel.GoToNextPageAsync();
+            UpdatePaginationControls(viewModel);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudieron cargar los pesos finalizados: " + ex.Message, "OK");
         }
         finally
         {

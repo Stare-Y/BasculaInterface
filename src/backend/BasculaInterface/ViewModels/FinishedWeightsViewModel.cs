@@ -11,8 +11,25 @@ namespace BasculaInterface.ViewModels
     public class FinishedWeightsViewModel : ViewModelBase
     {
         private List<WeightEntryDto> _finishedWeights { get; set; } = [];
-        private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
+        private Dictionary<int, ClienteProveedorDto> _partnerMap { get; set; } = [];
         private readonly IApiService _apiService = null!;
+        private const int PageSize = 30;
+
+        private uint _currentPage = 1;
+        public uint CurrentPage
+        {
+            get => _currentPage;
+            private set
+            {
+                _currentPage = value;
+                OnPropertyChanged(nameof(CurrentPage));
+                OnPropertyChanged(nameof(PageText));
+            }
+        }
+
+        public string PageText => $"Página {CurrentPage}";
+        public bool CanGoBack => CurrentPage > 1;
+        public bool CanGoForward { get; private set; }
 
         private bool isRefreshing;
 
@@ -20,7 +37,7 @@ namespace BasculaInterface.ViewModels
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
-        public FinishedWeightsViewModel() 
+        public FinishedWeightsViewModel()
         {
             RefreshCommand = new Command(async () =>
             {
@@ -89,7 +106,11 @@ namespace BasculaInterface.ViewModels
 
             try
             {
-                _finishedWeights = await _apiService.GetAsync<List<WeightEntryDto>>("api/Weight/All/Completed");
+                _finishedWeights = await _apiService.GetAsync<List<WeightEntryDto>>($"api/Weight/All/Completed?top={PageSize}&page={CurrentPage}");
+
+                CanGoForward = _finishedWeights.Count >= PageSize;
+                OnPropertyChanged(nameof(CanGoForward));
+                OnPropertyChanged(nameof(CanGoBack));
 
                 await LoadClienteProveedorAsync();
 
@@ -128,6 +149,20 @@ namespace BasculaInterface.ViewModels
                     FinishedWeights.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "No identificado" }, string.Empty));
                 }
             }
+        }
+
+        public async Task GoToNextPageAsync()
+        {
+            if (!CanGoForward) return;
+            CurrentPage++;
+            await LoadPendingWeightsAsync();
+        }
+
+        public async Task GoToPreviousPageAsync()
+        {
+            if (!CanGoBack) return;
+            CurrentPage--;
+            await LoadPendingWeightsAsync();
         }
     }
 }
