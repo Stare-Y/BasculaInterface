@@ -90,6 +90,11 @@ public partial class DetailedWeightView : ContentPage
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
+        if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+        {
+            PickerTargetBehavior.IsVisible = false;
+        }
+
         if (_entriesChanged)
         {
             WaitPopUp.Show("Un momento...");
@@ -358,7 +363,7 @@ public partial class DetailedWeightView : ContentPage
             {
                 string? detailNotes = null;
 
-                if(viewModel.Partner.Id <= 0)
+                if (viewModel.Partner.Id <= 0)
                 {
                     detailNotes = await NotesPopUp.ShowAsync("Que se esta pesando?");
                     if (detailNotes == null)
@@ -497,6 +502,8 @@ public partial class DetailedWeightView : ContentPage
         try
         {
             await viewModel.UpdateWeightEntry();
+
+            PickerTargetBehavior.IsVisible = true;
         }
         catch (Exception ex)
         {
@@ -653,7 +660,7 @@ public partial class DetailedWeightView : ContentPage
             if (row is null)
                 return;
 
-            if (row.Tare > 0 ||row.Weight > 0)
+            if (row.Tare > 0 || row.Weight > 0)
                 return;
 
             if (!row.IsGranel)
