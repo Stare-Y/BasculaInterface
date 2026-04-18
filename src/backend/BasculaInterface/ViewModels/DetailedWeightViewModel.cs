@@ -307,7 +307,12 @@ namespace BasculaInterface.ViewModels
 
             if (WeightEntry.WeightDetails.Count > 1 && (Partner is null || Partner.Id <= 0))
             {
-                throw new InvalidOperationException("A partner must be selected before concluding the weight process with multiple products.");
+                throw new InvalidOperationException("Debe seleccionarse un socio antes de concluir el proceso de pesaje con múltiples productos.");
+            }
+
+            if (WeightEntry.WeightDetails.Any(d => d.IsLoaded == false))
+            {
+                throw new InvalidOperationException("Todos los productos deben ser cargados antes de concluir el proceso de pesaje.");
             }
 
             WeightEntry.ConcludeDate = DateTime.UtcNow;
