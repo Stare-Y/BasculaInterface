@@ -18,6 +18,7 @@
         <ResourceDictionary>
             <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
             <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <local:CheckMarkVisibilityConverter x:Key="CheckMarkVisibilityConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -655,12 +656,18 @@
                                                     Clicked="MarkAsLoaded_Clicked"
                                                     HeightRequest="{OnPlatform Android=50,
                                                                                WinUI=75}"
-                                                    IsVisible="{Binding IsLoaded, Converter={StaticResource InvertedBoolConverter}}"
                                                     Style="{StaticResource Boton}"
                                                     Text="✓"
                                                     TextColor="White"
                                                     WidthRequest="{OnPlatform Android=50,
                                                                               WinUI=75}">
+                                                    <Button.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource CheckMarkVisibilityConverter}">
+                                                            <Binding Path="IsLoaded" />
+                                                            <Binding Path="SecondaryTare" />
+                                                            <Binding Path="Weight" />
+                                                        </MultiBinding>
+                                                    </Button.IsVisible>
                                                     <VisualStateManager.VisualStateGroups>
                                                         <VisualStateGroupList>
                                                             <VisualStateGroup>
