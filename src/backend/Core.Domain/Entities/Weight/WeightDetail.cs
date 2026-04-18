@@ -17,6 +17,7 @@ namespace Core.Domain.Entities.Weight
         public int? Costales { get; set; } = null;
         public DateTime? LastUpdated { get; set; } = null;
         public string? Notes { get; set; } = null;
+        public bool IsLoaded { get; set; } = true;
 
         /// <summary>
         /// If false, dont count its weight in the total and next weight entries.

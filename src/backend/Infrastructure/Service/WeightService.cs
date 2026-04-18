@@ -32,7 +32,7 @@ namespace Infrastructure.Service
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
-            if(weightEntry.Id > 0)
+            if (weightEntry.Id > 0)
             {
                 //this means a currently existing one, is trying to get its initial weight, so, lets update it instead
 
@@ -116,7 +116,7 @@ namespace Infrastructure.Service
             {
                 throw new InvalidOperationException("At least 1 product needs to be related to be able to make the pedido");
             }
-            if(weightEntry.ExternalTargetBehaviorFK is null || weightEntry.ExternalTargetBehavior is null)
+            if (weightEntry.ExternalTargetBehaviorFK is null || weightEntry.ExternalTargetBehavior is null)
             {
                 throw new InvalidOperationException("An External Target Behavior is required to post to SDK");
             }
@@ -145,19 +145,19 @@ namespace Infrastructure.Service
 
         private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntry weightEntry)
         {
-            if(weightEntry.ExternalTargetBehavior is null)
+            if (weightEntry.ExternalTargetBehavior is null)
             {
                 throw new InvalidOperationException("An External Target Behavior is required to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetSerie))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetSerie))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetAlmacen))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetAlmacen))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetConcept))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetConcept))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
@@ -183,13 +183,13 @@ namespace Infrastructure.Service
                 Fecha = DateTime.Now,
                 CodigoCteProv = cteProovedor.Code,
                 cObservaciones = "Generado en Bascula CPE",
-                Movimientos = products.Select(p =>
+                Movimientos = weightEntry.WeightDetails.Select(d =>
                     new MovimientoDto
                     {
-                        CodigoProducto = p.Code,
-                        CodigoAlmacen = p.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
-                        Unidades = GetUnidadesFromProductAndDetail( weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id),p),
-                        Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}",
+                        CodigoProducto = products.First(p => p.Id == d.FK_WeightedProductId).Code,
+                        CodigoAlmacen = products.First(p => p.Id == d.FK_WeightedProductId).IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
+                        Unidades = GetUnidadesFromProductAndDetail(d, products.First(p => p.Id == d.FK_WeightedProductId)),
+                        Referencia = $"Pesado por: {d.WeightedBy}",
                         Precio = purchasePrice
                     }).ToArray()
             };
@@ -250,8 +250,8 @@ namespace Infrastructure.Service
                     if (detail.FK_WeightedProductId.HasValue && detail.ProductPrice.HasValue)
                     {
                         // Use actual weight if measured, otherwise use required amount
-                        double quantity = detail.Weight > 0 
-                            ? detail.Weight 
+                        double quantity = detail.Weight > 0
+                            ? detail.Weight
                             : (detail.RequiredAmount ?? 0);
 
                         pendingEntriesCost += detail.ProductPrice.Value * quantity;
