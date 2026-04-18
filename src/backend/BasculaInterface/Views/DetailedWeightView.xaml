@@ -17,6 +17,8 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+            <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <local:CheckMarkVisibilityConverter x:Key="CheckMarkVisibilityConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -640,6 +642,44 @@
                                                                 <VisualState x:Name="Pressed">
                                                                     <VisualState.Setters>
                                                                         <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                            </VisualStateGroup>
+                                                        </VisualStateGroupList>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                </Button>
+
+                                                <!-- Mark as Loaded Button -->
+                                                <Button
+                                                    BackgroundColor="OrangeRed"
+                                                    BorderWidth="0"
+                                                    Clicked="MarkAsLoaded_Clicked"
+                                                    HeightRequest="{OnPlatform Android=50,
+                                                                               WinUI=75}"
+                                                    Style="{StaticResource Boton}"
+                                                    Text="✓"
+                                                    TextColor="White"
+                                                    WidthRequest="{OnPlatform Android=50,
+                                                                              WinUI=75}">
+                                                    <Button.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource CheckMarkVisibilityConverter}">
+                                                            <Binding Path="IsLoaded" />
+                                                            <Binding Path="SecondaryTare" />
+                                                            <Binding Path="Weight" />
+                                                        </MultiBinding>
+                                                    </Button.IsVisible>
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroupList>
+                                                            <VisualStateGroup>
+                                                                <VisualState x:Name="NormalLoaded" />
+                                                                <VisualState x:Name="PointerOverLoaded">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="Green" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                                <VisualState x:Name="PressedLoaded">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="DarkGreen" />
                                                                     </VisualState.Setters>
                                                                 </VisualState>
                                                             </VisualStateGroup>

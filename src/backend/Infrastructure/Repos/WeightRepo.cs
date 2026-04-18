@@ -169,6 +169,7 @@ namespace Infrastructure.Repos
                         existingDetail.RequiredAmount = incomingDetail.RequiredAmount;
                         existingDetail.Costales = incomingDetail.Costales;
                         existingDetail.Notes = incomingDetail.Notes;
+                        existingDetail.IsLoaded = incomingDetail.IsLoaded;
                         existingDetail.LastUpdated = DateTime.UtcNow;
                     }
                 }
@@ -225,7 +226,8 @@ namespace Infrastructure.Repos
                    existing.WeightedBy != incoming.WeightedBy ||
                    existing.SecondaryTare != incoming.SecondaryTare ||
                    existing.RequiredAmount != incoming.RequiredAmount ||
-                   existing.Costales != incoming.Costales;
+                   existing.Costales != incoming.Costales ||
+                   existing.IsLoaded != incoming.IsLoaded;
         }
     }
 }

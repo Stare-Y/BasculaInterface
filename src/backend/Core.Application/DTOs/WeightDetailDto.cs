@@ -17,6 +17,11 @@ namespace Core.Application.DTOs
         public DateTime? LastUpdated { get; set; } = null;
         public string? Notes { get; set; } = null;
 
+        /// <summary>
+        /// If false, dont count its weight in the total and next weight entries.
+        /// </summary>
+        public bool IsLoaded { get; set; }
+
         public WeightDetailDto() { }
 
         public WeightDetailDto(WeightDetail wd)
@@ -34,6 +39,7 @@ namespace Core.Application.DTOs
             Costales = wd.Costales;
             LastUpdated = wd.LastUpdated;
             Notes = wd.Notes;
+            IsLoaded = wd.IsLoaded;
         }
 
         public WeightDetail ToEntity()
@@ -51,7 +57,8 @@ namespace Core.Application.DTOs
                 ProductPrice = ProductPrice,
                 Costales = Costales,
                 LastUpdated = LastUpdated,
-                Notes = Notes
+                Notes = Notes,
+                IsLoaded = IsLoaded
             };
         }
     }

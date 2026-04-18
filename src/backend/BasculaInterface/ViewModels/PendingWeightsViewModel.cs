@@ -136,7 +136,7 @@ namespace BasculaInterface.ViewModels
                     {
                         teoricWeightText +=
                             "Total (teorico): "
-                            + (weight.WeightDetails.Sum(d => d.Weight)
+                            + (weight.WeightDetails.Where(d => d.IsLoaded).Sum(d => d.Weight)
                             + weight.TareWeight).ToString()
                             + " kg.";
                     }

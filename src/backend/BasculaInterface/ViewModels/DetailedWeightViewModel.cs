@@ -16,7 +16,7 @@ namespace BasculaInterface.ViewModels
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
-        public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
+        public double TotalWeight => WeightEntry?.WeightDetails?.Where(d => d.IsLoaded).Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = [];
 
         public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = [];
@@ -208,6 +208,7 @@ namespace BasculaInterface.ViewModels
                     existingRow.WeightedByDecorated = detail.WeightedBy;
                     existingRow.RequiredAmount = detail.RequiredAmount;
                     existingRow.Costales = detail.Costales;
+                    existingRow.IsLoaded = detail.IsLoaded;
                 }
             }
 
@@ -267,6 +268,23 @@ namespace BasculaInterface.ViewModels
             await FetchNewWeightDetails();
         }
 
+        public async Task SetWeightDetailLoaded(WeightEntryDetailRow row)
+        {
+            if (WeightEntry == null)
+                throw new InvalidOperationException("WeightEntry must be set before updating a detail.");
+
+            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(d => d.Id == row.Id);
+            if (detail == null)
+                throw new InvalidOperationException("No weight detail found for the given row.");
+
+            detail.IsLoaded = true;
+
+            detail.Tare = WeightEntry.BruteWeight;
+            await UpdateWeightEntry();
+
+            row.IsLoaded = true;
+        }
+
         public async Task DeleteWeightDetail(int detailId)
         {
             if (WeightEntry == null)
@@ -290,7 +308,12 @@ namespace BasculaInterface.ViewModels
 
             if (WeightEntry.WeightDetails.Count > 1 && (Partner is null || Partner.Id <= 0))
             {
-                throw new InvalidOperationException("A partner must be selected before concluding the weight process with multiple products.");
+                throw new InvalidOperationException("Debe seleccionarse un socio antes de concluir el proceso de pesaje con múltiples productos.");
+            }
+
+            if (WeightEntry.WeightDetails.Any(d => d.IsLoaded == false))
+            {
+                throw new InvalidOperationException("Todos los productos deben ser cargados antes de concluir el proceso de pesaje.");
             }
 
             WeightEntry.ConcludeDate = DateTime.UtcNow;
@@ -440,7 +463,8 @@ namespace BasculaInterface.ViewModels
                                     : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,
                     RequiredAmount = detail.RequiredAmount,
-                    Costales = detail.Costales
+                    Costales = detail.Costales,
+                    IsLoaded = detail.IsLoaded
                 };
 
                 if (detail.FK_WeightedProductId > 0 && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))

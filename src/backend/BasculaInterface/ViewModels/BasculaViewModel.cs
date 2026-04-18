@@ -13,7 +13,7 @@ namespace BasculaInterface.ViewModels
     public class BasculaViewModel : ViewModelBase
     {
         public string? DetailNotes { get; set; } = null;
-        public int? TargetWeightDetail {  get; set; } = null;
+        public int? TargetWeightDetail { get; set; } = null;
         private WeightEntryDto? _weightEntry;
         public WeightEntryDto? WeightEntry
         {
@@ -257,7 +257,7 @@ namespace BasculaInterface.ViewModels
 
                 if (WeightEntry.WeightDetails.Any())
                 {
-                    WeightEntry.BruteWeight = _pesoTotal + WeightEntry.WeightDetails.Sum(w => w.Weight);
+                    WeightEntry.BruteWeight = _pesoTotal + WeightEntry.WeightDetails.Where(d => d.IsLoaded).Sum(w => w.Weight);
                 }
 
                 await PostNewWeightEntry(printTurn);
@@ -320,7 +320,7 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
-            if(TargetWeightDetail == null)
+            if (TargetWeightDetail == null)
             {
                 throw new InvalidOperationException("TargetWeightDetail must be set to update the secondary tara.");
             }
@@ -328,6 +328,7 @@ namespace BasculaInterface.ViewModels
             if (detail != null)
             {
                 detail.SecondaryTare = TaraCurrentValue;
+                detail.IsLoaded = false; //If secondary tare, we assume the weight is not loaded, so we set it to false to not count it in the total weight and next weight entries until we capture a new weight entry or manually set it as loaded again.
                 detail.WeightedBy = DeviceInfo.Name;
                 await PutWeightEntry();
             }

@@ -160,7 +160,8 @@ namespace BasculaInterface.ViewModels
                                     ? null
                                     : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,
-                    RequiredAmount = detail.RequiredAmount
+                    RequiredAmount = detail.RequiredAmount,
+                    IsLoaded = detail.IsLoaded
                 };
 
                 if (detail.FK_WeightedProductId is not null && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))

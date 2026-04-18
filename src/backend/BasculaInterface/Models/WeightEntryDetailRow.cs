@@ -120,6 +120,20 @@ namespace BasculaInterface.Models
 
         public double? ProductPrice { get; set; } = null;
 
+        private bool _isLoaded = true;
+        public bool IsLoaded
+        {
+            get => _isLoaded;
+            set
+            {
+                if (_isLoaded != value)
+                {
+                    _isLoaded = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string RequiredAmountText => RequiredAmount > 0 && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
             : string.Empty;
