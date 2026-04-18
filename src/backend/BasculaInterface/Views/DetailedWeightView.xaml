@@ -17,6 +17,7 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+            <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -638,6 +639,39 @@
                                                                 </VisualState>
 
                                                                 <VisualState x:Name="Pressed">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                            </VisualStateGroup>
+                                                        </VisualStateGroupList>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                </Button>
+
+                                                <!-- Mark as Loaded Button -->
+                                                <Button
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                                                                      Dark={StaticResource 2}}"
+                                                    BorderWidth="0"
+                                                    Clicked="MarkAsLoaded_Clicked"
+                                                    HeightRequest="{OnPlatform Android=50,
+                                                                               WinUI=75}"
+                                                    IsVisible="{Binding IsLoaded, Converter={StaticResource InvertedBoolConverter}}"
+                                                    Style="{StaticResource Boton}"
+                                                    Text="✓"
+                                                    TextColor="White"
+                                                    WidthRequest="{OnPlatform Android=50,
+                                                                              WinUI=75}">
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroupList>
+                                                            <VisualStateGroup>
+                                                                <VisualState x:Name="NormalLoaded" />
+                                                                <VisualState x:Name="PointerOverLoaded">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="Green" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                                <VisualState x:Name="PressedLoaded">
                                                                     <VisualState.Setters>
                                                                         <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
                                                                     </VisualState.Setters>

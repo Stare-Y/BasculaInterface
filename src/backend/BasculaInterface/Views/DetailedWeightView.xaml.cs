@@ -758,6 +758,29 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
+    private async void MarkAsLoaded_Clicked(object sender, EventArgs e)
+    {
+        if (sender is not Button btn || btn.BindingContext is not WeightEntryDetailRow selectedRow)
+            return;
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Marcando como cargado...");
+        try
+        {
+            await viewModel.SetWeightDetailLoaded(selectedRow);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo marcar como cargado: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
     private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
         await BtnRefresh.ScaleTo(1.1, 100);

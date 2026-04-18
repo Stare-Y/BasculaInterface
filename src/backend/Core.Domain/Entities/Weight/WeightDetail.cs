@@ -18,11 +18,16 @@ namespace Core.Domain.Entities.Weight
         public DateTime? LastUpdated { get; set; } = null;
         public string? Notes { get; set; } = null;
 
+        /// <summary>
+        /// If false, dont count its weight in the total and next weight entries.
+        /// </summary>
+        public bool IsLoaded { get; set; } = true;
+
         [ForeignKey("FK_WeightEntryId")]
         public virtual WeightEntry WeightEntry { get; set; } = null!;
         public override string ToString()
         {
-            return $"Weight: {Weight}, Tare: {Tare}, ProductId: {FK_WeightedProductId}, Price: {ProductPrice}";
+            return $"Weight: {Weight}, Tare: {Tare}, ProductId: {FK_WeightedProductId}, Price: {ProductPrice}, IsLoaded: {IsLoaded}";
         }
     }
 }
