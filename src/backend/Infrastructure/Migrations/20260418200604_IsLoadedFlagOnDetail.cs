@@ -15,7 +15,7 @@ namespace Infrastructure.Migrations
                 table: "WeightDetails",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />

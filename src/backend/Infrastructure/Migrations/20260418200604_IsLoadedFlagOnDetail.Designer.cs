@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WeightDBContext))]
-    [Migration("20260418065314_IsLoadedFlagOnDetail")]
+    [Migration("20260418200604_IsLoadedFlagOnDetail")]
     partial class IsLoadedFlagOnDetail
     {
         /// <inheritdoc />
@@ -165,7 +165,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsLoaded")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTime?>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
