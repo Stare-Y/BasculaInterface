@@ -7,27 +7,31 @@ namespace BasculaInterface.Views;
 
 public partial class FinishedWeights : ContentPage
 {
-    private CancellationTokenSource? _cancellationTokenSource = null;
+    private CancellationTokenSource? _cts = null;
 
     public FinishedWeights(FinishedWeightsViewModel viewModel)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
 
-        this.BindingContext = viewModel 
+        this.BindingContext = viewModel
             ?? throw new ArgumentNullException(nameof(viewModel));
     }
 
-    public FinishedWeights(): this(MauiProgram.ServiceProvider.GetRequiredService<FinishedWeightsViewModel>()) { }
+    public FinishedWeights() : this(MauiProgram.ServiceProvider.GetRequiredService<FinishedWeightsViewModel>()) { }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         if (BindingContext is FinishedWeightsViewModel viewModel)
         {
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
             WaitPopUp.Show("Cargando pesos terminados, espere");
             await Task.Yield();
             try
             {
-                await viewModel.LoadPendingWeightsAsync();
+                await viewModel.LoadPendingWeightsAsync(token);
                 UpdatePaginationControls(viewModel);
 
 #if ANDROID
@@ -36,6 +40,10 @@ public partial class FinishedWeights : ContentPage
                 BtnReconnect.IsVisible = false;
 
                 return;
+            }
+            catch (OperationCanceledException)
+            {
+                // Navigation away cancelled the load, no action needed
             }
             catch (Exception ex)
             {
@@ -55,15 +63,15 @@ public partial class FinishedWeights : ContentPage
         await BtnRefresh.ScaleTo(1.1, 100);
         await BtnRefresh.ScaleTo(1.0, 100);
 
-        _cancellationTokenSource = new CancellationTokenSource();
+        _cts = new CancellationTokenSource();
         try
         {
-            await Task.Delay(4444, _cancellationTokenSource.Token);
+            await Task.Delay(4444, _cts.Token);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                _cts?.Cancel();
+                _cts?.Dispose();
+                _cts = null;
             });
         }
         catch (TaskCanceledException)
@@ -118,11 +126,11 @@ public partial class FinishedWeights : ContentPage
         BtnReconnect.Opacity = 0;
         await BtnReconnect.FadeTo(2, 200);
 
-        if (_cancellationTokenSource != null)
+        if (_cts != null)
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
             await Reconect();
         }
     }
@@ -132,11 +140,15 @@ public partial class FinishedWeights : ContentPage
         if (BindingContext is not FinishedWeightsViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         WaitPopUp.Show("Reconectando, espere");
 
         try
         {
-            await viewModel.LoadPendingWeightsAsync();
+            await viewModel.LoadPendingWeightsAsync(token);
             UpdatePaginationControls(viewModel);
 
             BtnReconnect.IsVisible = false;
@@ -171,12 +183,17 @@ public partial class FinishedWeights : ContentPage
         if (BindingContext is not FinishedWeightsViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         WaitPopUp.Show("Cargando pesos terminados, espere");
         try
         {
-            await viewModel.GoToPreviousPageAsync();
+            await viewModel.GoToPreviousPageAsync(token);
             UpdatePaginationControls(viewModel);
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             await DisplayAlert("Error", "No se pudieron cargar los pesos finalizados: " + ex.Message, "OK");
@@ -192,12 +209,17 @@ public partial class FinishedWeights : ContentPage
         if (BindingContext is not FinishedWeightsViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         WaitPopUp.Show("Cargando pesos terminados, espere");
         try
         {
-            await viewModel.GoToNextPageAsync();
+            await viewModel.GoToNextPageAsync(token);
             UpdatePaginationControls(viewModel);
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             await DisplayAlert("Error", "No se pudieron cargar los pesos finalizados: " + ex.Message, "OK");
@@ -206,5 +228,13 @@ public partial class FinishedWeights : ContentPage
         {
             WaitPopUp.Hide();
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 }

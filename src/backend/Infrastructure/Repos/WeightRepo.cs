@@ -54,7 +54,7 @@ namespace Infrastructure.Repos
                     w.CreatedAt < endDateTime &&
                     !w.IsDeleted
                     )
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -68,7 +68,7 @@ namespace Infrastructure.Repos
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted)
                 .OrderByDescending(w => w.CreatedAt)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -82,7 +82,7 @@ namespace Infrastructure.Repos
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted && w.ConcludeDate != null)
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -94,7 +94,7 @@ namespace Infrastructure.Repos
                 .Include(w => w.WeightDetails)
                 .Include(w => w.ExternalTargetBehavior)
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -108,7 +108,7 @@ namespace Infrastructure.Repos
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
