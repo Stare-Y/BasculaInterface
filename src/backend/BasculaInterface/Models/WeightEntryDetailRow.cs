@@ -137,7 +137,7 @@ namespace BasculaInterface.Models
             }
         }
 
-        public bool IsRowComplete => !IsGranel || (Weight > 0 && Tare > 0 && IsLoaded);
+        public bool IsRowComplete => !IsGranel || (Weight > 0 && Tare > 0 && ( IsLoaded && SecondaryTare > 0));
 
         public string RequiredAmountText => RequiredAmount > 0 && IsGranel
             ? "Cantidad Solicitada: " + RequiredAmount.Value.ToString("F2") + " kg."
