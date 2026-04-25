@@ -103,6 +103,7 @@ public partial class PickQuantityPopUp : ContentView
     {
         this.IsVisible = false;
         QuantityEntry.Text = string.Empty;
+        CostalesEntry.Text = string.Empty;
         _tcs?.TrySetResult(
             new Dictionary<double, int?>
             {
