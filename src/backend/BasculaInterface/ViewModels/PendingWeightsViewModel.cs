@@ -230,7 +230,7 @@ namespace BasculaInterface.ViewModels
 
             WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", weightEntry);
 
-            await PrintTurnAsync(newEntry, partner);
+            // await PrintTurnAsync(newEntry, partner);
         }
     }
 }
