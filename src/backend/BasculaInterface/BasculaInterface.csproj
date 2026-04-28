@@ -63,8 +63,8 @@
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		
 		 <!--avoid MSIX--> 
-		<!--<WindowsPackageType>None</WindowsPackageType>
-		<PublishSingleFile>true</PublishSingleFile>-->
+		<WindowsPackageType>None</WindowsPackageType>
+		<PublishSingleFile>true</PublishSingleFile>
 
 		<!--Name and title-->
 		<AssemblyName>BasculaInterface</AssemblyName>
