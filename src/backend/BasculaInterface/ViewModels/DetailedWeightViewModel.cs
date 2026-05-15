@@ -210,6 +210,15 @@ namespace BasculaInterface.ViewModels
                 }
             }
 
+            // Re-sort so incomplete (red) rows stay at the top
+            var sorted = WeightEntryDetailRows.OrderBy(r => r.IsRowComplete).ThenBy(r => r.Id).ToList();
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                int currentIndex = WeightEntryDetailRows.IndexOf(sorted[i]);
+                if (currentIndex != i)
+                    WeightEntryDetailRows.Move(currentIndex, i);
+            }
+
             OnPropertyChanged(nameof(TotalWeight));
             OnCollectionChanged(nameof(WeightEntryDetailRows));
         }
@@ -487,9 +496,9 @@ namespace BasculaInterface.ViewModels
                 WeightEntryDetailRows.Add(row);
             }
 
-            //sort the rows by id, and assign the order index
+            //sort the rows: incomplete (red) first, then complete (green), within each group order by id
             WeightEntryDetailRows = new ObservableCollection<WeightEntryDetailRow>(
-                WeightEntryDetailRows.OrderBy(row => row.Id).Select((row, index) =>
+                WeightEntryDetailRows.OrderBy(row => row.IsRowComplete).ThenBy(row => row.Id).Select((row, index) =>
                 {
                     row.OrderIndex = index + 1;
                     return row;
