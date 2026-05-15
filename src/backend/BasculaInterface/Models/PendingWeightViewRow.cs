@@ -8,6 +8,7 @@ namespace BasculaInterface.Models
         public WeightEntryDto WeightEntry { get; set; }
         public ClienteProveedorDto Partner { get; set; }
         public string HistoryText { get; set; } = string.Empty;
+        public string? RequestedProduct { get; set; } = null;
         public PendingWeightViewRow(WeightEntryDto weightEntry, ClienteProveedorDto partner, string historyText)
         {
             WeightEntry = weightEntry ?? throw new ArgumentNullException(nameof(weightEntry));

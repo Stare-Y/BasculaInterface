@@ -15,6 +15,7 @@ namespace BasculaInterface.ViewModels
     {
         private List<WeightEntryDto> _pendingWeights { get; set; } = [];
         private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
+        private Dictionary<int, string> _productNamesById { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; set; } = [];
         public ObservableCollection<ExternalTargetBehaviorDto> AvailableDocumentTypes { get; set; } = [];
@@ -81,6 +82,8 @@ namespace BasculaInterface.ViewModels
 
                 await LoadClienteProveedorAsync(cancellationToken);
 
+                await FetchRequestedProductsAsync(cancellationToken);
+
                 BuildObservableCollection();
             }
             finally
@@ -146,7 +149,11 @@ namespace BasculaInterface.ViewModels
 
                     if (partner.IsProvider)
                     {
-                        PendingWeightsDischarge.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
+                        PendingWeightViewRow row = new PendingWeightViewRow(weight, partner, teoricWeightText)
+                        {
+                            RequestedProduct = GetRequestedProductName(weight)
+                        };
+                        PendingWeightsDischarge.Add(row);
                     }
                     else
                     {
@@ -164,6 +171,47 @@ namespace BasculaInterface.ViewModels
 
             OnPropertyChanged(nameof(PendingWeightsCharge));
             OnPropertyChanged(nameof(PendingWeightsDischarge));
+        }
+
+        private string? GetRequestedProductName(WeightEntryDto weight)
+        {
+            WeightDetailDto? oldest = weight.WeightDetails
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId.Value > 0)
+                .OrderBy(d => d.Id)
+                .FirstOrDefault();
+
+            if (oldest == null)
+                return null;
+
+            return _productNamesById.TryGetValue(oldest.FK_WeightedProductId!.Value, out string? name) ? name : null;
+        }
+
+        private async Task FetchRequestedProductsAsync(CancellationToken cancellationToken = default)
+        {
+            _productNamesById.Clear();
+
+            int[] productIds = _pendingWeights
+                .SelectMany(w => w.WeightDetails)
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId.Value > 0)
+                .Select(d => d.FK_WeightedProductId!.Value)
+                .Distinct()
+                .ToArray();
+
+            if (productIds.Length == 0)
+                return;
+
+            string idsQuery = string.Join("&ids=", productIds);
+            List<ProductoDto>? products = await _apiService.GetAsync<List<ProductoDto>>($"api/Productos/ByMultipleIds?ids={idsQuery}", cancellationToken);
+
+            if (products != null)
+            {
+                foreach (ProductoDto product in products)
+                {
+                    _productNamesById[product.Id] = string.IsNullOrEmpty(product.Nombre)
+                        ? $"Producto {product.Id}"
+                        : $"{product.Code} - {product.Nombre}";
+                }
+            }
         }
 
         private async Task LoadClienteProveedorAsync(CancellationToken cancellationToken = default)

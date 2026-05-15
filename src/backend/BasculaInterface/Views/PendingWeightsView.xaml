@@ -14,6 +14,7 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+            <local:IsNotNullConverter x:Key="IsNotNullConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
     <Grid>
@@ -282,6 +283,19 @@
                                                                                      WinUI=800}"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding WeightEntry.Notes, StringFormat='Chofer: {0}.'}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}" />
+                                                <Label
+                                                    x:Name="lblRequestedProduct"
+                                                    FontSize="{OnPlatform WinUI=24,
+                                                                          Android=12}"
+                                                    HorizontalOptions="Start"
+                                                    HorizontalTextAlignment="Start"
+                                                    MaximumWidthRequest="{OnPlatform Android=450,
+                                                                                     WinUI=800}"
+                                                    IsVisible="{Binding RequestedProduct, Converter={x:StaticResource IsNotNullConverter}}"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding RequestedProduct, StringFormat='Producto: {0}'}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
                                             </VerticalStackLayout>
