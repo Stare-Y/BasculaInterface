@@ -512,6 +512,8 @@ public partial class DetailedWeightView : ContentPage
         }
 
         BtnPickPartner.IsVisible = false;
+
+        _entriesChanged = true;
     }
 
     private async void BtnPickPartner_Clicked(object sender, EventArgs e)
@@ -587,6 +589,7 @@ public partial class DetailedWeightView : ContentPage
             try
             {
                 await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
+                _entriesChanged = true;
             }
             finally
             {
@@ -632,8 +635,6 @@ public partial class DetailedWeightView : ContentPage
             productSelectView.OnProductSelected += OnProductSelected;
 
             await Shell.Current.Navigation.PushModalAsync(productSelectView);
-
-            _entriesChanged = true;
         }
         catch (Exception ex)
         {
