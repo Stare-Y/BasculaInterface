@@ -4,7 +4,6 @@ using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
 using Core.Application.Services;
-using System.Threading.Tasks;
 
 namespace BasculaInterface.Views;
 

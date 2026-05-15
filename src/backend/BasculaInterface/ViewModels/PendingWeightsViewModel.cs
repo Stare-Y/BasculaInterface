@@ -1,9 +1,7 @@
-﻿using BasculaInterface.Exceptions;
-using BasculaInterface.Models;
+﻿using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
-using Core.Domain.Entities.Weight;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
