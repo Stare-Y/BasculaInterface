@@ -71,9 +71,9 @@
     <!--  como acento cálido  -->
 
     <!--  🎨 Colores de estado de fila  -->
-    <Color x:Key="RowComplete">#E8F5E9</Color>
+    <Color x:Key="RowComplete">#81C04B</Color>
     <Color x:Key="RowCompleteDark">#3A4E3E</Color>
-    <Color x:Key="RowPending">#FFF3E0</Color>
+    <Color x:Key="RowPending">#FFD9A0</Color>
     <Color x:Key="RowPendingDark">#4E4438</Color>
 
     <!--  🎨 Brushes principales  -->
