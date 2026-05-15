@@ -596,7 +596,7 @@
                                         <!-- Android: 2-row layout; WinUI: single-row layout -->
                                         <Grid Padding="{OnPlatform Android='10,10,10,12', WinUI=20}" 
                                               RowDefinitions="{OnPlatform Android='Auto,Auto', WinUI='*'}"
-                                              ColumnDefinitions="{OnPlatform Android='Auto,*,*', WinUI='Auto,*,*,20,*'}"
+                                              ColumnDefinitions="{OnPlatform Android='Auto,*,*,Auto', WinUI='Auto,*,*,20,*,Auto'}"
                                               RowSpacing="{OnPlatform Android=10, WinUI=0}">
 
                                             <!-- Delete Button - Android: Row 1, Col 0; WinUI: Row 0, Col 0 -->
@@ -655,47 +655,9 @@
                                                     </VisualStateManager.VisualStateGroups>
                                                 </Button>
 
-                                                <!-- Mark as Loaded Button -->
-                                                <Button
-                                                    BackgroundColor="OrangeRed"
-                                                    BorderWidth="0"
-                                                    Clicked="MarkAsLoaded_Clicked"
-                                                    HeightRequest="{OnPlatform Android=50,
-                                                                               WinUI=75}"
-                                                    Style="{StaticResource Boton}"
-                                                    Text="✓"
-                                                    TextColor="White"
-                                                    WidthRequest="{OnPlatform Android=50,
-                                                                              WinUI=75}">
-                                                    <Button.IsVisible>
-                                                        <MultiBinding Converter="{StaticResource CheckMarkVisibilityConverter}">
-                                                            <Binding Path="IsLoaded" />
-                                                            <Binding Path="SecondaryTare" />
-                                                            <Binding Path="Weight" />
-                                                        </MultiBinding>
-                                                    </Button.IsVisible>
-                                                    <VisualStateManager.VisualStateGroups>
-                                                        <VisualStateGroupList>
-                                                            <VisualStateGroup>
-                                                                <VisualState x:Name="NormalLoaded" />
-                                                                <VisualState x:Name="PointerOverLoaded">
-                                                                    <VisualState.Setters>
-                                                                        <Setter Property="BackgroundColor" Value="Green" />
-                                                                    </VisualState.Setters>
-                                                                </VisualState>
-                                                                <VisualState x:Name="PressedLoaded">
-                                                                    <VisualState.Setters>
-                                                                        <Setter Property="BackgroundColor" Value="DarkGreen" />
-                                                                    </VisualState.Setters>
-                                                                </VisualState>
-                                                            </VisualStateGroup>
-                                                        </VisualStateGroupList>
-                                                    </VisualStateManager.VisualStateGroups>
-                                                </Button>
-
                                             </Grid>
 
-                                            <!-- Description Section - Android: Row 0, spans all columns; WinUI: Row 0, Col 1 -->
+                                            <!-- Description Section -->
                                             <VerticalStackLayout
                                                 Grid.Row="0"
                                                 Grid.Column="{OnPlatform Android=0, WinUI=1}"
@@ -797,6 +759,7 @@
                                             <Grid
                                                 Grid.Row="{OnPlatform Android=1, WinUI=0}"
                                                 Grid.Column="{OnPlatform Android=2, WinUI=4}"
+                                                Grid.ColumnSpan="1"
                                                 RowDefinitions="{OnPlatform Android='*', WinUI='Auto,Auto'}"
                                                 ColumnDefinitions="{OnPlatform Android='Auto,Auto', WinUI='*'}"
                                                 ColumnSpacing="{OnPlatform Android=6, WinUI=0}"
@@ -824,6 +787,54 @@
                                                     Text="{Binding WeightValue}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
+
+                                            </Grid>
+
+                                            <!-- Mark as Loaded Button - rightmost column -->
+                                            <Grid
+                                                Grid.Row="{OnPlatform Android=1, WinUI=0}"
+                                                Grid.Column="{OnPlatform Android=3, WinUI=5}"
+                                                HeightRequest="{OnPlatform Android=50, WinUI=75}"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                WidthRequest="{OnPlatform Android=50, WinUI=75}">
+
+                                                <Button
+                                                    BackgroundColor="OrangeRed"
+                                                    BorderWidth="0"
+                                                    Clicked="MarkAsLoaded_Clicked"
+                                                    HeightRequest="{OnPlatform Android=50,
+                                                                               WinUI=75}"
+                                                    Style="{StaticResource Boton}"
+                                                    Text="✓"
+                                                    TextColor="White"
+                                                    WidthRequest="{OnPlatform Android=50,
+                                                                              WinUI=75}">
+                                                    <Button.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource CheckMarkVisibilityConverter}">
+                                                            <Binding Path="IsLoaded" />
+                                                            <Binding Path="SecondaryTare" />
+                                                            <Binding Path="Weight" />
+                                                        </MultiBinding>
+                                                    </Button.IsVisible>
+                                                    <VisualStateManager.VisualStateGroups>
+                                                        <VisualStateGroupList>
+                                                            <VisualStateGroup>
+                                                                <VisualState x:Name="NormalLoaded" />
+                                                                <VisualState x:Name="PointerOverLoaded">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="Green" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                                <VisualState x:Name="PressedLoaded">
+                                                                    <VisualState.Setters>
+                                                                        <Setter Property="BackgroundColor" Value="DarkGreen" />
+                                                                    </VisualState.Setters>
+                                                                </VisualState>
+                                                            </VisualStateGroup>
+                                                        </VisualStateGroupList>
+                                                    </VisualStateManager.VisualStateGroups>
+                                                </Button>
 
                                             </Grid>
 

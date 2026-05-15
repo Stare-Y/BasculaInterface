@@ -3,8 +3,6 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
-using iText.Pdfua.Checkers.Utils.Ua2;
-using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -181,7 +179,7 @@ namespace BasculaInterface.ViewModels
                 if (Partner == null || Partner.Id != WeightEntry.PartnerId.Value)
                 {
                     Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={WeightEntry.PartnerId.Value}", cancellationToken);
-                    Partner.RazonSocial = Partner.Code.IsNullOrEmpty() ? Partner.RazonSocial : $"{Partner.Code} - {Partner.RazonSocial}";
+                    Partner.RazonSocial = string.IsNullOrEmpty(Partner.Code) ? Partner.RazonSocial : $"{Partner.Code} - {Partner.RazonSocial}";
                 }
             }
 
@@ -470,7 +468,7 @@ namespace BasculaInterface.ViewModels
 
                 if (detail.FK_WeightedProductId > 0 && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))
                 {
-                    if (product is null || product.Nombre.IsNullOrEmpty())
+                    if (product is null || string.IsNullOrEmpty(product.Nombre))
                     {
                         row.Description = $"Unknown Product ({detail.FK_WeightedProductId})";
                         row.IsGranel = false;
