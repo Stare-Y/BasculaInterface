@@ -9,5 +9,6 @@ namespace Core.Domain.Entities.Users
         public required string HashPassword { get; set; }
         public UserPermissions Permissions { get; set; } = new UserPermissions();
         public virtual ICollection<UserAuditLog> AuditLogs { get; set; } = [];
+        public DateTime? LastLogIn { get; set; }
     }
 }

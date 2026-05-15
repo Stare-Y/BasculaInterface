@@ -5,7 +5,6 @@ using Core.Domain.Entities.Turns;
 using Core.Domain.Entities.Users;
 using Core.Domain.Entities.Weight;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Infrastructure.Data
 {
