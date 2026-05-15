@@ -231,7 +231,22 @@
                             Style="{StaticResource EntryDatos}"
                             Text="{Binding WeightEntry.VehiclePlate}"
                             TextChanged="EntryVehiclePlate_TextChanged"
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center">
+                            <Entry.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding WeightEntry.VehiclePlate}"
+                                    TargetType="Entry"
+                                    Value="">
+                                    <Setter Property="BackgroundColor" Value="#FFCDD2" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding WeightEntry.VehiclePlate}"
+                                    TargetType="Entry"
+                                    Value="{x:Null}">
+                                    <Setter Property="BackgroundColor" Value="#FFCDD2" />
+                                </DataTrigger>
+                            </Entry.Triggers>
+                        </Entry>
                     </StackLayout>
                 </Border>
 
