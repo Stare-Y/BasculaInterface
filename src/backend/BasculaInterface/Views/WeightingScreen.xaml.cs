@@ -276,7 +276,7 @@ public partial class WeightingScreen : ContentPage
 
         bool printTurn = false;
 
-        if (viewModel.WeightEntry!.BruteWeight <= 0)
+        if (viewModel.WeightEntry!.BruteWeight <= 0 && viewModel.Product is null)
             printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
 
         WaitPopUp.Show("Capturando peso, espere...");
