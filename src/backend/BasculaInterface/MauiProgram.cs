@@ -38,10 +38,27 @@ public static class MauiProgram
 
                     if (appWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter overlappedPresenter)
                     {
-                        overlappedPresenter.IsResizable = false;
-                        overlappedPresenter.IsMaximizable = false;
-                        overlappedPresenter.IsMinimizable = true;
-                        overlappedPresenter.Maximize();
+                        bool hideTaskbar = Preferences.Get("HideTaskbar", false);
+                        if (hideTaskbar)
+                        {
+                            overlappedPresenter.IsResizable = false;
+                            overlappedPresenter.IsMaximizable = false;
+                            overlappedPresenter.IsMinimizable = true;
+                            overlappedPresenter.SetBorderAndTitleBar(true, true);
+
+                            // Cover the full display area (including taskbar) while keeping title bar with minimize
+                            var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary);
+                            appWindow.MoveAndResize(displayArea.OuterBounds);
+                            overlappedPresenter.Maximize();
+                        }
+                        else
+                        {
+                            overlappedPresenter.IsResizable = true;
+                            overlappedPresenter.IsMaximizable = true;
+                            overlappedPresenter.IsMinimizable = true;
+                            overlappedPresenter.SetBorderAndTitleBar(true, true);
+                            overlappedPresenter.Maximize();
+                        }
                     }
                 });
             });

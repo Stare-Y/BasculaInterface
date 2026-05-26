@@ -77,6 +77,7 @@ public partial class EditSettingsView : ContentPage
         EntryDocumentTypes.Text = Preferences.Get("PreferedDocumentType", string.Empty);
         EntryPurchaseExternalTarget.Text = Preferences.Get("PurchaseExternalTarget", string.Empty);
         CheckBoxFilterNull.IsChecked = Preferences.Get("FilterNull", false);
+        CheckBoxHideTaskbar.IsChecked = Preferences.Get("HideTaskbar", false);
         EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
         // Load theme preference (0 = System, 1 = Light, 2 = Dark)
@@ -98,6 +99,7 @@ public partial class EditSettingsView : ContentPage
         Preferences.Set("PreferedDocumentType", EntryDocumentTypes.Text);
         Preferences.Set("PurchaseExternalTarget", EntryPurchaseExternalTarget.Text);
         Preferences.Set("FilterNull", CheckBoxFilterNull.IsChecked);
+        Preferences.Set("HideTaskbar", CheckBoxHideTaskbar.IsChecked);
     }
 
     private async void BtnCancel_Clicked(object sender, EventArgs e)
@@ -169,6 +171,11 @@ public partial class EditSettingsView : ContentPage
     private void CheckBoxDontFilterNull_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         Preferences.Set("FilterNull", e.Value);
+    }
+
+    private void CheckBoxHideTaskbar_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        Preferences.Set("HideTaskbar", e.Value);
     }
 
     private void PickerTheme_SelectedIndexChanged(object sender, EventArgs e)

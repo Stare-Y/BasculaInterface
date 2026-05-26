@@ -247,6 +247,29 @@
                                 ColumnDefinitions="*,*"
                                 ColumnSpacing="35"
                                 HorizontalOptions="Fill"
+                                IsVisible="{OnPlatform WinUI=True, Android=False}"
+                                VerticalOptions="Center">
+
+                                <CheckBox
+                                    x:Name="CheckBoxHideTaskbar"
+                                    Grid.Column="0"
+                                    CheckedChanged="CheckBoxHideTaskbar_CheckedChanged"
+                                    HorizontalOptions="Start" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    FontSize="{OnPlatform Android=12,
+                                                          WinUI=22}"
+                                    HorizontalOptions="End"
+                                    Style="{StaticResource Label}"
+                                    Text="Ocultar barra de tareas al maximizar" />
+
+                            </Grid>
+
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="35"
+                                HorizontalOptions="Fill"
                                 VerticalOptions="Center">
 
                                 <Entry
