@@ -160,15 +160,18 @@ namespace Infrastructure.Repos
                     // Set LastUpdated if any tracked property has changed
                     if (HasDetailChanged(existingDetail, incomingDetail))
                     {
-                        existingDetail.Weight = incomingDetail.Weight;
-                        existingDetail.Tare = incomingDetail.Tare;
-                        existingDetail.SecondaryTare = incomingDetail.SecondaryTare;
-                        existingDetail.FK_WeightedProductId = incomingDetail.FK_WeightedProductId;
-                        existingDetail.ProductPrice = incomingDetail.ProductPrice;
-                        existingDetail.WeightedBy = incomingDetail.WeightedBy;
-                        existingDetail.RequiredAmount = incomingDetail.RequiredAmount;
-                        existingDetail.Costales = incomingDetail.Costales;
-                        existingDetail.Notes = incomingDetail.Notes;
+                        // Apply updates with stale snapshot protection:
+                        // If incoming value is default (0/null) but existing has real data,
+                        // preserve the existing value to prevent data loss from stale clients
+                        existingDetail.Weight = PreserveIfStaleDefault(existingDetail.Weight, incomingDetail.Weight);
+                        existingDetail.Tare = PreserveIfStaleDefault(existingDetail.Tare, incomingDetail.Tare);
+                        existingDetail.SecondaryTare = PreserveIfStaleDefault(existingDetail.SecondaryTare, incomingDetail.SecondaryTare);
+                        existingDetail.FK_WeightedProductId = PreserveIfStaleDefault(existingDetail.FK_WeightedProductId, incomingDetail.FK_WeightedProductId);
+                        existingDetail.ProductPrice = PreserveIfStaleDefault(existingDetail.ProductPrice, incomingDetail.ProductPrice);
+                        existingDetail.WeightedBy = PreserveIfStaleDefault(existingDetail.WeightedBy, incomingDetail.WeightedBy);
+                        existingDetail.RequiredAmount = PreserveIfStaleDefault(existingDetail.RequiredAmount, incomingDetail.RequiredAmount);
+                        existingDetail.Costales = PreserveIfStaleDefault(existingDetail.Costales, incomingDetail.Costales);
+                        existingDetail.Notes = PreserveIfStaleDefault(existingDetail.Notes, incomingDetail.Notes);
                         existingDetail.IsLoaded = incomingDetail.IsLoaded;
                         existingDetail.LastUpdated = DateTime.UtcNow;
                     }
@@ -229,6 +232,42 @@ namespace Infrastructure.Repos
                    existing.RequiredAmount != incoming.RequiredAmount ||
                    existing.Costales != incoming.Costales ||
                    existing.IsLoaded != incoming.IsLoaded;
+        }
+
+        /// <summary>
+        /// Prevents stale clients from overwriting real data with default values.
+        /// If incoming value is 0 (default) but existing has real data, preserve existing.
+        /// </summary>
+        private static double PreserveIfStaleDefault(double existing, double incoming)
+        {
+            // If incoming is 0 but existing has data, keep existing (stale snapshot protection)
+            if (incoming == 0 && existing != 0)
+                return existing;
+            return incoming;
+        }
+
+        /// <summary>
+        /// Prevents stale clients from overwriting real data with null values.
+        /// If incoming value is null but existing has real data, preserve existing.
+        /// </summary>
+        private static T? PreserveIfStaleDefault<T>(T? existing, T? incoming) where T : struct
+        {
+            // If incoming is null but existing has data, keep existing (stale snapshot protection)
+            if (!incoming.HasValue && existing.HasValue)
+                return existing;
+            return incoming;
+        }
+
+        /// <summary>
+        /// Prevents stale clients from overwriting real data with null/empty string values.
+        /// If incoming value is null/empty but existing has real data, preserve existing.
+        /// </summary>
+        private static string? PreserveIfStaleDefault(string? existing, string? incoming)
+        {
+            // If incoming is null/empty but existing has data, keep existing (stale snapshot protection)
+            if (string.IsNullOrEmpty(incoming) && !string.IsNullOrEmpty(existing))
+                return existing;
+            return incoming;
         }
     }
 }
