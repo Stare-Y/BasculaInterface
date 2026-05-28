@@ -181,15 +181,6 @@ namespace Infrastructure.Repos
                 }
             }
 
-            // Remove details that are no longer present
-            foreach (var existingDetail in existingEntry.WeightDetails.ToList())
-            {
-                if (!weightEntry.WeightDetails.Any(d => d.Id == existingDetail.Id))
-                {
-                    existingDetail.IsDeleted = true;
-                }
-            }
-
             await _context.SaveChangesAsync();
         }
 
@@ -201,6 +192,7 @@ namespace Infrastructure.Repos
                 return false;
             }
             weightEntry.IsDeleted = true;
+            weightEntry.LastUpdated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
