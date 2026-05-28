@@ -192,7 +192,6 @@ namespace Infrastructure.Repos
                 return false;
             }
             weightEntry.IsDeleted = true;
-            weightEntry.LastUpdated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
