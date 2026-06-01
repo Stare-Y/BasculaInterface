@@ -139,6 +139,11 @@ namespace Infrastructure.Repos
                 .FirstOrDefaultAsync(w => w.Id == weightEntry.Id && !w.IsDeleted)
                 ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
 
+            if(existingEntry.ConcludeDate != null)
+            {
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+            }
+
             // Apply scalar property changes to the tracked entity
             existingEntry.PartnerId = weightEntry.PartnerId;
             existingEntry.ConptaqiComercialFK = weightEntry.ConptaqiComercialFK;
