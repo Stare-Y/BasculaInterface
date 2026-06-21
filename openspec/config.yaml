@@ -1,0 +1,55 @@
+schema: spec-driven
+
+context: |
+  ## Project: Bascula CPE — Forrajera Weighing System
+
+  ### Tech Stack
+  - Backend: .NET 9, C#, Clean Architecture (Domain / Application / Infrastructure)
+  - API: ASP.NET Core Web API (BasculaTerminalApi)
+  - Desktop client: .NET MAUI (Windows/Android) — BasculaInterface
+  - Frontend web: React + TypeScript (BasculaUi) — admin/monitoring view
+  - Database: PostgreSQL via EF Core (WeightDBContext)
+  - External: ContpaqiComercial SDK (ERP integration via HTTP)
+
+  ### Domain
+  A forrajera (animal feed cooperative) operates two physical scales:
+  - Main scale (big): weighs full vehicles/trucks
+  - Secondary scale (small): weighs individual sacks (costales) or pallets (tarimas)
+
+  Multiple terminal types, all configured via MAUI Preferences:
+  - Main terminal (SecondaryTerminal=false, OnlyPedidos=false): full flow, conclude, Contpaqi
+  - Secondary terminal (SecondaryTerminal=true): weighs products on secondary scale, marks as loaded
+  - Pedidos-only terminal (OnlyPedidos=true): creates empty WeightEntries, adds product slots
+
+  ### Core Entities
+  - WeightEntry: one truck visit. Has TareWeight (empty truck), BruteWeight (running accumulated total),
+    ConcludeDate (null = in progress). One-to-many with WeightDetail.
+  - WeightDetail: one product slot on a WeightEntry. Has Weight (measured net), Tare (truck BruteWeight
+    at weigh time), SecondaryTare (empty tarima weight), RequiredAmount (expected qty), IsLoaded (bool).
+  - ProviderPurchase: purchase order from a provider; linked to a WeightEntry when truck arrives.
+  - ExternalTargetBehavior: config for ContpaqiComercial document routing (serie, almacen, concept).
+
+  ### Known Invariants
+  - IsLoaded on WeightDetail must start FALSE (product not yet physically on truck).
+    It becomes TRUE only after the product is weighed AND physically loaded into the truck.
+  - Once IsLoaded=true it must NOT flip back (product has left inventory).
+  - BruteWeight on WeightEntry is the source of truth for the running truck total.
+    It must only be modified server-side or with strict concurrency protection.
+  - A concluded WeightEntry (ConcludeDate != null) is immutable.
+
+  ### Conventions
+  - No user management yet (future work). Terminal identity = device name (DeviceInfo.Name).
+  - Soft delete everywhere (IsDeleted flag).
+  - All timestamps UTC.
+  - Spanish UI strings, English code identifiers.
+  - Solo developer project, currently in production.
+
+rules:
+  proposal:
+    - Keep proposals under 600 words
+    - Always include a Non-goals section
+    - Note which terminals are affected
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Flag any task that touches BruteWeight accumulation as high-risk
+    - Flag any task that changes the update path as high-risk

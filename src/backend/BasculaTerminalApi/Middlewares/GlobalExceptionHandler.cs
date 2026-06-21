@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using Core.Domain.Entities.Weight;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace BasculaTerminalApi.Middlewares
 {
@@ -17,6 +18,7 @@ namespace BasculaTerminalApi.Middlewares
                     {
                         context.Response.StatusCode = exception switch
                         {
+                            WeightConcurrencyException => StatusCodes.Status409Conflict,
                             InvalidOperationException => StatusCodes.Status400BadRequest,
                             NotImplementedException => StatusCodes.Status501NotImplemented,
                             KeyNotFoundException => StatusCodes.Status400BadRequest,

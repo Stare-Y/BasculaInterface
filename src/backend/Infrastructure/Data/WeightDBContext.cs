@@ -26,6 +26,9 @@ namespace Infrastructure.Data
             modelBuilder.Entity<WeightDetail>()
                 .Property(wd => wd.IsLoaded)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<WeightEntry>()
+                .UseXminAsConcurrencyToken();
         }
     }
 }

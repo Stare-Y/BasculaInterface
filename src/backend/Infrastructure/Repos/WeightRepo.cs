@@ -123,6 +123,101 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
+        public async Task<WeightDetail> GetDetailByIdAsync(int detailId)
+        {
+            return await _context.WeightDetails
+                .Include(d => d.WeightEntry)
+                .FirstOrDefaultAsync(d => d.Id == detailId && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detailId} not found.");
+        }
+
+        public async Task<WeightDetail> CreateDetailAsync(WeightDetail detail)
+        {
+            await _context.WeightDetails.AddAsync(detail);
+            await _context.SaveChangesAsync();
+            return detail;
+        }
+
+        public async Task UpdateDetailAsync(WeightDetail detail)
+        {
+            WeightDetail existing = await _context.WeightDetails
+                .FirstOrDefaultAsync(d => d.Id == detail.Id && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detail.Id} not found.");
+
+            existing.Weight = detail.Weight;
+            existing.Tare = detail.Tare;
+            existing.SecondaryTare = detail.SecondaryTare;
+            existing.WeightedBy = detail.WeightedBy;
+            existing.IsLoaded = detail.IsLoaded;
+            existing.LastUpdated = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<WeightEntry> MarkDetailLoadedAsync(int detailId)
+        {
+            WeightDetail detail = await _context.WeightDetails
+                .FirstOrDefaultAsync(d => d.Id == detailId && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detailId} not found.");
+
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == detail.FK_WeightEntryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry for detail {detailId} not found.");
+
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+            if (detail.Weight <= 0)
+                throw new InvalidOperationException("El producto debe tener un peso registrado antes de marcarse como cargado.");
+            if (detail.IsLoaded)
+                throw new InvalidOperationException("El producto ya está marcado como cargado.");
+
+            detail.IsLoaded = true;
+            detail.LastUpdated = DateTime.UtcNow;
+
+            // Include current detail (now IsLoaded=true) in sum by iterating the in-memory collection
+            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
+                .Where(d => d.IsLoaded || d.Id == detailId)
+                .Sum(d => d.Weight);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+
+            return entry;
+        }
+
+        public async Task ConcludeEntryAsync(int weightEntryId)
+        {
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == weightEntryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntryId} not found.");
+
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("El proceso ya ha sido finalizado.");
+            if (entry.WeightDetails.Any(d => !d.IsLoaded))
+                throw new InvalidOperationException("Todos los productos deben estar cargados antes de concluir el proceso de pesaje.");
+            if (entry.WeightDetails.Count > 1 && (entry.PartnerId == null || entry.PartnerId <= 0))
+                throw new InvalidOperationException("Debe seleccionarse un socio antes de concluir el proceso de pesaje con múltiples productos.");
+
+            entry.ConcludeDate = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+        }
+
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
             if (weightEntry.Id <= 0)
@@ -144,49 +239,25 @@ namespace Infrastructure.Repos
                 throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
             }
 
-            // Apply scalar property changes to the tracked entity
+            // Only apply non-integrity fields; BruteWeight, ConcludeDate, and detail weights
+            // are owned by dedicated endpoints and must not be overwritten here.
             existingEntry.PartnerId = weightEntry.PartnerId;
             existingEntry.ConptaqiComercialFK = weightEntry.ConptaqiComercialFK;
             existingEntry.ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio;
             existingEntry.ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK;
             existingEntry.TareWeight = weightEntry.TareWeight;
-            existingEntry.BruteWeight = weightEntry.BruteWeight;
-            existingEntry.ConcludeDate = weightEntry.ConcludeDate;
             existingEntry.VehiclePlate = weightEntry.VehiclePlate;
             existingEntry.Notes = weightEntry.Notes;
             existingEntry.RegisteredBy = weightEntry.RegisteredBy;
 
-            // Update existing details and add new ones
-            foreach (var incomingDetail in weightEntry.WeightDetails)
+            try
             {
-                var existingDetail = existingEntry.WeightDetails.FirstOrDefault(d => d.Id == incomingDetail.Id);
-                if (existingDetail != null)
-                {
-                    // Set LastUpdated if any tracked property has changed
-                    if (HasDetailChanged(existingDetail, incomingDetail))
-                    {
-                        existingDetail.Weight = incomingDetail.Weight;
-                        existingDetail.Tare = incomingDetail.Tare;
-                        existingDetail.SecondaryTare = incomingDetail.SecondaryTare;
-                        existingDetail.FK_WeightedProductId = incomingDetail.FK_WeightedProductId;
-                        existingDetail.ProductPrice = incomingDetail.ProductPrice;
-                        existingDetail.WeightedBy = incomingDetail.WeightedBy;
-                        existingDetail.RequiredAmount = incomingDetail.RequiredAmount;
-                        existingDetail.Costales = incomingDetail.Costales;
-                        existingDetail.Notes = incomingDetail.Notes;
-                        existingDetail.IsLoaded = incomingDetail.IsLoaded;
-                        existingDetail.LastUpdated = DateTime.UtcNow;
-                    }
-                }
-                else
-                {
-                    // New detail being added
-                    incomingDetail.LastUpdated = null;
-                    existingEntry.WeightDetails.Add(incomingDetail);
-                }
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -214,17 +285,5 @@ namespace Infrastructure.Repos
             return true;
         }
 
-        private static bool HasDetailChanged(WeightDetail existing, WeightDetail incoming)
-        {
-            return existing.Weight != incoming.Weight ||
-                   existing.Tare != incoming.Tare ||
-                   existing.FK_WeightedProductId != incoming.FK_WeightedProductId ||
-                   existing.ProductPrice != incoming.ProductPrice ||
-                   existing.WeightedBy != incoming.WeightedBy ||
-                   existing.SecondaryTare != incoming.SecondaryTare ||
-                   existing.RequiredAmount != incoming.RequiredAmount ||
-                   existing.Costales != incoming.Costales ||
-                   existing.IsLoaded != incoming.IsLoaded;
-        }
     }
 }

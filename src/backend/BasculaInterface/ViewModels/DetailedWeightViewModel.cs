@@ -76,17 +76,15 @@ namespace BasculaInterface.ViewModels
             }
             WeightDetailDto newDetail = new WeightDetailDto
             {
+                FK_WeightEntryId = WeightEntry.Id,
                 FK_WeightedProductId = product.Id,
-                Tare = 0, // Default tare value, can be adjusted later
-                Weight = 0, // Default weight value, can be adjusted later
                 RequiredAmount = qty,
                 Costales = costales
             };
 
-            // Add the new detail to the WeightEntry before updating
-            WeightEntry.WeightDetails.Add(newDetail);
-
-            await UpdateWeightEntry();
+            WeightDetailDto created = await _apiService.PostAsync<WeightDetailDto>("api/Weight/Detail", newDetail);
+            WeightEntry.WeightDetails.Add(created);
+            await FetchNewWeightDetails();
         }
 
         public DetailedWeightViewModel() { }
@@ -284,13 +282,20 @@ namespace BasculaInterface.ViewModels
             if (detail == null)
                 throw new InvalidOperationException("No weight detail found for the given row.");
 
-            detail.IsLoaded = true;
+            int detailId = row.Id;
+            WeightEntryDto updatedEntry = await _apiService.PutWithRetryAsync<WeightEntryDto>(
+                $"api/Weight/Detail/{detailId}/MarkLoaded",
+                buildBody: () => Task.FromResult<object?>(null),
+                refetch: async () =>
+                {
+                    WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                    WeightEntry = fresh;
+                });
 
-            detail.Tare = WeightEntry.BruteWeight;
-
-            await UpdateWeightEntry();
-
+            WeightEntry = updatedEntry;
             row.IsLoaded = true;
+            OnPropertyChanged(nameof(WeightEntry));
+            OnPropertyChanged(nameof(TotalWeight));
         }
 
         public async Task DeleteWeightDetail(int detailId)
@@ -314,35 +319,17 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry must be set before concluding the weight process.");
             }
 
-            if (WeightEntry.WeightDetails.Count > 1 && (Partner is null || Partner.Id <= 0))
-            {
-                throw new InvalidOperationException("Debe seleccionarse un socio antes de concluir el proceso de pesaje con múltiples productos.");
-            }
-
-            if (WeightEntry.WeightDetails.Any(d => d.IsLoaded == false))
-            {
-                throw new InvalidOperationException("Todos los productos deben ser cargados antes de concluir el proceso de pesaje.");
-            }
-
-            WeightEntry.ConcludeDate = DateTime.UtcNow;
-
-            //TODO: Validate tare + weights equal brute weight, maybe validate this from the API side
-
-            // Send the updated weight entry to the API
-            await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
-
-            if (Partner is not null && WeightEntry.ExternalTargetBehaviorFK > 0)
-            {
-                try
+            // Server validates all preconditions; call the dedicated conclude endpoint
+            await _apiService.PutWithRetryAsync<GenericResponse<string>>(
+                $"api/Weight/{WeightEntry.Id}/Conclude",
+                buildBody: () => Task.FromResult<object?>(null),
+                refetch: async () =>
                 {
-                    await SendToContpaqiComercial();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Error sending to contpaq: " + ex.Message);
-                }
-                //TODO: send 2 contpaq and then print with generated folio.
-            }
+                    WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                    WeightEntry = fresh;
+                });
+
+            // Contpaqi is now triggered server-side by ConcludeAsync — nothing to do here.
 
             await Task.Delay(500); // Small delay to ensure the weight entry is updated before fetching new details
 

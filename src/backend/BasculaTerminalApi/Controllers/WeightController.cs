@@ -1,10 +1,14 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
+using Core.Domain.Entities.Weight;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
+    public record SetSecondaryTareRequest(double SecondaryTare);
+    public record RecordWeightRequest(double Weight, string WeightedBy);
+
     [ApiController]
     [Route("api/[Controller]")]
     public class WeightController : ControllerBase
@@ -75,6 +79,92 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest(new GenericResponse<string> { Message = $"Error updating entry: {ex.Message}" });
             }
 
+        }
+
+        [HttpPost("Detail")]
+        public async Task<ActionResult<WeightDetailDto>> CreateDetail([FromBody] WeightDetailDto detailDto)
+        {
+            try
+            {
+                WeightDetailDto created = await _weightService.CreateDetailAsync(detailDto);
+                return CreatedAtAction(nameof(GetById), new { id = created.FK_WeightEntryId }, created);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = $"Error creating detail: {ex.Message}" });
+            }
+        }
+
+        [HttpPut("Detail/{id}/SecondaryTare")]
+        public async Task<IActionResult> SetSecondaryTare(int id, [FromBody] SetSecondaryTareRequest request)
+        {
+            try
+            {
+                await _weightService.SetSecondaryTareAsync(id, request.SecondaryTare);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("Detail/{id}/Weight")]
+        public async Task<IActionResult> RecordWeight(int id, [FromBody] RecordWeightRequest request)
+        {
+            try
+            {
+                await _weightService.RecordWeightAsync(id, request.Weight, request.WeightedBy);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("Detail/{id}/MarkLoaded")]
+        public async Task<ActionResult<WeightEntryDto>> MarkDetailLoaded(int id)
+        {
+            try
+            {
+                WeightEntryDto updated = await _weightService.MarkDetailLoadedAsync(id);
+                return Ok(updated);
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/Conclude")]
+        public async Task<IActionResult> ConcludeWeightEntry(int id)
+        {
+            try
+            {
+                await _weightService.ConcludeAsync(id);
+                return Ok(new GenericResponse<string> { Data = "Concluded", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
         }
 
         [HttpDelete]
