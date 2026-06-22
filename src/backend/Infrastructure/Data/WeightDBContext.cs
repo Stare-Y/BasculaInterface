@@ -27,8 +27,13 @@ namespace Infrastructure.Data
                 .Property(wd => wd.IsLoaded)
                 .HasDefaultValue(true);
 
-            modelBuilder.Entity<WeightEntry>()
-                .UseXminAsConcurrencyToken();
+            modelBuilder.Entity<WeightEntry>(we =>
+            {
+                we.Property<uint>("xmin")
+                    .HasColumnType("xid")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .IsConcurrencyToken();
+            });
         }
     }
 }

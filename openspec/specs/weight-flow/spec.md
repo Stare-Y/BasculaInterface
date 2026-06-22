@@ -54,8 +54,7 @@ CREATED (ConcludeDate=null)
 BruteWeight = TareWeight + Σ(details where IsLoaded=true).Weight
 ```
 
-This is currently computed client-side in `BasculaViewModel.CaptureNewWeightEntry` and
-written via `PUT /api/Weight` (full DTO). No server-side enforcement or concurrency protection exists yet.
+Server-owned and recomputed via `RecomputeBruteWeightAsync` on any mutation that changes loaded state. See `weight-detail-mutations` spec for the full mutation contract. Concurrency is protected via xmin OCC — see `weight-concurrency` spec.
 
 ## IsLoaded Lifecycle (secondary terminal flow)
 
@@ -84,31 +83,11 @@ BruteWeight role at conclusion:
 - Main scale reading - TareWeight - Σ(previous loaded products) = weight of last product
 - This is the "des-tare" final confirmation; BruteWeight at that point = theoretical total truck weight
 
-## Known Issues (as of 2026-06-21)
+## Related Specs
 
-### 1. IsLoaded defaults to true everywhere
-- `WeightDetail.cs`: `IsLoaded = true`
-- `WeightDetailDto.cs`: `IsLoaded = true`
-- DB migration `IsLoadedFlagOnDetail`: `defaultValue: true`
-- Result: new empty details are born as "loaded"; `SetWeightDetailLoaded` is a flag no-op
-- Intent: should start `false`, only become `true` after physical loading
-
-### 2. BruteWeight computed client-side, no server protection
-- `BasculaViewModel.CaptureNewWeightEntry`: `BruteWeight += _diferenciaAbs`
-- `WeightRepo.UpdateAsync`: `existingEntry.BruteWeight = weightEntry.BruteWeight` (blind overwrite)
-- No optimistic concurrency check (no row version, no LastUpdated guard on WeightEntry)
-- Result: concurrent terminal writes cause lost updates on BruteWeight
-
-### 3. PUT /api/Weight is the only mutation path (too wide)
-- All mutations — notes, partner, IsLoaded toggle, BruteWeight update — go through one endpoint
-- `SetWeightDetailLoaded` sends full WeightEntry snapshot; stale BruteWeight can overwrite correct DB value
-- Needed: dedicated narrow endpoints per mutation type
-
-### 4. No record-locking between terminals
-- Multiple terminals can read and write the same WeightEntry simultaneously
-- The `CanWeight` / `ReleaseWeight` mechanism exists only for the physical scale socket,
-  not for WeightEntry record access
-- Possible approaches: optimistic concurrency (EF RowVersion), or application-level record locking
+- [`weight-concurrency`](../weight-concurrency/spec.md) — xmin OCC and MAUI retry on 409
+- [`weight-detail-mutations`](../weight-detail-mutations/spec.md) — narrow endpoints for detail mutations and BruteWeight ownership
+- [`weight-entry-conclude`](../weight-entry-conclude/spec.md) — conclude endpoint and downstream triggers
 
 ## Terminal Configuration (MAUI Preferences)
 

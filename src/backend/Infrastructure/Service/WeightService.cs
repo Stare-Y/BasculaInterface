@@ -40,7 +40,9 @@ namespace Infrastructure.Service
 
                 return weightEntry;
             }
-            WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ToEntity());
+            WeightEntry entity = weightEntry.ToEntity();
+            entity.BruteWeight = entity.TareWeight;
+            WeightEntry newEntry = await _weightRepo.CreateAsync(entity);
 
             return new WeightEntryDto(newEntry);
         }
@@ -99,12 +101,16 @@ namespace Infrastructure.Service
                 RequiredAmount = dto.RequiredAmount,
                 Costales = dto.Costales,
                 Notes = dto.Notes,
-                Weight = 0,
-                Tare = 0,
+                Weight = dto.Weight,
+                Tare = dto.Weight > 0 ? entry.BruteWeight : dto.Tare,
                 IsLoaded = true
             };
 
             WeightDetail created = await _weightRepo.CreateDetailAsync(detail);
+
+            if (detail.IsLoaded && detail.Weight > 0)
+                await _weightRepo.RecomputeBruteWeightAsync(dto.FK_WeightEntryId);
+
             return new WeightDetailDto(created);
         }
 
@@ -135,6 +141,9 @@ namespace Infrastructure.Service
             detail.WeightedBy = weightedBy;
             detail.Tare = detail.WeightEntry.BruteWeight;
             await _weightRepo.UpdateDetailAsync(detail);
+
+            if (detail.IsLoaded)
+                await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
         }
 
         public async Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId)

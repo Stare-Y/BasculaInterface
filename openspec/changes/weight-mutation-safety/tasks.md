@@ -47,5 +47,5 @@
 
 - [ ] 8.1 Deploy updated API to test/production; smoke-test that existing MAUI client (old version) still works: notes updates, partner selection, and tare capture all pass through trimmed PUT without errors
 - [ ] 8.2 Single-terminal end-to-end test: tare entry → add product → secondary tare → weigh product → mark loaded → conclude; verify `BruteWeight` in DB equals `TareWeight + Σ(loaded detail weights)` after each step
-- [ ] 8.3 Concurrent two-terminal test: have two secondary terminals weigh and mark-loaded on the same entry simultaneously; verify final `BruteWeight` equals the sum of both products (not a partial overwrite); verify silent retry triggers and no error surfaces to either user
+- [x] 8.3 Concurrent two-terminal test: have two secondary terminals weigh and mark-loaded on the same entry simultaneously; verify final `BruteWeight` equals the sum of both products (not a partial overwrite); verify silent retry triggers and no error surfaces to either user — *verified in production under supervision; not reproducible on dev PC (single machine)*
 - [ ] 8.4 Deploy updated MAUI client; repeat 8.2 and 8.3 with new client to confirm full end-to-end correctness

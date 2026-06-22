@@ -17,6 +17,7 @@ namespace Core.Domain.Interfaces
         Task<WeightDetail> CreateDetailAsync(WeightDetail detail);
         Task UpdateDetailAsync(WeightDetail detail);
         Task<WeightEntry> MarkDetailLoadedAsync(int detailId);
+        Task RecomputeBruteWeightAsync(int entryId);
         Task ConcludeEntryAsync(int weightEntryId);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);

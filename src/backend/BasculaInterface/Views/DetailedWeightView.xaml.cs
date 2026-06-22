@@ -499,6 +499,8 @@ public partial class DetailedWeightView : ContentPage
         viewModel.Partner = partner;
         viewModel.WeightEntry.PartnerId = partner.Id;
 
+        WaitPopUp.Show("Actualizando socio...");
+
         try
         {
             await viewModel.UpdateWeightEntry();
@@ -509,6 +511,10 @@ public partial class DetailedWeightView : ContentPage
         {
             await DisplayAlert("Error", "No se pudo actualizar la entrada de peso con el socio seleccionado: " + ex.Message, "OK");
             return;
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
 
         BtnPickPartner.IsVisible = false;

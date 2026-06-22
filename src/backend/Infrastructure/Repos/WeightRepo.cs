@@ -154,6 +154,27 @@ namespace Infrastructure.Repos
             await _context.SaveChangesAsync();
         }
 
+        public async Task RecomputeBruteWeightAsync(int entryId)
+        {
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == entryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {entryId} not found.");
+
+            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
+                .Where(d => d.IsLoaded)
+                .Sum(d => d.Weight);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+        }
+
         public async Task<WeightEntry> MarkDetailLoadedAsync(int detailId)
         {
             WeightDetail detail = await _context.WeightDetails
@@ -246,6 +267,10 @@ namespace Infrastructure.Repos
             existingEntry.ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio;
             existingEntry.ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK;
             existingEntry.TareWeight = weightEntry.TareWeight;
+            existingEntry.BruteWeight = weightEntry.TareWeight
+                + existingEntry.WeightDetails
+                    .Where(d => d.IsLoaded && !d.IsDeleted)
+                    .Sum(d => d.Weight);
             existingEntry.VehiclePlate = weightEntry.VehiclePlate;
             existingEntry.Notes = weightEntry.Notes;
             existingEntry.RegisteredBy = weightEntry.RegisteredBy;
