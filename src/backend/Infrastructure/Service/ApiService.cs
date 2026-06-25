@@ -1,5 +1,6 @@
 ﻿using Core.Application.Services;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -158,6 +159,25 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
+        public async Task<T> PutWithRetryAsync<T>(string endpoint, Func<Task<object?>> buildBody, Func<Task> refetch, int maxRetries = 3)
+        {
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    object? body = await buildBody();
+                    return await PutAsync<T>(endpoint, body);
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Conflict && attempt < maxRetries)
+                {
+                    Debug.WriteLine($"[PutWithRetry] 409 on attempt {attempt + 1}/{maxRetries}, retrying in 300ms...");
+                    await Task.Delay(300);
+                    await refetch();
+                }
+            }
+            throw new InvalidOperationException("El servidor no pudo procesar la solicitud, intente de nuevo.");
+        }
+
         public async Task<bool> DeleteAsync(string endpoint, CancellationToken cancellationToken = default)
         {
             await LogRequest(endpoint: "DELETE " + endpoint);
@@ -192,7 +212,7 @@ namespace Infrastructure.Service
             if (!response.IsSuccessStatusCode)
             {
                 string error = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Status: {response.StatusCode}, Error: {error}");
+                throw new HttpRequestException($"Status: {response.StatusCode}, Error: {error}", null, response.StatusCode);
             }
         }
 

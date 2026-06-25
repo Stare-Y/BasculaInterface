@@ -40,7 +40,9 @@ namespace Infrastructure.Service
 
                 return weightEntry;
             }
-            WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ToEntity());
+            WeightEntry entity = weightEntry.ToEntity();
+            entity.BruteWeight = entity.TareWeight;
+            WeightEntry newEntry = await _weightRepo.CreateAsync(entity);
 
             return new WeightEntryDto(newEntry);
         }
@@ -79,17 +81,102 @@ namespace Infrastructure.Service
         public async Task UpdateAsync(WeightEntryDto weightEntry)
         {
             await _weightRepo.UpdateAsync(weightEntry.ToEntity());
-
-            if (weightEntry.ConcludeDate.HasValue)
-                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntry.Id);
         }
 
         public async Task UpdateAsync(WeightEntry weightEntry)
         {
             await _weightRepo.UpdateAsync(weightEntry);
+        }
 
-            if (weightEntry.ConcludeDate.HasValue)
-                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntry.Id);
+        public async Task<WeightDetailDto> CreateDetailAsync(WeightDetailDto dto)
+        {
+            WeightEntry entry = await _weightRepo.GetByIdAsync(dto.FK_WeightEntryId);
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("No se pueden agregar productos a un proceso ya finalizado.");
+
+            WeightDetail detail = new WeightDetail
+            {
+                FK_WeightEntryId = dto.FK_WeightEntryId,
+                FK_WeightedProductId = dto.FK_WeightedProductId,
+                RequiredAmount = dto.RequiredAmount,
+                Costales = dto.Costales,
+                Notes = dto.Notes,
+                Weight = dto.Weight,
+                Tare = dto.Weight > 0 ? entry.BruteWeight : dto.Tare,
+                IsLoaded = true
+            };
+
+            WeightDetail created = await _weightRepo.CreateDetailAsync(detail);
+
+            if (detail.IsLoaded && detail.Weight > 0)
+                await _weightRepo.RecomputeBruteWeightAsync(dto.FK_WeightEntryId);
+
+            return new WeightDetailDto(created);
+        }
+
+        public async Task SetSecondaryTareAsync(int detailId, double tare)
+        {
+            if (tare <= 0)
+                throw new ArgumentOutOfRangeException(nameof(tare), "La tara secundaria debe ser mayor que cero.");
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+            if (detail.WeightEntry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+
+            detail.SecondaryTare = tare;
+            detail.IsLoaded = false;
+            await _weightRepo.UpdateDetailAsync(detail);
+        }
+
+        public async Task RecordWeightAsync(int detailId, double weight, string weightedBy)
+        {
+            if (weight <= 0)
+                throw new ArgumentOutOfRangeException(nameof(weight), "El peso debe ser mayor que cero.");
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+            if (detail.WeightEntry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+
+            detail.Weight = weight;
+            detail.WeightedBy = weightedBy;
+            detail.Tare = detail.WeightEntry.BruteWeight;
+            await _weightRepo.UpdateDetailAsync(detail);
+
+            if (detail.IsLoaded)
+                await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
+        }
+
+        public async Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId)
+        {
+            WeightEntry entry = await _weightRepo.MarkDetailLoadedAsync(detailId);
+            return new WeightEntryDto(entry);
+        }
+
+        public async Task ConcludeAsync(int weightEntryId)
+        {
+            await _weightRepo.ConcludeEntryAsync(weightEntryId);
+
+            try
+            {
+                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntryId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ConcludeAsync] ProviderPurchase conclude failed (non-fatal): {ex.Message}");
+            }
+
+            WeightEntry entry = await _weightRepo.GetByIdAsync(weightEntryId);
+            if (entry.PartnerId > 0 && entry.ExternalTargetBehaviorFK > 0 && (entry.ConptaqiComercialFK == null || entry.ConptaqiComercialFK <= 0))
+            {
+                try
+                {
+                    await SendToContpaqiComercial(weightEntryId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ConcludeAsync] Contpaqi post failed (non-fatal): {ex.Message}");
+                }
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)

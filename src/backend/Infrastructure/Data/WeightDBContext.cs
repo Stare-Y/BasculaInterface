@@ -26,6 +26,14 @@ namespace Infrastructure.Data
             modelBuilder.Entity<WeightDetail>()
                 .Property(wd => wd.IsLoaded)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<WeightEntry>(we =>
+            {
+                we.Property<uint>("xmin")
+                    .HasColumnType("xid")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .IsConcurrencyToken();
+            });
         }
     }
 }
