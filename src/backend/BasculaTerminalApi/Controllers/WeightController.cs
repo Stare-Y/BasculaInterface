@@ -166,6 +166,28 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
+        [HttpPatch("{weightId}/ChangeTargetDocumentBehavior")]
+        public async Task<IActionResult> ChangeTargetDocumentBehavior(int weightId, [FromQuery] int newTargetId)
+        {
+            try
+            {
+                if (weightId == 0)
+                    return BadRequest("Invalid weight ID");
+
+                if (newTargetId == 0)
+                    return BadRequest("invalid TargetBehavior ID");
+
+                await _weightService.ChangeTargetDocumentBehavior(weightId, newTargetId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating target behavior");
+                return BadRequest("Error updating target behavior" + ex.Message);
+            }
+        }
+
         [HttpGet("ValidateCredit")]
         public async Task<ActionResult<CreditValidationResponse>> ValidatePartnerCredit(
             [FromQuery] int partnerId,

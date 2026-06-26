@@ -2,6 +2,7 @@
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
 using Core.Domain.Entities.Base;
+using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
 using Microsoft.Extensions.Options;
@@ -11,12 +12,13 @@ namespace Infrastructure.Service
     public class WeightService : IWeightService
     {
         private readonly IWeightRepo _weightRepo;
+        private readonly IExternalTargetBehaviorService _targetBehaviorService;
         private readonly IApiService _apiService;
         private readonly IClienteProveedorService _clienteProveedorService;
         private readonly IProductService _productService;
         private readonly IProviderPurchaseService _providerPurchaseService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
-        public WeightService(IWeightRepo weightRepo, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IProviderPurchaseService providerPurchaseService)
+        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IProviderPurchaseService providerPurchaseService)
         {
             _weightRepo = weightRepo;
 
@@ -29,6 +31,8 @@ namespace Infrastructure.Service
             _productService = productService;
 
             _providerPurchaseService = providerPurchaseService;
+
+            _targetBehaviorService = targetBehaviorService;
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
@@ -201,6 +205,18 @@ namespace Infrastructure.Service
                 return weightDetail.Weight;
             else
                 return weightDetail.RequiredAmount ?? 0;
+        }
+
+        public async Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId)
+        {
+            WeightEntry existingWeight = await _weightRepo.GetByIdAsync(weightId);
+
+            ExternalTargetBehaviorDto targetBehavior = await _targetBehaviorService.GetByIdAsync(targetDocumentBehaviorId);
+
+            //this seems redundant, but is so taht the target service throws exception if not found
+            existingWeight.ExternalTargetBehaviorFK = targetBehavior.Id;
+
+            await _weightRepo.UpdateAsync(existingWeight);
         }
 
         public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount)
