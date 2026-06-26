@@ -9,6 +9,7 @@ namespace Core.Application.Services
         Task<T> PostAsync<T>(string endpoint, object data, CancellationToken cancellationToken = default);
         Task<T> PutAsync<T>(string endpoint, object? data, CancellationToken cancellationToken = default);
         Task<T> PatchAsync<T>(string endpoint, object? data, CancellationToken cancellationToken = default);
+        Task PatchAsync(string enpoint, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(string endpoint, CancellationToken cancellationToken = default);
         /// <summary>
         /// Puts to <paramref name="endpoint"/> and silently retries on 409 Conflict.

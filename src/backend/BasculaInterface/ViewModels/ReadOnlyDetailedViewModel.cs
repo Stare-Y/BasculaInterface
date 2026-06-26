@@ -63,6 +63,18 @@ namespace BasculaInterface.ViewModels
             }
         }
 
+        public async Task ChangeTargetDocumentBehavior(ExternalTargetBehaviorDto newTargetBehavior, CancellationToken cancellationToken = default)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before updating.");
+            }
+
+            await _apiService.PatchAsync($"api/Weight/{WeightEntry.Id}/ChangeTargetDocumentBehavior?newTargetId={newTargetBehavior.Id}", cancellationToken);
+
+            await FetchNewWeightDetails();
+        }
+
         public async Task UpdateWeightEntry()
         {
             if (WeightEntry == null)

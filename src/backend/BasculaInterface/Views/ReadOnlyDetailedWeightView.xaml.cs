@@ -162,11 +162,13 @@ public partial class ReadOnlyDetailedWeightView : ContentPage
         {
             ExternalTargetBehaviorDto? selectedItem = PickerTargetBehavior.SelectedItem as ExternalTargetBehaviorDto;
 
+            _cts = new CancellationTokenSource();
+
+            CancellationToken token = _cts.Token;
+
             if (selectedItem is null) { return; }
 
-            viewModel.WeightEntry!.ExternalTargetBehaviorFK = selectedItem.Id;
-
-            await viewModel.UpdateWeightEntry();
+            await viewModel.ChangeTargetDocumentBehavior(selectedItem, token);
         }
         catch (Exception ex)
         {

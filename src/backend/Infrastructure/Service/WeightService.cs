@@ -303,7 +303,8 @@ namespace Infrastructure.Service
             //this seems redundant, but is so taht the target service throws exception if not found
             existingWeight.ExternalTargetBehaviorFK = targetBehavior.Id;
 
-            await _weightRepo.UpdateAsync(existingWeight);
+            //force true to not validate if concluded or that
+            await _weightRepo.UpdateAsync(existingWeight, force:true);
         }
 
         public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount)

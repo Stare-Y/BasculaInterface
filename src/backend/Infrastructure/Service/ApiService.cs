@@ -159,6 +159,18 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
+        public async Task PatchAsync(string endpoint, CancellationToken cancellationToken = default)
+        {
+
+            await LogRequest(endpoint: "PATCH " + endpoint);
+
+            HttpResponseMessage response = await _client.PatchAsync(endpoint, null, cancellationToken);
+
+            await LogResponse(response);
+
+            await ValidateResponse(response);
+        }
+
         public async Task<T> PutWithRetryAsync<T>(string endpoint, Func<Task<object?>> buildBody, Func<Task> refetch, int maxRetries = 3)
         {
             for (int attempt = 0; attempt <= maxRetries; attempt++)

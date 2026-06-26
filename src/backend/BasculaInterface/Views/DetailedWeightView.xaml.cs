@@ -843,9 +843,13 @@ public partial class DetailedWeightView : ContentPage
         {
             ExternalTargetBehaviorDto? selectedItem = PickerTargetBehavior.SelectedItem as ExternalTargetBehaviorDto;
 
+            _cts = new CancellationTokenSource();
+
+            CancellationToken token = _cts.Token;
+
             if (selectedItem is null) { return; }
 
-            await viewModel.ChangeTargetDocumentBehavior(selectedItem);
+            await viewModel.ChangeTargetDocumentBehavior(selectedItem, token);
         }
         catch (Exception ex)
         {

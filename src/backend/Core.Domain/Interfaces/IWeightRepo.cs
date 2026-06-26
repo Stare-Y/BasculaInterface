@@ -13,7 +13,7 @@ namespace Core.Domain.Interfaces
         Task<IEnumerable<WeightEntry>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntry>> GetPendingWeights(int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntry>> GetPendingWeightsByPartnerAsync(int partnerId);
-        Task UpdateAsync(WeightEntry weightEntry);
+        Task UpdateAsync(WeightEntry weightEntry, bool force = false);
         Task<WeightDetail> CreateDetailAsync(WeightDetail detail);
         Task UpdateDetailAsync(WeightDetail detail);
         Task<WeightEntry> MarkDetailLoadedAsync(int detailId);

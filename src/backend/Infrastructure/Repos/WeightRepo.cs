@@ -239,7 +239,7 @@ namespace Infrastructure.Repos
             }
         }
 
-        public async Task UpdateAsync(WeightEntry weightEntry)
+        public async Task UpdateAsync(WeightEntry weightEntry, bool force = false)
         {
             if (weightEntry.Id <= 0)
             {
@@ -255,7 +255,7 @@ namespace Infrastructure.Repos
                 .FirstOrDefaultAsync(w => w.Id == weightEntry.Id && !w.IsDeleted)
                 ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
 
-            if(existingEntry.ConcludeDate != null)
+            if(existingEntry.ConcludeDate != null && !force)
             {
                 throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
             }
