@@ -188,6 +188,8 @@ public partial class DetailedWeightView : ContentPage
             }
             finally
             {
+                _isInitializing = false;
+
                 BtnSaveNotes.IsVisible = false;
 
                 WaitPopUp.Hide();
@@ -830,10 +832,7 @@ public partial class DetailedWeightView : ContentPage
     {
         // Skip if we're programmatically setting the picker during initialization
         if (_isInitializing)
-        {
-            _isInitializing = false;
             return;
-        }
 
         if (BindingContext is not DetailedWeightViewModel viewModel)
         { return; }

@@ -87,9 +87,9 @@ namespace Infrastructure.Service
             await _weightRepo.UpdateAsync(weightEntry.ToEntity());
         }
 
-        public async Task UpdateAsync(WeightEntry weightEntry)
+        public async Task UpdateAsync(WeightEntry weightEntry, bool force = false)
         {
-            await _weightRepo.UpdateAsync(weightEntry);
+            await _weightRepo.UpdateAsync(weightEntry, force);
         }
 
         public async Task<WeightDetailDto> CreateDetailAsync(WeightDetailDto dto)
@@ -229,7 +229,7 @@ namespace Infrastructure.Service
             Console.WriteLine($"Received Notes: {result.Message}");
             weightEntry.Notes += " " + result.Message;
 
-            await UpdateAsync(weightEntry);
+            await UpdateAsync(weightEntry, force: true);
 
             return result;
         }
