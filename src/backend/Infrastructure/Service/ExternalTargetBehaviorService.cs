@@ -13,7 +13,7 @@ namespace Infrastructure.Service
         }
         public async Task<IEnumerable<ExternalTargetBehaviorDto>> GetAllAsync()
         {
-            return (await _externalTargetBehaviorRepo.GetAllAsync()).Select(behavior => new ExternalTargetBehaviorDto(behavior));
+            return (await _externalTargetBehaviorRepo.GetAllAsync()).Where(behavior => !behavior.Hidden).Select(behavior => new ExternalTargetBehaviorDto(behavior));
         }
         public async Task<ExternalTargetBehaviorDto> GetByIdAsync(int id)
         {

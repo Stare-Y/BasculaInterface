@@ -20,9 +20,45 @@ public partial class WeightingScreen : ContentPage
         {
             EntryVehiclePlate.IsEnabled = false;
         }
+
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
     }
 
-    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.F2)
+        {
+            BtnPickPartner_Clicked(BtnPickPartner, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F12)
+        {
+            BtnCaptureNewWeight_Clicked(BtnCaptureNewWeight, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
+
+    public WeightingScreen(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, ProductoDto? productoDto = null, string? detailNotes = null, int? targetWeightDetail = null, bool useIncommingTara = true, bool providers = false) : this(MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>())
     {
         if (BindingContext is not BasculaViewModel viewModel)
             return;
@@ -32,13 +68,20 @@ public partial class WeightingScreen : ContentPage
         viewModel.WeightEntry = weightEntry;
         viewModel.Partner = partner;
         viewModel.Product = productoDto;
+        viewModel.TargetWeightDetail = targetWeightDetail;
+        viewModel.DetailNotes = detailNotes;
 
-        if (useIncommingTara && !Preferences.Get("SecondaryTerminal", false))
+        if(!string.IsNullOrEmpty(detailNotes))
+        {
+            viewModel.Product = new ProductoDto { Nombre = detailNotes };
+        }
+
+        if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
         {
             if (weightEntry.BruteWeight > 0)
             {
                 if (productoDto is null)
-                    viewModel.SetTara(0);
+                    viewModel.SetTara(useIncommingTara ? weightEntry.BruteWeight : 0);
                 else
                     viewModel.SetTara(weightEntry.BruteWeight);
             }
@@ -50,7 +93,7 @@ public partial class WeightingScreen : ContentPage
         else if (productoDto is not null)
         {
             WeightDetailDto weightingDetail = weightEntry.WeightDetails
-                .FirstOrDefault(x => x.FK_WeightedProductId == productoDto.Id)
+                .FirstOrDefault(x => x.Id == targetWeightDetail)
                 ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
             if (weightingDetail.SecondaryTare is not null && weightingDetail.SecondaryTare > 0)
@@ -233,10 +276,11 @@ public partial class WeightingScreen : ContentPage
 
         bool printTurn = false;
 
-        if (viewModel.WeightEntry!.BruteWeight <= 0)
+        if (viewModel.WeightEntry!.BruteWeight <= 0 && viewModel.Product is null)
             printTurn = await DisplayAlert("Imprimir Turno", "¿Desea imprimir el turno después de registrar el peso?", "Sí", "No");
 
         WaitPopUp.Show("Capturando peso, espere...");
+
         try
         {
             await viewModel.CaptureNewWeightEntry(printTurn);
@@ -369,6 +413,8 @@ public partial class WeightingScreen : ContentPage
 
         try
         {
+            WaitPopUp.Show("Estableciendo tara, espere...");
+
             WeightDetailDto weightingDetail = viewModel.WeightEntry?.WeightDetails.FirstOrDefault(x => x.FK_WeightedProductId == viewModel.Product?.Id)
                 ?? throw new InvalidOperationException("Cannot weight a product, if theres not already specified");
 
@@ -389,6 +435,10 @@ public partial class WeightingScreen : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Error", "Error al establecer la tara: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 
@@ -448,14 +498,19 @@ public partial class WeightingScreen : ContentPage
         }
     }
 
-    private void Editor_TextChanged(object sender, TextChangedEventArgs e)
+    private void EntryNotes_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (sender is Editor entry && e.NewTextValue != null)
+        if (sender is Entry entry && e.NewTextValue != null)
         {
             var upper = e.NewTextValue.ToUpperInvariant();
 
             if (entry.Text != upper)
                 entry.Text = upper;
         }
+    }
+
+    private void EntryNotes_Completed(object sender, EventArgs e)
+    {
+        EntryVehiclePlate.Focus();
     }
 }

@@ -47,6 +47,8 @@
                     HorizontalOptions="Fill"
                     Keyboard="Numeric"
                     Placeholder="Cantidad en kilos..."
+                    ReturnType="Next"
+                    Completed="QuantityEntry_Completed"
                     TextChanged="QuantityEntry_TextChanged" />
             </Grid>
 
@@ -65,6 +67,8 @@
                      HorizontalOptions="Fill"
                      Keyboard="Numeric"
                      Placeholder="Cantidad en Costales..."
+                     ReturnType="Done"
+                     Completed="CostalesEntry_Completed"
                      TextChanged="CostalesEntry_TextChanged" />
             </Grid>
 

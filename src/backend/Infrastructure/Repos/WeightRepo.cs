@@ -54,7 +54,7 @@ namespace Infrastructure.Repos
                     w.CreatedAt < endDateTime &&
                     !w.IsDeleted
                     )
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -68,7 +68,7 @@ namespace Infrastructure.Repos
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted)
                 .OrderByDescending(w => w.CreatedAt)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -82,7 +82,7 @@ namespace Infrastructure.Repos
                                 .Where(wd => !wd.IsDeleted))
                 .Where(w => !w.IsDeleted && w.ConcludeDate != null)
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -94,7 +94,7 @@ namespace Infrastructure.Repos
                 .Include(w => w.WeightDetails)
                 .Include(w => w.ExternalTargetBehavior)
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
@@ -108,25 +108,181 @@ namespace Infrastructure.Repos
                 .Include(w => w.WeightDetails
                                 .Where(wd => !wd.IsDeleted))
                 .OrderByDescending(w => w.ConcludeDate)
-                .Skip((int)page - 1)
+                .Skip(((int)page - 1) * top)
                 .Take(top)
                 .ToListAsync();
         }
 
-        public async Task UpdateAsync(WeightEntry weightEntry)
+        public async Task<IEnumerable<WeightEntry>> GetPendingWeightsByPartnerAsync(int partnerId)
+        {
+            return await _context.WeightEntries
+                .AsNoTracking()
+                .Where(w => w.PartnerId == partnerId && w.ConcludeDate == null && !w.IsDeleted)
+                .Include(w => w.WeightDetails
+                                .Where(wd => !wd.IsDeleted))
+                .ToListAsync();
+        }
+
+        public async Task<WeightDetail> GetDetailByIdAsync(int detailId)
+        {
+            return await _context.WeightDetails
+                .Include(d => d.WeightEntry)
+                .FirstOrDefaultAsync(d => d.Id == detailId && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detailId} not found.");
+        }
+
+        public async Task<WeightDetail> CreateDetailAsync(WeightDetail detail)
+        {
+            await _context.WeightDetails.AddAsync(detail);
+            await _context.SaveChangesAsync();
+            return detail;
+        }
+
+        public async Task UpdateDetailAsync(WeightDetail detail)
+        {
+            WeightDetail existing = await _context.WeightDetails
+                .FirstOrDefaultAsync(d => d.Id == detail.Id && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detail.Id} not found.");
+
+            existing.Weight = detail.Weight;
+            existing.Tare = detail.Tare;
+            existing.SecondaryTare = detail.SecondaryTare;
+            existing.WeightedBy = detail.WeightedBy;
+            existing.IsLoaded = detail.IsLoaded;
+            existing.LastUpdated = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RecomputeBruteWeightAsync(int entryId)
+        {
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == entryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {entryId} not found.");
+
+            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
+                .Where(d => d.IsLoaded)
+                .Sum(d => d.Weight);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+        }
+
+        public async Task<WeightEntry> MarkDetailLoadedAsync(int detailId)
+        {
+            WeightDetail detail = await _context.WeightDetails
+                .FirstOrDefaultAsync(d => d.Id == detailId && !d.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightDetail with ID {detailId} not found.");
+
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == detail.FK_WeightEntryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry for detail {detailId} not found.");
+
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+            if (detail.Weight <= 0)
+                throw new InvalidOperationException("El producto debe tener un peso registrado antes de marcarse como cargado.");
+            if (detail.IsLoaded)
+                throw new InvalidOperationException("El producto ya está marcado como cargado.");
+
+            detail.IsLoaded = true;
+            detail.LastUpdated = DateTime.UtcNow;
+
+            // Include current detail (now IsLoaded=true) in sum by iterating the in-memory collection
+            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
+                .Where(d => d.IsLoaded || d.Id == detailId)
+                .Sum(d => d.Weight);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+
+            return entry;
+        }
+
+        public async Task ConcludeEntryAsync(int weightEntryId)
+        {
+            WeightEntry entry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(d => !d.IsDeleted))
+                .FirstOrDefaultAsync(w => w.Id == weightEntryId && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntryId} not found.");
+
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("El proceso ya ha sido finalizado.");
+            if (entry.WeightDetails.Any(d => !d.IsLoaded))
+                throw new InvalidOperationException("Todos los productos deben estar cargados antes de concluir el proceso de pesaje.");
+            if (entry.WeightDetails.Count > 1 && (entry.PartnerId == null || entry.PartnerId <= 0))
+                throw new InvalidOperationException("Debe seleccionarse un socio antes de concluir el proceso de pesaje con múltiples productos.");
+
+            entry.ConcludeDate = DateTime.UtcNow;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
+        }
+
+        public async Task UpdateAsync(WeightEntry weightEntry, bool force = false)
         {
             if (weightEntry.Id <= 0)
             {
                 throw new ArgumentException("WeightEntry ID must be a valid one.", nameof(weightEntry.Id));
             }
 
-            WeightEntry existingEntry = await GetByIdAsync(weightEntry.Id);
+            // Load existing entry as TRACKED to apply only changed properties
+            // This avoids _context.Update() which marks ALL properties as Modified
+            // and can cause change-tracker side effects with related entities (e.g. ProviderPurchase)
+            WeightEntry existingEntry = await _context.WeightEntries
+                .Include(w => w.WeightDetails.Where(wd => !wd.IsDeleted))
+                .Include(w => w.ExternalTargetBehavior)
+                .FirstOrDefaultAsync(w => w.Id == weightEntry.Id && !w.IsDeleted)
+                ?? throw new KeyNotFoundException($"WeightEntry with ID {weightEntry.Id} not found.");
 
-            weightEntry.CreatedAt = existingEntry.CreatedAt;
+            if(existingEntry.ConcludeDate != null && !force)
+            {
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+            }
 
-            _context.WeightEntries.Update(weightEntry);
+            // Only apply non-integrity fields; BruteWeight, ConcludeDate, and detail weights
+            // are owned by dedicated endpoints and must not be overwritten here.
+            existingEntry.PartnerId = weightEntry.PartnerId;
+            existingEntry.ConptaqiComercialFK = weightEntry.ConptaqiComercialFK;
+            existingEntry.ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio;
+            existingEntry.ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK;
+            existingEntry.TareWeight = weightEntry.TareWeight;
+            existingEntry.BruteWeight = weightEntry.TareWeight
+                + existingEntry.WeightDetails
+                    .Where(d => d.IsLoaded && !d.IsDeleted)
+                    .Sum(d => d.Weight);
+            existingEntry.VehiclePlate = weightEntry.VehiclePlate;
+            existingEntry.Notes = weightEntry.Notes;
+            existingEntry.RegisteredBy = weightEntry.RegisteredBy;
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new WeightConcurrencyException("El registro fue modificado por otro terminal. Intente de nuevo.", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -149,8 +305,10 @@ namespace Infrastructure.Repos
                 return false;
             }
             weightDetail.IsDeleted = true;
+            weightDetail.LastUpdated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
+
     }
 }

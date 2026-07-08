@@ -9,5 +9,6 @@ namespace Core.Domain.Entities.Behaviors
         public string? TargetConcept { get; set; }
         public string? TargetDomain { get; set; }
         public string? TargetAlmacen { get; set; }
+        public bool Hidden { get; set; } = false;
     }
 }

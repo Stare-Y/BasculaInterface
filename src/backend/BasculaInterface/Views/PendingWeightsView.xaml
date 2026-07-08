@@ -5,13 +5,18 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
     xmlns:vm="clr-namespace:BasculaInterface.ViewModels"
+    xmlns:models="clr-namespace:BasculaInterface.Models"
+    xmlns:local="clr-namespace:BasculaInterface.Resources.Converters"
     Title="Pedidos en Proceso"
     BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                       Dark={StaticResource BlackTheme}}">
-    <ContentPage.BindingContext>
-        <vm:PendingWeightsViewModel />
-    </ContentPage.BindingContext>
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
+            <local:IsNotNullConverter x:Key="IsNotNullConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <Grid>
 
         <Grid
@@ -83,7 +88,8 @@
                         Clicked="BtnNewWeighProcess_Clicked"
                         IsVisible="True"
                         Style="{StaticResource BotonPrincipal}"
-                        Text="Nueva Entrada" />
+                        Text="Nueva Entrada"
+                        ToolTipProperties.Text="Nueva Entrada (F5)" />
                     <Button
                         x:Name="BtnNewWeightLessPedido"
                         Grid.Row="{OnPlatform WinUI=0}"
@@ -93,7 +99,17 @@
                         Clicked="OnBtnNewWeighlessProcess_clicked"
                         IsVisible="False"
                         Style="{StaticResource BotonPrincipal}"
-                        Text="Nuevo Pedido sin Pesada" />
+                        Text="Nuevo Pedido sin Pesada"
+                        ToolTipProperties.Text="Nuevo Pedido sin Pesada (F8)" />
+
+                    <Button
+                        x:Name="BtnComprasProveedor"
+                        Grid.Row="{OnPlatform WinUI=2}"
+                        Clicked="BtnComprasProveedor_Clicked"
+                        IsVisible="False"
+                        Style="{StaticResource Boton}"
+                        Text="Compras"
+                        ToolTipProperties.Text="Ver Compras" />
 
                     <Button
                         x:Name="BtnFinished"
@@ -101,7 +117,8 @@
                         Clicked="BtnFinished_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"
-                        Text="Ver Finalizados" />
+                        Text="Ver Finalizados"
+                        ToolTipProperties.Text="Ver Finalizados (F6)" />
                     
                     <Button
                         x:Name="BtnExit"
@@ -109,7 +126,8 @@
                         Clicked="BtnExit_Clicked"
                         IsVisible="{OnPlatform Android=False}"
                         Style="{StaticResource Boton}"
-                        Text="Salir" />
+                        Text="Salir"
+                        ToolTipProperties.Text="Salir (Esc)" />
 
                     <!--  What is this?  -->
                     <Border
@@ -201,7 +219,6 @@
                         <CollectionView
                             x:Name="PendingWeightsCollectionView"
                             HorizontalOptions="Center"
-                            ItemsSource="{Binding PendingWeightsCharge}"
                             SelectionChanged="PendingWeightsCollectionView_SelectionChanged"
                             SelectionMode="Single"
                             VerticalOptions="Start">
@@ -211,7 +228,7 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="models:PendingWeightViewRow">
                                     <Border
                                         x:Name="BtnSeleccionar"
                                         Padding="15"
@@ -268,6 +285,19 @@
                                                     Text="{Binding WeightEntry.Notes, StringFormat='Chofer: {0}.'}"
                                                     TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                                 Dark={StaticResource 1}}" />
+                                                <Label
+                                                    x:Name="lblRequestedProduct"
+                                                    FontSize="{OnPlatform WinUI=24,
+                                                                          Android=12}"
+                                                    HorizontalOptions="Start"
+                                                    HorizontalTextAlignment="Start"
+                                                    MaximumWidthRequest="{OnPlatform Android=450,
+                                                                                     WinUI=800}"
+                                                    IsVisible="{Binding RequestedProduct, Converter={x:StaticResource IsNotNullConverter}}"
+                                                    Style="{StaticResource Label}"
+                                                    Text="{Binding RequestedProduct, StringFormat='Producto: {0}'}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                                Dark={StaticResource 1}}" />
                                             </VerticalStackLayout>
 
                                             <VerticalStackLayout Grid.Column="1" Spacing="4">
@@ -294,12 +324,13 @@
                                                     TextColor="{StaticResource 2}" />
 
                                                 <Label
-                                                    Text="{Binding WeightEntry.CreatedAt, StringFormat='{0:dd/MM HH:mm}'}"
+                                                    Text="{Binding WeightEntry.CreatedAt, Converter={StaticResource UtcToLocalConverter}, StringFormat='{0:dd/MM HH:mm}'}"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
                                                     FontSize="{OnPlatform WinUI=20,
                                                                           Android=10}"
                                                     VerticalOptions="Center"
+                                                    TextColor="Orange"
                                                     />
 
                                             </VerticalStackLayout>

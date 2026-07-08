@@ -50,5 +50,15 @@ namespace Infrastructure.Repos
             return clienteProveedor;
         }
 
+        public async Task<IEnumerable<ClienteProveedor>> GetByMultipleIds(int[] ids, CancellationToken cancellationToken = default)
+        {
+            if (ids == null || ids.Length == 0)
+                return [];
+
+            return await _context.ClientesProveedores
+                .AsNoTracking()
+                .Where(cp => ids.Contains(cp.CIDCLIENTEPROVEEDOR))
+                .ToListAsync(cancellationToken);
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers

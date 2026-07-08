@@ -33,6 +33,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("Hidden")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -54,6 +57,57 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ExternalTargetBehaviors");
+                });
+
+            modelBuilder.Entity("Core.Domain.Entities.ProviderOrders.ProviderPurchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Concluded")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpectedArrival")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("RealAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("RequiredAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("WeightEntryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WeightEntryId");
+
+                    b.ToTable("ProviderPurchases");
                 });
 
             modelBuilder.Entity("Core.Domain.Entities.Turns.Turn", b =>
@@ -106,6 +160,17 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<bool>("IsLoaded")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
 
                     b.Property<double?>("ProductPrice")
                         .HasColumnType("double precision");
@@ -177,11 +242,26 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExternalTargetBehaviorFK");
 
                     b.ToTable("WeightEntries");
+                });
+
+            modelBuilder.Entity("Core.Domain.Entities.ProviderOrders.ProviderPurchase", b =>
+                {
+                    b.HasOne("Core.Domain.Entities.Weight.WeightEntry", "WeightEntry")
+                        .WithMany()
+                        .HasForeignKey("WeightEntryId");
+
+                    b.Navigation("WeightEntry");
                 });
 
             modelBuilder.Entity("Core.Domain.Entities.Weight.WeightDetail", b =>

@@ -124,8 +124,8 @@ public partial class PartnerSelectView : ContentPage
             BtnConfirm.IsVisible = true;
             BtnConfirm.IsEnabled = true;
 
-            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {socio.RazonSocial}?", "No", "Si");
-            if (!confirmed)
+            bool confirmed = await DisplayAlert("Confirmación", $"¿Deseas seleccionar a {socio.RazonSocial}?", "Si", "No");
+            if (confirmed)
             {
                 OnPartnerSelected?.Invoke(socio);
                 await Shell.Current.Navigation.PopModalAsync();

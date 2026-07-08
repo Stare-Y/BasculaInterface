@@ -1,9 +1,7 @@
-﻿using BasculaInterface.Exceptions;
-using BasculaInterface.Models;
+﻿using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
-using Core.Domain.Entities.Weight;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -15,6 +13,7 @@ namespace BasculaInterface.ViewModels
     {
         private List<WeightEntryDto> _pendingWeights { get; set; } = [];
         private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
+        private Dictionary<int, string> _productNamesById { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsCharge { get; set; } = [];
         public ObservableCollection<PendingWeightViewRow> PendingWeightsDischarge { get; set; } = [];
         public ObservableCollection<ExternalTargetBehaviorDto> AvailableDocumentTypes { get; set; } = [];
@@ -47,30 +46,41 @@ namespace BasculaInterface.ViewModels
                 {
                     await LoadPendingWeightsAsync();
 
+                    // Apply the same filtering rules as OnAppearing and Reconect
+                    if (Preferences.Get("ShowDocumentTypeFilter", false))
+                    {
+                        await LoadExternalTargetBehaviors();
+                    }
+
+                    if (Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
+                    {
+                        int preferedId = int.TryParse(preferedDocumentType, out int result) ? result : 0;
+                        ShowDocumentsWithId(preferedId);
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    if (ex.Message.Contains("NotFound"))
-                    {
-                        throw new OriginEmptyException("No hay pesos pendientes, puedes crear uno nuevo :D");
-                    }
-                    else
-                    {
-                        throw new Exception(ex.Message);
-                    }
+                    // Exceptions are handled by the view or LoadPendingWeightsAsync itself
+                    // Just ensure IsRefreshing is reset
+                }
+                finally
+                {
+                    IsRefreshing = false;
                 }
             });
         }
 
-        public async Task LoadPendingWeightsAsync()
+        public async Task LoadPendingWeightsAsync(CancellationToken cancellationToken = default)
         {
             _pendingWeights.Clear();
 
             try
             {
-                _pendingWeights = await _apiService.GetAsync<List<WeightEntryDto>>("api/Weight/Pending");
+                _pendingWeights = await _apiService.GetAsync<List<WeightEntryDto>>("api/Weight/Pending", cancellationToken);
 
-                await LoadClienteProveedorAsync();
+                await LoadClienteProveedorAsync(cancellationToken);
+
+                await FetchRequestedProductsAsync(cancellationToken);
 
                 BuildObservableCollection();
             }
@@ -86,13 +96,13 @@ namespace BasculaInterface.ViewModels
             BuildObservableCollection(desiredId);
         }
 
-        public async Task LoadExternalTargetBehaviors()
+        public async Task LoadExternalTargetBehaviors(CancellationToken cancellationToken = default)
         {
             AvailableDocumentTypes.Clear();
 
-            List<ExternalTargetBehaviorDto> behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available");
+            List<ExternalTargetBehaviorDto> behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available", cancellationToken);
 
-            AvailableDocumentTypes.Add( new ExternalTargetBehaviorDto { Id = 0, TargetName = "Mostrar Todos" } );
+            AvailableDocumentTypes.Add(new ExternalTargetBehaviorDto { Id = 0, TargetName = "Mostrar Todos" });
 
             foreach (var behavior in behaviors)
             {
@@ -107,13 +117,16 @@ namespace BasculaInterface.ViewModels
             PendingWeightsCharge.Clear();
             PendingWeightsDischarge.Clear();
 
-            foreach (WeightEntryDto weight in _pendingWeights)
+            // Sort pending weights first, then add to collections (avoids reassigning ObservableCollection)
+            var sortedWeights = _pendingWeights.OrderByDescending(w => w.CreatedAt);
+
+            foreach (WeightEntryDto weight in sortedWeights)
             {
-                if(Preferences.Get("SecondaryTerminal", false))
-                {
-                    //skip weights with no tare weight
-                    continue;
-                }
+                //if (Preferences.Get("SecondaryTerminal", false))
+                //{
+                //    //skip weights with no tare weight
+                //    continue;
+                //}
 
                 ClienteProveedorDto? partner = _clienteProveedorDtos.FirstOrDefault(p => p.Id == weight.PartnerId);
                 if (partner != null)
@@ -124,7 +137,7 @@ namespace BasculaInterface.ViewModels
                     {
                         teoricWeightText +=
                             "Total (teorico): "
-                            + (weight.WeightDetails.Sum(d => d.Weight)
+                            + (weight.WeightDetails.Where(d => d.IsLoaded).Sum(d => d.Weight)
                             + weight.TareWeight).ToString()
                             + " kg.";
                     }
@@ -134,7 +147,11 @@ namespace BasculaInterface.ViewModels
 
                     if (partner.IsProvider)
                     {
-                        PendingWeightsDischarge.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
+                        PendingWeightViewRow row = new PendingWeightViewRow(weight, partner, teoricWeightText)
+                        {
+                            RequestedProduct = GetRequestedProductName(weight)
+                        };
+                        PendingWeightsDischarge.Add(row);
                     }
                     else
                     {
@@ -150,19 +167,52 @@ namespace BasculaInterface.ViewModels
                 }
             }
 
-            PendingWeightsCharge = new(
-                PendingWeightsCharge.OrderByDescending(w => w.WeightEntry.CreatedAt)
-            );
-
-            PendingWeightsDischarge = new(
-                PendingWeightsDischarge.OrderByDescending(w => w.WeightEntry.CreatedAt)
-            );
-
             OnPropertyChanged(nameof(PendingWeightsCharge));
             OnPropertyChanged(nameof(PendingWeightsDischarge));
         }
 
-        private async Task LoadClienteProveedorAsync()
+        private string? GetRequestedProductName(WeightEntryDto weight)
+        {
+            WeightDetailDto? oldest = weight.WeightDetails
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId.Value > 0)
+                .OrderBy(d => d.Id)
+                .FirstOrDefault();
+
+            if (oldest == null)
+                return null;
+
+            return _productNamesById.TryGetValue(oldest.FK_WeightedProductId!.Value, out string? name) ? name : null;
+        }
+
+        private async Task FetchRequestedProductsAsync(CancellationToken cancellationToken = default)
+        {
+            _productNamesById.Clear();
+
+            int[] productIds = _pendingWeights
+                .SelectMany(w => w.WeightDetails)
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId.Value > 0)
+                .Select(d => d.FK_WeightedProductId!.Value)
+                .Distinct()
+                .ToArray();
+
+            if (productIds.Length == 0)
+                return;
+
+            string idsQuery = string.Join("&ids=", productIds);
+            List<ProductoDto>? products = await _apiService.GetAsync<List<ProductoDto>>($"api/Productos/ByMultipleIds?ids={idsQuery}", cancellationToken);
+
+            if (products != null)
+            {
+                foreach (ProductoDto product in products)
+                {
+                    _productNamesById[product.Id] = string.IsNullOrEmpty(product.Nombre)
+                        ? $"Producto {product.Id}"
+                        : $"{product.Code} - {product.Nombre}";
+                }
+            }
+        }
+
+        private async Task LoadClienteProveedorAsync(CancellationToken cancellationToken = default)
         {
             _clienteProveedorDtos.Clear();
 
@@ -172,13 +222,21 @@ namespace BasculaInterface.ViewModels
                 return;
             }
 
-            foreach (WeightEntryDto weight in _pendingWeights)
+            // Batch fetch all partners to avoid N+1 queries
+            int[] partnerIds = _pendingWeights
+                .Where(w => w.PartnerId.HasValue && w.PartnerId.Value > 0)
+                .Select(w => w.PartnerId!.Value)
+                .Distinct()
+                .ToArray();
+
+            if (partnerIds.Length > 0)
             {
-                //get the partner id
-                if (weight.PartnerId.HasValue && weight.PartnerId.Value > 0)
+                string idsQuery = string.Join("&ids=", partnerIds);
+                List<ClienteProveedorDto>? partners = await _apiService.GetAsync<List<ClienteProveedorDto>>($"api/ClienteProveedor/ByMultipleIds?ids={idsQuery}", cancellationToken);
+
+                if (partners != null)
                 {
-                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={weight.PartnerId.Value}");
-                    if (partner != null)
+                    foreach (ClienteProveedorDto partner in partners)
                     {
                         partner.RazonSocial = partner.Code.IsNullOrEmpty() ? partner.RazonSocial : $"{partner.Code} - {partner.RazonSocial}";
                         _clienteProveedorDtos.Add(partner);
@@ -218,7 +276,7 @@ namespace BasculaInterface.ViewModels
 
             WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", weightEntry);
 
-            await PrintTurnAsync(newEntry, partner);
+            // await PrintTurnAsync(newEntry, partner);
         }
     }
 }

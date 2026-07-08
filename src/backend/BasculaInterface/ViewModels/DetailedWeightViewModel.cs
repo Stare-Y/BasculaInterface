@@ -3,8 +3,6 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
-using iText.Pdfua.Checkers.Utils.Ua2;
-using Microsoft.IdentityModel.Tokens;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -16,7 +14,7 @@ namespace BasculaInterface.ViewModels
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
-        public double TotalWeight => WeightEntry?.WeightDetails?.Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
+        public double TotalWeight => WeightEntry?.WeightDetails?.Where(d => d.IsLoaded).Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = [];
 
         public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = [];
@@ -78,14 +76,15 @@ namespace BasculaInterface.ViewModels
             }
             WeightDetailDto newDetail = new WeightDetailDto
             {
+                FK_WeightEntryId = WeightEntry.Id,
                 FK_WeightedProductId = product.Id,
-                Tare = 0, // Default tare value, can be adjusted later
-                Weight = 0, // Default weight value, can be adjusted later
                 RequiredAmount = qty,
                 Costales = costales
             };
-            WeightEntry.WeightDetails.Add(newDetail);
-            await UpdateWeightEntry();
+
+            WeightDetailDto created = await _apiService.PostAsync<WeightDetailDto>("api/Weight/Detail", newDetail);
+            WeightEntry.WeightDetails.Add(created);
+            await FetchNewWeightDetails();
         }
 
         public DetailedWeightViewModel() { }
@@ -135,7 +134,7 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public async Task FetchNewWeightDetails()
+        public async Task FetchNewWeightDetails(CancellationToken cancellationToken = default)
         {
             if (WeightEntry == null)
             {
@@ -145,21 +144,41 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry.Id must be a valid positive integer.");
             }
+
+            // Compare against UI rows count, not the DTO count (which may have been modified locally)
+            int previousDetailCount = WeightEntryDetailRows.Count;
+
             // Fetch the latest weight entry details from the API
-            WeightEntryDto? updatedEntry = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+            WeightEntryDto? updatedEntry = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}", cancellationToken);
             if (updatedEntry == null)
             {
                 throw new InvalidOperationException("Failed to fetch updated weight entry details.");
             }
-            // Update the WeightEntry property and reload products
-            WeightEntry = updatedEntry;
-            await LoadProductsAsync(WeightEntry, Partner);
 
-            //ifweightentry has partnerid, fetch partner details
+            // Update the WeightEntry property
+            WeightEntry = updatedEntry;
+
+            // Reload products if the detail count changed (new products added/removed)
+            int newDetailCount = WeightEntry.WeightDetails?.Count ?? 0;
+            if (newDetailCount != previousDetailCount)
+            {
+                await LoadProductsAsync(WeightEntry, Partner, cancellationToken);
+            }
+            else
+            {
+                // Update existing rows with new weight/tare/weightedBy values without refetching products
+                UpdateExistingDetailRows();
+            }
+
+            // Only fetch partner if PartnerId changed or Partner is not set
             if (WeightEntry.PartnerId.HasValue && WeightEntry.PartnerId.Value > 0)
             {
-                Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={WeightEntry.PartnerId.Value}");
-                Partner.RazonSocial = Partner.Code.IsNullOrEmpty() ? Partner.RazonSocial : $"{Partner.Code} - {Partner.RazonSocial}";
+                // Skip API call if Partner already matches the current PartnerId
+                if (Partner == null || Partner.Id != WeightEntry.PartnerId.Value)
+                {
+                    Partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={WeightEntry.PartnerId.Value}", cancellationToken);
+                    Partner.RazonSocial = string.IsNullOrEmpty(Partner.Code) ? Partner.RazonSocial : $"{Partner.Code} - {Partner.RazonSocial}";
+                }
             }
 
             OnPropertyChanged(nameof(WeightEntry));
@@ -167,19 +186,90 @@ namespace BasculaInterface.ViewModels
             OnPropertyChanged(nameof(TotalWeight));
         }
 
-        public async Task LoadExternalTargetBehaviors()
+        /// <summary>
+        /// Updates existing detail rows with new weight/tare values without refetching product data.
+        /// </summary>
+        private void UpdateExistingDetailRows()
         {
-            ExternalTargetBehaviors.Clear();
+            if (WeightEntry?.WeightDetails == null) return;
+
+            foreach (var detail in WeightEntry.WeightDetails)
+            {
+                var existingRow = WeightEntryDetailRows.FirstOrDefault(r => r.Id == detail.Id);
+                if (existingRow != null)
+                {
+                    existingRow.Tare = detail.Tare;
+                    existingRow.Weight = detail.Weight;
+                    existingRow.SecondaryTare = detail.SecondaryTare;
+                    existingRow.WeightedByDecorated = detail.WeightedBy;
+                    existingRow.RequiredAmount = detail.RequiredAmount;
+                    existingRow.Costales = detail.Costales;
+                    existingRow.IsLoaded = detail.IsLoaded;
+                }
+            }
+
+            // Re-sort so incomplete (red) rows stay at the top
+            var sorted = WeightEntryDetailRows.OrderBy(r => r.IsRowComplete).ThenBy(r => r.Id).ToList();
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                int currentIndex = WeightEntryDetailRows.IndexOf(sorted[i]);
+                if (currentIndex != i)
+                    WeightEntryDetailRows.Move(currentIndex, i);
+            }
+
+            OnPropertyChanged(nameof(TotalWeight));
+            OnCollectionChanged(nameof(WeightEntryDetailRows));
+        }
+
+        public async Task LoadExternalTargetBehaviors(CancellationToken cancellationToken = default)
+        {
+            // Skip API call if behaviors are already loaded (cache)
+            if (ExternalTargetBehaviors.Count > 0)
+            {
+                return;
+            }
+
             if (WeightEntry == null)
             {
                 throw new InvalidOperationException("WeightEntry must be set before loading external target behaviors.");
             }
-            var behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available");
+            var behaviors = await _apiService.GetAsync<List<ExternalTargetBehaviorDto>>($"api/ExternalTargetBehavior/Available", cancellationToken);
             foreach (var behavior in behaviors)
             {
                 ExternalTargetBehaviors.Add(behavior);
             }
             OnCollectionChanged(nameof(ExternalTargetBehaviors));
+        }
+
+        /// <summary>
+        /// Attempts to retrieve an external target behavior by its ID from the API.
+        /// If found, adds it to the local list and returns its index.
+        /// If not found or an error occurs, returns -1.
+        /// </summary>
+        public async Task<int> ResolveExternalTargetBehaviorByIdAsync(int targetId, CancellationToken cancellationToken = default)
+        {
+            var behavior = await _apiService.GetAsync<ExternalTargetBehaviorDto>(
+                $"api/ExternalTargetBehavior/ById?id={targetId}", cancellationToken);
+
+            if (behavior is null || behavior.Id <= 0)
+                return -1;
+
+            ExternalTargetBehaviors.Add(behavior);
+            OnCollectionChanged(nameof(ExternalTargetBehaviors));
+
+            return ExternalTargetBehaviors.Count - 1;
+        }
+
+        public async Task ChangeTargetDocumentBehavior(ExternalTargetBehaviorDto newTargetBehavior, CancellationToken cancellationToken = default)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before updating.");
+            }
+
+            await _apiService.PatchAsync($"api/Weight/{WeightEntry.Id}/ChangeTargetDocumentBehavior?newTargetId={newTargetBehavior.Id}", cancellationToken);
+
+            await FetchNewWeightDetails();
         }
 
         public async Task UpdateWeightEntry()
@@ -193,6 +283,31 @@ namespace BasculaInterface.ViewModels
             await _apiService.PutAsync<object>("api/Weight", WeightEntry);
 
             await FetchNewWeightDetails();
+        }
+
+        public async Task SetWeightDetailLoaded(WeightEntryDetailRow row)
+        {
+            if (WeightEntry == null)
+                throw new InvalidOperationException("WeightEntry must be set before updating a detail.");
+
+            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(d => d.Id == row.Id);
+            if (detail == null)
+                throw new InvalidOperationException("No weight detail found for the given row.");
+
+            int detailId = row.Id;
+            WeightEntryDto updatedEntry = await _apiService.PutWithRetryAsync<WeightEntryDto>(
+                $"api/Weight/Detail/{detailId}/MarkLoaded",
+                buildBody: () => Task.FromResult<object?>(null),
+                refetch: async () =>
+                {
+                    WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                    WeightEntry = fresh;
+                });
+
+            WeightEntry = updatedEntry;
+            row.IsLoaded = true;
+            OnPropertyChanged(nameof(WeightEntry));
+            OnPropertyChanged(nameof(TotalWeight));
         }
 
         public async Task DeleteWeightDetail(int detailId)
@@ -216,30 +331,17 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry must be set before concluding the weight process.");
             }
 
-            if (WeightEntry.WeightDetails.Count > 1 && (Partner is null || Partner.Id <= 0))
-            {
-                throw new InvalidOperationException("A partner must be selected before concluding the weight process with multiple products.");
-            }
-
-            WeightEntry.ConcludeDate = DateTime.UtcNow;
-
-            //TODO: Validate tare + weights equal brute weight, maybe validate this from the API side
-
-            // Send the updated weight entry to the API
-            await _apiService.PutAsync<GenericResponse<string>>("api/Weight", WeightEntry);
-
-            if (Partner is not null && !Partner.IsProvider)
-            {
-                try
+            // Server validates all preconditions; call the dedicated conclude endpoint
+            await _apiService.PutWithRetryAsync<GenericResponse<string>>(
+                $"api/Weight/{WeightEntry.Id}/Conclude",
+                buildBody: () => Task.FromResult<object?>(null),
+                refetch: async () =>
                 {
-                    await SendToContpaqiComercial();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Error sending to contpaq: " + ex.Message);
-                }
-                //TODO: send 2 contpaq and then print with generated folio.
-            }
+                    WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                    WeightEntry = fresh;
+                });
+
+            // Contpaqi is now triggered server-side by ConcludeAsync — nothing to do here.
 
             await Task.Delay(500); // Small delay to ensure the weight entry is updated before fetching new details
 
@@ -296,7 +398,27 @@ namespace BasculaInterface.ViewModels
             }
         }
 
-        public async Task LoadProductsAsync(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null)
+        /// <summary>
+        /// Validates if the partner has sufficient credit for the requested amount,
+        /// considering all pending weight entries.
+        /// </summary>
+        /// <param name="requestedAmount">The amount to validate (e.g., qty * product.Precio)</param>
+        /// <returns>CreditValidationResponse with validation results</returns>
+        /// <exception cref="InvalidOperationException">Thrown when Partner is not set</exception>
+        public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(double requestedAmount)
+        {
+            if (Partner is null || Partner.Id <= 0)
+            {
+                throw new InvalidOperationException("No se ha seleccionado un socio para validar el crédito.");
+            }
+
+            CreditValidationResponse response = await _apiService.GetAsync<CreditValidationResponse>(
+                $"api/Weight/ValidateCredit?partnerId={Partner.Id}&requestedAmount={requestedAmount}");
+
+            return response;
+        }
+
+        public async Task LoadProductsAsync(WeightEntryDto weightEntry, ClienteProveedorDto? partner = null, CancellationToken cancellationToken = default)
         {
             WeightEntry = weightEntry;
 
@@ -314,8 +436,28 @@ namespace BasculaInterface.ViewModels
                 return; // No details to load
             }
 
+            // Batch fetch all products to avoid N+1 queries
+            int[] productIds = WeightEntry.WeightDetails
+                .Where(d => d.FK_WeightedProductId.HasValue && d.FK_WeightedProductId > 0)
+                .Select(d => d.FK_WeightedProductId!.Value)
+                .Distinct()
+                .ToArray();
+
+            Dictionary<int, ProductoDto> productsById = [];
+            if (productIds.Length > 0)
+            {
+                string idsQuery = string.Join("&ids=", productIds);
+                List<ProductoDto>? products = await _apiService.GetAsync<List<ProductoDto>>($"api/Productos/ByMultipleIds?ids={idsQuery}", cancellationToken);
+                if (products != null)
+                {
+                    productsById = products.ToDictionary(p => p.Id);
+                }
+            }
+
             foreach (WeightDetailDto detail in WeightEntry.WeightDetails)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 WeightEntryDetailRow row = new WeightEntryDetailRow
                 {
                     Id = detail.Id,
@@ -323,19 +465,18 @@ namespace BasculaInterface.ViewModels
                     Weight = detail.Weight,
                     FK_WeightedProductId = detail.FK_WeightedProductId,
                     ProductPrice = detail.ProductPrice,
-                    WeightedBy = detail.WeightedBy == null
+                    WeightedByDecorated = detail.WeightedBy == null
                                     ? null
                                     : detail.WeightedBy,
                     SecondaryTare = detail.SecondaryTare,
                     RequiredAmount = detail.RequiredAmount,
-                    Costales = detail.Costales
+                    Costales = detail.Costales,
+                    IsLoaded = detail.IsLoaded
                 };
 
-                if (detail.FK_WeightedProductId is not null)
+                if (detail.FK_WeightedProductId > 0 && productsById.TryGetValue(detail.FK_WeightedProductId.Value, out ProductoDto? product))
                 {
-                    ProductoDto? product = await _apiService.GetAsync<ProductoDto>($"api/Productos/ById?id={detail.FK_WeightedProductId}");
-
-                    if (product is null || product.Nombre.IsNullOrEmpty())
+                    if (product is null || string.IsNullOrEmpty(product.Nombre))
                     {
                         row.Description = $"Unknown Product ({detail.FK_WeightedProductId})";
                         row.IsGranel = false;
@@ -348,21 +489,23 @@ namespace BasculaInterface.ViewModels
                 }
                 else
                 {
-                    row.Description = "Peso Libre";
+                    row.Description = string.IsNullOrEmpty(detail.Notes) ? "Peso Libre" : detail.Notes;
                 }
 
                 WeightEntryDetailRows.Add(row);
             }
 
-            //sort the rows by id, and assign the order index
+            //sort the rows: incomplete (red) first, then complete (green), within each group order by id
             WeightEntryDetailRows = new ObservableCollection<WeightEntryDetailRow>(
-                WeightEntryDetailRows.OrderBy(row => row.Id).Select((row, index) =>
+                WeightEntryDetailRows.OrderBy(row => row.IsRowComplete).ThenBy(row => row.Id).Select((row, index) =>
                 {
                     row.OrderIndex = index + 1;
                     return row;
                 })
             );
 
+            // Notify UI that the collection reference changed
+            OnPropertyChanged(nameof(WeightEntryDetailRows));
             OnCollectionChanged(nameof(WeightEntryDetailRows));
         }
     }

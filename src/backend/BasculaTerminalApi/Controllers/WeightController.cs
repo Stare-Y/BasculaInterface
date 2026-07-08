@@ -1,10 +1,14 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
+using Core.Domain.Entities.Weight;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
+    public record SetSecondaryTareRequest(double SecondaryTare);
+    public record RecordWeightRequest(double Weight, string WeightedBy);
+
     [ApiController]
     [Route("api/[Controller]")]
     public class WeightController : ControllerBase
@@ -75,6 +79,92 @@ namespace BasculaTerminalApi.Controllers
                 return BadRequest(new GenericResponse<string> { Message = $"Error updating entry: {ex.Message}" });
             }
 
+        }
+
+        [HttpPost("Detail")]
+        public async Task<ActionResult<WeightDetailDto>> CreateDetail([FromBody] WeightDetailDto detailDto)
+        {
+            try
+            {
+                WeightDetailDto created = await _weightService.CreateDetailAsync(detailDto);
+                return CreatedAtAction(nameof(GetById), new { id = created.FK_WeightEntryId }, created);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = $"Error creating detail: {ex.Message}" });
+            }
+        }
+
+        [HttpPut("Detail/{id}/SecondaryTare")]
+        public async Task<IActionResult> SetSecondaryTare(int id, [FromBody] SetSecondaryTareRequest request)
+        {
+            try
+            {
+                await _weightService.SetSecondaryTareAsync(id, request.SecondaryTare);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("Detail/{id}/Weight")]
+        public async Task<IActionResult> RecordWeight(int id, [FromBody] RecordWeightRequest request)
+        {
+            try
+            {
+                await _weightService.RecordWeightAsync(id, request.Weight, request.WeightedBy);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("Detail/{id}/MarkLoaded")]
+        public async Task<ActionResult<WeightEntryDto>> MarkDetailLoaded(int id)
+        {
+            try
+            {
+                WeightEntryDto updated = await _weightService.MarkDetailLoadedAsync(id);
+                return Ok(updated);
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/Conclude")]
+        public async Task<IActionResult> ConcludeWeightEntry(int id)
+        {
+            try
+            {
+                await _weightService.ConcludeAsync(id);
+                return Ok(new GenericResponse<string> { Data = "Concluded", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
         }
 
         [HttpDelete]
@@ -163,6 +253,77 @@ namespace BasculaTerminalApi.Controllers
             {
                 _logger.LogError(ex, "Error sending document to contpaqi comercial");
                 return BadRequest("Error sending document to contpaqi comercial" + ex.Message);
+            }
+        }
+
+        [HttpPatch("{weightId}/ChangeTargetDocumentBehavior")]
+        public async Task<IActionResult> ChangeTargetDocumentBehavior(int weightId, [FromQuery] int newTargetId)
+        {
+            try
+            {
+                if (weightId == 0)
+                    return BadRequest("Invalid weight ID");
+
+                if (newTargetId == 0)
+                    return BadRequest("invalid TargetBehavior ID");
+
+                await _weightService.ChangeTargetDocumentBehavior(weightId, newTargetId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating target behavior");
+                return BadRequest("Error updating target behavior" + ex.Message);
+            }
+        }
+
+        [HttpGet("ValidateCredit")]
+        public async Task<ActionResult<CreditValidationResponse>> ValidatePartnerCredit(
+            [FromQuery] int partnerId,
+            [FromQuery] double requestedAmount)
+        {
+            try
+            {
+                if (partnerId <= 0)
+                {
+                    return BadRequest(new CreditValidationResponse
+                    {
+                        IsValid = false,
+                        Message = "ID de socio inválido."
+                    });
+                }
+
+                if (requestedAmount < 0)
+                {
+                    return BadRequest(new CreditValidationResponse
+                    {
+                        IsValid = false,
+                        Message = "El monto solicitado no puede ser negativo."
+                    });
+                }
+
+                CreditValidationResponse result = await _weightService.ValidatePartnerCreditAsync(partnerId, requestedAmount);
+
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Partner with ID {PartnerId} not found", partnerId);
+                return NotFound(new CreditValidationResponse
+                {
+                    IsValid = false,
+                    Message = $"Socio con ID {partnerId} no encontrado."
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating credit for partner {PartnerId}", partnerId);
+                return BadRequest(new CreditValidationResponse
+                {
+                    IsValid = false,
+                    Message = $"Error validando crédito: {ex.Message}"
+                });
             }
         }
     }

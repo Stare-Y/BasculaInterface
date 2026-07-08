@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
 
 namespace BasculaInterface;
+
 public static class MauiProgram
 {
-    public static IServiceProvider ServiceProvider { get; set; } = null !;
+    public static IServiceProvider ServiceProvider { get; set; } = null!;
     public static string PrintTemplate { get; set; } = "\n\tCOOPERATIVA\n\tPEDRO\n\tEZQUEDA\n\n{fechaHora}\n\nTara: {tara}kg\nNeto: {neto}kg\nBruto: {bruto}kg\n";
     public static MauiApp CreateMauiApp()
     {
@@ -37,10 +38,27 @@ public static class MauiProgram
 
                     if (appWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter overlappedPresenter)
                     {
-                        overlappedPresenter.IsResizable = false;
-                        overlappedPresenter.IsMaximizable = false;
-                        overlappedPresenter.IsMinimizable = true;
-                        overlappedPresenter.Maximize();
+                        bool hideTaskbar = Preferences.Get("HideTaskbar", false);
+                        if (hideTaskbar)
+                        {
+                            overlappedPresenter.IsResizable = false;
+                            overlappedPresenter.IsMaximizable = false;
+                            overlappedPresenter.IsMinimizable = true;
+                            overlappedPresenter.SetBorderAndTitleBar(true, true);
+
+                            // Cover the full display area (including taskbar) while keeping title bar with minimize
+                            var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary);
+                            appWindow.MoveAndResize(displayArea.OuterBounds);
+                            overlappedPresenter.Maximize();
+                        }
+                        else
+                        {
+                            overlappedPresenter.IsResizable = true;
+                            overlappedPresenter.IsMaximizable = true;
+                            overlappedPresenter.IsMinimizable = true;
+                            overlappedPresenter.SetBorderAndTitleBar(true, true);
+                            overlappedPresenter.Maximize();
+                        }
                     }
                 });
             });
@@ -52,13 +70,14 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
-        
+
         builder.Services.AddTransient<BasculaViewModel>();
         builder.Services.AddTransient<PendingWeightsViewModel>();
         builder.Services.AddTransient<ProductSelectorViewModel>();
         builder.Services.AddTransient<PartnerSelectorViewModel>();
         builder.Services.AddTransient<FinishedWeightsViewModel>();
         builder.Services.AddTransient<ReadOnlyDetailedViewModel>();
+        builder.Services.AddTransient<ProviderPurchaseListViewModel>();
         builder.Services.AddTransient<IApiService, ApiService>();
         builder.Services.AddHttpClient<IApiService, ApiService>(client =>
         {
@@ -67,7 +86,10 @@ public static class MauiProgram
             client.DefaultRequestHeaders.Add("Accept", "application/json");
         });
         //build service provider
-        ServiceProvider = builder.Services.BuildServiceProvider();
-        return builder.Build();
+        MauiApp app = builder.Build();
+
+        ServiceProvider = app.Services;
+
+        return app;
     }
 }

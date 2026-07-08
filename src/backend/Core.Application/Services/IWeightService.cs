@@ -13,8 +13,15 @@ namespace Core.Application.Services
         Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1);
         Task UpdateAsync(WeightEntryDto weightEntry);
+        Task<WeightDetailDto> CreateDetailAsync(WeightDetailDto detail);
+        Task SetSecondaryTareAsync(int detailId, double tare);
+        Task RecordWeightAsync(int detailId, double weight, string weightedBy);
+        Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId);
+        Task ConcludeAsync(int weightEntryId);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteDetailAsync(int id);
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
+        Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
+        Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId);
     }
 }

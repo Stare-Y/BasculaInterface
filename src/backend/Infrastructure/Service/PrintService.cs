@@ -51,22 +51,42 @@ namespace Infrastructure.Service
                     _logger.LogError(ex, "Error fetching latest weight entry data before printing. Proceeding with provided data.");
                 }
 
-                iText.Kernel.Geom.PageSize pageSize = new(_settings.TicketWidth, _settings.TicketHeight);
-                // Create a temp PDF
-                string filePath = Path.GetTempFileName() + ".pdf";
+                // Use a very tall page so content never overflows to a second page
+                float maxHeight = 14400f;
+                float usedHeight;
+                float mediaBoxBottom;
+                iText.Kernel.Geom.PageSize pageSize = new(_settings.TicketWidth, maxHeight);
+                string tempPath = Path.GetTempFileName() + ".tmp.pdf";
 
-                using (PdfWriter writer = new(filePath))
+                // Render content on the tall page
+                using (PdfWriter writer = new(tempPath))
                 using (PdfDocument pdf = new(writer))
                 using (Document document = new(pdf, pageSize))
                 {
-                    //document content
                     await BuildWeightEntryDocument(document, entry);
-
-                    PdfPage page = pdf.GetFirstPage();
-                    float contentHeight = document.GetRenderer().GetCurrentArea().GetBBox().GetY();
-                    float usedHeight = _settings.TicketHeight - contentHeight;
-                    page.SetMediaBox(new iText.Kernel.Geom.Rectangle(0, 0, _settings.TicketWidth, usedHeight));
+                    var bbox = document.GetRenderer().GetCurrentArea().GetBBox();
+                    // bbox.GetY() = bottom margin (always ~10), bbox.GetHeight() = remaining unused height
+                    // Content sits between the top of the page and the top of the remaining area
+                    float topOfRemaining = bbox.GetY() + bbox.GetHeight();
+                    usedHeight = maxHeight - topOfRemaining + 10f; // +10 bottom padding
+                    mediaBoxBottom = topOfRemaining - 10f;
                 }
+
+                // Re-open and trim page to actual content height
+                string filePath = Path.GetTempFileName() + ".pdf";
+                _logger.LogInformation("WeightEntry print metrics: maxHeight={MaxH}, usedHeight={UsedH}, mediaBoxBottom={MBB}, width={W}",
+                    maxHeight, usedHeight, mediaBoxBottom, _settings.TicketWidth);
+
+                using (PdfReader reader = new(tempPath))
+                using (PdfWriter writer = new(filePath))
+                using (PdfDocument pdf = new(reader, writer))
+                {
+                    PdfPage page = pdf.GetFirstPage();
+                    page.SetMediaBox(new iText.Kernel.Geom.Rectangle(0, mediaBoxBottom, _settings.TicketWidth, usedHeight));
+                    page.SetCropBox(new iText.Kernel.Geom.Rectangle(0, mediaBoxBottom, _settings.TicketWidth, usedHeight));
+                }
+                try { File.Delete(tempPath); } catch { }
+
                 PrintPdf(filePath);
             }
             catch (Exception ex)
@@ -80,12 +100,15 @@ namespace Infrastructure.Service
         {
             try
             {
-                iText.Kernel.Geom.PageSize pageSize = new(_settings.TicketWidth, _settings.TicketHeight);
+                // Use a very tall page so content never overflows
+                float maxHeight = 14400f;
+                float usedHeight;
+                float mediaBoxBottom;
+                iText.Kernel.Geom.PageSize pageSize = new(_settings.TicketWidth, maxHeight);
+                string tempPath = Path.GetTempFileName() + ".tmp.pdf";
 
-                // Create a temp PDF
-                string filePath = Path.GetTempFileName() + ".pdf";
-
-                using (PdfWriter writer = new(filePath))
+                // Render content on the tall page
+                using (PdfWriter writer = new(tempPath))
                 using (PdfDocument pdf = new(writer))
                 using (Document document = new(pdf, pageSize))
                 {
@@ -93,15 +116,27 @@ namespace Infrastructure.Service
 
                     var fontSize = _settings.NormalFontSize;
                     var fechaHora = DateTime.Now.ToString("dd-MM-yyyy\nHH:mm:ss");
-                    document.Add(new Paragraph(fechaHora + " " + text).SetFontSize(fontSize).SetFont(iText.Kernel.Font.PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.COURIER)));
-
-                    PdfPage page = pdf.GetFirstPage();
-                    float contentHeight = document.GetRenderer().GetCurrentArea().GetBBox().GetY();
-                    float usedHeight = _settings.TicketHeight - contentHeight;
-
-                    // Ajustar tamaño real de la página al contenido
-                    page.SetMediaBox(new iText.Kernel.Geom.Rectangle(0, 0, _settings.TicketWidth, usedHeight));
+                    document.Add(new Paragraph(fechaHora + " " + text).SetFontSize(fontSize).SetFont(PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.COURIER)));
+                    var bbox = document.GetRenderer().GetCurrentArea().GetBBox();
+                    float topOfRemaining = bbox.GetY() + bbox.GetHeight();
+                    usedHeight = maxHeight - topOfRemaining + 10f;
+                    mediaBoxBottom = topOfRemaining - 10f;
                 }
+
+                // Re-open and trim page to actual content height
+                string filePath = Path.GetTempFileName() + ".pdf";
+                _logger.LogInformation("PlainText print metrics: maxHeight={MaxH}, usedHeight={UsedH}, mediaBoxBottom={MBB}, width={W}",
+                    maxHeight, usedHeight, mediaBoxBottom, _settings.TicketWidth);
+
+                using (PdfReader reader = new(tempPath))
+                using (PdfWriter writer = new(filePath))
+                using (PdfDocument pdf = new(reader, writer))
+                {
+                    PdfPage page = pdf.GetFirstPage();
+                    page.SetMediaBox(new iText.Kernel.Geom.Rectangle(0, mediaBoxBottom, _settings.TicketWidth, usedHeight));
+                    page.SetCropBox(new iText.Kernel.Geom.Rectangle(0, mediaBoxBottom, _settings.TicketWidth, usedHeight));
+                }
+                try { File.Delete(tempPath); } catch { }
 
                 PrintPdf(filePath);
             }
@@ -177,13 +212,13 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph("Productos de pedido:")));
+                .Add(BuildParagraph("Productos:")));
 
             foreach (WeightDetailDto detail in entry.WeightDetails)
             {
                 string productName = "Pesada libre";
 
-                if (detail.FK_WeightedProductId.HasValue)
+                if (detail.FK_WeightedProductId > 0)
                 {
                     try
                     {
@@ -201,11 +236,15 @@ namespace Infrastructure.Service
                         _logger.LogError(ex, "Error fetching product info for printing");
                     }
                 }
+                else
+                {
+                    productName = detail.Notes ?? productName;
+                }
 
                 table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph(productName, _settings.SubTitleFontSize, TextAlignment.CENTER, bold: true)));
 
-                if (detail.RequiredAmount.HasValue)
+                if (detail.RequiredAmount > 0)
                 {
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph($"Requerido: {detail.RequiredAmount} kg{(detail.Costales > 0 ? $" ~ {detail.Costales} costales." : ".")}", _settings.SmallFontSize, TextAlignment.LEFT)));
@@ -214,7 +253,7 @@ namespace Infrastructure.Service
                 if (detail.Tare > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph($"Peso Anterior:", _settings.SmallFontSize)));
+                    .Add(BuildParagraph($"Tara:", _settings.SmallFontSize)));
 
                     table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(detail.Tare.ToString("F2") + "kg", _settings.SmallFontSize, TextAlignment.RIGHT, bold: false)));
@@ -223,7 +262,7 @@ namespace Infrastructure.Service
                 if (detail.Weight > 0)
                 {
                     table.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph("Peso Real:", _settings.SmallFontSize)));
+                    .Add(BuildParagraph("Neto:", _settings.SmallFontSize)));
 
                     table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                             .Add(BuildParagraph(detail.Weight.ToString("F2") + "kg", _settings.SubTitleFontSize, TextAlignment.RIGHT, bold: true)));
@@ -259,13 +298,13 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph(_settings.CompanyName, _settings.TitleFontSize, TextAlignment.CENTER, true)));
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph("Detalle de Pedido", _settings.SubTitleFontSize, TextAlignment.CENTER)));
+                .Add(BuildParagraph($"Pesada {entry.Id}", _settings.SubTitleFontSize, TextAlignment.CENTER)));
 
             table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph()));// Empty row
 
             //partner
-            if (entry.PartnerId.HasValue)
+            if (entry.PartnerId > 0)
             {
                 try
                 {
@@ -274,7 +313,7 @@ namespace Infrastructure.Service
                     table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                         .Add(BuildParagraph(partner.IsProvider ? "Proveedor:" : "Socio:")));
                     table.AddCell(new Cell(2, 5).SetBorder(Border.NO_BORDER)
-                        .Add(BuildParagraph(partner.RazonSocial, bold: true)));
+                        .Add(BuildParagraph(partner.Code + " - " + partner.RazonSocial, bold: true)));
 
 
                     if (!entry.ContpaqiComercialFolio.IsNullOrEmpty())
@@ -306,7 +345,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 1).SetBorder(Border.NO_BORDER)
-            .Add(BuildParagraph("TARA:")));
+            .Add(BuildParagraph("TARA INICIAL:")));
 
             table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.TareWeight.ToString("F2") + "kg", textAlignment: TextAlignment.RIGHT, bold: true)));
@@ -328,7 +367,7 @@ namespace Infrastructure.Service
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph("Salida:", bold: true)));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
-                    .Add(BuildParagraph(entry.ConcludeDate.Value.ToString("dd-MM-yyyy HH:mm:ss"))));
+                    .Add(BuildParagraph(entry.ConcludeDate.Value.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss"))));
                 table.AddCell(new Cell(1, 5).SetBorder(Border.NO_BORDER)
                     .Add(BuildParagraph()));// Empty row
             }

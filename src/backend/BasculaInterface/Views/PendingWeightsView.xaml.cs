@@ -9,48 +9,122 @@ namespace BasculaInterface.Views;
 
 public partial class PendingWeightsView : ContentPage
 {
-    private CancellationTokenSource? _cancellationTokenSource = null;
+    private CancellationTokenSource? _cts = null;
+    private bool _isFirstLoad = true;
 
     public PendingWeightsView(PendingWeightsViewModel viewModel)
     {
-        InitializeComponent();
-
-        BindingContext = viewModel 
+        // Set BindingContext BEFORE InitializeComponent so XAML bindings resolve correctly
+        BindingContext = viewModel
             ?? throw new ArgumentNullException(nameof(viewModel));
 
+        InitializeComponent();
+
+        // Subscribe to Loaded event for first-time initialization
+        this.Loaded += OnPageLoaded;
+
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
     }
 
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        if (e.Key == Windows.System.VirtualKey.F5 && BtnNewWeighProcess.IsVisible)
+        {
+            BtnNewWeighProcess_Clicked(BtnNewWeighProcess, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F6 && BtnFinished.IsVisible)
+        {
+            BtnFinished_Clicked(BtnFinished, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.F8 && BtnNewWeightLessPedido.IsVisible)
+        {
+            OnBtnNewWeighlessProcess_clicked(BtnNewWeightLessPedido, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            BtnExit_Clicked(BtnExit, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
+
     public PendingWeightsView() : this(MauiProgram.ServiceProvider.GetRequiredService<PendingWeightsViewModel>()) { }
+
+    private async void OnPageLoaded(object? sender, EventArgs e)
+    {
+        // Only run on first load
+        if (!_isFirstLoad)
+            return;
+
+        _isFirstLoad = false;
+
+        await LoadDataAsync();
+    }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // Skip if first load (handled by OnPageLoaded)
+        if (_isFirstLoad)
+            return;
+
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
         if (BindingContext is not PendingWeightsViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
         WaitPopUp.Show("Cargando pesos pendientes, espere");
-        await Task.Yield();
+
         try
         {
             EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
 
-            await viewModel.LoadPendingWeightsAsync();
+            await viewModel.LoadPendingWeightsAsync(token);
 
-            if(Preferences.Get("ShowDocumentTypeFilter", false))
+            if (Preferences.Get("ShowDocumentTypeFilter", false))
             {
-                await viewModel.LoadExternalTargetBehaviors();
+                await viewModel.LoadExternalTargetBehaviors(token);
 
                 PickerDocumentType.IsVisible = true;
 
                 PickerDocumentType.SelectedIndex = 0;
             }
 
-            if(Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
+            if (Preferences.Get("PreferedDocumentType", null) is string preferedDocumentType)
             {
                 int preferedId = int.TryParse(preferedDocumentType, out int result) ? result : 0;
 
                 var index = viewModel.AvailableDocumentTypes.ToList().FindIndex(d => d.Id == preferedId);
-
 
                 if (PickerDocumentType.IsVisible)
                 {
@@ -58,8 +132,25 @@ public partial class PendingWeightsView : ContentPage
                         PickerDocumentType.SelectedIndex = index;
                 }
 
+                // Filter the collections BEFORE setting ItemsSource
                 viewModel.ShowDocumentsWithId(preferedId);
             }
+
+            // Set ItemsSource directly - compiled bindings (x:DataType) handle the rest
+            // This must happen AFTER ShowDocumentsWithId to avoid blank rows
+            if (!BtnCargas.IsEnabled)
+            {
+                PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsCharge;
+            }
+            else
+            {
+                PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
+            }
+
+            // Workaround for MAUI CollectionView first item sizing bug
+#if ANDROID
+            await ForceCollectionViewRelayout();
+#endif
 
             if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
             {
@@ -67,14 +158,22 @@ public partial class PendingWeightsView : ContentPage
 
                 BtnNewWeighProcess.IsVisible = false;
 
-                if(Preferences.Get("OnlyPedidos", false))
+                BtnFinished.IsVisible = false;
+
+                if (Preferences.Get("OnlyPedidos", false))
+                {
                     BtnNewWeightLessPedido.IsVisible = true;
+                    BtnFinished.IsVisible = true;
+                }
             }
 #if ANDROID
             BtnRefresh.IsVisible = false;
 #endif
             BtnReconnect.IsVisible = false;
-
+        }
+        catch (OperationCanceledException)
+        {
+            // Navigation cancelled, ignore
             return;
         }
         catch (Exception ex)
@@ -88,6 +187,32 @@ public partial class PendingWeightsView : ContentPage
         {
             WaitPopUp.Hide();
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+    }
+
+    /// <summary>
+    /// Forces the CollectionView to re-measure all items.
+    /// Workaround for MAUI bug where items render with incorrect dimensions on first load.
+    /// </summary>
+    private async Task ForceCollectionViewRelayout()
+    {
+        await Task.Delay(50);
+
+        await Dispatcher.DispatchAsync(() =>
+        {
+            // Use ScrollTo to force re-render without breaking compiled bindings
+            if (PendingWeightsCollectionView.ItemsSource is System.Collections.IList list && list.Count > 0)
+            {
+                PendingWeightsCollectionView.ScrollTo(0, position: ScrollToPosition.Start, animate: false);
+            }
+        });
     }
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -107,8 +232,13 @@ public partial class PendingWeightsView : ContentPage
 
                 await Shell.Current.Navigation.PushAsync(targetView);
             }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", "No se pudieron cargar los detalles del peso: " + ex.Message, "OK");
+            }
             finally
             {
+                PendingWeightsCollectionView.SelectedItem = null;
                 WaitPopUp.Hide();
             }
         }
@@ -146,10 +276,10 @@ public partial class PendingWeightsView : ContentPage
         }
     }
 
-    private async Task Reconect()
+    private async Task Reconect(CancellationToken token = default)
     {
         if (BindingContext is not PendingWeightsViewModel viewModel)
-            return; 
+            return;
 
         if (EntryHost.Text.Contains("http"))
         {
@@ -161,13 +291,14 @@ public partial class PendingWeightsView : ContentPage
         }
 
         WaitPopUp.Show("Reconectando, espere");
+        await Task.Yield();
         try
         {
-            await viewModel.LoadPendingWeightsAsync();
+            await viewModel.LoadPendingWeightsAsync(token);
 
             if (Preferences.Get("ShowDocumentTypeFilter", false))
             {
-                await viewModel.LoadExternalTargetBehaviors();
+                await viewModel.LoadExternalTargetBehaviors(token);
 
                 PickerDocumentType.IsVisible = true;
 
@@ -180,22 +311,22 @@ public partial class PendingWeightsView : ContentPage
 
                 var index = viewModel.AvailableDocumentTypes.ToList().FindIndex(d => d.Id == preferedId);
 
-
                 if (PickerDocumentType.IsVisible)
                 {
                     if (index >= 0)
                         PickerDocumentType.SelectedIndex = index;
-
-                    return;
                 }
 
                 viewModel.ShowDocumentsWithId(preferedId);
             }
 
-
             BtnReconnect.IsVisible = false;
             BorderEntryHost.IsVisible = false;
-
+        }
+        catch (OperationCanceledException)
+        {
+            // Reconnection cancelled, ignore
+            return;
         }
         catch (OriginEmptyException)
         {
@@ -221,16 +352,16 @@ public partial class PendingWeightsView : ContentPage
         await BtnRefresh.ScaleTo(1.1, 100);
         await BtnRefresh.ScaleTo(1.0, 100);
 
-        _cancellationTokenSource = new CancellationTokenSource();
+        _cts = new CancellationTokenSource();
         try
         {
-            await Task.Delay(4444, _cancellationTokenSource.Token);
+            await Task.Delay(4444, _cts.Token);
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 //BorderEntryHost.IsVisible = true;
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                _cts?.Cancel();
+                _cts?.Dispose();
+                _cts = null;
             });
         }
         catch (TaskCanceledException)
@@ -249,18 +380,23 @@ public partial class PendingWeightsView : ContentPage
         BtnReconnect.Opacity = 0;
         await BtnReconnect.FadeTo(2, 200);
 
-        if (_cancellationTokenSource != null)
+        if (_cts != null)
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
-            if (string.IsNullOrEmpty(EntryHost.Text))
-            {
-                await DisplayAlert("Error", "La URL del host no puede estar vac�a.", "OK");
-                return;
-            }
-            await Reconect();
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
         }
+
+        if (string.IsNullOrEmpty(EntryHost.Text))
+        {
+            await DisplayAlert("Error", "La URL del host no puede estar vacía.", "OK");
+            return;
+        }
+
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        await Reconect(token);
     }
 
     private async void BtnExit_Clicked(object sender, EventArgs e)
@@ -300,7 +436,7 @@ public partial class PendingWeightsView : ContentPage
         {
             string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
             int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
-            WeightEntryDto weightEntry = new ()
+            WeightEntryDto weightEntry = new()
             {
                 PartnerId = partner.Id,
                 TareWeight = 0,
@@ -311,6 +447,8 @@ public partial class PendingWeightsView : ContentPage
             };
 
             await viewModel.PostNewWeightEntry(weightEntry, partner);
+
+            await Reconect();
 
             await Task.Delay(500);
         }
@@ -326,19 +464,21 @@ public partial class PendingWeightsView : ContentPage
 
     private void CargasDescargasToggle(object sender, EventArgs e)
     {
-        if(BindingContext is not PendingWeightsViewModel viewModel)
+        if (BindingContext is not PendingWeightsViewModel viewModel)
             return;
 
         if (!BtnCargas.IsEnabled)
         {
             BtnCargas.IsEnabled = true;
             BtnDescargas.IsEnabled = false;
+            BtnComprasProveedor.IsVisible = true;
             PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
         }
         else
         {
             BtnCargas.IsEnabled = false;
             BtnDescargas.IsEnabled = true;
+            BtnComprasProveedor.IsVisible = false;
             PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsCharge;
         }
     }
@@ -357,5 +497,10 @@ public partial class PendingWeightsView : ContentPage
         {
             viewModel.ShowDocumentsWithId(selectedDocumentType.Id);
         }
+    }
+
+    private async void BtnComprasProveedor_Clicked(object sender, EventArgs e)
+    {
+        await Shell.Current.Navigation.PushModalAsync(new ProviderPurchaseListView());
     }
 }

@@ -7,17 +7,24 @@ namespace BasculaInterface.Views;
 
 public partial class DetailedWeightView : ContentPage
 {
+    private bool _keepExternalTargetBehaviorDisabled = false;
     private bool _entriesChanged = false;
+    private bool _isInitializing = false;
+    private CancellationTokenSource? _cts;
 
     public DetailedWeightView(DetailedWeightViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        SubscribeToKeyboardEvents();
+
         if (Preferences.Get("SecondaryTerminal", false))
         {
             BtnNuevoProducto.IsVisible = false;
             BtnNewEntry.IsVisible = false;
             BtnDeleteEntry.IsVisible = false;
+            BtnPrintTicket.IsVisible = false;
+            EntryNotes.IsEnabled = false;
         }
         else if (Preferences.Get("OnlyPedidos", false))
         {
@@ -28,6 +35,49 @@ public partial class DetailedWeightView : ContentPage
 
     public DetailedWeightView() { }
 
+    private void SubscribeToKeyboardEvents()
+    {
+#if WINDOWS
+        this.Loaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown += OnWindowKeyDown;
+            }
+        };
+
+        this.Unloaded += (s, e) =>
+        {
+            var window = this.Window?.Handler?.PlatformView as Microsoft.UI.Xaml.Window;
+            if (window?.Content is Microsoft.UI.Xaml.UIElement content)
+            {
+                content.KeyDown -= OnWindowKeyDown;
+            }
+        };
+#endif
+    }
+
+#if WINDOWS
+    private void OnWindowKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        // Don't handle keys when popup is visible
+        if (PickPopUp.IsVisible || NotesPopUp.IsVisible)
+            return;
+
+        if (e.Key == Windows.System.VirtualKey.F1 && BtnNuevoProducto.IsVisible)
+        {
+            BtnNuevoProducto_Clicked(BtnNuevoProducto, EventArgs.Empty);
+            e.Handled = true;
+        }
+        else if (e.Key == Windows.System.VirtualKey.Escape)
+        {
+            BtnVolver_Clicked(BtnVolver, EventArgs.Empty);
+            e.Handled = true;
+        }
+    }
+#endif
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -36,14 +86,27 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
+        {
+            PickerTargetBehavior.IsVisible = false;
+        }
+
         if (_entriesChanged)
         {
             WaitPopUp.Show("Un momento...");
             try
             {
-                await viewModel.FetchNewWeightDetails();
+                await viewModel.FetchNewWeightDetails(token);
 
                 _entriesChanged = false;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
             }
             catch (Exception ex)
             {
@@ -58,25 +121,79 @@ public partial class DetailedWeightView : ContentPage
             }
         }
 
-        WaitPopUp.Show("Un momento...");
-        try
+        // Only fetch and set the picker if it doesn't already have a valid selection.
+        // This avoids re-triggering SelectedIndexChanged when coming back from a modal.
+        if (PickerTargetBehavior.SelectedIndex < 0 || viewModel.ExternalTargetBehaviors.Count == 0)
         {
-            await viewModel.LoadExternalTargetBehaviors();
-
-            if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null || viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+            WaitPopUp.Show("Un momento...");
+            try
             {
-                PickerTargetBehavior.SelectedItem = viewModel.ExternalTargetBehaviors.FirstOrDefault(behavior => behavior.Id == viewModel.WeightEntry!.ExternalTargetBehaviorFK);
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
-        }
-        finally
-        {
-            BtnSaveNotes.IsVisible = false;
+                _isInitializing = true;
 
-            WaitPopUp.Hide();
+                await viewModel.LoadExternalTargetBehaviors(token);
+
+                if (viewModel.WeightEntry!.ExternalTargetBehaviorFK is not null && viewModel.WeightEntry!.ExternalTargetBehaviorFK > 0)
+                {
+                    int targetId = viewModel.WeightEntry!.ExternalTargetBehaviorFK.Value;
+                    int index = -1;
+                    for (int i = 0; i < viewModel.ExternalTargetBehaviors.Count; i++)
+                    {
+                        if (viewModel.ExternalTargetBehaviors[i].Id == targetId)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    if (index >= 0)
+                    {
+                        PickerTargetBehavior.SelectedIndex = index;
+                    }
+                    else
+                    {
+                        // Not found in the available list — try fetching by ID
+                        try
+                        {
+                            int resolvedIndex = await viewModel.ResolveExternalTargetBehaviorByIdAsync(targetId, token);
+                            if (resolvedIndex >= 0)
+                            {
+                                PickerTargetBehavior.SelectedIndex = resolvedIndex;
+                                PickerTargetBehavior.IsEnabled = false;
+                            }
+                            else
+                            {
+                                PickerTargetBehavior.IsEnabled = false;
+                                await DisplayAlert("Aviso", "El documento objetivo previamente seleccionado ya no es válido.", "OK");
+                            }
+                        }
+                        catch
+                        {
+                            PickerTargetBehavior.IsEnabled = false;
+                            await DisplayAlert("Aviso", "El documento objetivo previamente seleccionado ya no es válido.", "OK");
+                        }
+                        finally
+                        {
+                            _keepExternalTargetBehaviorDisabled = true;
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudieron obtener los posibles documentos objetivo ({ex.Message}).", "OK");
+            }
+            finally
+            {
+                _isInitializing = false;
+
+                BtnSaveNotes.IsVisible = false;
+
+                WaitPopUp.Hide();
+            }
         }
 
         if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
@@ -91,13 +208,18 @@ public partial class DetailedWeightView : ContentPage
                 else
                     BtnPickPartner.IsVisible = false;
 
-                PickerTargetBehavior.IsEnabled = true;
+                PickerTargetBehavior.IsEnabled = true && !_keepExternalTargetBehaviorDisabled;
+
+                return;
             }
+
+            PickerTargetBehavior.IsVisible = false;
+
             return;
         }
 
         BtnFinishWeight.IsVisible = true;
-        PickerTargetBehavior.IsEnabled = true;
+        PickerTargetBehavior.IsEnabled = true && !_keepExternalTargetBehaviorDisabled;
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {
@@ -124,6 +246,52 @@ public partial class DetailedWeightView : ContentPage
             BtnPickPartner.IsVisible = true;
         else
             BtnPickPartner.IsVisible = false;
+
+        // Workaround for MAUI CollectionView first item sizing bug
+        await ForceCollectionViewRelayout();
+    }
+
+    /// <summary>
+    /// Forces the CollectionView to re-measure all items.
+    /// This is a workaround for a known MAUI bug where the first item 
+    /// in a CollectionView renders with incorrect dimensions.
+    /// </summary>
+    private async Task ForceCollectionViewRelayout()
+    {
+        // Small delay to let the layout system settle
+        await Task.Delay(100);
+
+        // Force re-layout by refreshing the ItemsSource binding
+        await Dispatcher.DispatchAsync(() =>
+        {
+            var viewModel = GetViewModel();
+            if (viewModel.WeightEntryDetailRows.Count > 0)
+            {
+                // Save current source and reassign to force re-measure
+                var source = CollectionViewWeightDetails.ItemsSource;
+                CollectionViewWeightDetails.ItemsSource = null;
+                CollectionViewWeightDetails.ItemsSource = source;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Handles the Loaded event for the CollectionView.
+    /// Forces a re-layout to fix first item sizing issues.
+    /// </summary>
+    private async void CollectionViewWeightDetails_Loaded(object? sender, EventArgs e)
+    {
+#if ANDROID
+        await ForceCollectionViewRelayout();
+#endif
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 
     private DetailedWeightViewModel GetViewModel()
@@ -194,7 +362,19 @@ public partial class DetailedWeightView : ContentPage
 
             if (viewModel.WeightEntry != null && viewModel.Partner != null)
             {
-                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner);
+                string? detailNotes = null;
+
+                if (viewModel.Partner.Id <= 0)
+                {
+                    detailNotes = await NotesPopUp.ShowAsync("Que se esta pesando?");
+                    if (detailNotes == null)
+                    {
+                        // User cancelled the prompt
+                        return;
+                    }
+                }
+
+                WeightingScreen weightingScreen = new WeightingScreen(viewModel.WeightEntry, viewModel.Partner, detailNotes: detailNotes, useIncommingTara: viewModel.Partner.Id <= 0);
 
                 if (weightingScreen.BindingContext is not BasculaViewModel basculaViewModel)
                     throw new InvalidOperationException("No se pudo validar el estado de la bascuila en el VM");
@@ -320,17 +500,27 @@ public partial class DetailedWeightView : ContentPage
         viewModel.Partner = partner;
         viewModel.WeightEntry.PartnerId = partner.Id;
 
+        WaitPopUp.Show("Actualizando socio...");
+
         try
         {
             await viewModel.UpdateWeightEntry();
+
+            PickerTargetBehavior.IsVisible = true;
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", "No se pudo actualizar la entrada de peso con el socio seleccionado: " + ex.Message, "OK");
             return;
         }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
 
         BtnPickPartner.IsVisible = false;
+
+        _entriesChanged = true;
     }
 
     private async void BtnPickPartner_Clicked(object sender, EventArgs e)
@@ -371,12 +561,47 @@ public partial class DetailedWeightView : ContentPage
 
             double composedCost = (qty * product.Precio) + viewModel.TotalCost;
 
-            if (!viewModel.Partner.IgnoreCreditLimit && viewModel.Partner.CreditLimit > 0 && composedCost > viewModel.Partner.AvailableCredit)
+            // Quick local check - skip API call if partner ignores credit limit or has no limit
+            if (viewModel.Partner.IgnoreCreditLimit || viewModel.Partner.CreditLimit <= 0)
             {
-                throw new InvalidOperationException($"No hay suficiente credito para agregar este producto con la cantidad  seleccionada (excede por ${composedCost - viewModel.Partner?.AvailableCredit}).");
+                // Partner ignores credit limit or has no limit configured, skip validation
+            }
+            else
+            {
+                // First do a quick local check against available credit
+                if (composedCost > viewModel.Partner.AvailableCredit)
+                {
+                    throw new InvalidOperationException("No hay suficiente crédito para agregar este producto.");
+                }
+
+                // If local check passes, validate with API (considers other pending weight entries)
+                WaitPopUp.Show("Validando credito...");
+                try
+                {
+                    CreditValidationResponse creditValidation = await viewModel.ValidatePartnerCreditAsync(qty * product.Precio);
+
+                    if (!creditValidation.IsValid)
+                    {
+                        throw new InvalidOperationException("No hay suficiente crédito para agregar este producto.");
+                    }
+                }
+                finally
+                {
+                    WaitPopUp.Hide();
+                }
             }
 
-            await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
+            // Show loading screen while adding product and refreshing data
+            WaitPopUp.Show("Agregando producto...");
+            try
+            {
+                await viewModel.AddProductToWeightEntry(product, qty, result[result.Keys.First()]);
+                _entriesChanged = true;
+            }
+            finally
+            {
+                WaitPopUp.Hide();
+            }
         }
         catch (Exception ex)
         {
@@ -417,8 +642,6 @@ public partial class DetailedWeightView : ContentPage
             productSelectView.OnProductSelected += OnProductSelected;
 
             await Shell.Current.Navigation.PushModalAsync(productSelectView);
-
-            _entriesChanged = true;
         }
         catch (Exception ex)
         {
@@ -445,7 +668,7 @@ public partial class DetailedWeightView : ContentPage
             if (row is null)
                 return;
 
-            if (row.Tare > 0)
+            if (row.Tare > 0 || row.Weight > 0)
                 return;
 
             if (!row.IsGranel)
@@ -480,7 +703,7 @@ public partial class DetailedWeightView : ContentPage
                     };
                 }
 
-                WeightingScreen weightingScreen = new(viewModel.WeightEntry!, viewModel.Partner, producto, useIncommingTara: false);
+                WeightingScreen weightingScreen = new(viewModel.WeightEntry!, viewModel.Partner, producto, targetWeightDetail: row.Id, useIncommingTara: false);
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
 
@@ -543,6 +766,29 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
+    private async void MarkAsLoaded_Clicked(object sender, EventArgs e)
+    {
+        if (sender is not Button btn || btn.BindingContext is not WeightEntryDetailRow selectedRow)
+            return;
+
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        WaitPopUp.Show("Marcando como cargado...");
+        try
+        {
+            await viewModel.SetWeightDetailLoaded(selectedRow);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo marcar como cargado: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
     private async void BtnRefresh_Clicked(object sender, EventArgs e)
     {
         await BtnRefresh.ScaleTo(1.1, 100);
@@ -584,6 +830,10 @@ public partial class DetailedWeightView : ContentPage
 
     private async void PickerTargetBehavior_SelectedIndexChanged(object sender, EventArgs e)
     {
+        // Skip if we're programmatically setting the picker during initialization
+        if (_isInitializing)
+            return;
+
         if (BindingContext is not DetailedWeightViewModel viewModel)
         { return; }
 
@@ -592,11 +842,13 @@ public partial class DetailedWeightView : ContentPage
         {
             ExternalTargetBehaviorDto? selectedItem = PickerTargetBehavior.SelectedItem as ExternalTargetBehaviorDto;
 
+            _cts = new CancellationTokenSource();
+
+            CancellationToken token = _cts.Token;
+
             if (selectedItem is null) { return; }
 
-            viewModel.WeightEntry!.ExternalTargetBehaviorFK = selectedItem.Id;
-
-            await viewModel.UpdateWeightEntry();
+            await viewModel.ChangeTargetDocumentBehavior(selectedItem, token);
         }
         catch (Exception ex)
         {

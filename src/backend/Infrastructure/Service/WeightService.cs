@@ -1,8 +1,8 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
-using Core.Application.Extensions;
 using Core.Application.Services;
 using Core.Domain.Entities.Base;
+using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
 using Microsoft.Extensions.Options;
@@ -12,11 +12,13 @@ namespace Infrastructure.Service
     public class WeightService : IWeightService
     {
         private readonly IWeightRepo _weightRepo;
+        private readonly IExternalTargetBehaviorService _targetBehaviorService;
         private readonly IApiService _apiService;
         private readonly IClienteProveedorService _clienteProveedorService;
         private readonly IProductService _productService;
+        private readonly IProviderPurchaseService _providerPurchaseService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
-        public WeightService(IWeightRepo weightRepo, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options)
+        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IProviderPurchaseService providerPurchaseService)
         {
             _weightRepo = weightRepo;
 
@@ -27,10 +29,14 @@ namespace Infrastructure.Service
             _clienteProveedorService = clienteProveedorService;
 
             _productService = productService;
+
+            _providerPurchaseService = providerPurchaseService;
+
+            _targetBehaviorService = targetBehaviorService;
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
-            if(weightEntry.Id > 0)
+            if (weightEntry.Id > 0)
             {
                 //this means a currently existing one, is trying to get its initial weight, so, lets update it instead
 
@@ -38,50 +44,143 @@ namespace Infrastructure.Service
 
                 return weightEntry;
             }
-            WeightEntry newEntry = await _weightRepo.CreateAsync(weightEntry.ConvertToBaseEntry());
+            WeightEntry entity = weightEntry.ToEntity();
+            entity.BruteWeight = entity.TareWeight;
+            WeightEntry newEntry = await _weightRepo.CreateAsync(entity);
 
-            return newEntry.ConvertToDto();
+            return new WeightEntryDto(newEntry);
         }
 
         public async Task<WeightEntryDto> GetByIdAsync(int id)
         {
             WeightEntry entry = await _weightRepo.GetByIdAsync(id);
 
-            return entry.ConvertToDto();
+            return new WeightEntryDto(entry);
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllAsync(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllAsync(top, page));
+            return (await _weightRepo.GetAllAsync(top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllComplete(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllComplete(top, page));
+            return (await _weightRepo.GetAllComplete(top, page)).Select(we => new WeightEntryDto(we));
         }
         public async Task<IEnumerable<WeightEntryDto>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page));
+            return (await _weightRepo.GetByDateRange(startDate, endDate, top: top, page: page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetAllByPartnerAsync(int partnerId, int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetAllByPartnerAsync(partnerId, top, page));
+            return (await _weightRepo.GetAllByPartnerAsync(partnerId, top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task<IEnumerable<WeightEntryDto>> GetPendingWeights(int top = 30, uint page = 1)
         {
-            return WeightExtensions.ConvertRangeToDto(await _weightRepo.GetPendingWeights(top, page));
+            return (await _weightRepo.GetPendingWeights(top, page)).Select(we => new WeightEntryDto(we));
         }
 
         public async Task UpdateAsync(WeightEntryDto weightEntry)
         {
-            await _weightRepo.UpdateAsync(weightEntry.ConvertToBaseEntry());
+            await _weightRepo.UpdateAsync(weightEntry.ToEntity());
         }
 
-        public async Task UpdateAsync(WeightEntry weightEntry)
+        public async Task UpdateAsync(WeightEntry weightEntry, bool force = false)
         {
-            await _weightRepo.UpdateAsync(weightEntry);
+            await _weightRepo.UpdateAsync(weightEntry, force);
+        }
+
+        public async Task<WeightDetailDto> CreateDetailAsync(WeightDetailDto dto)
+        {
+            WeightEntry entry = await _weightRepo.GetByIdAsync(dto.FK_WeightEntryId);
+            if (entry.ConcludeDate != null)
+                throw new InvalidOperationException("No se pueden agregar productos a un proceso ya finalizado.");
+
+            WeightDetail detail = new WeightDetail
+            {
+                FK_WeightEntryId = dto.FK_WeightEntryId,
+                FK_WeightedProductId = dto.FK_WeightedProductId,
+                RequiredAmount = dto.RequiredAmount,
+                Costales = dto.Costales,
+                Notes = dto.Notes,
+                Weight = dto.Weight,
+                Tare = dto.Weight > 0 ? entry.BruteWeight : dto.Tare,
+                IsLoaded = true
+            };
+
+            WeightDetail created = await _weightRepo.CreateDetailAsync(detail);
+
+            if (detail.IsLoaded && detail.Weight > 0)
+                await _weightRepo.RecomputeBruteWeightAsync(dto.FK_WeightEntryId);
+
+            return new WeightDetailDto(created);
+        }
+
+        public async Task SetSecondaryTareAsync(int detailId, double tare)
+        {
+            if (tare <= 0)
+                throw new ArgumentOutOfRangeException(nameof(tare), "La tara secundaria debe ser mayor que cero.");
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+            if (detail.WeightEntry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+
+            detail.SecondaryTare = tare;
+            detail.IsLoaded = false;
+            await _weightRepo.UpdateDetailAsync(detail);
+        }
+
+        public async Task RecordWeightAsync(int detailId, double weight, string weightedBy)
+        {
+            if (weight <= 0)
+                throw new ArgumentOutOfRangeException(nameof(weight), "El peso debe ser mayor que cero.");
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+            if (detail.WeightEntry.ConcludeDate != null)
+                throw new InvalidOperationException("No se puede modificar un proceso ya finalizado.");
+
+            detail.Weight = weight;
+            detail.WeightedBy = weightedBy;
+            detail.Tare = detail.WeightEntry.BruteWeight;
+            await _weightRepo.UpdateDetailAsync(detail);
+
+            if (detail.IsLoaded)
+                await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
+        }
+
+        public async Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId)
+        {
+            WeightEntry entry = await _weightRepo.MarkDetailLoadedAsync(detailId);
+            return new WeightEntryDto(entry);
+        }
+
+        public async Task ConcludeAsync(int weightEntryId)
+        {
+            await _weightRepo.ConcludeEntryAsync(weightEntryId);
+
+            try
+            {
+                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntryId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ConcludeAsync] ProviderPurchase conclude failed (non-fatal): {ex.Message}");
+            }
+
+            WeightEntry entry = await _weightRepo.GetByIdAsync(weightEntryId);
+            if (entry.PartnerId > 0 && entry.ExternalTargetBehaviorFK > 0 && (entry.ConptaqiComercialFK == null || entry.ConptaqiComercialFK <= 0))
+            {
+                try
+                {
+                    await SendToContpaqiComercial(weightEntryId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ConcludeAsync] Contpaqi post failed (non-fatal): {ex.Message}");
+                }
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -108,7 +207,7 @@ namespace Infrastructure.Service
             {
                 throw new InvalidOperationException("At least 1 product needs to be related to be able to make the pedido");
             }
-            if(weightEntry.ExternalTargetBehaviorFK is null || weightEntry.ExternalTargetBehavior is null)
+            if (weightEntry.ExternalTargetBehaviorFK is null || weightEntry.ExternalTargetBehavior is null)
             {
                 throw new InvalidOperationException("An External Target Behavior is required to post to SDK");
             }
@@ -130,30 +229,33 @@ namespace Infrastructure.Service
             Console.WriteLine($"Received Notes: {result.Message}");
             weightEntry.Notes += " " + result.Message;
 
-            await UpdateAsync(weightEntry);
+            await UpdateAsync(weightEntry, force: true);
 
             return result;
         }
 
         private async Task<DocumentoDto> BuildContpaqiDocumentDto(WeightEntry weightEntry)
         {
-            if(weightEntry.ExternalTargetBehavior is null)
+            if (weightEntry.ExternalTargetBehavior is null)
             {
                 throw new InvalidOperationException("An External Target Behavior is required to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetSerie))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetSerie))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetAlmacen))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetAlmacen))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
-            if(string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetConcept))
+            if (string.IsNullOrEmpty(weightEntry.ExternalTargetBehavior.TargetConcept))
             {
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
             ClienteProveedorDto cteProovedor = await _clienteProveedorService.GetById(weightEntry.PartnerId!.Value);
+            ProviderPurchaseDto? purchase = await _providerPurchaseService.GetByWeightEntryIdAsync(weightEntry.Id);
+            double purchasePrice = (double)(purchase?.Price ?? 0);
+
             List<ProductoDto> products = [];
             foreach (WeightDetail weightDetail in weightEntry.WeightDetails)
             {
@@ -167,19 +269,19 @@ namespace Infrastructure.Service
 
             return new DocumentoDto
             {
-                CodConcepto = !isProvider ? weightEntry.ExternalTargetBehavior.TargetConcept 
-                    : throw new NotImplementedException("Can't create documents from providers, just clients for now"),
+                CodConcepto = weightEntry.ExternalTargetBehavior.TargetConcept,
                 Serie = weightEntry.ExternalTargetBehavior.TargetSerie,
                 Fecha = DateTime.Now,
                 CodigoCteProv = cteProovedor.Code,
                 cObservaciones = "Generado en Bascula CPE",
-                Movimientos = products.Select(p =>
+                Movimientos = weightEntry.WeightDetails.Select(d =>
                     new MovimientoDto
                     {
-                        CodigoProducto = p.Code,
-                        CodigoAlmacen = p.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
-                        Unidades = GetUnidadesFromProductAndDetail( weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id),p),
-                        Referencia = $"Pesado por: {weightEntry.WeightDetails.First(wd => wd.FK_WeightedProductId == p.Id).WeightedBy}"
+                        CodigoProducto = products.First(p => p.Id == d.FK_WeightedProductId).Code,
+                        CodigoAlmacen = products.First(p => p.Id == d.FK_WeightedProductId).IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
+                        Unidades = GetUnidadesFromProductAndDetail(d, products.First(p => p.Id == d.FK_WeightedProductId)),
+                        Referencia = $"Pesado por: {d.WeightedBy}",
+                        Precio = purchasePrice
                     }).ToArray()
             };
         }
@@ -190,6 +292,92 @@ namespace Infrastructure.Service
                 return weightDetail.Weight;
             else
                 return weightDetail.RequiredAmount ?? 0;
+        }
+
+        public async Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId)
+        {
+            WeightEntry existingWeight = await _weightRepo.GetByIdAsync(weightId);
+
+            ExternalTargetBehaviorDto targetBehavior = await _targetBehaviorService.GetByIdAsync(targetDocumentBehaviorId);
+
+            //this seems redundant, but is so taht the target service throws exception if not found
+            existingWeight.ExternalTargetBehaviorFK = targetBehavior.Id;
+
+            //force true to not validate if concluded or that
+            await _weightRepo.UpdateAsync(existingWeight, force:true);
+        }
+
+        public async Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount)
+        {
+            // Fetch the partner to get their credit information
+            ClienteProveedorDto partner = await _clienteProveedorService.GetById(partnerId);
+
+            // If partner ignores credit limit, always return valid
+            if (partner.IgnoreCreditLimit)
+            {
+                return new CreditValidationResponse
+                {
+                    IsValid = true,
+                    AvailableCredit = partner.AvailableCredit,
+                    RequestedAmount = requestedAmount,
+                    PendingEntriesCost = 0,
+                    RemainingCredit = partner.AvailableCredit - requestedAmount,
+                    Message = "Crédito válido."
+                };
+            }
+
+            // If partner has no credit limit set, they can't make purchases on credit
+            if (partner.CreditLimit <= 0)
+            {
+                return new CreditValidationResponse
+                {
+                    IsValid = false,
+                    AvailableCredit = 0,
+                    RequestedAmount = requestedAmount,
+                    PendingEntriesCost = 0,
+                    RemainingCredit = 0,
+                    Message = "El socio no tiene límite de crédito configurado."
+                };
+            }
+
+            // Get all pending (not finished) weight entries for this partner
+            IEnumerable<WeightEntry> pendingEntries = await _weightRepo.GetPendingWeightsByPartnerAsync(partnerId);
+
+            // Calculate the total cost of pending entries
+            // If weight is already measured (Weight > 0), use Weight * Price
+            // Otherwise, use RequiredAmount * Price
+            double pendingEntriesCost = 0;
+            foreach (WeightEntry entry in pendingEntries)
+            {
+                foreach (WeightDetail detail in entry.WeightDetails)
+                {
+                    if (detail.FK_WeightedProductId.HasValue && detail.ProductPrice.HasValue)
+                    {
+                        // Use actual weight if measured, otherwise use required amount
+                        double quantity = detail.Weight > 0
+                            ? detail.Weight
+                            : (detail.RequiredAmount ?? 0);
+
+                        pendingEntriesCost += detail.ProductPrice.Value * quantity;
+                    }
+                }
+            }
+
+            // Calculate remaining credit after considering pending entries and requested amount
+            double remainingCredit = partner.AvailableCredit - requestedAmount - pendingEntriesCost;
+            bool isValid = remainingCredit >= 0;
+
+            return new CreditValidationResponse
+            {
+                IsValid = isValid,
+                AvailableCredit = partner.AvailableCredit,
+                RequestedAmount = requestedAmount,
+                PendingEntriesCost = pendingEntriesCost,
+                RemainingCredit = remainingCredit,
+                Message = isValid
+                    ? "Crédito válido."
+                    : "Crédito insuficiente."
+            };
         }
     }
 }

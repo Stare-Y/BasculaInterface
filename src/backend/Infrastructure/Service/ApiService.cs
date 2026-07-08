@@ -1,5 +1,6 @@
 ﻿using Core.Application.Services;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -87,11 +88,11 @@ namespace Infrastructure.Service
             }
         }
 
-        public async Task<T> SendAsync<T>(HttpRequestMessage requestMessage)
+        public async Task<T> SendAsync<T>(HttpRequestMessage requestMessage, CancellationToken cancellationToken = default)
         {
             await LogRequest(requestMessage);
 
-            HttpResponseMessage response = await _client.SendAsync(requestMessage);
+            HttpResponseMessage response = await _client.SendAsync(requestMessage, cancellationToken);
 
             await LogResponse(response);
 
@@ -100,11 +101,11 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<T> GetAsync<T>(string endpoint)
+        public async Task<T> GetAsync<T>(string endpoint, CancellationToken cancellationToken = default)
         {
             await LogRequest(endpoint: "GET " + endpoint);
 
-            HttpResponseMessage response = await _client.GetAsync(endpoint);
+            HttpResponseMessage response = await _client.GetAsync(endpoint, cancellationToken);
 
             await LogResponse(response);
 
@@ -113,13 +114,13 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<T> PostAsync<T>(string endpoint, object data)
+        public async Task<T> PostAsync<T>(string endpoint, object data, CancellationToken cancellationToken = default)
         {
             StringContent content = await SerializeContent(data);
 
             await LogRequest(endpoint: "POST " + endpoint, payload: content);
 
-            HttpResponseMessage response = await _client.PostAsync(endpoint, content);
+            HttpResponseMessage response = await _client.PostAsync(endpoint, content, cancellationToken);
 
             await LogResponse(response);
 
@@ -128,13 +129,13 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<T> PutAsync<T>(string endpoint, object? data)
+        public async Task<T> PutAsync<T>(string endpoint, object? data, CancellationToken cancellationToken = default)
         {
             StringContent content = await SerializeContent(data);
 
             await LogRequest(endpoint: "PUT " + endpoint, payload: content);
 
-            HttpResponseMessage response = await _client.PutAsync(endpoint, content);
+            HttpResponseMessage response = await _client.PutAsync(endpoint, content, cancellationToken);
 
             await LogResponse(response);
 
@@ -143,13 +144,13 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<T> PatchAsync<T>(string endpoint, object? data)
+        public async Task<T> PatchAsync<T>(string endpoint, object? data, CancellationToken cancellationToken = default)
         {
             StringContent content = await SerializeContent(data);
 
             await LogRequest(endpoint: "PATCH " + endpoint, payload: content);
 
-            HttpResponseMessage response = await _client.PatchAsync(endpoint, content);
+            HttpResponseMessage response = await _client.PatchAsync(endpoint, content, cancellationToken);
 
             await LogResponse(response);
 
@@ -158,11 +159,43 @@ namespace Infrastructure.Service
             return await DeserializeResponse<T>(response);
         }
 
-        public async Task<bool> DeleteAsync(string endpoint)
+        public async Task PatchAsync(string endpoint, CancellationToken cancellationToken = default)
+        {
+
+            await LogRequest(endpoint: "PATCH " + endpoint);
+
+            HttpResponseMessage response = await _client.PatchAsync(endpoint, null, cancellationToken);
+
+            await LogResponse(response);
+
+            await ValidateResponse(response);
+        }
+
+        public async Task<T> PutWithRetryAsync<T>(string endpoint, Func<Task<object?>> buildBody, Func<Task> refetch, int maxRetries = 3)
+        {
+            for (int attempt = 0; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    object? body = await buildBody();
+                    return await PutAsync<T>(endpoint, body);
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Conflict && attempt < maxRetries)
+                {
+                    Debug.WriteLine($"[PutWithRetry] 409 on attempt {attempt + 1}/{maxRetries}, retrying in 300ms...");
+                    await Task.Delay(300);
+                    await refetch();
+                }
+            }
+            throw new InvalidOperationException("El servidor no pudo procesar la solicitud, intente de nuevo.");
+        }
+
+        public async Task<bool> DeleteAsync(string endpoint, CancellationToken cancellationToken = default)
         {
             await LogRequest(endpoint: "DELETE " + endpoint);
 
-            HttpResponseMessage response = await _client.DeleteAsync(endpoint);
+            using var request = new HttpRequestMessage(HttpMethod.Delete, endpoint);
+            HttpResponseMessage response = await _client.SendAsync(request, cancellationToken);
 
             await LogResponse(response);
 
@@ -191,7 +224,7 @@ namespace Infrastructure.Service
             if (!response.IsSuccessStatusCode)
             {
                 string error = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Status: {response.StatusCode}, Error: {error}");
+                throw new HttpRequestException($"Status: {response.StatusCode}, Error: {error}", null, response.StatusCode);
             }
         }
 

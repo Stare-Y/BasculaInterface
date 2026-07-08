@@ -75,6 +75,7 @@ namespace Infrastructure.Service
 
             _buffer.Append(chunk);
 
+
             while (true)
             {
                 string bufferString = _buffer.ToString();
@@ -90,6 +91,7 @@ namespace Infrastructure.Service
 
                 OnBasculaRead?.Invoke(this, new OnBasculaReadEventArgs(currentWeight));
             }
+
         }
 
 

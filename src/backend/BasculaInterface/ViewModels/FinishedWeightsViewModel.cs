@@ -11,8 +11,25 @@ namespace BasculaInterface.ViewModels
     public class FinishedWeightsViewModel : ViewModelBase
     {
         private List<WeightEntryDto> _finishedWeights { get; set; } = [];
-        private List<ClienteProveedorDto> _clienteProveedorDtos { get; set; } = [];
+        private Dictionary<int, ClienteProveedorDto> _partnerMap { get; set; } = [];
         private readonly IApiService _apiService = null!;
+        private const int PageSize = 30;
+
+        private uint _currentPage = 1;
+        public uint CurrentPage
+        {
+            get => _currentPage;
+            private set
+            {
+                _currentPage = value;
+                OnPropertyChanged(nameof(CurrentPage));
+                OnPropertyChanged(nameof(PageText));
+            }
+        }
+
+        public string PageText => $"Página {CurrentPage}";
+        public bool CanGoBack => CurrentPage > 1;
+        public bool CanGoForward { get; private set; }
 
         private bool isRefreshing;
 
@@ -20,7 +37,7 @@ namespace BasculaInterface.ViewModels
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
-        public FinishedWeightsViewModel() 
+        public FinishedWeightsViewModel()
         {
             RefreshCommand = new Command(async () =>
             {
@@ -55,43 +72,52 @@ namespace BasculaInterface.ViewModels
                 OnPropertyChanged(nameof(IsRefreshing));
             }
         }
-        public ObservableCollection<PendingWeightViewRow> FinishedWeights { get; } = [];
+        public ObservableCollection<PendingWeightViewRow> FinishedWeights { get; set; } = [];
 
-        private async Task LoadClienteProveedorAsync()
+        private async Task LoadClienteProveedorAsync(CancellationToken cancellationToken = default)
         {
-            _clienteProveedorDtos.Clear();
+            _partnerMap.Clear();
 
             if (_finishedWeights.Count == 0)
-            {
-                OnCollectionChanged(nameof(_clienteProveedorDtos));
                 return;
-            }
 
-            foreach (WeightEntryDto weight in _finishedWeights)
-            {
-                //get the partner id
-                if (weight.PartnerId.HasValue && weight.PartnerId.Value > 0)
-                {
-                    ClienteProveedorDto? partner = await _apiService.GetAsync<ClienteProveedorDto>($"api/ClienteProveedor/ById?id={weight.PartnerId.Value}");
-                    if (partner != null)
-                    {
-                        _clienteProveedorDtos.Add(partner);
-                    }
-                }
-            }
+            int[] partnerIds = _finishedWeights
+                .Where(w => w.PartnerId.HasValue && w.PartnerId.Value > 0)
+                .Select(w => w.PartnerId!.Value)
+                .Distinct()
+                .ToArray();
 
-            OnCollectionChanged(nameof(_clienteProveedorDtos));
+            if (partnerIds.Length == 0)
+                return;
+
+            string idsQuery = string.Join("&ids=", partnerIds);
+            List<ClienteProveedorDto> partners = await _apiService.GetAsync<List<ClienteProveedorDto>>(
+                $"api/ClienteProveedor/ByMultipleIds?ids={idsQuery}", cancellationToken);
+
+            foreach (ClienteProveedorDto partner in partners)
+                _partnerMap[partner.Id] = partner;
         }
 
-        public async Task LoadPendingWeightsAsync()
+        public async Task LoadPendingWeightsAsync(CancellationToken cancellationToken = default)
         {
             _finishedWeights.Clear();
 
             try
             {
-                _finishedWeights = await _apiService.GetAsync<List<WeightEntryDto>>("api/Weight/All/Completed");
+                cancellationToken.ThrowIfCancellationRequested();
 
-                await LoadClienteProveedorAsync();
+                _finishedWeights = await _apiService.GetAsync<List<WeightEntryDto>>(
+                    $"api/Weight/All/Completed?top={PageSize}&page={CurrentPage}", cancellationToken);
+
+                CanGoForward = _finishedWeights.Count >= PageSize;
+                OnPropertyChanged(nameof(CanGoForward));
+                OnPropertyChanged(nameof(CanGoBack));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                await LoadClienteProveedorAsync(cancellationToken);
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 BuildObservableCollection();
             }
@@ -104,30 +130,45 @@ namespace BasculaInterface.ViewModels
 
         private void BuildObservableCollection()
         {
-            FinishedWeights.Clear();
+            var rows = new List<PendingWeightViewRow>();
+
             foreach (WeightEntryDto weight in _finishedWeights)
             {
-                ClienteProveedorDto? partner = _clienteProveedorDtos.FirstOrDefault(p => p.Id == weight.PartnerId);
-                if (partner != null)
-                {
-                    string teoricWeightText = string.Empty;
+                _partnerMap.TryGetValue(weight.PartnerId ?? 0, out ClienteProveedorDto? partner);
 
-                    if (weight.WeightDetails.Count > 0)
-                    {
-                        teoricWeightText +=
-                            "Total (teorico): "
-                            + (weight.WeightDetails.Sum(d => d.Weight)
-                            + weight.TareWeight).ToString()
-                            + " kg.";
-                    }
+                string teoricWeightText = string.Empty;
 
-                    FinishedWeights.Add(new PendingWeightViewRow(weight, partner, teoricWeightText));
-                }
-                else
+                if (partner != null && weight.WeightDetails.Count > 0)
                 {
-                    FinishedWeights.Add(new PendingWeightViewRow(weight, new ClienteProveedorDto { RazonSocial = "No identificado" }, string.Empty));
+                    teoricWeightText =
+                        "Total (teorico): "
+                        + (weight.WeightDetails.Sum(d => d.Weight)
+                        + weight.TareWeight).ToString()
+                        + " kg.";
                 }
+
+                rows.Add(new PendingWeightViewRow(
+                    weight,
+                    partner ?? new ClienteProveedorDto { RazonSocial = "No identificado" },
+                    teoricWeightText));
             }
+
+            FinishedWeights = new ObservableCollection<PendingWeightViewRow>(rows);
+            OnPropertyChanged(nameof(FinishedWeights));
+        }
+
+        public async Task GoToNextPageAsync(CancellationToken cancellationToken = default)
+        {
+            if (!CanGoForward) return;
+            CurrentPage++;
+            await LoadPendingWeightsAsync(cancellationToken);
+        }
+
+        public async Task GoToPreviousPageAsync(CancellationToken cancellationToken = default)
+        {
+            if (!CanGoBack) return;
+            CurrentPage--;
+            await LoadPendingWeightsAsync(cancellationToken);
         }
     }
 }

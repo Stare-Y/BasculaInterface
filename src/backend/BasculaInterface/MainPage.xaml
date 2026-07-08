@@ -39,15 +39,17 @@
 
                 <Button
                     x:Name="BtnLogIn"
-                    HeightRequest="{OnPlatform Android=75,
-                                               WinUI=100}"
+                    FontSize="{OnPlatform Android=24,
+                                          WinUI=36}"
+                    HeightRequest="{OnPlatform Android=120,
+                                               WinUI=180}"
                     Pressed="BtnLogin_Pressed"
                     Released="BtnLogin_Released"
                     Shadow="{StaticResource DefaultShadow}"
                     Style="{StaticResource Boton}"
                     Text="Login"
-                    WidthRequest="{OnPlatform Android=200,
-                                              WinUI=300}" />
+                    WidthRequest="{OnPlatform Android=280,
+                                              WinUI=450}" />
             </Grid>
 
             <!--  Elementos ocultos opcionales  -->

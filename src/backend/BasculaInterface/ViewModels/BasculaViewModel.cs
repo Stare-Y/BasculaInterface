@@ -5,12 +5,15 @@ using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BasculaInterface.ViewModels
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public class BasculaViewModel : ViewModelBase
     {
+        public string? DetailNotes { get; set; } = null;
+        public int? TargetWeightDetail { get; set; } = null;
         private WeightEntryDto? _weightEntry;
         public WeightEntryDto? WeightEntry
         {
@@ -248,14 +251,9 @@ namespace BasculaInterface.ViewModels
 
             if (_tara == 0)
             {
+                // Initial truck tare: set TareWeight only; BruteWeight is server-owned
                 WeightEntry!.TareWeight = _pesoTotal;
-                WeightEntry.BruteWeight = _pesoTotal;
                 WeightEntry.PartnerId = Partner?.Id;
-
-                if (WeightEntry.WeightDetails.Any())
-                {
-                    WeightEntry.BruteWeight = _pesoTotal + WeightEntry.WeightDetails.Sum(w => w.Weight);
-                }
 
                 await PostNewWeightEntry(printTurn);
 
@@ -269,35 +267,49 @@ namespace BasculaInterface.ViewModels
 
             WeightEntry.PartnerId = Partner?.Id;
 
-            if (WeightEntry.WeightDetails.Any(w => w.FK_WeightedProductId == Product?.Id))
+            if (TargetWeightDetail.HasValue && WeightEntry.WeightDetails.Any(w => w.Id == TargetWeightDetail.Value))
             {
-                // If the product already exists, update the weight
-                WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.FK_WeightedProductId == Product?.Id);
-                existingDetail.Weight = _diferenciaAbs;
-                existingDetail.Tare = WeightEntry.BruteWeight;
-                existingDetail.WeightedBy = DeviceInfo.Name;
+                // Secondary terminal: record measured weight via narrow endpoint
+                WeightDetailDto existingDetail = WeightEntry.WeightDetails.First(w => w.Id == TargetWeightDetail.Value);
 
-                WeightEntry.BruteWeight += _diferenciaAbs;
+                if (_diferenciaAbs <= 0)
+                {
+                    throw new InvalidOperationException($"La diferencia de la tara es 0 \n(Tara inicial: {existingDetail.SecondaryTare} peso final: {_pesoTotal}) \nDESTARA Y CAPTURA DE NUEVO");
+                }
 
-                await PutWeightEntry();
+                double measuredWeight = _diferenciaAbs;
+                string deviceName = DeviceInfo.Name;
+
+                await _apiService.PutWithRetryAsync<object>(
+                    $"api/Weight/Detail/{existingDetail.Id}/Weight",
+                    buildBody: () => Task.FromResult<object?>(new { Weight = measuredWeight, WeightedBy = deviceName }),
+                    refetch: async () =>
+                    {
+                        WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                        WeightEntry = fresh;
+                    });
+
+                // Refresh local state from server so BruteWeight reflects server-computed value
+                WeightEntryDto updated = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                WeightEntry = updated;
 
                 return;
             }
-            
-            // If the product does not exist, add a new detail
-            WeightEntry.WeightDetails.Add(new WeightDetailDto
+
+            // New detail: post to create endpoint, server computes BruteWeight
+            WeightDetailDto newDetail = new WeightDetailDto
             {
                 FK_WeightEntryId = WeightEntry.Id,
-                Tare = WeightEntry.BruteWeight,
                 Weight = _diferenciaAbs,
                 FK_WeightedProductId = Product?.Id,
                 RequiredAmount = ProductQuantity,
-                WeightedBy = DeviceInfo.Name
-            });
+                WeightedBy = DeviceInfo.Name,
+                Notes = DetailNotes
+            };
 
-            WeightEntry.BruteWeight = _pesoTotal;
-
-            await PutWeightEntry();
+            WeightDetailDto created = await _apiService.PostAsync<WeightDetailDto>("api/Weight/Detail", newDetail);
+            WeightEntryDto refreshed = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+            WeightEntry = refreshed;
         }
 
         public async Task PutSecondaryTara()
@@ -310,16 +322,30 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry is not initialized.");
             }
-            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(w => w.FK_WeightedProductId == Product?.Id);
-            if (detail != null)
+            if (TargetWeightDetail == null)
             {
-                detail.SecondaryTare = TaraCurrentValue;
-                detail.WeightedBy = DeviceInfo.Name;
-                await PutWeightEntry();
+                throw new InvalidOperationException("TargetWeightDetail must be set to update the secondary tara.");
             }
-            else
-            {
+            WeightDetailDto? detail = WeightEntry.WeightDetails.FirstOrDefault(w => w.Id == TargetWeightDetail.Value);
+            if (detail == null)
                 throw new InvalidOperationException("No weight detail found for the current product.");
+
+            double tara = TaraCurrentValue;
+            await _apiService.PutWithRetryAsync<object>(
+                $"api/Weight/Detail/{detail.Id}/SecondaryTare",
+                buildBody: () => Task.FromResult<object?>(new { SecondaryTare = tara }),
+                refetch: async () =>
+                {
+                    WeightEntryDto fresh = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
+                    WeightEntry = fresh;
+                });
+
+            // Reflect server state locally (re-find in case WeightEntry was refreshed during retry)
+            WeightDetailDto? refreshed = WeightEntry.WeightDetails.FirstOrDefault(w => w.Id == detail.Id);
+            if (refreshed != null)
+            {
+                refreshed.SecondaryTare = tara;
+                refreshed.IsLoaded = false;
             }
         }
 
@@ -327,10 +353,10 @@ namespace BasculaInterface.ViewModels
         {
             if (Preferences.Get("RequirePartner", false) || Providers)
             {
-                if(Partner is null || Partner.Id < 1)
+                if (Partner is null || Partner.Id < 1)
                     throw new InvalidOperationException("Es obligatorio especificar al socio.");
             }
-            if(Providers && (Product is null || Product.Id <= 0))
+            if (Providers && (Product is null || Product.Id <= 0))
             {
                 throw new InvalidOperationException("Es obligatorio especificar el producto para las descargas de proveedores.");
             }
@@ -350,10 +376,6 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }
-
-            string? preferedIdString = Preferences.Get("PreferedDocumentType", null);
-            int? preferedExternalTypeId = int.TryParse(preferedIdString, out int result) ? result : null;
-            WeightEntry.ExternalTargetBehaviorFK = preferedExternalTypeId;
         }
 
         private async Task PrintTurnAsync(WeightEntryDto newWeightEntry)
@@ -384,39 +406,27 @@ namespace BasculaInterface.ViewModels
             WeightEntry.RegisteredBy = DeviceInfo.Name;
 
             WeightEntryDto newEntry = await _apiService.PostAsync<WeightEntryDto>("api/Weight", WeightEntry);
-            
+
             WeightEntry = newEntry;
 
-            if(Product is not null && Product.Id != 0)
+            if (Product is not null && Product.Id > 0)
             {
-                WeightEntry.WeightDetails.Add(new WeightDetailDto
+                WeightDetailDto detailToAdd = new WeightDetailDto
                 {
                     FK_WeightEntryId = WeightEntry.Id,
-                    FK_WeightedProductId = Product?.Id,
+                    FK_WeightedProductId = Product.Id,
                     RequiredAmount = ProductQuantity,
-                    WeightedBy = DeviceInfo.Name
-                });
-                await PutWeightEntry();
+                    WeightedBy = DeviceInfo.Name,
+                    Notes = DetailNotes,
+                };
+                await _apiService.PostAsync<WeightDetailDto>("api/Weight/Detail", detailToAdd);
+                // Refresh to get server-assigned detail ID
+                WeightEntry = await _apiService.GetAsync<WeightEntryDto>($"api/Weight/ById?id={WeightEntry.Id}");
             }
 
-            if(printTurn)
+            if (printTurn)
                 await PrintTurnAsync(newEntry);
         }
 
-        private async Task PutWeightEntry()
-        {
-            if (_apiService == null)
-            {
-                throw new InvalidOperationException("ApiService is not initialized.");
-            }
-            if (WeightEntry == null)
-            {
-                throw new InvalidOperationException("WeightEntry is not initialized.");
-            }
-
-            WeightEntry.RegisteredBy = DeviceInfo.Name;
-
-            await _apiService.PutAsync<object>("api/Weight", WeightEntry);
-        }
     }
 }

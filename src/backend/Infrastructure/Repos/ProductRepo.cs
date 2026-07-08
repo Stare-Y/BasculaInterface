@@ -19,9 +19,9 @@ namespace Infrastructure.Repos
             return await _context.Productos
                 .AsNoTracking()
                 .Where(p => p.CNOMBREPRODUCTO.Contains(name) || p.CCODIGOPRODUCTO.Contains(name))
-                .Skip((page - 1) * sizePage)    
-                .Take(sizePage)                  
-                .OrderBy(p => p.CNOMBREPRODUCTO) 
+                .Skip((page - 1) * sizePage)
+                .Take(sizePage)
+                .OrderBy(p => p.CNOMBREPRODUCTO)
                 .ToListAsync();
         }
         public async Task<Producto> GetByIdAsync(int id)
@@ -32,6 +32,14 @@ namespace Infrastructure.Repos
                 ?? throw new KeyNotFoundException($"No se encontró el producto con ID: {id}");
 
             return producto;
+        }
+
+        public async Task<IEnumerable<Producto>> GetByMultipleIdsAsync(int[] ids)
+        {
+            return await _context.Productos
+                .AsNoTracking()
+                .Where(p => ids.Contains(p.CIDPRODUCTO))
+                .ToListAsync();
         }
     }
 }
