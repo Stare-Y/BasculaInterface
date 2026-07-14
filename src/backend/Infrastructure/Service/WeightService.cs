@@ -294,6 +294,11 @@ namespace Infrastructure.Service
                 return weightDetail.RequiredAmount ?? 0;
         }
 
+        public async Task TrySwapPartner(int weightId, int currentPartnerId, int newPartnerId)
+        {
+            return;
+        }
+
         public async Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId)
         {
             WeightEntry existingWeight = await _weightRepo.GetByIdAsync(weightId);

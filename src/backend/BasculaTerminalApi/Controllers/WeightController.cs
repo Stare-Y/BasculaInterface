@@ -1,5 +1,6 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
+using Core.Application.DTOs.Request;
 using Core.Application.Services;
 using Core.Domain.Entities.Weight;
 using Microsoft.AspNetCore.Mvc;
@@ -324,6 +325,23 @@ namespace BasculaTerminalApi.Controllers
                     IsValid = false,
                     Message = $"Error validando crédito: {ex.Message}"
                 });
+            }
+        }
+
+        [HttpPost("Partner/Swap")]
+        public async Task<IActionResult> SwapPartner([FromBody]SwapPartnerRequest request)
+        {
+            try
+            {
+                await _weightService.TrySwapPartner(request.WeightId, request.CurrentPartnerId, request.NewPartnerId);
+
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error swapping partners.");
+
+                return BadRequest();
             }
         }
     }

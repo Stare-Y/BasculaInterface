@@ -23,5 +23,6 @@ namespace Core.Application.Services
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
         Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
         Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId);
+        Task TrySwapPartner(int weightId, int currentPartnerId, int newPartnerId);
     }
 }
