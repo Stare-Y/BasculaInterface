@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Whole environment y tal",
+    "Projects": [
+      {
+        "Path": "BasculaInterface\\BasculaInterface.csproj",
+        "Action": "Start",
+        "DebugTarget": "Windows Machine"
+      },
+      {
+        "Path": "BasculaTerminalApi\\BasculaTerminalApi.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]
