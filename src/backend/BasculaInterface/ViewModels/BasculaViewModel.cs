@@ -248,6 +248,7 @@ namespace BasculaInterface.ViewModels
         public async Task CaptureNewWeightEntry(bool printTurn = false)
         {
             ValidateBeforePosting();
+            await ValidateCreditForCaptureAsync();
 
             if (_tara == 0)
             {
@@ -375,6 +376,36 @@ namespace BasculaInterface.ViewModels
             if (string.IsNullOrEmpty(WeightEntry.VehiclePlate) && !Preferences.Get("SecondaryTerminal", false))
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
+            }
+        }
+
+        /// <summary>
+        /// Classic/weightless entry flow (issue #122 follow-up): this ViewModel used to post the
+        /// partner + product with no credit check at all — unlike the "Add Product" and
+        /// "Change Product" flows in DetailedWeightView, which both go through
+        /// `api/Weight/ValidateCredit`. Mirrors their skip conditions (IgnoreCreditLimit or
+        /// CreditLimit &lt;= 0 both mean "unlimited") before deferring to the server for the
+        /// actual check, so all three entry points enforce the same rule.
+        /// </summary>
+        private async Task ValidateCreditForCaptureAsync()
+        {
+            if (Product is null || Product.Id <= 0)
+                return; // no product attached to this capture — nothing to validate
+
+            if (Partner is null || Partner.Id <= 0)
+                return; // no partner assigned; ValidateBeforePosting already enforces RequirePartner/Providers
+
+            if (Partner.IgnoreCreditLimit || Partner.CreditLimit <= 0)
+                return; // unlimited credit
+
+            double requestedAmount = ProductQuantity * Product.Precio;
+
+            CreditValidationResponse result = await _apiService.GetAsync<CreditValidationResponse>(
+                $"api/Weight/ValidateCredit?partnerId={Partner.Id}&requestedAmount={requestedAmount}");
+
+            if (!result.IsValid)
+            {
+                throw new InvalidOperationException(result.Message ?? "Crédito insuficiente para este producto.");
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
+using Core.Application.Settings;
 using Core.Domain.Entities.Base;
 using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.Weight;
@@ -18,11 +19,14 @@ namespace Infrastructure.Service
         private readonly IProductService _productService;
         private readonly IProviderPurchaseService _providerPurchaseService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
-        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IProviderPurchaseService providerPurchaseService)
+        private readonly WeightSettings _weightSettings;
+        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IOptions<WeightSettings> weightSettingsOptions, IProviderPurchaseService providerPurchaseService)
         {
             _weightRepo = weightRepo;
 
             _comercialSDKSettings = options.Value;
+
+            _weightSettings = weightSettingsOptions.Value;
 
             _apiService = apiService;
 
@@ -317,8 +321,10 @@ namespace Infrastructure.Service
             // Fetch the partner to get their credit information
             ClienteProveedorDto partner = await _clienteProveedorService.GetById(partnerId);
 
-            // If partner ignores credit limit, always return valid
-            if (partner.IgnoreCreditLimit)
+            // If partner ignores credit limit, or has no credit limit configured (CreditLimit <= 0
+            // means "unlimited" per ERP convention, confirmed with the system's domain expert —
+            // NOT "blocked"), always return valid.
+            if (partner.IgnoreCreditLimit || partner.CreditLimit <= 0)
             {
                 return new CreditValidationResponse
                 {
@@ -328,20 +334,6 @@ namespace Infrastructure.Service
                     PendingEntriesCost = 0,
                     RemainingCredit = partner.AvailableCredit - requestedAmount,
                     Message = "Crédito válido."
-                };
-            }
-
-            // If partner has no credit limit set, they can't make purchases on credit
-            if (partner.CreditLimit <= 0)
-            {
-                return new CreditValidationResponse
-                {
-                    IsValid = false,
-                    AvailableCredit = 0,
-                    RequestedAmount = requestedAmount,
-                    PendingEntriesCost = 0,
-                    RemainingCredit = 0,
-                    Message = "El socio no tiene límite de crédito configurado."
                 };
             }
 
@@ -383,6 +375,45 @@ namespace Infrastructure.Service
                     ? "Crédito válido."
                     : "Crédito insuficiente."
             };
+        }
+
+        public async Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordHash)
+        {
+            // An empty configured hash means the feature hasn't been set up yet — never allow it to
+            // be satisfied by an equally-empty submitted hash.
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+            ProductoDto newProduct = await _productService.GetByIdAsync(newProductId);
+
+            // Preserve whatever quantity has already been captured; this operation never touches it.
+            double quantity = detail.Weight > 0 ? detail.Weight : (detail.RequiredAmount ?? 0);
+            double oldCost = (detail.ProductPrice ?? 0) * quantity;
+            double newCost = newProduct.Precio * quantity;
+
+            // Only the incremental exposure needs validating — ValidatePartnerCreditAsync already
+            // counts this detail's current cost inside the partner's pending-entries total, so
+            // passing the full newCost here would double-count it.
+            if (newCost > oldCost)
+            {
+                int partnerId = detail.WeightEntry?.PartnerId ?? 0;
+                CreditValidationResponse creditResult = await ValidatePartnerCreditAsync(partnerId, newCost - oldCost);
+                if (!creditResult.IsValid)
+                {
+                    throw new InvalidOperationException(creditResult.Message ?? "Crédito insuficiente para el nuevo producto.");
+                }
+            }
+
+            detail.FK_WeightedProductId = newProductId;
+            detail.ProductPrice = newProduct.Precio;
+
+            // Deliberately not checking WeightEntry.ConcludeDate here — the password is the
+            // intended override to correct a product after conclusion (see design.md Decision 3).
+            await _weightRepo.UpdateDetailAsync(detail);
         }
     }
 }

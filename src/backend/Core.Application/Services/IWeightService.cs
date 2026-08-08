@@ -24,5 +24,6 @@ namespace Core.Application.Services
         Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
         Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId);
         Task TrySwapPartner(int weightId, int currentPartnerId, int newPartnerId);
+        Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordHash);
     }
 }

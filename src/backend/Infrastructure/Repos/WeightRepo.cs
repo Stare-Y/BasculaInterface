@@ -149,6 +149,8 @@ namespace Infrastructure.Repos
             existing.SecondaryTare = detail.SecondaryTare;
             existing.WeightedBy = detail.WeightedBy;
             existing.IsLoaded = detail.IsLoaded;
+            existing.FK_WeightedProductId = detail.FK_WeightedProductId;
+            existing.ProductPrice = detail.ProductPrice;
             existing.LastUpdated = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

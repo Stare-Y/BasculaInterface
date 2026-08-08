@@ -19,6 +19,7 @@
             <local:UtcToLocalConverter x:Key="UtcToLocalConverter"/>
             <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
             <local:CheckMarkVisibilityConverter x:Key="CheckMarkVisibilityConverter"/>
+            <local:RowMenuVisibilityConverter x:Key="RowMenuVisibilityConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -593,8 +594,15 @@
                                             </DataTrigger>
                                         </Border.Triggers>
 
+                                        <Border.GestureRecognizers>
+                                            <PointerGestureRecognizer PointerEntered="DetailRow_PointerEntered" PointerExited="DetailRow_PointerExited" />
+                                        </Border.GestureRecognizers>
+
+                                        <!-- Outer overlay Grid: row content underneath, row-menu button floats top-right -->
+                                        <Grid>
+
                                         <!-- Android: 2-row layout; WinUI: single-row layout -->
-                                        <Grid Padding="{OnPlatform Android='10,10,10,12', WinUI=20}" 
+                                        <Grid Padding="{OnPlatform Android='10,10,10,12', WinUI=20}"
                                               RowDefinitions="{OnPlatform Android='Auto,Auto', WinUI='*'}"
                                               ColumnDefinitions="{OnPlatform Android='Auto,*,*,Auto', WinUI='Auto,*,*,20,*,Auto'}"
                                               RowSpacing="{OnPlatform Android=10, WinUI=0}">
@@ -839,6 +847,26 @@
                                             </Grid>
 
                                         </Grid>
+
+                                        <!-- Row menu ("⋮") - hidden by default on WinUI (shown on hover), always shown on Android (no hover concept) -->
+                                        <Button
+                                            x:Name="BtnRowMenu"
+                                            BackgroundColor="Transparent"
+                                            BorderWidth="0"
+                                            Clicked="RowMenu_Clicked"
+                                            FontSize="22"
+                                            HeightRequest="36"
+                                            HorizontalOptions="End"
+                                            IsVisible="{Binding CanChangeProductMenu, Converter={StaticResource RowMenuVisibilityConverter}, ConverterParameter={OnPlatform Android=True, WinUI=False}}"
+                                            Margin="0,6,6,0"
+                                            Style="{StaticResource Boton}"
+                                            Text="&#8942;"
+                                            TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource 1}}"
+                                            VerticalOptions="Start"
+                                            WidthRequest="36" />
+
+                                        </Grid>
+                                        <!-- End outer overlay Grid -->
 
                                         <VisualStateManager.VisualStateGroups>
                                             <VisualStateGroupList>
@@ -1241,6 +1269,7 @@
         <components:WaitPopUp x:Name="WaitPopUp" />
         <components:PickQuantityPopUp x:Name="PickPopUp" />
         <components:PickNotesPopUp x:Name="NotesPopUp" />
+        <components:ChangeProductConfirmPopUp x:Name="ChangeProductPopUp" />
 
     </Grid>
 

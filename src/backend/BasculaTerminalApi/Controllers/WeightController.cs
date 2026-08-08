@@ -9,6 +9,7 @@ namespace BasculaTerminalApi.Controllers
 {
     public record SetSecondaryTareRequest(double SecondaryTare);
     public record RecordWeightRequest(double Weight, string WeightedBy);
+    public record ChangeDetailProductRequest(int NewProductId, string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -325,6 +326,29 @@ namespace BasculaTerminalApi.Controllers
                     IsValid = false,
                     Message = $"Error validando crédito: {ex.Message}"
                 });
+            }
+        }
+
+        [HttpPatch("Detail/{id}/Product")]
+        public async Task<IActionResult> ChangeDetailProduct(int id, [FromBody] ChangeDetailProductRequest request)
+        {
+            try
+            {
+                await _weightService.ChangeDetailProductAsync(id, request.NewProductId, request.PasswordHash);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing product for weight detail {Id}", id);
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
             }
         }
 

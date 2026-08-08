@@ -158,9 +158,18 @@ namespace BasculaInterface.ViewModels
             // Update the WeightEntry property
             WeightEntry = updatedEntry;
 
-            // Reload products if the detail count changed (new products added/removed)
+            // Reload products if the detail count changed (new products added/removed), or if an
+            // existing detail's product identity changed (e.g. "Change Product", issue #122) —
+            // UpdateExistingDetailRows only refreshes weight/tare/notes fields, never the product
+            // name/price, so a same-count product swap needs the full reload too.
             int newDetailCount = WeightEntry.WeightDetails?.Count ?? 0;
-            if (newDetailCount != previousDetailCount)
+            bool productIdentityChanged = WeightEntry.WeightDetails?.Any(detail =>
+            {
+                WeightEntryDetailRow? existingRow = WeightEntryDetailRows.FirstOrDefault(r => r.Id == detail.Id);
+                return existingRow != null && existingRow.FK_WeightedProductId != detail.FK_WeightedProductId;
+            }) ?? false;
+
+            if (newDetailCount != previousDetailCount || productIdentityChanged)
             {
                 await LoadProductsAsync(WeightEntry, Partner, cancellationToken);
             }
@@ -268,6 +277,23 @@ namespace BasculaInterface.ViewModels
             }
 
             await _apiService.PatchAsync($"api/Weight/{WeightEntry.Id}/ChangeTargetDocumentBehavior?newTargetId={newTargetBehavior.Id}", cancellationToken);
+
+            await FetchNewWeightDetails();
+        }
+
+        /// <summary>
+        /// Changes the product on an existing WeightDetail. Requires the manager password
+        /// (plaintext here — hashed before it ever reaches the API, see PasswordHasher).
+        /// Throws on wrong password, insufficient credit, or a concurrency conflict; the caller
+        /// (View code-behind) is responsible for surfacing that to the user.
+        /// </summary>
+        public async Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordPlaintext)
+        {
+            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Weight/Detail/{detailId}/Product",
+                new { NewProductId = newProductId, PasswordHash = passwordHash });
 
             await FetchNewWeightDetails();
         }

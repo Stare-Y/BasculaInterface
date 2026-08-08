@@ -609,6 +609,81 @@ public partial class DetailedWeightView : ContentPage
         }
     }
 
+    private WeightEntryDetailRow? _rowPendingProductChange;
+
+    private void DetailRow_PointerEntered(object sender, PointerEventArgs e)
+    {
+        if (sender is Border { BindingContext: WeightEntryDetailRow row } border &&
+            border.FindByName<Button>("BtnRowMenu") is Button menuButton)
+            menuButton.IsVisible = row.CanChangeProductMenu;
+    }
+
+    private void DetailRow_PointerExited(object sender, PointerEventArgs e)
+    {
+        if (sender is Border border && border.FindByName<Button>("BtnRowMenu") is Button menuButton)
+            menuButton.IsVisible = false;
+    }
+
+    private async void RowMenu_Clicked(object sender, EventArgs e)
+    {
+        if (sender is not Button button || button.BindingContext is not WeightEntryDetailRow row)
+            return;
+
+        // Defense in depth: the button's own IsVisible binding already gates this, but a stale
+        // hover state (or a bug in the binding) shouldn't be enough to let the action through.
+        if (!row.CanChangeProductMenu)
+            return;
+
+        string action = await DisplayActionSheet(row.Description, "Cancelar", null, "Cambiar producto");
+
+        if (action != "Cambiar producto")
+            return;
+
+        try
+        {
+            _rowPendingProductChange = row;
+
+            ProductSelectView productSelectView = new ProductSelectView();
+            productSelectView.OnProductSelected += OnProductSelectedForChange;
+
+            await Shell.Current.Navigation.PushModalAsync(productSelectView);
+        }
+        catch (Exception ex)
+        {
+            _rowPendingProductChange = null;
+            await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
+        }
+    }
+
+    private async void OnProductSelectedForChange(ProductoDto newProduct)
+    {
+        WeightEntryDetailRow? row = _rowPendingProductChange;
+        _rowPendingProductChange = null;
+
+        if (row is null || BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        string? password = await ChangeProductPopUp.ShowAsync(newProduct.Nombre);
+
+        if (string.IsNullOrEmpty(password))
+            return; // cancelled
+
+        WaitPopUp.Show("Cambiando producto...");
+        try
+        {
+            await viewModel.ChangeDetailProductAsync(row.Id, newProduct.Id, password);
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cambiar el producto: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
     private async void BtnNuevoProducto_Clicked(object sender, EventArgs e)
     {
         await BtnNuevoProducto.ScaleTo(1.1, 100);

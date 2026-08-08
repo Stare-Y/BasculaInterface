@@ -17,5 +17,13 @@
         public float TicketWidth { get; set; } = 226.716f;
         public float TicketHeight { get; set; } = 841.8897f;
         public string WeightSerialRegex { get; set; } = @"[+-]?\d+(\.\d+)?";
+
+        /// <summary>
+        /// SHA-256 (hex, lowercase) of the shared password required to change the product on an
+        /// existing WeightDetail. Temporary/insecure-by-design stopgap (issue #122) — not tied to
+        /// any specific user. The client hashes the operator's plaintext input before sending it;
+        /// this value is compared against that hash, never against plaintext.
+        /// </summary>
+        public string ChangeProductPasswordHash { get; set; } = string.Empty;
     }
 }

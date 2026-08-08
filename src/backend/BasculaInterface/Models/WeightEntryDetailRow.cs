@@ -89,6 +89,16 @@ namespace BasculaInterface.Models
         public int? FK_WeightedProductId { get; set; } = null;
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
 
+        /// <summary>
+        /// Gates the row's "⋮" change-product menu (issue #122): allowed for the main terminal
+        /// (i.e. not "terminal secundaria") in either "Solo Pedidos" mode or the default/"main"
+        /// mode where no terminal mode is enabled at all. Never allowed for a secondary terminal
+        /// or an "OnlyFinished" ("Solo Concluidos") terminal.
+        /// </summary>
+        public bool CanChangeProductMenu =>
+            !Preferences.Get("SecondaryTerminal", false) &&
+            !Preferences.Get("OnlyFinished", false);
+
         private double? _requiredAmount = null;
         public double? RequiredAmount
         {
