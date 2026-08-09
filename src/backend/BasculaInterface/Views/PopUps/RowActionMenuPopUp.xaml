@@ -24,7 +24,7 @@
             HorizontalOptions="Center"
             MaximumWidthRequest="400"
             MinimumWidthRequest="300"
-            RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
             RowSpacing="15"
             VerticalOptions="Center">
 
@@ -84,10 +84,25 @@
                 Text="Cambiar peso"
                 WidthRequest="260" />
 
+            <Button
+                x:Name="btnDelete"
+                Grid.Row="4"
+                BackgroundColor="Red"
+                Clicked="OnDeleteClicked"
+                CornerRadius="20"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=16}"
+                HeightRequest="50"
+                HorizontalOptions="Center"
+                Style="{StaticResource Boton}"
+                Text="Eliminar"
+                TextColor="White"
+                WidthRequest="260" />
+
             <!--  Cancel  -->
             <Button
                 x:Name="btnCancel"
-                Grid.Row="4"
+                Grid.Row="5"
                 BackgroundColor="Transparent"
                 Clicked="OnCancelClicked"
                 CornerRadius="20"

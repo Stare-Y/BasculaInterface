@@ -11,6 +11,7 @@ namespace BasculaTerminalApi.Controllers
     public record ChangeDetailProductRequest(int NewProductId, string PasswordHash);
     public record ChangePartnerRequest(int NewPartnerId, string PasswordHash);
     public record ChangeDetailAmountRequest(double? NewWeight, double? NewRequiredAmount, string PasswordHash);
+    public record DeleteDetailRequest(string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -395,6 +396,29 @@ namespace BasculaTerminalApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing amount for weight detail {Id}", id);
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPatch("Detail/{id}/Delete")]
+        public async Task<IActionResult> DeleteDetailSafely(int id, [FromBody] DeleteDetailRequest request)
+        {
+            try
+            {
+                await _weightService.DeleteDetailSafelyAsync(id, request.PasswordHash);
+                return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting detail entry with ID {Id}", id);
                 return BadRequest(new GenericResponse<string> { Message = ex.Message });
             }
         }

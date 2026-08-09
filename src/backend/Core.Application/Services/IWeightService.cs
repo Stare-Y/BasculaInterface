@@ -26,5 +26,6 @@ namespace Core.Application.Services
         Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordHash);
         Task ChangePartnerAsync(int weightId, int newPartnerId, string passwordHash);
         Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, string passwordHash);
+        Task DeleteDetailSafelyAsync(int detailId, string passwordHash);
     }
 }

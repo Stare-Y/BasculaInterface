@@ -649,6 +649,9 @@ public partial class DetailedWeightView : ContentPage
             case "Cambiar peso":
                 await StartChangeAmountFlow(row);
                 break;
+            case "Eliminar":
+                await StartDeleteDetailFlow(row);
+                break;
             default:
                 return; // cancelled
         }
@@ -694,6 +697,34 @@ public partial class DetailedWeightView : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Error", "No se pudo cambiar el peso/cantidad: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
+        }
+    }
+
+    private async Task StartDeleteDetailFlow(WeightEntryDetailRow row)
+    {
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        // No picker/value step here — go straight to the description + password confirmation
+        // popup, mirroring StartChangeAmountFlow's shape but with only a password to capture.
+        string? password = await DeleteDetailPopUp.ShowAsync(row.Description);
+
+        if (string.IsNullOrEmpty(password))
+            return; // cancelled
+
+        WaitPopUp.Show("Eliminando pesada, espere...");
+        try
+        {
+            await viewModel.DeleteWeightDetailSafelyAsync(row.Id, password);
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo eliminar la pesada: " + ex.Message, "OK");
         }
         finally
         {

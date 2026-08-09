@@ -1272,6 +1272,7 @@
         <components:ChangeProductConfirmPopUp x:Name="ChangeProductPopUp" />
         <components:ChangePartnerConfirmPopUp x:Name="ChangePartnerPopUp" />
         <components:ChangeAmountConfirmPopUp x:Name="ChangeAmountPopUp" />
+        <components:DeleteDetailConfirmPopUp x:Name="DeleteDetailPopUp" />
         <components:RowActionMenuPopUp x:Name="RowMenuPopUp" />
 
     </Grid>

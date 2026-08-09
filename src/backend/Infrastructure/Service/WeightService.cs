@@ -564,5 +564,44 @@ namespace Infrastructure.Service
                 await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
             }
         }
+
+        public async Task DeleteDetailSafelyAsync(int detailId, string passwordHash)
+        {
+            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync/
+            // ChangeDetailAmountAsync — a single "manager override" secret gates all four actions
+            // (see design.md Decision 2 of change-weight-detail-product, reused as-is here).
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+
+            // Blocked once a Contpaqi document already exists for this entry — same rule as
+            // ChangePartnerAsync/ChangeDetailProductAsync/ChangeDetailAmountAsync. Deliberately
+            // NOT based on ConcludeDate (see design.md Decision 2 of delete-weight-detail).
+            if (detail.WeightEntry?.ConptaqiComercialFK > 0)
+            {
+                throw new InvalidOperationException("Este proceso ya cuenta con un documento en Contpaqi; no se puede eliminar el detalle.");
+            }
+
+            // Capture before deleting — once IsDeleted=true the detail is no longer a reliable
+            // source for these (see design.md Decision 5 of delete-weight-detail).
+            bool wasLoaded = detail.IsLoaded;
+            int entryId = detail.FK_WeightEntryId;
+
+            // No credit re-validation here: removing a detail only ever decreases the parent
+            // entry's cost exposure (see design.md Decision 4 of delete-weight-detail).
+            await _weightRepo.DeleteDetailAsync(detailId);
+
+            // BruteWeight only ever sums Weight for IsLoaded details — a never-loaded detail was
+            // never counted, so skip the recompute entirely for it. Must run after the delete
+            // above so the recompute's own query excludes the just-deleted detail.
+            if (wasLoaded)
+            {
+                await _weightRepo.RecomputeBruteWeightAsync(entryId);
+            }
+        }
     }
 }

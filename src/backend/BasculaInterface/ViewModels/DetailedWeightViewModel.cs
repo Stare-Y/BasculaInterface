@@ -350,6 +350,29 @@ namespace BasculaInterface.ViewModels
             await FetchNewWeightDetails();
         }
 
+        /// <summary>
+        /// Soft-deletes an existing WeightDetail via the password-gated endpoint (issue #125).
+        /// Requires the manager password (plaintext here — hashed before it ever reaches the API,
+        /// see PasswordHasher). Reuses the same shared password as ChangeDetailProductAsync/
+        /// ChangePartnerAsync/ChangeDetailAmountAsync — see design.md Decision 2 of
+        /// delete-weight-detail. Throws on wrong password, an entry that already has a Contpaqi
+        /// document, or a concurrency conflict; the caller (View code-behind) is responsible for
+        /// surfacing that to the user. Distinct from the existing unguarded DeleteWeightDetail,
+        /// which stays reserved for the empty-row "✕" button.
+        /// </summary>
+        public async Task DeleteWeightDetailSafelyAsync(int detailId, string passwordPlaintext)
+        {
+            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Weight/Detail/{detailId}/Delete",
+                new { PasswordHash = passwordHash });
+
+            // Also refreshes TotalWeight/BruteWeight, since deleting a loaded detail changes the
+            // server-recomputed total.
+            await FetchNewWeightDetails();
+        }
+
         public async Task UpdateWeightEntry()
         {
             if (WeightEntry == null)
