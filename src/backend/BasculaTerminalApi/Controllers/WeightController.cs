@@ -10,6 +10,7 @@ namespace BasculaTerminalApi.Controllers
     public record RecordWeightRequest(double Weight, string WeightedBy);
     public record ChangeDetailProductRequest(int NewProductId, string PasswordHash);
     public record ChangePartnerRequest(int NewPartnerId, string PasswordHash);
+    public record ChangeDetailAmountRequest(double? NewWeight, double? NewRequiredAmount, string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -371,6 +372,29 @@ namespace BasculaTerminalApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing partner for weight entry {Id}", id);
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpPatch("Detail/{id}/Amount")]
+        public async Task<IActionResult> ChangeDetailAmount(int id, [FromBody] ChangeDetailAmountRequest request)
+        {
+            try
+            {
+                await _weightService.ChangeDetailAmountAsync(id, request.NewWeight, request.NewRequiredAmount, request.PasswordHash);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
+            }
+            catch (WeightConcurrencyException)
+            {
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing amount for weight detail {Id}", id);
                 return BadRequest(new GenericResponse<string> { Message = ex.Message });
             }
         }

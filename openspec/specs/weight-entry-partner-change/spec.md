@@ -58,8 +58,8 @@ The endpoint SHALL use the same optimistic-concurrency handling as other weight-
 - **THEN** the server returns `409 Conflict` with a message indicating the record was modified by another terminal
 
 ### Requirement: Row action menu is a themed popup, not a native action sheet
-The row's "⋮" menu (`DetailedWeightView`) SHALL present its actions ("Cambiar producto", "Cambiar socio") through a custom, app-themed popup component consistent with the app's existing popup visual style, instead of the platform's native action sheet.
+The row's "⋮" menu (`DetailedWeightView`) SHALL present its actions ("Cambiar producto", "Cambiar socio", "Cambiar peso"/"Cambiar cantidad") through a custom, app-themed popup component consistent with the app's existing popup visual style, instead of the platform's native action sheet.
 
-#### Scenario: Row menu shows both actions in a styled popup
+#### Scenario: Row menu shows all actions in a styled popup
 - **WHEN** an operator taps the "⋮" button on a weight-detail row where `CanChangeProductMenu` is true
-- **THEN** a themed popup appears listing "Cambiar producto" and "Cambiar socio" as distinct, styled options, plus a way to cancel, rendered with the app's theme colors rather than the OS's native action sheet styling
+- **THEN** a themed popup appears listing "Cambiar producto", "Cambiar socio", and "Cambiar peso"/"Cambiar cantidad" as distinct, styled options, plus a way to cancel, rendered with the app's theme colors rather than the OS's native action sheet styling

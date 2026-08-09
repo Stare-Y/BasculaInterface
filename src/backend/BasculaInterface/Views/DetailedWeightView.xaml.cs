@@ -636,7 +636,7 @@ public partial class DetailedWeightView : ContentPage
 
         // Themed popup (issue #121) replaces the previous native DisplayActionSheet so the menu
         // matches the rest of the app instead of the OS's own action-sheet styling.
-        string? action = await RowMenuPopUp.ShowAsync(row.Description);
+        string? action = await RowMenuPopUp.ShowAsync(row.Description, row.IsGranel);
 
         switch (action)
         {
@@ -645,6 +645,9 @@ public partial class DetailedWeightView : ContentPage
                 break;
             case "Cambiar socio":
                 await StartChangePartnerFlow();
+                break;
+            case "Cambiar peso":
+                await StartChangeAmountFlow(row);
                 break;
             default:
                 return; // cancelled
@@ -666,6 +669,35 @@ public partial class DetailedWeightView : ContentPage
         {
             _rowPendingProductChange = null;
             await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
+        }
+    }
+
+    private async Task StartChangeAmountFlow(WeightEntryDetailRow row)
+    {
+        if (BindingContext is not DetailedWeightViewModel viewModel)
+            return;
+
+        // Unlike product/partner, there's no picker step here — go straight to the
+        // value + password confirmation popup.
+        double currentValue = row.IsGranel ? row.Weight : (row.RequiredAmount ?? 0);
+        (double NewValue, string Password)? result = await ChangeAmountPopUp.ShowAsync(currentValue, row.IsGranel);
+
+        if (result is null)
+            return; // cancelled
+
+        WaitPopUp.Show("Cambiando peso...");
+        try
+        {
+            await viewModel.ChangeDetailAmountAsync(row.Id, row.IsGranel, result.Value.NewValue, result.Value.Password);
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cambiar el peso/cantidad: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 

@@ -24,7 +24,7 @@
             HorizontalOptions="Center"
             MaximumWidthRequest="400"
             MinimumWidthRequest="300"
-            RowDefinitions="Auto,Auto,Auto,Auto"
+            RowDefinitions="Auto,Auto,Auto,Auto,Auto"
             RowSpacing="15"
             VerticalOptions="Center">
 
@@ -69,10 +69,25 @@
                 Text="Cambiar socio"
                 WidthRequest="260" />
 
+            <Button
+                x:Name="btnChangeAmount"
+                Grid.Row="3"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                  Dark={StaticResource BlackGray}}"
+                Clicked="OnChangeAmountClicked"
+                CornerRadius="20"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=16}"
+                HeightRequest="50"
+                HorizontalOptions="Center"
+                Style="{StaticResource Boton}"
+                Text="Cambiar peso"
+                WidthRequest="260" />
+
             <!--  Cancel  -->
             <Button
                 x:Name="btnCancel"
-                Grid.Row="3"
+                Grid.Row="4"
                 BackgroundColor="Transparent"
                 Clicked="OnCancelClicked"
                 CornerRadius="20"

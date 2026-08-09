@@ -47,14 +47,17 @@ public partial class RowActionMenuPopUp : ContentView
     }
 #endif
 
-    // Returns the selected menu action's text ("Cambiar producto"/"Cambiar socio"), or null if
-    // the operator cancelled. The caller (View code-behind) routes on the returned value the same
-    // way it previously branched on DisplayActionSheet's result.
-    public Task<string?> ShowAsync(string title)
+    // Returns the selected menu action's text ("Cambiar producto"/"Cambiar socio"/"Cambiar peso"),
+    // or null if the operator cancelled. The caller (View code-behind) routes on the returned
+    // value the same way it previously branched on DisplayActionSheet's result.
+    // `isGranel` (default true) swaps the amount button's label between "Cambiar peso" (bulk/
+    // scale-captured products) and "Cambiar cantidad" (piece-count products) at call time.
+    public Task<string?> ShowAsync(string title, bool isGranel = true)
     {
         _tcs = new TaskCompletionSource<string?>();
 
         TitleLabel.Text = string.IsNullOrWhiteSpace(title) ? "Opciones" : title;
+        btnChangeAmount.Text = isGranel ? "Cambiar peso" : "Cambiar cantidad";
 
         this.IsVisible = true;
 
@@ -81,6 +84,14 @@ public partial class RowActionMenuPopUp : ContentView
         await btnChangePartner.ScaleTo(1.0, 100);
 
         CloseWithResult("Cambiar socio");
+    }
+
+    private async void OnChangeAmountClicked(object sender, EventArgs e)
+    {
+        await btnChangeAmount.ScaleTo(1.1, 100);
+        await btnChangeAmount.ScaleTo(1.0, 100);
+
+        CloseWithResult("Cambiar peso");
     }
 
     private async void OnCancelClicked(object sender, EventArgs e)

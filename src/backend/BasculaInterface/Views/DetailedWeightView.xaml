@@ -1271,6 +1271,7 @@
         <components:PickNotesPopUp x:Name="NotesPopUp" />
         <components:ChangeProductConfirmPopUp x:Name="ChangeProductPopUp" />
         <components:ChangePartnerConfirmPopUp x:Name="ChangePartnerPopUp" />
+        <components:ChangeAmountConfirmPopUp x:Name="ChangeAmountPopUp" />
         <components:RowActionMenuPopUp x:Name="RowMenuPopUp" />
 
     </Grid>

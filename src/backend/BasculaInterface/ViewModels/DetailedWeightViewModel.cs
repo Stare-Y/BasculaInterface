@@ -325,6 +325,31 @@ namespace BasculaInterface.ViewModels
             await FetchNewWeightDetails();
         }
 
+        /// <summary>
+        /// Overrides the captured Weight (granel products) or RequiredAmount (non-granel
+        /// products) on an existing WeightDetail. Requires the manager password (plaintext here —
+        /// hashed before it ever reaches the API, see PasswordHasher). Reuses the same shared
+        /// password as ChangeDetailProductAsync/ChangePartnerAsync (issue #122's stopgap gate
+        /// covers this action too — see design.md Decision 2 of change-weight-detail-amount).
+        /// Throws on wrong password, an ERP document already existing on the entry, insufficient
+        /// credit, or a concurrency conflict; the caller (View code-behind) is responsible for
+        /// surfacing that to the user.
+        /// </summary>
+        public async Task ChangeDetailAmountAsync(int detailId, bool isGranel, double newValue, string passwordPlaintext)
+        {
+            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Weight/Detail/{detailId}/Amount",
+                isGranel
+                    ? new { NewWeight = newValue, NewRequiredAmount = (double?)null, PasswordHash = passwordHash }
+                    : new { NewWeight = (double?)null, NewRequiredAmount = newValue, PasswordHash = passwordHash });
+
+            // Also refreshes TotalWeight/BruteWeight, since a Weight override may have changed
+            // the server-recomputed total.
+            await FetchNewWeightDetails();
+        }
+
         public async Task UpdateWeightEntry()
         {
             if (WeightEntry == null)

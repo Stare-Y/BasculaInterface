@@ -151,6 +151,7 @@ namespace Infrastructure.Repos
             existing.IsLoaded = detail.IsLoaded;
             existing.FK_WeightedProductId = detail.FK_WeightedProductId;
             existing.ProductPrice = detail.ProductPrice;
+            existing.RequiredAmount = detail.RequiredAmount;
             existing.LastUpdated = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();

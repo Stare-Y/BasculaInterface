@@ -383,6 +383,16 @@ namespace Infrastructure.Service
             }
 
             WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+
+            // Blocked once a Contpaqi document already exists for this entry — mirrors the same
+            // guard ChangePartnerAsync already enforces. Deliberately NOT based on ConcludeDate
+            // (a concluded-but-not-yet-sent entry may still change product; see design.md
+            // Decision 3 of change-weight-detail-amount).
+            if (detail.WeightEntry?.ConptaqiComercialFK > 0)
+            {
+                throw new InvalidOperationException("Este proceso ya cuenta con un documento en Contpaqi; no se puede cambiar el producto.");
+            }
+
             ProductoDto newProduct = await _productService.GetByIdAsync(newProductId);
 
             // Preserve whatever quantity has already been captured; this operation never touches it.
@@ -466,6 +476,93 @@ namespace Infrastructure.Service
             // force:true bypasses the concluded-entry lock, same as ChangeTargetDocumentBehavior —
             // the ConptaqiComercialFK check above is the real gate for this action.
             await _weightRepo.UpdateAsync(entry, force: true);
+        }
+
+        public async Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, string passwordHash)
+        {
+            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync — a single
+            // "manager override" secret gates all three actions (see design.md Decision 2 of
+            // change-weight-detail-product, reused as-is here).
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
+            // Exactly one of the two fields must be supplied — an ambiguous request (both or
+            // neither) is rejected rather than silently resolved by priority (see design.md
+            // Decision 1).
+            if (newWeight.HasValue == newRequiredAmount.HasValue)
+            {
+                throw new ArgumentException("Debe especificarse exactamente uno: NewWeight o NewRequiredAmount.");
+            }
+
+            if (newWeight.HasValue && newWeight.Value <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newWeight), "El peso debe ser mayor que cero.");
+            }
+
+            if (newRequiredAmount.HasValue && newRequiredAmount.Value <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newRequiredAmount), "La cantidad requerida debe ser mayor que cero.");
+            }
+
+            WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
+
+            // Blocked once a Contpaqi document already exists for this entry — same rule as
+            // ChangePartnerAsync/ChangeDetailProductAsync. Deliberately NOT based on ConcludeDate
+            // (see design.md Decision 3).
+            if (detail.WeightEntry?.ConptaqiComercialFK > 0)
+            {
+                throw new InvalidOperationException("Este proceso ya cuenta con un documento en Contpaqi; no se puede cambiar el peso/cantidad.");
+            }
+
+            // quantity before the edit: existing convention (Weight wins if captured).
+            double oldQuantity = detail.Weight > 0 ? detail.Weight : (detail.RequiredAmount ?? 0);
+
+            // quantity after the edit: if Weight is being changed, the new Weight always wins
+            // (same convention). If only RequiredAmount is being changed and the detail already
+            // has a captured Weight, the quantity used for cost stays keyed off Weight — this
+            // RequiredAmount edit has no effect on cost/credit (documented edge case, see
+            // design.md Decision 4).
+            double newQuantity = newWeight ?? (detail.Weight > 0 ? detail.Weight : (newRequiredAmount ?? 0));
+
+            double oldCost = (detail.ProductPrice ?? 0) * oldQuantity;
+            double newCost = (detail.ProductPrice ?? 0) * newQuantity;
+
+            // Only the incremental exposure needs validating — ValidatePartnerCreditAsync already
+            // counts this detail's current cost inside the partner's pending-entries total, so
+            // passing the full newCost here would double-count it.
+            if (newCost > oldCost)
+            {
+                int partnerId = detail.WeightEntry?.PartnerId ?? 0;
+                CreditValidationResponse creditResult = await ValidatePartnerCreditAsync(partnerId, newCost - oldCost);
+                if (!creditResult.IsValid)
+                {
+                    throw new InvalidOperationException(creditResult.Message ?? "Crédito insuficiente para el nuevo peso/cantidad.");
+                }
+            }
+
+            if (newWeight.HasValue)
+            {
+                detail.Weight = newWeight.Value;
+            }
+            else
+            {
+                detail.RequiredAmount = newRequiredAmount;
+            }
+
+            // Deliberately not checking WeightEntry.ConcludeDate here — the password is the
+            // intended override to correct a captured amount after conclusion (see design.md
+            // Decision 3).
+            await _weightRepo.UpdateDetailAsync(detail);
+
+            // BruteWeight only ever sums Weight, never RequiredAmount, and only for loaded
+            // details — mirrors RecordWeightAsync's own recompute guard (see design.md Decision 5).
+            if (newWeight.HasValue && detail.IsLoaded)
+            {
+                await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
+            }
         }
     }
 }
