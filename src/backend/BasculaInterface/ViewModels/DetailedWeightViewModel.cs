@@ -298,6 +298,33 @@ namespace BasculaInterface.ViewModels
             await FetchNewWeightDetails();
         }
 
+        /// <summary>
+        /// Changes the partner on the current WeightEntry. Requires the manager password
+        /// (plaintext here — hashed before it ever reaches the API, see PasswordHasher). Reuses
+        /// the same shared password as ChangeDetailProductAsync (issue #122's stopgap gate
+        /// covers both actions — see design.md Decision 2 of change-weight-entry-partner).
+        /// Throws on wrong password, an entry that already has a Contpaqi document, insufficient
+        /// credit, or a concurrency conflict; the caller (View code-behind) is responsible for
+        /// surfacing that to the user.
+        /// </summary>
+        public async Task ChangePartnerAsync(int newPartnerId, string passwordPlaintext)
+        {
+            if (WeightEntry == null)
+            {
+                throw new InvalidOperationException("WeightEntry must be set before changing its partner.");
+            }
+
+            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Weight/{WeightEntry.Id}/Partner",
+                new { NewPartnerId = newPartnerId, PasswordHash = passwordHash });
+
+            // Also refreshes Partner, since WeightEntry.PartnerId will now differ from the
+            // previously cached Partner.Id (see FetchNewWeightDetails).
+            await FetchNewWeightDetails();
+        }
+
         public async Task UpdateWeightEntry()
         {
             if (WeightEntry == null)

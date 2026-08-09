@@ -634,11 +634,25 @@ public partial class DetailedWeightView : ContentPage
         if (!row.CanChangeProductMenu)
             return;
 
-        string action = await DisplayActionSheet(row.Description, "Cancelar", null, "Cambiar producto");
+        // Themed popup (issue #121) replaces the previous native DisplayActionSheet so the menu
+        // matches the rest of the app instead of the OS's own action-sheet styling.
+        string? action = await RowMenuPopUp.ShowAsync(row.Description);
 
-        if (action != "Cambiar producto")
-            return;
+        switch (action)
+        {
+            case "Cambiar producto":
+                await StartChangeProductFlow(row);
+                break;
+            case "Cambiar socio":
+                await StartChangePartnerFlow();
+                break;
+            default:
+                return; // cancelled
+        }
+    }
 
+    private async Task StartChangeProductFlow(WeightEntryDetailRow row)
+    {
         try
         {
             _rowPendingProductChange = row;
@@ -652,6 +666,47 @@ public partial class DetailedWeightView : ContentPage
         {
             _rowPendingProductChange = null;
             await DisplayAlert("Error", "No se pudo cargar la selección de productos: " + ex.Message, "OK");
+        }
+    }
+
+    private async Task StartChangePartnerFlow()
+    {
+        try
+        {
+            PartnerSelectView partnerSelectView = new PartnerSelectView();
+            partnerSelectView.OnPartnerSelected += OnPartnerSelectedForChange;
+
+            await Shell.Current.Navigation.PushModalAsync(partnerSelectView);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cargar la selección de socios: " + ex.Message, "OK");
+        }
+    }
+
+    private async void OnPartnerSelectedForChange(ClienteProveedorDto newPartner)
+    {
+        if (BindingContext is not DetailedWeightViewModel viewModel || viewModel.WeightEntry is null)
+            return;
+
+        string? password = await ChangePartnerPopUp.ShowAsync(newPartner.RazonSocial);
+
+        if (string.IsNullOrEmpty(password))
+            return; // cancelled
+
+        WaitPopUp.Show("Cambiando socio...");
+        try
+        {
+            await viewModel.ChangePartnerAsync(newPartner.Id, password);
+            _entriesChanged = true;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo cambiar el socio: " + ex.Message, "OK");
+        }
+        finally
+        {
+            WaitPopUp.Hide();
         }
     }
 

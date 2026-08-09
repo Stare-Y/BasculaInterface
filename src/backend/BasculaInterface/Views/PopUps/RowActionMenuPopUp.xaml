@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="BasculaInterface.Views.PopUps.RowActionMenuPopUp"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    IsVisible="False">
+
+    <!--
+        Replaces the native DisplayActionSheet previously used for the weight-detail row's "⋮"
+        menu (issue #122) so it picks up the app's own theme/colors instead of the OS's action
+        sheet styling (issue #121). Same ContentView + TaskCompletionSource popup pattern as
+        ChangeProductConfirmPopUp/PickQuantityPopUp.
+    -->
+    <Grid
+        BackgroundColor="#80000000"
+        HorizontalOptions="Fill"
+        VerticalOptions="Fill"
+        ZIndex="999">
+        <Grid
+            x:Name="PopupOverlay"
+            Padding="20"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                              Dark={StaticResource 2}}"
+            HorizontalOptions="Center"
+            MaximumWidthRequest="400"
+            MinimumWidthRequest="300"
+            RowDefinitions="Auto,Auto,Auto,Auto"
+            RowSpacing="15"
+            VerticalOptions="Center">
+
+            <!--  Title  -->
+            <Label
+                x:Name="TitleLabel"
+                Grid.Row="0"
+                FontAttributes="Bold"
+                FontSize="18"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                Text="Opciones" />
+
+            <!--  Menu Items  -->
+            <Button
+                x:Name="btnChangeProduct"
+                Grid.Row="1"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                  Dark={StaticResource BlackGray}}"
+                Clicked="OnChangeProductClicked"
+                CornerRadius="20"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=16}"
+                HeightRequest="50"
+                HorizontalOptions="Center"
+                Style="{StaticResource Boton}"
+                Text="Cambiar producto"
+                WidthRequest="260" />
+
+            <Button
+                x:Name="btnChangePartner"
+                Grid.Row="2"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                  Dark={StaticResource BlackGray}}"
+                Clicked="OnChangePartnerClicked"
+                CornerRadius="20"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=16}"
+                HeightRequest="50"
+                HorizontalOptions="Center"
+                Style="{StaticResource Boton}"
+                Text="Cambiar socio"
+                WidthRequest="260" />
+
+            <!--  Cancel  -->
+            <Button
+                x:Name="btnCancel"
+                Grid.Row="3"
+                BackgroundColor="Transparent"
+                Clicked="OnCancelClicked"
+                CornerRadius="20"
+                FontSize="{OnPlatform Android=12,
+                                      WinUI=16}"
+                HeightRequest="45"
+                HorizontalOptions="Center"
+                Style="{StaticResource Boton}"
+                Text="Cancelar"
+                TextColor="{AppThemeBinding Light={StaticResource 1},
+                                            Dark={StaticResource 1}}"
+                WidthRequest="150" />
+        </Grid>
+    </Grid>
+</ContentView>

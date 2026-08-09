@@ -1270,6 +1270,8 @@
         <components:PickQuantityPopUp x:Name="PickPopUp" />
         <components:PickNotesPopUp x:Name="NotesPopUp" />
         <components:ChangeProductConfirmPopUp x:Name="ChangeProductPopUp" />
+        <components:ChangePartnerConfirmPopUp x:Name="ChangePartnerPopUp" />
+        <components:RowActionMenuPopUp x:Name="RowMenuPopUp" />
 
     </Grid>
 
