@@ -1,6 +1,5 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
-using Core.Application.DTOs.Request;
 using Core.Application.Services;
 using Core.Domain.Entities.Weight;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +9,7 @@ namespace BasculaTerminalApi.Controllers
     public record SetSecondaryTareRequest(double SecondaryTare);
     public record RecordWeightRequest(double Weight, string WeightedBy);
     public record ChangeDetailProductRequest(int NewProductId, string PasswordHash);
+    public record ChangePartnerRequest(int NewPartnerId, string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -352,20 +352,26 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpPost("Partner/Swap")]
-        public async Task<IActionResult> SwapPartner([FromBody]SwapPartnerRequest request)
+        [HttpPatch("{id}/Partner")]
+        public async Task<IActionResult> ChangePartner(int id, [FromBody] ChangePartnerRequest request)
         {
             try
             {
-                await _weightService.TrySwapPartner(request.WeightId, request.CurrentPartnerId, request.NewPartnerId);
-
-                return Ok();
+                await _weightService.ChangePartnerAsync(id, request.NewPartnerId, request.PasswordHash);
+                return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
             }
-            catch(Exception ex)
+            catch (WeightConcurrencyException)
             {
-                _logger.LogError(ex, "Error swapping partners.");
-
-                return BadRequest();
+                return Conflict(new GenericResponse<string> { Message = "El registro fue modificado por otro terminal. Intente de nuevo." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing partner for weight entry {Id}", id);
+                return BadRequest(new GenericResponse<string> { Message = ex.Message });
             }
         }
     }

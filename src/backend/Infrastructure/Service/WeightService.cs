@@ -298,11 +298,6 @@ namespace Infrastructure.Service
                 return weightDetail.RequiredAmount ?? 0;
         }
 
-        public async Task TrySwapPartner(int weightId, int currentPartnerId, int newPartnerId)
-        {
-            return;
-        }
-
         public async Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId)
         {
             WeightEntry existingWeight = await _weightRepo.GetByIdAsync(weightId);
@@ -414,6 +409,63 @@ namespace Infrastructure.Service
             // Deliberately not checking WeightEntry.ConcludeDate here — the password is the
             // intended override to correct a product after conclusion (see design.md Decision 3).
             await _weightRepo.UpdateDetailAsync(detail);
+        }
+
+        public async Task ChangePartnerAsync(int weightId, int newPartnerId, string passwordHash)
+        {
+            // Same shared password as ChangeDetailProductAsync — a single "manager override"
+            // secret gates both actions (see design.md Decision 2).
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
+            WeightEntry entry = await _weightRepo.GetByIdAsync(weightId);
+
+            // Blocked once a Contpaqi document already exists for this entry — deliberately NOT
+            // based on ConcludeDate (a concluded-but-not-yet-sent entry may still change partner;
+            // see design.md Decision 4).
+            if (entry.ConptaqiComercialFK > 0)
+            {
+                throw new InvalidOperationException("Este proceso ya cuenta con un documento en Contpaqi; no se puede cambiar el socio.");
+            }
+
+            // Picking the same partner that's already assigned is a no-op for credit purposes —
+            // this entry is already counted in ValidatePartnerCreditAsync's pendingEntriesCost for
+            // that partner (it's still tracked under them and not concluded), so re-validating
+            // would double-count its own cost and could spuriously reject a change that changes
+            // nothing. Still persist below (harmless idempotent write) so the password gate stays
+            // consistent regardless of which partner was picked.
+            if (newPartnerId != entry.PartnerId)
+            {
+                // The entry's entire current cost is new exposure for the incoming partner — none
+                // of it is counted in their pending-entries total yet, since the entry is still
+                // attributed to the old partner until this change is persisted (see design.md
+                // Decision 5). (ValidatePartnerCreditAsync fetches the new partner itself and
+                // surfaces a not-found error for a bad partner id — no separate lookup needed here.)
+                double totalCost = 0;
+                foreach (WeightDetail detail in entry.WeightDetails)
+                {
+                    if (detail.FK_WeightedProductId.HasValue && detail.ProductPrice.HasValue)
+                    {
+                        double quantity = detail.Weight > 0 ? detail.Weight : (detail.RequiredAmount ?? 0);
+                        totalCost += detail.ProductPrice.Value * quantity;
+                    }
+                }
+
+                CreditValidationResponse creditResult = await ValidatePartnerCreditAsync(newPartnerId, totalCost);
+                if (!creditResult.IsValid)
+                {
+                    throw new InvalidOperationException(creditResult.Message ?? "Crédito insuficiente para el nuevo socio.");
+                }
+            }
+
+            entry.PartnerId = newPartnerId;
+
+            // force:true bypasses the concluded-entry lock, same as ChangeTargetDocumentBehavior —
+            // the ConptaqiComercialFK check above is the real gate for this action.
+            await _weightRepo.UpdateAsync(entry, force: true);
         }
     }
 }
