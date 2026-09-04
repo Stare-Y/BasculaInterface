@@ -22,6 +22,9 @@ namespace Core.Application.DTOs
         /// </summary>
         public bool IsLoaded { get; set; } = true;
 
+        /// <summary>Set when this detail originated from converting a PedidoLine to weight.</summary>
+        public int? FK_PedidoLineId { get; set; }
+
         public WeightDetailDto() { }
 
         public WeightDetailDto(WeightDetail wd)
@@ -40,6 +43,7 @@ namespace Core.Application.DTOs
             LastUpdated = wd.LastUpdated;
             Notes = wd.Notes;
             IsLoaded = wd.IsLoaded;
+            FK_PedidoLineId = wd.FK_PedidoLineId;
         }
 
         public WeightDetail ToEntity()
@@ -58,7 +62,8 @@ namespace Core.Application.DTOs
                 Costales = Costales,
                 LastUpdated = LastUpdated,
                 Notes = Notes,
-                IsLoaded = IsLoaded
+                IsLoaded = IsLoaded,
+                FK_PedidoLineId = FK_PedidoLineId
             };
         }
     }

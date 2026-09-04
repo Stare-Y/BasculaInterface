@@ -17,10 +17,9 @@ namespace Infrastructure.Service
         private readonly IApiService _apiService;
         private readonly IClienteProveedorService _clienteProveedorService;
         private readonly IProductService _productService;
-        private readonly IProviderPurchaseService _providerPurchaseService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
         private readonly WeightSettings _weightSettings;
-        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IOptions<WeightSettings> weightSettingsOptions, IProviderPurchaseService providerPurchaseService)
+        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IOptions<WeightSettings> weightSettingsOptions)
         {
             _weightRepo = weightRepo;
 
@@ -33,8 +32,6 @@ namespace Infrastructure.Service
             _clienteProveedorService = clienteProveedorService;
 
             _productService = productService;
-
-            _providerPurchaseService = providerPurchaseService;
 
             _targetBehaviorService = targetBehaviorService;
         }
@@ -164,14 +161,11 @@ namespace Infrastructure.Service
         {
             await _weightRepo.ConcludeEntryAsync(weightEntryId);
 
-            try
-            {
-                await _providerPurchaseService.ConcludeByWeightEntryAsync(weightEntryId);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[ConcludeAsync] ProviderPurchase conclude failed (non-fatal): {ex.Message}");
-            }
+            // Note: PedidoLine.Concluded is computed from received/pending amounts
+            // (RequiredAmount - Σ loaded WeightDetail.Weight), not a stored flag tied
+            // to WeightEntry conclusion — a truck can leave with a partial delivery,
+            // concluding this entry while its pedido line(s) stay open with pending > 0
+            // for a future visit. No pedido-side update is needed here.
 
             WeightEntry entry = await _weightRepo.GetByIdAsync(weightEntryId);
             if (entry.PartnerId > 0 && entry.ExternalTargetBehaviorFK > 0 && (entry.ConptaqiComercialFK == null || entry.ConptaqiComercialFK <= 0))
@@ -257,8 +251,6 @@ namespace Infrastructure.Service
                 throw new InvalidOperationException("The External Target Behavior needs to have a target serie to build the document");
             }
             ClienteProveedorDto cteProovedor = await _clienteProveedorService.GetById(weightEntry.PartnerId!.Value);
-            ProviderPurchaseDto? purchase = await _providerPurchaseService.GetByWeightEntryIdAsync(weightEntry.Id);
-            double purchasePrice = (double)(purchase?.Price ?? 0);
 
             List<ProductoDto> products = [];
             foreach (WeightDetail weightDetail in weightEntry.WeightDetails)
@@ -282,10 +274,17 @@ namespace Infrastructure.Service
                     new MovimientoDto
                     {
                         CodigoProducto = products.First(p => p.Id == d.FK_WeightedProductId).Code,
+                        // Almacén precedence: the product's own classification-based default,
+                        // then the entry-level ExternalTargetBehavior's TargetAlmacen — which
+                        // for a pedido conversion is the hidden behavior the operator picked
+                        // in the convert-to-weight dialog (design.md Decision 5).
                         CodigoAlmacen = products.First(p => p.Id == d.FK_WeightedProductId).IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen,
                         Unidades = GetUnidadesFromProductAndDetail(d, products.First(p => p.Id == d.FK_WeightedProductId)),
                         Referencia = $"Pesado por: {d.WeightedBy}",
-                        Precio = purchasePrice
+                        // Price precedence: the pedido line's own price (per-product, correct
+                        // for multi-product entries) falling back to whatever price was
+                        // captured directly on the detail for non-pedido weigh-ins.
+                        Precio = (double)(d.PedidoLine?.Price ?? (decimal?)d.ProductPrice ?? 0)
                     }).ToArray()
             };
         }

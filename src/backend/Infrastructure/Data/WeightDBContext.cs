@@ -13,7 +13,8 @@ namespace Infrastructure.Data
         public DbSet<WeightDetail> WeightDetails { get; set; } = null!;
         public DbSet<ExternalTargetBehavior> ExternalTargetBehaviors { get; set; } = null!;
         public DbSet<Turn> Turns { get; set; } = null!;
-        public DbSet<ProviderPurchase> ProviderPurchases { get; set; } = null!;
+        public DbSet<Pedido> Pedidos { get; set; } = null!;
+        public DbSet<PedidoLine> PedidoLines { get; set; } = null!;
         public WeightDBContext(DbContextOptions<WeightDBContext> options)
             : base(options)
         {
@@ -26,6 +27,14 @@ namespace Infrastructure.Data
             modelBuilder.Entity<WeightDetail>()
                 .Property(wd => wd.IsLoaded)
                 .HasDefaultValue(true);
+
+            modelBuilder.Entity<WeightDetail>(wd =>
+            {
+                wd.HasOne(d => d.PedidoLine)
+                    .WithMany(pl => pl.WeightDetails)
+                    .HasForeignKey(d => d.FK_PedidoLineId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             modelBuilder.Entity<WeightEntry>(we =>
             {

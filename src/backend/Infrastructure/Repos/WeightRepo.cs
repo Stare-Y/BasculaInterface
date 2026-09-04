@@ -26,8 +26,8 @@ namespace Infrastructure.Repos
         {
             WeightEntry? entry = await _context.WeightEntries
                 .AsNoTracking()
-                .Include(w => w.WeightDetails
-                .Where(wd => !wd.IsDeleted))
+                .Include(w => w.WeightDetails.Where(wd => !wd.IsDeleted))
+                    .ThenInclude(wd => wd.PedidoLine)
                 .Include(wd => wd.ExternalTargetBehavior)
                 .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
 
@@ -157,6 +157,25 @@ namespace Infrastructure.Repos
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// The vehicle's current running weight: <c>TareWeight + loadedSum</c> for the normal
+        /// case (arrives empty, gets loaded), or <c>TareWeight - loadedSum</c> when
+        /// <see cref="WeightEntry.IsDischarge"/> is set (arrives loaded, discharges) — see
+        /// design.md Decision 7. Guards against discharging more than the vehicle brought in.
+        /// </summary>
+        private static double ComputeBruteWeight(WeightEntry entry, double loadedSum)
+        {
+            if (entry.IsDischarge)
+            {
+                if (loadedSum > entry.TareWeight)
+                    throw new InvalidOperationException("No se puede descargar más peso del que trae el vehículo.");
+
+                return entry.TareWeight - loadedSum;
+            }
+
+            return entry.TareWeight + loadedSum;
+        }
+
         public async Task RecomputeBruteWeightAsync(int entryId)
         {
             WeightEntry entry = await _context.WeightEntries
@@ -164,9 +183,8 @@ namespace Infrastructure.Repos
                 .FirstOrDefaultAsync(w => w.Id == entryId && !w.IsDeleted)
                 ?? throw new KeyNotFoundException($"WeightEntry with ID {entryId} not found.");
 
-            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
-                .Where(d => d.IsLoaded)
-                .Sum(d => d.Weight);
+            double loadedSum = entry.WeightDetails.Where(d => d.IsLoaded).Sum(d => d.Weight);
+            entry.BruteWeight = ComputeBruteWeight(entry, loadedSum);
 
             try
             {
@@ -200,9 +218,8 @@ namespace Infrastructure.Repos
             detail.LastUpdated = DateTime.UtcNow;
 
             // Include current detail (now IsLoaded=true) in sum by iterating the in-memory collection
-            entry.BruteWeight = entry.TareWeight + entry.WeightDetails
-                .Where(d => d.IsLoaded || d.Id == detailId)
-                .Sum(d => d.Weight);
+            double loadedSum = entry.WeightDetails.Where(d => d.IsLoaded || d.Id == detailId).Sum(d => d.Weight);
+            entry.BruteWeight = ComputeBruteWeight(entry, loadedSum);
 
             try
             {
@@ -270,10 +287,11 @@ namespace Infrastructure.Repos
             existingEntry.ContpaqiComercialFolio = weightEntry.ContpaqiComercialFolio;
             existingEntry.ExternalTargetBehaviorFK = weightEntry.ExternalTargetBehaviorFK;
             existingEntry.TareWeight = weightEntry.TareWeight;
-            existingEntry.BruteWeight = weightEntry.TareWeight
-                + existingEntry.WeightDetails
-                    .Where(d => d.IsLoaded && !d.IsDeleted)
-                    .Sum(d => d.Weight);
+            existingEntry.IsDischarge = weightEntry.IsDischarge;
+            double updateLoadedSum = existingEntry.WeightDetails
+                .Where(d => d.IsLoaded && !d.IsDeleted)
+                .Sum(d => d.Weight);
+            existingEntry.BruteWeight = ComputeBruteWeight(existingEntry, updateLoadedSum);
             existingEntry.VehiclePlate = weightEntry.VehiclePlate;
             existingEntry.Notes = weightEntry.Notes;
             existingEntry.RegisteredBy = weightEntry.RegisteredBy;

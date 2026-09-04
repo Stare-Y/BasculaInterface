@@ -6,12 +6,13 @@ using System.Collections.ObjectModel;
 
 namespace BasculaInterface.ViewModels
 {
-    public class ProviderPurchaseListViewModel : ViewModelBase
+    /// <summary>Replaces ProviderPurchaseListViewModel — lists Pedido headers instead of flat purchase rows.</summary>
+    public class PedidoListViewModel : ViewModelBase
     {
         private readonly IApiService _apiService;
         private const int PageSize = 30;
 
-        public ObservableCollection<ProviderPurchaseViewRow> Purchases { get; set; } = [];
+        public ObservableCollection<PedidoViewRow> Pedidos { get; set; } = [];
 
         private uint _currentPage = 1;
         public uint CurrentPage
@@ -29,32 +30,26 @@ namespace BasculaInterface.ViewModels
         public bool CanGoBack => CurrentPage > 1;
         public bool CanGoForward { get; private set; }
 
-        public ProviderPurchaseListViewModel(IApiService apiService)
+        public PedidoListViewModel(IApiService apiService)
         {
             _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
         }
 
-        public async Task LoadPurchasesAsync(CancellationToken cancellationToken = default)
+        public async Task LoadPedidosAsync(CancellationToken cancellationToken = default)
         {
-            List<ProviderPurchaseDto> purchases = await _apiService.GetAsync<List<ProviderPurchaseDto>>(
-                $"api/ProviderPurchase/All?top={PageSize}&page={CurrentPage}", cancellationToken);
+            List<PedidoDto> pedidos = await _apiService.GetAsync<List<PedidoDto>>(
+                $"api/Pedido/All?top={PageSize}&page={CurrentPage}", cancellationToken);
 
-            CanGoForward = purchases.Count >= PageSize;
+            CanGoForward = pedidos.Count >= PageSize;
             OnPropertyChanged(nameof(CanGoForward));
             OnPropertyChanged(nameof(CanGoBack));
 
-            int[] providerIds = purchases
+            int[] providerIds = pedidos
                 .Select(p => p.ProviderId)
                 .Distinct()
                 .ToArray();
 
-            int[] productIds = purchases
-                .Select(p => p.ProductId)
-                .Distinct()
-                .ToArray();
-
             Dictionary<int, string> providerNames = new();
-            Dictionary<int, string> productNames = new();
 
             if (providerIds.Length > 0)
             {
@@ -66,48 +61,36 @@ namespace BasculaInterface.ViewModels
                     providerNames[p.Id] = p.RazonSocial;
             }
 
-            if (productIds.Length > 0)
-            {
-                string idsQuery = string.Join("&ids=", productIds);
-                List<ProductoDto> products = await _apiService.GetAsync<List<ProductoDto>>(
-                    $"api/Productos/ByMultipleIds?ids={idsQuery}", cancellationToken);
+            Pedidos.Clear();
 
-                foreach (var p in products)
-                    productNames[p.Id] = string.IsNullOrEmpty(p.Code) ? p.Nombre : $"{p.Code} - {p.Nombre}";
-            }
-
-            Purchases.Clear();
-
-            foreach (var purchase in purchases
+            foreach (var pedido in pedidos
                 .OrderBy(p => p.Concluded)
                 .ThenBy(p => p.ExpectedArrival))
             {
-                string providerName = providerNames.TryGetValue(purchase.ProviderId, out var pn) ? pn : "Desconocido";
-                string productName = productNames.TryGetValue(purchase.ProductId, out var prn) ? prn : "Desconocido";
-
-                Purchases.Add(new ProviderPurchaseViewRow(purchase, providerName, productName));
+                string providerName = providerNames.TryGetValue(pedido.ProviderId, out var pn) ? pn : "Desconocido";
+                Pedidos.Add(new PedidoViewRow(pedido, providerName));
             }
 
-            OnPropertyChanged(nameof(Purchases));
+            OnPropertyChanged(nameof(Pedidos));
         }
 
         public async Task GoToNextPageAsync(CancellationToken cancellationToken = default)
         {
             if (!CanGoForward) return;
             CurrentPage++;
-            await LoadPurchasesAsync(cancellationToken);
+            await LoadPedidosAsync(cancellationToken);
         }
 
         public async Task GoToPreviousPageAsync(CancellationToken cancellationToken = default)
         {
             if (!CanGoBack) return;
             CurrentPage--;
-            await LoadPurchasesAsync(cancellationToken);
+            await LoadPedidosAsync(cancellationToken);
         }
 
-        public async Task DeletePurchaseAsync(int id, CancellationToken cancellationToken = default)
+        public async Task DeletePedidoAsync(int id, CancellationToken cancellationToken = default)
         {
-            await _apiService.DeleteAsync($"api/ProviderPurchase?id={id}", cancellationToken);
+            await _apiService.DeleteAsync($"api/Pedido?id={id}", cancellationToken);
         }
     }
 }

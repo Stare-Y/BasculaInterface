@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BasculaInterface.Views.PedidoFormView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
+    xmlns:models="clr-namespace:BasculaInterface.Models"
+    Title="Pedido a Proveedor"
+    BackgroundColor="{AppThemeBinding Light={StaticResource 1},
+                                      Dark={StaticResource BlackTheme}}">
+
+    <Grid>
+        <ScrollView
+            Padding="20">
+
+            <VerticalStackLayout
+                Spacing="20">
+
+                <Label
+                    x:Name="LblTitle"
+                    FontAttributes="Bold"
+                    FontSize="28"
+                    HorizontalOptions="Start"
+                    Style="{StaticResource Label}"
+                    Text="Nuevo Pedido"
+                    TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                Dark={StaticResource 2}}" />
+
+                <Label
+                    x:Name="LblStatus"
+                    FontAttributes="Bold"
+                    FontSize="18"
+                    HorizontalOptions="Start"
+                    IsVisible="False" />
+
+                <!-- Provider -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                        <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                Style="{StaticResource Label}"
+                                Text="Proveedor"
+                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                            Dark={StaticResource 1}}" />
+                            <Label
+                                x:Name="LblProviderName"
+                                FontSize="16"
+                                Style="{StaticResource Label}"
+                                Text="Sin proveedor seleccionado" />
+                        </VerticalStackLayout>
+                        <Button
+                            x:Name="BtnPickProvider"
+                            Grid.Column="1"
+                            Clicked="BtnPickProvider_Clicked"
+                            Style="{StaticResource Boton}"
+                            Text="Seleccionar"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Expected arrival -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Fecha Esperada de Llegada"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 1}}" />
+                        <DatePicker
+                            x:Name="DatePickerExpectedArrival" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Notes -->
+                <Border
+                    Padding="15"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                      Dark={StaticResource BlackGray}}"
+                    StrokeShape="RoundRectangle 15"
+                    StrokeThickness="0">
+                    <VerticalStackLayout Spacing="10">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="20"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource Label}"
+                            Text="Notas"
+                            TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                        Dark={StaticResource 1}}" />
+                        <Editor
+                            x:Name="EditorNotes"
+                            HeightRequest="100"
+                            Placeholder="Notas opcionales..." />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Header action buttons -->
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="15"
+                    HorizontalOptions="Fill">
+
+                    <Button
+                        x:Name="BtnSave"
+                        Grid.Column="0"
+                        Clicked="BtnSave_Clicked"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Guardar" />
+
+                    <Button
+                        x:Name="BtnDelete"
+                        Grid.Column="1"
+                        BackgroundColor="DarkRed"
+                        Clicked="BtnDelete_Clicked"
+                        IsVisible="False"
+                        Style="{StaticResource BotonPrincipal}"
+                        Text="Eliminar"
+                        TextColor="White" />
+
+                    <Button
+                        x:Name="BtnCancel"
+                        Grid.Column="2"
+                        Clicked="BtnCancel_Clicked"
+                        Style="{StaticResource Boton}"
+                        Text="Cancelar" />
+                </Grid>
+
+                <!-- Lines section (only shown once the header exists) -->
+                <VerticalStackLayout x:Name="LinesSection" IsVisible="False" Spacing="15">
+
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="22"
+                        HorizontalOptions="Start"
+                        Style="{StaticResource Label}"
+                        Text="Productos del Pedido"
+                        TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                    Dark={StaticResource 2}}" />
+
+                    <CollectionView
+                        x:Name="LinesCollectionView"
+                        HeightRequest="320"
+                        VerticalOptions="Start">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:PedidoLineViewRow">
+                                <Border
+                                    Padding="15"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                                      Dark={StaticResource BlackGray}}"
+                                    StrokeShape="RoundRectangle 15"
+                                    StrokeThickness="0">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                                        <VerticalStackLayout Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Spacing="4">
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="18"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding ProductName}" />
+                                            <Label
+                                                FontSize="14"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding AmountsText}" />
+                                            <Label
+                                                FontSize="13"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding PendingText}"
+                                                TextColor="Orange" />
+                                            <Label
+                                                FontAttributes="Italic"
+                                                FontSize="13"
+                                                Style="{StaticResource Label}"
+                                                Text="{Binding StatusText}"
+                                                TextColor="{Binding StatusColor}" />
+                                            <Label
+                                                FontAttributes="Bold"
+                                                FontSize="12"
+                                                IsVisible="{Binding RequiresDisTaring}"
+                                                Style="{StaticResource Label}"
+                                                Text="Requiere destare"
+                                                TextColor="{AppThemeBinding Light={StaticResource 4},
+                                                                            Dark={StaticResource 2}}" />
+                                        </VerticalStackLayout>
+
+                                        <HorizontalStackLayout Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Spacing="10" VerticalOptions="Center">
+                                            <Button
+                                                Clicked="BtnConvertLine_Clicked"
+                                                CommandParameter="{Binding .}"
+                                                IsVisible="{Binding CanConvert}"
+                                                Style="{StaticResource Boton}"
+                                                Text="Pesar" />
+                                            <Button
+                                                BackgroundColor="DarkRed"
+                                                Clicked="BtnCloseLine_Clicked"
+                                                CommandParameter="{Binding .}"
+                                                IsVisible="{Binding CanClose}"
+                                                Style="{StaticResource Boton}"
+                                                Text="Cerrar"
+                                                TextColor="White" />
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                        <CollectionView.EmptyView>
+                            <Label
+                                FontSize="15"
+                                HorizontalOptions="Center"
+                                Style="{StaticResource Label}"
+                                Text="Este pedido aún no tiene productos" />
+                        </CollectionView.EmptyView>
+                    </CollectionView>
+
+                    <!-- Add line panel -->
+                    <Border
+                        Padding="15"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
+                                                          Dark={StaticResource BlackGray}}"
+                        StrokeShape="RoundRectangle 15"
+                        StrokeThickness="0">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                FontAttributes="Bold"
+                                FontSize="18"
+                                Style="{StaticResource Label}"
+                                Text="Agregar Producto" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="15">
+                                <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                                    <Label
+                                        x:Name="LblNewLineProduct"
+                                        FontSize="15"
+                                        Style="{StaticResource Label}"
+                                        Text="Sin producto seleccionado" />
+                                </VerticalStackLayout>
+                                <Button
+                                    x:Name="BtnPickNewLineProduct"
+                                    Grid.Column="1"
+                                    Clicked="BtnPickNewLineProduct_Clicked"
+                                    Style="{StaticResource Boton}"
+                                    Text="Seleccionar" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Entry
+                                    x:Name="EntryNewLineAmount"
+                                    Grid.Column="0"
+                                    Keyboard="Numeric"
+                                    Placeholder="Cantidad requerida (kg)" />
+                                <Entry
+                                    x:Name="EntryNewLinePrice"
+                                    Grid.Column="1"
+                                    Keyboard="Numeric"
+                                    Placeholder="Precio unitario (opcional)" />
+                            </Grid>
+
+                            <HorizontalStackLayout Spacing="8">
+                                <CheckBox x:Name="ChkNewLineDisTaring" VerticalOptions="Center" />
+                                <Label
+                                    FontSize="15"
+                                    Style="{StaticResource Label}"
+                                    Text="Requiere destare"
+                                    VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+
+                            <Button
+                                x:Name="BtnAddLine"
+                                Clicked="BtnAddLine_Clicked"
+                                HorizontalOptions="Fill"
+                                Style="{StaticResource BotonPrincipal}"
+                                Text="Agregar Línea" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <components:WaitPopUp x:Name="WaitPopUp" />
+        <components:ConvertLineToWeightPopUp x:Name="ConvertPopUp" />
+    </Grid>
+</ContentPage>

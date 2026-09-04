@@ -19,5 +19,12 @@ namespace Infrastructure.Service
         {
             return new ExternalTargetBehaviorDto(await _externalTargetBehaviorRepo.GetByIdAsync(id));
         }
+        public async Task<IEnumerable<ExternalTargetBehaviorDto>> GetAlmacenTargetsAsync()
+        {
+            return (await _externalTargetBehaviorRepo.GetAllAsync())
+                .Where(behavior => behavior.Hidden)
+                .OrderBy(behavior => behavior.TargetAlmacen)
+                .Select(behavior => new ExternalTargetBehaviorDto(behavior));
+        }
     }
 }

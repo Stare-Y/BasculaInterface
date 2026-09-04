@@ -4,11 +4,11 @@ using Core.Application.Services;
 
 namespace BasculaInterface.Views;
 
-public partial class ProviderPurchaseListView : ContentPage
+public partial class PedidoListView : ContentPage
 {
     private bool _isFirstLoad = true;
 
-    public ProviderPurchaseListView(ProviderPurchaseListViewModel viewModel)
+    public PedidoListView(PedidoListViewModel viewModel)
     {
         BindingContext = viewModel
             ?? throw new ArgumentNullException(nameof(viewModel));
@@ -18,8 +18,8 @@ public partial class ProviderPurchaseListView : ContentPage
         this.Loaded += OnPageLoaded;
     }
 
-    public ProviderPurchaseListView()
-        : this(MauiProgram.ServiceProvider.GetRequiredService<ProviderPurchaseListViewModel>()) { }
+    public PedidoListView()
+        : this(MauiProgram.ServiceProvider.GetRequiredService<PedidoListViewModel>()) { }
 
     private async void OnPageLoaded(object? sender, EventArgs e)
     {
@@ -42,14 +42,14 @@ public partial class ProviderPurchaseListView : ContentPage
 
     private async Task LoadDataAsync()
     {
-        if (BindingContext is not ProviderPurchaseListViewModel viewModel)
+        if (BindingContext is not PedidoListViewModel viewModel)
             return;
 
         WaitPopUp.Show("Cargando pedidos, espere");
         try
         {
-            await viewModel.LoadPurchasesAsync();
-            PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            await viewModel.LoadPedidosAsync();
+            PedidosCollectionView.ItemsSource = viewModel.Pedidos;
             UpdatePaginationControls(viewModel);
         }
         catch (Exception ex)
@@ -62,27 +62,27 @@ public partial class ProviderPurchaseListView : ContentPage
         }
     }
 
-    private void UpdatePaginationControls(ProviderPurchaseListViewModel viewModel)
+    private void UpdatePaginationControls(PedidoListViewModel viewModel)
     {
         BtnPrevPage.IsEnabled = viewModel.CanGoBack;
         BtnNextPage.IsEnabled = viewModel.CanGoForward;
         LblPage.Text = viewModel.PageText;
     }
 
-    private async void PurchasesCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void PedidosCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (PurchasesCollectionView.SelectedItem is not ProviderPurchaseViewRow row)
+        if (PedidosCollectionView.SelectedItem is not PedidoViewRow row)
             return;
 
         WaitPopUp.Show("Cargando pedido, espere");
         try
         {
-            ProviderPurchaseFormViewModel formViewModel = new(
+            PedidoFormViewModel formViewModel = new(
                 MauiProgram.ServiceProvider.GetRequiredService<IApiService>());
 
-            formViewModel.LoadExisting(row.Purchase);
+            formViewModel.LoadExisting(row.Pedido);
 
-            ProviderPurchaseFormView formView = new(formViewModel);
+            PedidoFormView formView = new(formViewModel);
             await Shell.Current.Navigation.PushAsync(formView);
         }
         catch (Exception ex)
@@ -91,7 +91,7 @@ public partial class ProviderPurchaseListView : ContentPage
         }
         finally
         {
-            PurchasesCollectionView.SelectedItem = null;
+            PedidosCollectionView.SelectedItem = null;
             WaitPopUp.Hide();
         }
     }
@@ -100,10 +100,10 @@ public partial class ProviderPurchaseListView : ContentPage
     {
         try
         {
-            ProviderPurchaseFormViewModel formViewModel = new(
+            PedidoFormViewModel formViewModel = new(
                 MauiProgram.ServiceProvider.GetRequiredService<IApiService>());
 
-            ProviderPurchaseFormView formView = new(formViewModel);
+            PedidoFormView formView = new(formViewModel);
             await Shell.Current.Navigation.PushAsync(formView);
         }
         catch (Exception ex)
@@ -119,14 +119,14 @@ public partial class ProviderPurchaseListView : ContentPage
 
     private async void BtnPrevPage_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not ProviderPurchaseListViewModel viewModel)
+        if (BindingContext is not PedidoListViewModel viewModel)
             return;
 
         WaitPopUp.Show("Cargando pedidos, espere");
         try
         {
             await viewModel.GoToPreviousPageAsync();
-            PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            PedidosCollectionView.ItemsSource = viewModel.Pedidos;
             UpdatePaginationControls(viewModel);
         }
         catch (Exception ex)
@@ -141,14 +141,14 @@ public partial class ProviderPurchaseListView : ContentPage
 
     private async void BtnNextPage_Clicked(object sender, EventArgs e)
     {
-        if (BindingContext is not ProviderPurchaseListViewModel viewModel)
+        if (BindingContext is not PedidoListViewModel viewModel)
             return;
 
         WaitPopUp.Show("Cargando pedidos, espere");
         try
         {
             await viewModel.GoToNextPageAsync();
-            PurchasesCollectionView.ItemsSource = viewModel.Purchases;
+            PedidosCollectionView.ItemsSource = viewModel.Pedidos;
             UpdatePaginationControls(viewModel);
         }
         catch (Exception ex)

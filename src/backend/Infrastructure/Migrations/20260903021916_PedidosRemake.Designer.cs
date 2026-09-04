@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(WeightDBContext))]
-    partial class WeightDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260903021916_PedidosRemake")]
+    partial class PedidosRemake
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,9 +32,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AlmacenName")
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -166,6 +166,36 @@ namespace Infrastructure.Migrations
                     b.ToTable("Turns");
                 });
 
+            modelBuilder.Entity("Core.Domain.Entities.Warehousing.Almacen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Hidden")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Almacenes");
+                });
+
             modelBuilder.Entity("Core.Domain.Entities.Weight.WeightDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -179,6 +209,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("FK_AlmacenId")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("FK_PedidoLineId")
                         .HasColumnType("integer");
@@ -209,6 +242,9 @@ namespace Infrastructure.Migrations
                     b.Property<double?>("RequiredAmount")
                         .HasColumnType("double precision");
 
+                    b.Property<bool>("RequiresDisTaring")
+                        .HasColumnType("boolean");
+
                     b.Property<double?>("SecondaryTare")
                         .HasColumnType("double precision");
 
@@ -222,6 +258,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FK_AlmacenId");
 
                     b.HasIndex("FK_PedidoLineId");
 
@@ -257,9 +295,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDischarge")
                         .HasColumnType("boolean");
 
                     b.Property<string>("Notes")
@@ -304,6 +339,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Domain.Entities.Weight.WeightDetail", b =>
                 {
+                    b.HasOne("Core.Domain.Entities.Warehousing.Almacen", "Almacen")
+                        .WithMany()
+                        .HasForeignKey("FK_AlmacenId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Core.Domain.Entities.ProviderOrders.PedidoLine", "PedidoLine")
                         .WithMany("WeightDetails")
                         .HasForeignKey("FK_PedidoLineId")
@@ -314,6 +354,8 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("FK_WeightEntryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Almacen");
 
                     b.Navigation("PedidoLine");
 

@@ -14,7 +14,17 @@ namespace BasculaInterface.ViewModels
         public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
-        public double TotalWeight => WeightEntry?.WeightDetails?.Where(d => d.IsLoaded).Sum(d => d.Weight) + WeightEntry?.TareWeight ?? 0;
+        public double TotalWeight
+        {
+            get
+            {
+                if (WeightEntry is null)
+                    return 0;
+
+                double loadedSum = WeightEntry.WeightDetails?.Where(d => d.IsLoaded).Sum(d => d.Weight) ?? 0;
+                return WeightEntry.IsDischarge ? WeightEntry.TareWeight - loadedSum : WeightEntry.TareWeight + loadedSum;
+            }
+        }
         public ObservableCollection<WeightEntryDetailRow> WeightEntryDetailRows { get; private set; } = [];
 
         public ObservableCollection<ExternalTargetBehaviorDto> ExternalTargetBehaviors { get; set; } = [];
