@@ -1,0 +1,56 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# The MAUI client (BasculaInterface) can't build on Linux (needs Windows workloads) and the
+# future FlaUI bot suite is Windows-only — both are excluded via BasculaInterface.CI.slnf.
+# This job covers Core.Domain / Core.Application / Infrastructure / BasculaTerminalApi and the
+# xUnit suite in BasculaTerminalTest.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore src/backend/BasculaInterface.CI.slnf
+
+      - name: Build
+        run: dotnet build src/backend/BasculaInterface.CI.slnf --no-restore -c Release
+
+      # "Category!=Live" skips BasculaClient (needs a running API + a real scale). It keeps the
+      # "Integration" tests, which spin up a throwaway PostgreSQL via Testcontainers — Docker is
+      # preinstalled on GitHub-hosted ubuntu runners, so no extra service setup is needed.
+      - name: Test
+        run: >
+          dotnet test src/backend/BasculaInterface.CI.slnf --no-build -c Release
+          --filter "Category!=Live"
+          --logger "trx;LogFileName=backend-tests.trx"
+          --results-directory ${{ github.workspace }}/test-results
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: backend test results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+
+      - name: Upload trx artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: test-results/*.trx

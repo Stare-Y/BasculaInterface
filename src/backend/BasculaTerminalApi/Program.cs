@@ -69,3 +69,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 await app.RunAsync();
+
+/// <summary>
+/// Explicit entry-point marker so the integration-test project can reference the host via
+/// <c>WebApplicationFactory&lt;Program&gt;</c>. Top-level-statement programs otherwise expose only
+/// an <c>internal</c> <c>Program</c> that a separate test assembly cannot see.
+/// </summary>
+public partial class Program { }

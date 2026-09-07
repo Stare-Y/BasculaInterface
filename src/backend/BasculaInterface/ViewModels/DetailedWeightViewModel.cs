@@ -2,6 +2,7 @@
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
+using Core.Application.Security;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -299,7 +300,7 @@ namespace BasculaInterface.ViewModels
         /// </summary>
         public async Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordPlaintext)
         {
-            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
 
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Product",
@@ -324,7 +325,7 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry must be set before changing its partner.");
             }
 
-            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
 
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/{WeightEntry.Id}/Partner",
@@ -347,7 +348,7 @@ namespace BasculaInterface.ViewModels
         /// </summary>
         public async Task ChangeDetailAmountAsync(int detailId, bool isGranel, double newValue, string passwordPlaintext)
         {
-            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
 
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Amount",
@@ -372,7 +373,7 @@ namespace BasculaInterface.ViewModels
         /// </summary>
         public async Task DeleteWeightDetailSafelyAsync(int detailId, string passwordPlaintext)
         {
-            string passwordHash = Services.PasswordHasher.HashSha256Hex(passwordPlaintext);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
 
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Delete",
