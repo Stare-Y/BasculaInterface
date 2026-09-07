@@ -1,19 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android;net8.0-windows10.0.19041.0</TargetFrameworks>
-		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>-->
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
-
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+		<!-- Windows-only. The app has only ever been deployed to the Windows terminal / VM;
+		     the Android head was dropped when net8.0-android went out of support. -->
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
 		<EnableWindowsTargeting Condition="$([MSBuild]::IsOSPlatform('linux'))">true</EnableWindowsTargeting>
-		<OutputType>Exe</OutputType>
+		<!-- GUI subsystem. A console Exe makes the WinUI window flash and close on launch. -->
+		<OutputType>WinExe</OutputType>
 		<RootNamespace>BasculaInterface</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -46,16 +39,7 @@
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
-	  <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
-	  <AndroidPackageFormat>apk</AndroidPackageFormat>
-	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
-		<!--<OutputType>WinExe</OutputType>-->
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	
 		<!-- Publish as single file and self-contained -->
@@ -93,7 +77,6 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <AndroidResource Remove="Views\Controls\**" />
 	  <Compile Remove="Views\Controls\**" />
 	  <EmbeddedResource Remove="Views\Controls\**" />
 	  <MauiCss Remove="Views\Controls\**" />
@@ -115,7 +98,7 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
 	</ItemGroup>

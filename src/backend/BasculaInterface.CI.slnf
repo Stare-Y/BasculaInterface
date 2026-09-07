@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "BasculaInterface.sln",
+    "projects": [
+      "Core.Domain\\Core.Domain.csproj",
+      "Core.Application\\Core.Application.csproj",
+      "Infrastructure\\Infrastructure.csproj",
+      "BasculaTerminalApi\\BasculaTerminalApi.csproj",
+      "BasculaTerminalTest\\BasculaTerminalTest.csproj"
+    ]
+  }
+}
