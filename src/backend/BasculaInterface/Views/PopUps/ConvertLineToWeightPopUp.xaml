@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="BasculaInterface.Views.PopUps.ConvertLineToWeightPopUp"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    IsVisible="False">
+
+    <!--
+        Modeled on ChangeAmountConfirmPopUp's ContentView + TaskCompletionSource pattern.
+        Lets the operator target a portion of a PedidoLine's pending amount and pick a
+        (mandatory) target almacén pre-filled from the product default before converting
+        to weight — design.md Decisions 3 and 5.
+    -->
+    <Grid
+        BackgroundColor="#80000000"
+        HorizontalOptions="Fill"
+        VerticalOptions="Fill"
+        ZIndex="999">
+        <Grid
+            x:Name="PopupOverlay"
+            Padding="20"
+            BackgroundColor="{AppThemeBinding Light={StaticResource 4},
+                                              Dark={StaticResource 2}}"
+            HorizontalOptions="Center"
+            MaximumWidthRequest="400"
+            MinimumWidthRequest="300"
+            RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+            RowSpacing="15"
+            VerticalOptions="Center">
+
+            <!--  Title  -->
+            <Label
+                x:Name="TitleLabel"
+                Grid.Row="0"
+                FontSize="18"
+                HorizontalOptions="Center"
+                Text="Convertir a peso" />
+
+            <!--  Pending amount  -->
+            <Label
+                x:Name="PendingLabel"
+                Grid.Row="1"
+                FontAttributes="Bold"
+                FontSize="16"
+                HorizontalOptions="Center"
+                Text="Pendiente: 0 kg" />
+
+            <!--  Target amount Entry  -->
+            <Entry
+                x:Name="TargetAmountEntry"
+                Grid.Row="2"
+                HorizontalOptions="Fill"
+                Keyboard="Numeric"
+                Placeholder="Cantidad a convertir..."
+                ReturnType="Next" />
+
+            <!--  Almacén Picker (mandatory, pre-filled from the product default)  -->
+            <Picker
+                x:Name="AlmacenPicker"
+                Grid.Row="3"
+                ItemDisplayBinding="{Binding AlmacenDisplayText}"
+                Title="Almacén destino (obligatorio)" />
+
+            <!--  Action Buttons  -->
+            <HorizontalStackLayout
+                Grid.Row="4"
+                HorizontalOptions="Center"
+                Spacing="10">
+
+                <Button
+                    x:Name="btnCancel"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                      Dark={StaticResource BlackGray}}"
+                    Clicked="OnPopupCancelClicked"
+                    CornerRadius="20"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    HeightRequest="50"
+                    Style="{StaticResource Boton}"
+                    Text="Cancelar"
+                    WidthRequest="150" />
+
+                <Button
+                    x:Name="btnConfirm"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
+                                                      Dark={StaticResource BlackGray}}"
+                    Clicked="OnPopupAcceptClicked"
+                    CornerRadius="20"
+                    FontSize="{OnPlatform Android=12,
+                                          WinUI=18}"
+                    HeightRequest="50"
+                    Style="{StaticResource Boton}"
+                    Text="Confirmar"
+                    WidthRequest="150" />
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+</ContentView>

@@ -501,6 +501,6 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnComprasProveedor_Clicked(object sender, EventArgs e)
     {
-        await Shell.Current.Navigation.PushModalAsync(new ProviderPurchaseListView());
+        await Shell.Current.Navigation.PushModalAsync(new PedidoListView());
     }
 }

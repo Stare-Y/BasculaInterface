@@ -276,7 +276,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 3).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph("BRUTO:", _settings.NormalFontSize, TextAlignment.RIGHT)));
+                .Add(BuildParagraph(entry.IsDischarge ? "PESO FINAL (VACÍO):" : "BRUTO:", _settings.NormalFontSize, TextAlignment.RIGHT)));
             table.AddCell(new Cell(1, 2).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.BruteWeight.ToString("F2") + "kg", _settings.SubTitleFontSize, TextAlignment.RIGHT, true)));
 
@@ -345,7 +345,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 1).SetBorder(Border.NO_BORDER)
-            .Add(BuildParagraph("TARA INICIAL:")));
+            .Add(BuildParagraph(entry.IsDischarge ? "PESO INICIAL (CARGADO):" : "TARA INICIAL:")));
 
             table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.TareWeight.ToString("F2") + "kg", textAlignment: TextAlignment.RIGHT, bold: true)));

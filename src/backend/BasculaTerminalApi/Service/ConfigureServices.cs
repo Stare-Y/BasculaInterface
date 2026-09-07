@@ -79,7 +79,9 @@ namespace BasculaTerminalApi.Service
 
             services.AddScoped<IExternalTargetBehaviorRepo, ExternalTargetBehaviorRepo>();
 
-            services.AddScoped<IProviderPurchaseRepo, ProviderPurchaseRepo>();
+            services.AddScoped<IPedidoRepo, PedidoRepo>();
+
+            services.AddScoped<IPedidoLineRepo, PedidoLineRepo>();
 
             services.AddTransient<IApiService, ApiService>();
             services.AddHttpClient<IApiService, ApiService>(client =>
@@ -103,7 +105,7 @@ namespace BasculaTerminalApi.Service
 
             services.AddScoped<IExternalTargetBehaviorService, ExternalTargetBehaviorService>();
 
-            services.AddScoped<IProviderPurchaseService, ProviderPurchaseService>();
+            services.AddScoped<IPedidoService, PedidoService>();
 
             return services;
         }

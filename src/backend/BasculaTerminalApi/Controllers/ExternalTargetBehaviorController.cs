@@ -24,6 +24,13 @@ namespace BasculaTerminalApi.Controllers
             return Ok(await _externalTargetBehaviorService.GetAllAsync());
         }
 
+        /// <summary>Hidden behaviors used as almacén targets for pedido conversion (design.md Decision 5).</summary>
+        [HttpGet("AlmacenTargets")]
+        public async Task<ActionResult<IEnumerable<ExternalTargetBehaviorDto>>> GetAlmacenTargets()
+        {
+            return Ok(await _externalTargetBehaviorService.GetAlmacenTargetsAsync());
+        }
+
         [HttpGet("ById")]
         public async Task<ActionResult<ExternalTargetBehaviorDto>> GetById([FromQuery] int id)
         {

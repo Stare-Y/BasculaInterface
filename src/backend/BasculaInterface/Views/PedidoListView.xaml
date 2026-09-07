@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="BasculaInterface.Views.ProviderPurchaseListView"
+    x:Class="BasculaInterface.Views.PedidoListView"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:BasculaInterface.Views.PopUps"
@@ -72,7 +72,7 @@
                     FontSize="{OnPlatform WinUI=28, Android=18}"
                     HorizontalOptions="Start"
                     Style="{StaticResource Label}"
-                    Text="Pedidos Pendientes a Proveedores"
+                    Text="Pedidos a Proveedores"
                     TextColor="{AppThemeBinding Light={StaticResource 4},
                                                 Dark={StaticResource 2}}" />
 
@@ -85,9 +85,9 @@
                     StrokeThickness="0">
 
                     <CollectionView
-                        x:Name="PurchasesCollectionView"
+                        x:Name="PedidosCollectionView"
                         HorizontalOptions="Center"
-                        SelectionChanged="PurchasesCollectionView_SelectionChanged"
+                        SelectionChanged="PedidosCollectionView_SelectionChanged"
                         SelectionMode="Single"
                         VerticalOptions="Start">
 
@@ -96,7 +96,7 @@
                         </CollectionView.ItemsLayout>
 
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:ProviderPurchaseViewRow">
+                            <DataTemplate x:DataType="models:PedidoViewRow">
                                 <Border
                                     Padding="15"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
@@ -130,21 +130,12 @@
                                                 HorizontalOptions="Start"
                                                 HorizontalTextAlignment="Start"
                                                 Style="{StaticResource Label}"
-                                                Text="{Binding ProductName}"
+                                                Text="{Binding LineCountText}"
                                                 TextColor="{AppThemeBinding Light={StaticResource Black},
                                                                             Dark={StaticResource 1}}" />
                                         </VerticalStackLayout>
 
                                         <VerticalStackLayout Grid.Column="1" Spacing="6">
-                                            <Label
-                                                FontAttributes="Bold"
-                                                FontSize="{OnPlatform WinUI=22, Android=13}"
-                                                HorizontalOptions="End"
-                                                Style="{StaticResource Label}"
-                                                Text="{Binding AmountText}"
-                                                TextColor="{AppThemeBinding Light={StaticResource Black},
-                                                                            Dark={StaticResource 1}}" />
-
                                             <Label
                                                 FontSize="{OnPlatform WinUI=18, Android=11}"
                                                 HorizontalOptions="End"

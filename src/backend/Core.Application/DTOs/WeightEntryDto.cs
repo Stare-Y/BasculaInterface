@@ -11,6 +11,9 @@ namespace Core.Application.DTOs
         public int? ExternalTargetBehaviorFK { get; set; }
         public double TareWeight { get; set; } = 0; //initial weight
         public double BruteWeight { get; set; } = 0; //final weight
+
+        /// <summary>True when the vehicle arrived loaded and is discharging (a pedido delivery) — BruteWeight counts down from TareWeight instead of up.</summary>
+        public bool IsDischarge { get; set; } = false;
         public DateTime? ConcludeDate { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string VehiclePlate { get; set; } = string.Empty;
@@ -34,6 +37,7 @@ namespace Core.Application.DTOs
             PartnerId = entry.PartnerId;
             TareWeight = entry.TareWeight;
             BruteWeight = entry.BruteWeight;
+            IsDischarge = entry.IsDischarge;
             ConcludeDate = entry.ConcludeDate;
             CreatedAt = entry.CreatedAt;
             Notes = entry.Notes;
@@ -53,6 +57,7 @@ namespace Core.Application.DTOs
                 PartnerId = PartnerId,
                 TareWeight = TareWeight,
                 BruteWeight = BruteWeight,
+                IsDischarge = IsDischarge,
                 ConcludeDate = ConcludeDate,
                 Notes = Notes,
                 VehiclePlate = VehiclePlate,
@@ -67,6 +72,7 @@ namespace Core.Application.DTOs
             entry.PartnerId = PartnerId;
             entry.TareWeight = TareWeight;
             entry.BruteWeight = BruteWeight;
+            entry.IsDischarge = IsDischarge;
             entry.ConcludeDate = ConcludeDate;
             entry.Notes = Notes;
             entry.VehiclePlate = VehiclePlate;
