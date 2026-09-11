@@ -27,4 +27,10 @@
     <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Lets BasculaTerminalTest unit-test the internal PrintService label helpers directly
+         instead of exercising the whole iText document-building path (tasks.md §12c). -->
+    <InternalsVisibleTo Include="BasculaTerminalTest" />
+  </ItemGroup>
+
 </Project>

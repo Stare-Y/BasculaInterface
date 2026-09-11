@@ -276,7 +276,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 3).SetBorder(Border.NO_BORDER)
-                .Add(BuildParagraph(entry.IsDischarge ? "PESO FINAL (VACÍO):" : "BRUTO:", _settings.NormalFontSize, TextAlignment.RIGHT)));
+                .Add(BuildParagraph(GetFinalWeightLabel(entry.IsDischarge), _settings.NormalFontSize, TextAlignment.RIGHT)));
             table.AddCell(new Cell(1, 2).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.BruteWeight.ToString("F2") + "kg", _settings.SubTitleFontSize, TextAlignment.RIGHT, true)));
 
@@ -290,6 +290,22 @@ namespace Infrastructure.Service
                 .SetFont(bold ? _boldFont : _regularFont)
                 .SetTextAlignment(textAlignment);
         }
+
+        /// <summary>
+        /// The ticket's "current running total" label (design.md Decision 7) — a discharge
+        /// entry's total counts down toward empty, so it reads as the final weight rather
+        /// than a brute (loaded) weight. Internal + <c>InternalsVisibleTo</c> so this can be
+        /// unit-tested without exercising the whole iText document-building path.
+        /// </summary>
+        internal static string GetFinalWeightLabel(bool isDischarge) =>
+            isDischarge ? "PESO FINAL (VACÍO):" : "BRUTO:";
+
+        /// <summary>
+        /// The ticket's "starting weight" label (design.md Decision 7) — a discharge entry
+        /// starts from the loaded vehicle, not an empty tare.
+        /// </summary>
+        internal static string GetInitialWeightLabel(bool isDischarge) =>
+            isDischarge ? "PESO INICIAL (CARGADO):" : "TARA INICIAL:";
         private async Task<Table> BuildWeightHeader(WeightEntryDto entry)
         {
             Table table = new(5);// 5 columns
@@ -345,7 +361,7 @@ namespace Infrastructure.Service
                 .Add(BuildParagraph()));// Empty row
 
             table.AddCell(new Cell(1, 1).SetBorder(Border.NO_BORDER)
-            .Add(BuildParagraph(entry.IsDischarge ? "PESO INICIAL (CARGADO):" : "TARA INICIAL:")));
+            .Add(BuildParagraph(GetInitialWeightLabel(entry.IsDischarge))));
 
             table.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER)
                 .Add(BuildParagraph(entry.TareWeight.ToString("F2") + "kg", textAlignment: TextAlignment.RIGHT, bold: true)));
