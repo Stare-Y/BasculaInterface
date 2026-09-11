@@ -60,14 +60,14 @@
 
 ## 8. Verification
 
-- [ ] 8.1 Unit/manual test: converting a line twice (partial, then the remainder) succeeds and pending reaches exactly 0 without a third conversion being possible
-- [ ] 8.2 Unit/manual test: converting more than the current pending amount is rejected
-- [ ] 8.3 Unit/manual test: `PATCH Line/{id}/Close` force-closes a line with pending > 0; `Concluded` reflects it immediately
-- [ ] 8.4 Unit/manual test: a `Pedido` header's computed `Concluded` flips to true only once every line is concluded (natural or manual)
-- [ ] 8.5 Manual test: ERP document submission resolves almacén as `product.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen` — granel product keeps its hardcoded code; non-granel uses the picked hidden behavior's `TargetAlmacen` ⚠️ HIGH-RISK path (Contpaqi document submission)
-- [ ] 8.6 Manual test: an operator sets `RequiresDisTaring=true` on a pedido line; converting it produces a `WeightDetail` with `RequiresDisTaring=true`; unchecking the box in the convert dialog produces one with `false` while the line keeps its value
-- [ ] 8.7 Regression test: non-pedido `WeightEntry`/`WeightDetail` flows (manual weigh-ins with no `FK_PedidoLineId`) are unaffected — including `WeightDetail.RequiresDisTaring` defaulting to `false`
-- [ ] 8.9 Manual test: the convert dialog forces an almacén-target choice (pre-filled by matching product `IdAlmacen` to a hidden behavior's `TargetAlmacen`) and shows an error instead of submitting when `GET /api/ExternalTargetBehavior/AlmacenTargets` is empty; server rejects a new-entry conversion with no/ non-hidden `ExternalTarget`
+- [x] 8.1 Unit/manual test: converting a line twice (partial, then the remainder) succeeds and pending reaches exactly 0 without a third conversion being possible — covered by `PedidoPartialFulfillmentFlowTests.Converting_a_line_twice_reaches_exactly_zero_pending_and_blocks_a_third_conversion` (§12d, 2026-09-11)
+- [x] 8.2 Unit/manual test: converting more than the current pending amount is rejected — covered by `PedidoServiceConvertLineToWeightTests.Throws_when_the_target_amount_exceeds_the_pending_amount` (unit) and `PedidoPartialFulfillmentFlowTests.Converting_more_than_the_pending_amount_is_rejected_with_400` (integration)
+- [x] 8.3 Unit/manual test: `PATCH Line/{id}/Close` force-closes a line with pending > 0; `Concluded` reflects it immediately — pure DTO logic, covered by `PedidoDtoTests.Line_is_concluded_when_manually_closed_regardless_of_pending` (§12a, 2026-09-11)
+- [x] 8.4 Unit/manual test: a `Pedido` header's computed `Concluded` flips to true only once every line is concluded (natural or manual) — covered by `PedidoDtoTests.Pedido_is_concluded_once_every_line_is_concluded_naturally_or_manually` + `Pedido_is_not_concluded_while_any_line_is_open` + `Pedido_with_no_lines_is_never_concluded` (§12a, 2026-09-11)
+- [ ] 8.5 Manual test: ERP document submission resolves almacén as `product.IdAlmacen ?? weightEntry.ExternalTargetBehavior.TargetAlmacen` — granel product keeps its hardcoded code; non-granel uses the picked hidden behavior's `TargetAlmacen` ⚠️ HIGH-RISK path (Contpaqi document submission) — needs real ERP; owner-gated, not automatable here
+- [x] 8.6 ~~Manual test: RequiresDisTaring on WeightDetail~~ — moot, `WeightDetail.RequiresDisTaring` was removed in §11a (reverted)
+- [x] 8.7 Regression test: non-pedido `WeightEntry`/`WeightDetail` flows (manual weigh-ins with no `FK_PedidoLineId`) are unaffected — the non-discharge `BruteWeight` path (the flow every non-pedido weigh-in uses) is covered by `WeightRepoDischargeTests.Normal_entry_adds_loaded_weight_to_tare` + `UpdateAsync_on_a_normal_entry_is_unaffected_by_the_discharge_branch` (§12b, 2026-09-11); no `FK_PedidoLineId`/`RequiresDisTaring` field remains to regress on non-pedido `WeightDetail`s (grep-confirmed clean in §11c.5)
+- [ ] 8.9 Manual test: the convert dialog forces an almacén-target choice (pre-filled by matching product `IdAlmacen` to a hidden behavior's `TargetAlmacen`) and shows an error instead of submitting when `GET /api/ExternalTargetBehavior/AlmacenTargets` is empty; server rejects a new-entry conversion with no/ non-hidden `ExternalTarget` — server-side half covered by `PedidoServiceConvertLineToWeightTests.Throws_when_creating_a_new_entry_without_a_valid_almacen_target` / `Throws_when_the_picked_target_is_not_a_hidden_almacen_behavior`; the MAUI dialog UX (pre-fill, empty-catalog error) remains owner smoke-test only
 - [x] 8.10 Grep test: `grep -rn "ProductWeighingConfig"` over `src/` is clean (no migration files exist yet either)
 - [ ] 8.8 Migration test: fresh database applies the new migration cleanly (**pending 2.2**); `grep -ri providerpurchase` confirmed clean except: historical migration files (expected, must not be edited), doc-comments in new files that reference the old model for context, and the not-yet-reworked MAUI files tracked under section 7
 
@@ -156,6 +156,30 @@ Owner feedback while validating section 10 (2026-09-04): `WeightDetail.RequiresD
 ### 11c. Migration & verification
 - [x] 11c.1 Generated `Infrastructure/Migrations/20260904212654_DischargeDirectionAndDisTaringRollback.cs` (scaffold-only connection string): `DropColumn(WeightDetails.RequiresDisTaring)`; `AddColumn(WeightEntries.IsDischarge boolean NOT NULL DEFAULT false)`. Snapshot updated; both `BasculaTerminalApi` and `BasculaTerminalTest` build clean (0/0)
 - [ ] 11c.2 **Owner action:** apply the migration
-- [ ] 11c.3 Manual test: a discharge entry's `BruteWeight` falls as products are captured, never exceeds `TareWeight`, and the printed ticket shows `"PESO INICIAL (CARGADO):"` (high) / `"PESO FINAL (VACÍO):"` (low) — never an apparent increase
-- [ ] 11c.4 Manual/regression test: a normal (non-pedido) weigh-in's `BruteWeight`/ticket labels are byte-for-byte the same as before this section
+- [x] 11c.3 Manual test: a discharge entry's `BruteWeight` falls as products are captured, never exceeds `TareWeight`, and the printed ticket shows `"PESO INICIAL (CARGADO):"` (high) / `"PESO FINAL (VACÍO):"` (low) — never an apparent increase — `BruteWeight` arithmetic + over-discharge guard covered by `WeightRepoDischargeTests` (§12b); ticket labels covered by `PrintServiceLabelTests` (§12c). Both 2026-09-11.
+- [x] 11c.4 Manual/regression test: a normal (non-pedido) weigh-in's `BruteWeight`/ticket labels are byte-for-byte the same as before this section — `BruteWeight` non-discharge path covered by `WeightRepoDischargeTests.Normal_entry_adds_loaded_weight_to_tare`/`UpdateAsync_on_a_normal_entry_is_unaffected_by_the_discharge_branch`; labels pinned to their pre-change text by `PrintServiceLabelTests` (`isDischarge: false` cases). §12b/§12c, 2026-09-11.
 - [x] 11c.5 `grep -rn "RequiresDisTaring"` over `src/` (excl. migrations) shows only `PedidoLine`/`PedidoLineDto`/`PedidoLineRepo`/the Pedido-form MAUI files — zero hits in `WeightDetail`/`WeightDetailDto`/`PedidoService`'s convert path/the convert popup
+
+## 12. Close the automatable §8/§11c verification gaps (explore pass, 2026-09-11)
+
+The automated-test-foundations suite (2026-09-06) closed §8.2/§8.9-server incidentally without anyone reconciling this checklist against it. This section closes what's left that doesn't require a real DB/ERP/MAUI, so only genuinely owner-gated items remain (§8.5, §8.8, §9c.5, §10c.5, §10d.2, §11c.2).
+
+### 12a. `Concluded` / `Close` semantics (closes §8.3, §8.4)
+- [x] 12a.1 New `BasculaTerminalTest/Unit/Application/PedidoDtoTests.cs`: `PedidoLineDto.Concluded` is true when `ManuallyClosed=true` regardless of pending; true when pending reaches exactly 0 (and when it overshoots); false otherwise
+- [x] 12a.2 Same file: `PedidoDto.Concluded` is false with zero lines, false while any line is unconcluded, true only once every line is concluded (mix of natural-zero-pending and manually-closed lines)
+
+### 12b. `WeightRepo` discharge arithmetic (closes §11c.3, §11c.4's BruteWeight half, contributes to §8.7)
+- [x] 12b.1 Added `Microsoft.EntityFrameworkCore.InMemory` 9.0.9 (version-matched to `Microsoft.EntityFrameworkCore.SqlServer`) to `BasculaTerminalTest.csproj`
+- [x] 12b.2 New `BasculaTerminalTest/Unit/Infrastructure/WeightRepoDischargeTests.cs`: `RecomputeBruteWeightAsync`/`MarkDetailLoadedAsync`/`UpdateAsync` compute `TareWeight - Σloaded` when `IsDischarge`, `TareWeight + Σloaded` otherwise; over-discharge throws `InvalidOperationException`; unloaded/deleted details excluded. **Each test seeds and exercises through separate `WeightDBContext` instances on the same InMemory database name** — a single shared context let change-tracker relationship fixup silently bypass the repo's filtered `!IsDeleted` includes during a first draft (caught by `Unloaded_and_deleted_details_are_excluded_from_the_running_total` failing); the fix also better mirrors the real per-request scoped context.
+
+### 12c. `PrintService` ticket labels (closes §11c.4's label half)
+- [x] 12c.1 Extracted the two `entry.IsDischarge ? "..." : "..."` ternaries (`PrintService.cs`) into `internal static GetFinalWeightLabel`/`GetInitialWeightLabel` on `PrintService` — behavior-preserving, `BuildWeightDetailsTable`/`BuildWeightHeader` just call them
+- [x] 12c.2 `<InternalsVisibleTo Include="BasculaTerminalTest" />` added to `Infrastructure.csproj` (none existed before)
+- [x] 12c.3 New `BasculaTerminalTest/Unit/Infrastructure/PrintServiceLabelTests.cs`: both helpers return the discharge-labeled string when `true` and the original pre-change string when `false`
+
+### 12d. Full partial-fulfillment loop (closes §8.1)
+- [x] 12d.1 Extended `PedidoPartialFulfillmentFlowTests` with `Converting_a_line_twice_reaches_exactly_zero_pending_and_blocks_a_third_conversion`: converts 60 then the remaining 40 of a 100 line, asserts `PendingAmount == 0` and `Concluded == true`, then asserts a third conversion attempt is rejected with 400
+
+### 12e. Bookkeeping
+- [x] 12e.1 `dotnet test` on `BasculaInterface.CI.slnf --filter "Category!=Live"`: 67/67 green (60 unit + 7 integration), 0 warn/0 err build. Unit tier alone (`Category!=Integration&Category!=Live`, no Docker/Podman) also verified green on its own — the new InMemory-based tests stay runnable without a container engine, as intended.
+- [x] 12e.2 §8.1/§8.3/§8.4/§8.7/§11c.3/§11c.4 re-checked above, each citing the new test name(s)

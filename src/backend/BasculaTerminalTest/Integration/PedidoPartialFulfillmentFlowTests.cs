@@ -67,5 +67,40 @@ namespace BasculaTerminalTest.Integration
 
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, resp.StatusCode);
         }
+
+        [Fact]
+        public async Task Converting_a_line_twice_reaches_exactly_zero_pending_and_blocks_a_third_conversion()
+        {
+            int behaviorId = await PedidoFlow.SeedHiddenAlmacenTargetAsync(_factory);
+            (int pedidoId, int lineId) = await PedidoFlow.CreatePedidoWithLineAsync(_client, requiredAmount: 100m);
+
+            // First visit: 60 of 100.
+            WeightEntryDto first = await PedidoFlow.ConvertLineAndSetTareAsync(_client, lineId, targetAmount: 60m, behaviorId);
+            await (await _client.PutAsJsonAsync(
+                $"/api/Weight/Detail/{first.WeightDetails.Single().Id}/Weight",
+                new RecordWeightRequest(60, "integration-test"))).EnsureOk();
+
+            PedidoDto afterFirst = await (await _client.GetAsync($"/api/Pedido/{pedidoId}")).ReadAs<PedidoDto>();
+            PedidoLineDto lineAfterFirst = afterFirst.Lines.Single();
+            Assert.Equal(40m, lineAfterFirst.PendingAmount);
+            Assert.False(lineAfterFirst.Concluded);
+
+            // Second visit: the remaining 40 — a fresh weight entry, same line.
+            WeightEntryDto second = await PedidoFlow.ConvertLineAndSetTareAsync(_client, lineId, targetAmount: 40m, behaviorId);
+            await (await _client.PutAsJsonAsync(
+                $"/api/Weight/Detail/{second.WeightDetails.Single().Id}/Weight",
+                new RecordWeightRequest(40, "integration-test"))).EnsureOk();
+
+            PedidoDto afterSecond = await (await _client.GetAsync($"/api/Pedido/{pedidoId}")).ReadAs<PedidoDto>();
+            PedidoLineDto lineAfterSecond = afterSecond.Lines.Single();
+            Assert.Equal(0m, lineAfterSecond.PendingAmount);
+            Assert.True(lineAfterSecond.Concluded);
+
+            // A third conversion attempt must be rejected — nothing left to convert.
+            var thirdResp = await _client.PostAsJsonAsync(
+                $"/api/Pedido/Line/{lineId}/ConvertToWeight",
+                new ConvertLineToWeightRequest(null, 1m, behaviorId.ToString()));
+            Assert.Equal(System.Net.HttpStatusCode.BadRequest, thirdResp.StatusCode);
+        }
     }
 }
