@@ -153,6 +153,19 @@
                 </Setter>
             </Style>
 
+            <!--
+                Compact variant of "Boton" for inline per-item actions (e.g. the Pedido lines
+                list) where the page-sized 280x80 WinUI button is too heavy. Same colors/border
+                behavior, smaller footprint.
+            -->
+            <Style x:Key="BotonChico" TargetType="Button" BasedOn="{StaticResource Boton}">
+                <Setter Property="FontSize" Value="{OnPlatform Android=13, WinUI=16}" />
+                <Setter Property="WidthRequest" Value="{OnPlatform Android=80, WinUI=120}" />
+                <Setter Property="HeightRequest" Value="{OnPlatform Android=40, WinUI=48}" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="BorderWidth" Value="2" />
+            </Style>
+
             <Style x:Key="HoverButton" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="Transparent" />
                 <Setter Property="BorderColor" Value="Transparent" />

@@ -41,6 +41,7 @@ public partial class PedidoFormView : ContentPage
         LblStatus.TextColor = isConcluded ? Colors.Green : Colors.Gray;
 
         BtnDelete.IsVisible = !isConcluded;
+        BtnDeleteAndroid.IsVisible = !isConcluded;
         LinesSection.IsVisible = true;
 
         if (isConcluded)
@@ -49,6 +50,7 @@ public partial class PedidoFormView : ContentPage
             DatePickerExpectedArrival.IsEnabled = false;
             EditorNotes.IsEnabled = false;
             BtnSave.IsVisible = false;
+            BtnSaveAndroid.IsVisible = false;
             BtnPickNewLineProduct.IsEnabled = false;
             BtnAddLine.IsEnabled = false;
         }
@@ -137,6 +139,7 @@ public partial class PedidoFormView : ContentPage
                 // before a PedidoLine can reference it).
                 LblTitle.Text = "Editar Pedido";
                 BtnDelete.IsVisible = true;
+                BtnDeleteAndroid.IsVisible = true;
                 LinesSection.IsVisible = true;
                 await ViewModel.LoadAlmacenTargetsAsync();
                 LinesCollectionView.ItemsSource = ViewModel.LineRows;
@@ -217,6 +220,14 @@ public partial class PedidoFormView : ContentPage
         }
     }
 
+    private void LineRowHeader_Tapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Parameter is not PedidoLineViewRow row)
+            return;
+
+        row.IsExpanded = !row.IsExpanded;
+    }
+
     private async void BtnConvertLine_Clicked(object sender, EventArgs e)
     {
         if (sender is not Button button || button.CommandParameter is not PedidoLineViewRow row)
@@ -284,7 +295,7 @@ public partial class PedidoFormView : ContentPage
         }
     }
 
-    private async void BtnCancel_Clicked(object sender, EventArgs e)
+    private async void BtnBack_Clicked(object sender, EventArgs e)
     {
         await Shell.Current.Navigation.PopAsync();
     }
