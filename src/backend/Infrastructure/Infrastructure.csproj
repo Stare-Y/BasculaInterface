@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Needed for IHttpContextAccessor (CurrentUserService) — this project isn't Sdk.Web, so the
-         ASP.NET Core shared framework isn't referenced implicitly (issue #134). -->
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Migrations\ContpaqiSQL\**" />
     <EmbeddedResource Remove="Migrations\ContpaqiSQL\**" />
     <None Remove="Migrations\ContpaqiSQL\**" />

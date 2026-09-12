@@ -31,7 +31,7 @@
 - [x] 4.2 `IAuthService`/`AuthService`: `LoginAsync` resolves UserCode→Username, verifies password, issues JWT + effective-permissions `UserDto`
 - [x] 4.3 `IPermissionService`/`PermissionService`: role-default table + tri-state override resolution + `Sudo` short-circuit
 - [x] 4.4 `IGateAuthorizationService`/`GateAuthorizationService`: `TryAuthorizeAsync(identifier, password)`
-- [x] 4.5 `ICurrentUserService`/`CurrentUserService` (wraps `IHttpContextAccessor`, required adding a `FrameworkReference` to `Microsoft.AspNetCore.App` on `Infrastructure.csproj` since it isn't an `Sdk.Web` project)
+- [x] 4.5 `ICurrentUserService` (interface, `Core.Application`) / `CurrentUserService` (impl, wraps `IHttpContextAccessor`). **Corrected placement**: the implementation lives in `BasculaTerminalApi/Service/` (an `Sdk.Web` project, which has the ASP.NET Core framework natively), not in the shared `Infrastructure` project. An earlier pass put it in `Infrastructure` behind a `FrameworkReference Include="Microsoft.AspNetCore.App"`, which leaked that framework reference into the MAUI client `BasculaInterface` (which also references `Infrastructure`) and broke its Release/win-x64 ReadyToRun publish with a crossgen error on `ITlsHandshakeFeature.HostName` — caught and fixed after the owner hit it on a real build.
 - [x] 4.6 (unplanned) `IUserService`/`UserService` and `IAuditLogRepo`/`AuditLogRepo`/`IAuditLogService`/`AuditLogService` — needed for tasks 5.2/5.5/6.5, not separately called out in the original task list
 
 ## 5. Backend — controllers
