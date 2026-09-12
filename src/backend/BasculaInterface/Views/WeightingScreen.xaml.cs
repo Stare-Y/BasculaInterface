@@ -10,19 +10,25 @@ public partial class WeightingScreen : ContentPage
     public double Tara { get; set; }
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
-    private readonly ISessionService _sessionService;
+    private readonly ISessionService? _sessionService;
 
     // Server-side CanCaptureWeightManually permission replaces the old device-local "Capturar
     // peso manualmente" Preferences toggle outright (issue #134 / design.md Decision 8).
-    private bool CanCaptureWeightManually => _sessionService.CurrentUser?.CanCaptureWeightManually ?? false;
+    // Null-conditional on _sessionService itself, not just CurrentUser: InitializeComponent() can
+    // synchronously fire PesoLabel_TextChanged (a XAML-wired event) before a field assigned in the
+    // constructor body normally would be — resolving the service before InitializeComponent()
+    // below avoids that window, but this stays defensive in case any other timing path hits it.
+    private bool CanCaptureWeightManually => _sessionService?.CurrentUser?.CanCaptureWeightManually ?? false;
 
     public WeightingScreen(BasculaViewModel viewModel)
     {
-        InitializeComponent();
-        BindingContext = viewModel;
-
+        // Resolved before InitializeComponent() deliberately — see CanCaptureWeightManually's
+        // comment above.
         _sessionService = MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService
             ?? throw new InvalidOperationException("ISessionService not registered.");
+
+        InitializeComponent();
+        BindingContext = viewModel;
 
         GridManualToggle.IsVisible = CanCaptureWeightManually;
 
