@@ -12,6 +12,7 @@ namespace BasculaTerminalApi.Controllers
     public record ChangePartnerRequest(int NewPartnerId, string PasswordHash);
     public record ChangeDetailAmountRequest(double? NewWeight, double? NewRequiredAmount, string PasswordHash);
     public record DeleteDetailRequest(string PasswordHash);
+    public record DeleteWeightEntryRequest(string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -171,18 +172,21 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        [HttpPatch("{id}/Delete")]
+        public async Task<IActionResult> DeleteSafely(int id, [FromBody] DeleteWeightEntryRequest request)
         {
             try
             {
-                bool deleted = await _weightService.DeleteAsync(id);
-                if (!deleted)
-                {
-                    return NotFound($"Weight entry with ID {id} not found.");
-                }
-
-                return NoContent();
+                await _weightService.DeleteSafelyAsync(id, request.PasswordHash);
+                return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Weight entry with ID {id} not found.");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
             }
             catch (Exception ex)
             {

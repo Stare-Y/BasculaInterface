@@ -9,10 +9,11 @@ using NSubstitute;
 namespace BasculaTerminalTest.Unit.Infrastructure
 {
     /// <summary>
-    /// The four manager-override actions on <see cref="WeightService"/> all sit behind the same
-    /// shared SHA-256 password gate (issue #122). These tests pin the gate itself: a wrong or
-    /// unconfigured password must throw <see cref="UnauthorizedAccessException"/> before any repo
-    /// work happens, and a correct password must let the call through to the repo.
+    /// The five manager-override actions on <see cref="WeightService"/> all sit behind the same
+    /// shared SHA-256 password gate (issue #122, extended to whole-entry delete by issue #133 /
+    /// extend-delete-password-gate). These tests pin the gate itself: a wrong or unconfigured
+    /// password must throw <see cref="UnauthorizedAccessException"/> before any repo work happens,
+    /// and a correct password must let the call through to the repo.
     /// </summary>
     public class WeightServicePasswordGateTests
     {
@@ -25,6 +26,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
             ChangePartner,
             ChangeDetailAmount,
             DeleteDetailSafely,
+            DeleteSafely,
         }
 
         private readonly IWeightRepo _weightRepo = Substitute.For<IWeightRepo>();
@@ -47,6 +49,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
             GatedAction.ChangePartner => sut.ChangePartnerAsync(weightId: 1, newPartnerId: 2, password),
             GatedAction.ChangeDetailAmount => sut.ChangeDetailAmountAsync(detailId: 1, newWeight: 10.0, newRequiredAmount: null, password),
             GatedAction.DeleteDetailSafely => sut.DeleteDetailSafelyAsync(detailId: 1, password),
+            GatedAction.DeleteSafely => sut.DeleteSafelyAsync(id: 1, password),
             _ => throw new ArgumentOutOfRangeException(nameof(action)),
         };
 
@@ -55,6 +58,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         [InlineData(GatedAction.ChangePartner)]
         [InlineData(GatedAction.ChangeDetailAmount)]
         [InlineData(GatedAction.DeleteDetailSafely)]
+        [InlineData(GatedAction.DeleteSafely)]
         public async Task Rejects_a_wrong_password_without_touching_the_repo(GatedAction action)
         {
             WeightService sut = CreateSut(configuredHash: CorrectHash);
@@ -69,6 +73,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         [InlineData(GatedAction.ChangePartner)]
         [InlineData(GatedAction.ChangeDetailAmount)]
         [InlineData(GatedAction.DeleteDetailSafely)]
+        [InlineData(GatedAction.DeleteSafely)]
         public async Task Rejects_when_unconfigured_even_if_the_submitted_hash_is_also_empty(GatedAction action)
         {
             WeightService sut = CreateSut(configuredHash: string.Empty);
@@ -83,6 +88,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         [InlineData(GatedAction.ChangePartner)]
         [InlineData(GatedAction.ChangeDetailAmount)]
         [InlineData(GatedAction.DeleteDetailSafely)]
+        [InlineData(GatedAction.DeleteSafely)]
         public async Task Accepts_a_correct_password_case_insensitively_and_proceeds_to_the_repo(GatedAction action)
         {
             // A real detail/entry so code past the gate reaches the repo instead of NRE-ing first.

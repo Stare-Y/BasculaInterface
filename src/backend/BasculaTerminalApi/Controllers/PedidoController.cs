@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace BasculaTerminalApi.Controllers
 {
     public record ConvertLineToWeightRequest(int? WeightEntryId, decimal? TargetAmount, string? ExternalTarget);
+    public record DeletePedidoRequest(string PasswordHash);
+    public record DeletePedidoLineRequest(string PasswordHash);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -100,18 +102,22 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery] int id)
+        [HttpPatch("{id}/Delete")]
+        public async Task<IActionResult> DeleteSafely(int id, [FromBody] DeletePedidoRequest request)
         {
             try
             {
-                bool deleted = await _pedidoService.DeleteAsync(id);
+                bool deleted = await _pedidoService.DeleteSafelyAsync(id, request.PasswordHash);
                 if (!deleted)
                 {
                     return NotFound(new GenericResponse<string> { Message = $"Pedido with ID {id} not found." });
                 }
 
-                return NoContent();
+                return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
             }
             catch (Exception ex)
             {
@@ -159,18 +165,22 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpDelete("Line")]
-        public async Task<IActionResult> DeleteLine([FromQuery] int id)
+        [HttpPatch("Line/{id}/Delete")]
+        public async Task<IActionResult> DeleteLineSafely(int id, [FromBody] DeletePedidoLineRequest request)
         {
             try
             {
-                bool deleted = await _pedidoService.DeleteLineAsync(id);
+                bool deleted = await _pedidoService.DeleteLineSafelyAsync(id, request.PasswordHash);
                 if (!deleted)
                 {
                     return NotFound(new GenericResponse<string> { Message = $"PedidoLine with ID {id} not found." });
                 }
 
-                return NoContent();
+                return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
             }
             catch (Exception ex)
             {

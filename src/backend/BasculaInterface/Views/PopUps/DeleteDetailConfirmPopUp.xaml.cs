@@ -49,10 +49,14 @@ public partial class DeleteDetailConfirmPopUp : ContentView
 
     // Returns the plaintext password entered, or null if the user cancelled.
     // Hashing happens in the caller (ViewModel), keeping this popup a plain input control.
-    public Task<string?> ShowAsync(string detailDescription)
+    // `title` lets this same control be reused for deleting a WeightEntry or a Pedido, not just
+    // a WeightDetail (issue #133 / extend-delete-password-gate) — defaults to the original
+    // wording so the existing detail-delete call site doesn't need to change.
+    public Task<string?> ShowAsync(string detailDescription, string title = "Eliminar producto:")
     {
         _tcs = new TaskCompletionSource<string?>();
 
+        TitleLabel.Text = title;
         DetailDescriptionLabel.Text = string.IsNullOrWhiteSpace(detailDescription) ? "Producto" : detailDescription;
 
         this.IsVisible = true;

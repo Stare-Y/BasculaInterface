@@ -100,7 +100,15 @@ namespace BasculaInterface.ViewModels
 
         public DetailedWeightViewModel() { }
 
-        public async Task DeleteWeightEntry()
+        /// <summary>
+        /// Deletes the whole WeightEntry via the password-gated endpoint (issue #133 /
+        /// extend-delete-password-gate). Requires the manager password (plaintext here — hashed
+        /// before it ever reaches the API, see PasswordHasher). Reuses the same shared password as
+        /// every other guarded mutation. Throws on wrong password, an entry that already has a
+        /// Contpaqi document, or a missing entry; the caller (View code-behind) is responsible for
+        /// surfacing that to the user.
+        /// </summary>
+        public async Task DeleteWeightEntry(string passwordPlaintext)
         {
             if (WeightEntry == null)
             {
@@ -110,8 +118,13 @@ namespace BasculaInterface.ViewModels
             {
                 throw new InvalidOperationException("WeightEntry.Id must be a valid positive integer.");
             }
-            // Send delete request to the API
-            await _apiService.DeleteAsync($"api/Weight?id={WeightEntry.Id}");
+
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Weight/{WeightEntry.Id}/Delete",
+                new { PasswordHash = passwordHash });
+
             WeightEntry = null;
             Partner = null;
             WeightEntryDetailRows.Clear();

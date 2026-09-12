@@ -181,9 +181,29 @@ namespace Infrastructure.Service
             }
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task DeleteSafelyAsync(int id, string passwordHash)
         {
-            return await _weightRepo.DeleteAsync(id);
+            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync/
+            // ChangeDetailAmountAsync/DeleteDetailSafelyAsync (see design.md Decision 3 of
+            // extend-delete-password-gate).
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
+            // Propagates KeyNotFoundException if the entry doesn't exist (or is already deleted).
+            WeightEntry entry = await _weightRepo.GetByIdAsync(id);
+
+            // Blocked once a Contpaqi document already exists — mirrors the same guard every
+            // sibling guarded mutation on WeightEntry/WeightDetail enforces. Deliberately NOT
+            // based on ConcludeDate (design.md Decision 2 of extend-delete-password-gate).
+            if (entry.ConptaqiComercialFK > 0)
+            {
+                throw new InvalidOperationException("Este proceso ya cuenta con un documento en Contpaqi; no se puede eliminar.");
+            }
+
+            await _weightRepo.DeleteAsync(id);
         }
 
         public Task<bool> DeleteDetailAsync(int id)

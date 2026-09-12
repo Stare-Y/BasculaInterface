@@ -1,6 +1,7 @@
 using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
+using Core.Application.Security;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
 
@@ -158,9 +159,20 @@ namespace BasculaInterface.ViewModels
             return Pedido;
         }
 
-        public async Task DeletePedidoAsync(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Deletes the whole Pedido via the password-gated endpoint (issue #133 /
+        /// extend-delete-password-gate). Requires the manager password (plaintext here — hashed
+        /// before it ever reaches the API, see PasswordHasher). Reuses the same shared password as
+        /// every WeightEntry/WeightDetail guarded mutation.
+        /// </summary>
+        public async Task DeletePedidoAsync(string passwordPlaintext, CancellationToken cancellationToken = default)
         {
-            await _apiService.DeleteAsync($"api/Pedido?id={Pedido.Id}", cancellationToken);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Pedido/{Pedido.Id}/Delete",
+                new { PasswordHash = passwordHash },
+                cancellationToken);
         }
 
         public async Task AddLineAsync(int productId, decimal requiredAmount, decimal? price, string? notes, bool requiresDisTaring, CancellationToken cancellationToken = default)

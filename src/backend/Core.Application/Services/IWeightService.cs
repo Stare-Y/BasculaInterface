@@ -18,7 +18,7 @@ namespace Core.Application.Services
         Task RecordWeightAsync(int detailId, double weight, string weightedBy);
         Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId);
         Task ConcludeAsync(int weightEntryId);
-        Task<bool> DeleteAsync(int id);
+        Task DeleteSafelyAsync(int id, string passwordHash);
         Task<bool> DeleteDetailAsync(int id);
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
         Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);

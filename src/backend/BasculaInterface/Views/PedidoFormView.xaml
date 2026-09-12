@@ -412,5 +412,6 @@
 
         <components:WaitPopUp x:Name="WaitPopUp" />
         <components:ConvertLineToWeightPopUp x:Name="ConvertPopUp" />
+        <components:DeleteDetailConfirmPopUp x:Name="DeletePedidoPopUp" />
     </Grid>
 </ContentPage>

@@ -1,6 +1,7 @@
 using BasculaInterface.Models;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
+using Core.Application.Security;
 using Core.Application.Services;
 using System.Collections.ObjectModel;
 
@@ -88,9 +89,19 @@ namespace BasculaInterface.ViewModels
             await LoadPedidosAsync(cancellationToken);
         }
 
-        public async Task DeletePedidoAsync(int id, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Deletes a Pedido via the password-gated endpoint (issue #133 / extend-delete-password-gate).
+        /// No View currently calls this — kept in sync with the gated endpoint so it doesn't become
+        /// a latent gap if a delete action is added to the pedido list later.
+        /// </summary>
+        public async Task DeletePedidoAsync(int id, string passwordPlaintext, CancellationToken cancellationToken = default)
         {
-            await _apiService.DeleteAsync($"api/Pedido?id={id}", cancellationToken);
+            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
+
+            await _apiService.PatchAsync<GenericResponse<string>>(
+                $"api/Pedido/{id}/Delete",
+                new { PasswordHash = passwordHash },
+                cancellationToken);
         }
     }
 }

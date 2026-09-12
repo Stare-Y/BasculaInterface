@@ -998,22 +998,30 @@ public partial class DetailedWeightView : ContentPage
         await BtnDeleteEntry.ScaleTo(1.1, 100);
         await BtnDeleteEntry.ScaleTo(1.0, 100);
 
-        if (BindingContext is not DetailedWeightViewModel viewModel)
+        if (BindingContext is not DetailedWeightViewModel viewModel || viewModel.WeightEntry == null)
         {
             return;
         }
 
-        bool confirmed = await DisplayAlert("Confirmación", "¿Estás seguro de que deseas eliminar toda la entrada de peso? Esta acción no se puede deshacer.", "No", "Si");
+        // No separate yes/no dialog — the password prompt itself is the confirmation, mirroring
+        // StartDeleteDetailFlow's shape (issue #133 / extend-delete-password-gate).
+        string? password = await DeleteDetailPopUp.ShowAsync(
+            $"Folio #{viewModel.WeightEntry.Id}",
+            "Eliminar entrada de peso:");
 
-        if (confirmed)
-            return;
+        if (string.IsNullOrEmpty(password))
+            return; // cancelled
 
         WaitPopUp.Show("Eliminando entrada de peso, espere...");
         try
         {
-            await viewModel.DeleteWeightEntry();
+            await viewModel.DeleteWeightEntry(password);
 
             await Shell.Current.Navigation.PopAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", "No se pudo eliminar la entrada de peso: " + ex.Message, "OK");
         }
         finally
         {

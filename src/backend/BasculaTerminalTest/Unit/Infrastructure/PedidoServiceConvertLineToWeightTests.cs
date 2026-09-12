@@ -1,9 +1,11 @@
+using BasculaTerminalTest.TestDoubles;
 using Core.Application.DTOs;
 using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.ProviderOrders;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
 using Infrastructure.Service;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace BasculaTerminalTest.Unit.Infrastructure
@@ -27,7 +29,12 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         private readonly IWeightRepo _weightRepo = Substitute.For<IWeightRepo>();
         private readonly IExternalTargetBehaviorRepo _behaviorRepo = Substitute.For<IExternalTargetBehaviorRepo>();
 
-        private PedidoService CreateSut() => new(_pedidoRepo, _pedidoLineRepo, _weightRepo, _behaviorRepo);
+        private PedidoService CreateSut() => new(
+            _pedidoRepo,
+            _pedidoLineRepo,
+            _weightRepo,
+            _behaviorRepo,
+            Options.Create(TestData.WeightSettings()));
 
         private static PedidoLine Line(decimal requiredAmount, bool manuallyClosed = false, params WeightDetail[] details) => new()
         {

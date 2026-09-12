@@ -9,11 +9,11 @@ namespace Core.Application.Services
         Task<IEnumerable<PedidoDto>> GetAllAsync(int top = 30, uint page = 1);
         Task<IEnumerable<PedidoDto>> GetByProviderIdAsync(int providerId, int top = 30, uint page = 1);
         Task UpdateAsync(PedidoDto dto);
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteSafelyAsync(int id, string passwordHash);
 
         Task<PedidoLineDto> CreateLineAsync(PedidoLineDto dto);
         Task UpdateLineAsync(PedidoLineDto dto);
-        Task<bool> DeleteLineAsync(int id);
+        Task<bool> DeleteLineSafelyAsync(int id, string passwordHash);
 
         /// <summary>Force-closes a line (design.md Decision 4) — accepts a short/cancelled shipment.</summary>
         Task CloseLineAsync(int lineId);

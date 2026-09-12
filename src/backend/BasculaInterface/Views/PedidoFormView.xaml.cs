@@ -157,14 +157,19 @@ public partial class PedidoFormView : ContentPage
 
     private async void BtnDelete_Clicked(object sender, EventArgs e)
     {
-        bool confirmed = await DisplayAlert("Confirmar", "¿Deseas eliminar este pedido?", "Sí", "No");
-        if (!confirmed)
-            return;
+        // No separate yes/no dialog — the password prompt itself is the confirmation, mirroring
+        // DetailedWeightView.BtnDeleteEntry_Clicked's shape (issue #133 / extend-delete-password-gate).
+        string? password = await DeletePedidoPopUp.ShowAsync(
+            $"Pedido #{ViewModel.Pedido.Id}",
+            "Eliminar pedido:");
+
+        if (string.IsNullOrEmpty(password))
+            return; // cancelled
 
         WaitPopUp.Show("Eliminando pedido, espere");
         try
         {
-            await ViewModel.DeletePedidoAsync();
+            await ViewModel.DeletePedidoAsync(password);
 
             await DisplayAlert("Éxito", "Pedido eliminado.", "OK");
 

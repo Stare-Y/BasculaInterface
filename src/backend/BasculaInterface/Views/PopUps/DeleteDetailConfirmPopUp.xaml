@@ -24,6 +24,7 @@
 
             <!--  Title  -->
             <Label
+                x:Name="TitleLabel"
                 Grid.Row="0"
                 FontSize="18"
                 HorizontalOptions="Center"

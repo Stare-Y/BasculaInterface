@@ -1,9 +1,11 @@
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Application.Settings;
 using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.ProviderOrders;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Service
 {
@@ -13,17 +15,20 @@ namespace Infrastructure.Service
         private readonly IPedidoLineRepo _pedidoLineRepo;
         private readonly IWeightRepo _weightRepo;
         private readonly IExternalTargetBehaviorRepo _externalTargetBehaviorRepo;
+        private readonly WeightSettings _weightSettings;
 
         public PedidoService(
             IPedidoRepo pedidoRepo,
             IPedidoLineRepo pedidoLineRepo,
             IWeightRepo weightRepo,
-            IExternalTargetBehaviorRepo externalTargetBehaviorRepo)
+            IExternalTargetBehaviorRepo externalTargetBehaviorRepo,
+            IOptions<WeightSettings> weightSettingsOptions)
         {
             _pedidoRepo = pedidoRepo;
             _pedidoLineRepo = pedidoLineRepo;
             _weightRepo = weightRepo;
             _externalTargetBehaviorRepo = externalTargetBehaviorRepo;
+            _weightSettings = weightSettingsOptions.Value;
         }
 
         public async Task<PedidoDto> CreateAsync(PedidoDto dto)
@@ -57,8 +62,17 @@ namespace Infrastructure.Service
             await _pedidoRepo.UpdateAsync(dto.ToEntity());
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteSafelyAsync(int id, string passwordHash)
         {
+            // Reuses the same shared "manager override" password as every WeightDetail guarded
+            // mutation (see design.md Decision 3 of extend-delete-password-gate) — Pedido has no
+            // password setting of its own.
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
             return await _pedidoRepo.DeleteAsync(id);
         }
 
@@ -74,8 +88,16 @@ namespace Infrastructure.Service
             await _pedidoLineRepo.UpdateAsync(dto.ToEntity());
         }
 
-        public async Task<bool> DeleteLineAsync(int id)
+        public async Task<bool> DeleteLineSafelyAsync(int id, string passwordHash)
         {
+            // Same shared password as DeleteSafelyAsync above. Gated even though no UI caller
+            // exists yet, so the gap can't resurface silently when one is added.
+            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
+                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+            }
+
             return await _pedidoLineRepo.DeleteAsync(id);
         }
 
