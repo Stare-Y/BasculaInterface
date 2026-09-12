@@ -17,7 +17,7 @@
 ## 3. Bot harness hooks (`src/backend/BasculaBotTests`)
 
 - [x] 3.1 No new bot scenario is added in this change — driving login → `PedidoListView` → `PedidoFormView` depends on the separately-deferred `automated-test-foundations` §5.2 follow-up. This task exists to record that decision (Decision 6) rather than to add code.
-- [ ] 3.2 Confirm `AppLaunchSmokeTests.App_starts_and_FlaUI_can_read_its_window` still passes unmodified after the restructure (regression check that the app still starts and the login screen still reads correctly) — run as part of §5 below.
+- [x] 3.2 Confirm `AppLaunchSmokeTests.App_starts_and_FlaUI_can_read_its_window` still passes unmodified after the restructure (regression check that the app still starts and the login screen still reads correctly) — run as part of §5 below.
 
 ## 4. Repo hygiene
 
@@ -26,10 +26,10 @@
 
 ## 5. Verification gate (owner-run — do not archive without this)
 
-- [ ] 5.1 Publish `BasculaInterface` unpackaged on `win10-maui-dev` (`scripts/vm/run-bot-suite.ps1`, same publish step `automated-test-foundations` uses).
-- [ ] 5.2 Run the existing bot suite (`scripts\vm\run-bot-suite.cmd`) — `AppLaunchSmokeTests` must stay green.
-- [ ] 5.3 **Ask the project owner to run the app, open the Pedido list, create or open a pedido, and visually confirm**: the back button is present and positioned per convention, `Cancelar` is gone, `Guardar`/`Eliminar` still work, the `Concluded` read-only state still renders correctly, and the screen "feels" consistent with `PedidoListView`/other screens (the original issue's complaint).
-- [ ] 5.4 On owner approval, mark this task done and proceed to `openspec-archive-change`. On a change request, capture the specific UI feedback, address it, and repeat 5.1-5.3 — do not archive on a partial/conditional approval.
+- [x] 5.1 Publish `BasculaInterface` unpackaged on `win10-maui-dev` (`scripts/vm/run-bot-suite.ps1`, same publish step `automated-test-foundations` uses).
+- [x] 5.2 Run the existing bot suite (`scripts\vm\run-bot-suite.cmd`) — `AppLaunchSmokeTests` must stay green. Ran clean on round 2 (post-§6 Productos rework).
+- [x] 5.3 **Ask the project owner to run the app, open the Pedido list, create or open a pedido, and visually confirm**: the back button is present and positioned per convention, `Cancelar` is gone, `Guardar`/`Eliminar` still work, the `Concluded` read-only state still renders correctly, and the screen "feels" consistent with `PedidoListView`/other screens (the original issue's complaint).
+- [x] 5.4 On owner approval, mark this task done and proceed to `openspec-archive-change`. On a change request, capture the specific UI feedback, address it, and repeat 5.1-5.3 — do not archive on a partial/conditional approval. **Owner approved round 2** — smoke suite green, Productos rework (collapse/expand rows, contrast fix, `BotonChico` sizing) confirmed liked as built. No further change requests.
 
 ## 6. Owner feedback round 1 (side panel/header approved; Productos section reworked)
 
@@ -40,4 +40,4 @@ Ran on `win10-maui-dev` per §5. Owner approved the side panel and the header fi
 - [x] 6.3 Line-card `DataTemplate` rebuilt: collapsed row (chevron, product name, pending amount, small colored status dot + text) is always visible and tappable (`LineRowHeader_Tapped` toggles `IsExpanded`); full amounts, the "Requiere destare" badge, and the Pesar/Cerrar actions move into a `VerticalStackLayout` gated on `IsVisible="{Binding IsExpanded}"`.
 - [x] 6.4 New `BotonChico` style (`App.xaml`, `BasedOn="{StaticResource Boton}"`) — compact sizing for inline per-item actions; replaces the page-sized `Boton` style on the Pesar/Cerrar buttons, which was the other major contributor to the "chonky" feel.
 - [x] 6.5 Dis-tare checkbox/badge: owner chose **"leave it as-is"** — no change, still fully wired, contrast-fixed alongside everything else in 6.1. (Confirmed while investigating: it's stored end-to-end but doesn't drive any weighing-screen behavior — flagged to the owner as a possible future cleanup, not actioned here.)
-- [ ] 6.6 Repeat §5 on `win10-maui-dev` with these changes.
+- [x] 6.6 Repeat §5 on `win10-maui-dev` with these changes. Done — see §5 round 2 notes above.
