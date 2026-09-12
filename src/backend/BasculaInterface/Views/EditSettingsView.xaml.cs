@@ -16,11 +16,6 @@ public partial class EditSettingsView : ContentPage
         Preferences.Set("SecondaryTerminal", e.Value);
     }
 
-    private void CheckBoxManualWeight_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        Preferences.Set("ManualWeight", e.Value);
-    }
-
     private void CheckBoxRequirePartner_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         Preferences.Set("RequirePartner", e.Value);
@@ -42,14 +37,12 @@ public partial class EditSettingsView : ContentPage
         {
             //uncheck everything else
             CheckBoxSecondaryTerminal.IsChecked = false;
-            CheckBoxManualWeight.IsChecked = false;
             CheckBoxRequirePartner.IsChecked = false;
             CheckBoxOnlyPedidos.IsChecked = false;
             CheckBoxBypasTurn.IsChecked = false;
 
             //disable everything else
             CheckBoxSecondaryTerminal.IsEnabled = false;
-            CheckBoxManualWeight.IsEnabled = false;
             CheckBoxRequirePartner.IsEnabled = false;
             CheckBoxOnlyPedidos.IsEnabled = false;
             CheckBoxBypasTurn.IsEnabled = false;
@@ -58,7 +51,6 @@ public partial class EditSettingsView : ContentPage
         {
             //enable everything else
             CheckBoxSecondaryTerminal.IsEnabled = true;
-            CheckBoxManualWeight.IsEnabled = true;
             CheckBoxRequirePartner.IsEnabled = true;
             CheckBoxOnlyPedidos.IsEnabled = true;
             CheckBoxBypasTurn.IsEnabled = true;
@@ -68,7 +60,6 @@ public partial class EditSettingsView : ContentPage
     private void LoadPreferences()
     {
         CheckBoxSecondaryTerminal.IsChecked = Preferences.Get("SecondaryTerminal", false);
-        CheckBoxManualWeight.IsChecked = Preferences.Get("ManualWeight", false);
         CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
         CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
         CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
@@ -90,7 +81,6 @@ public partial class EditSettingsView : ContentPage
     private void SetPreferences()
     {
         Preferences.Set("SecondaryTerminal", CheckBoxSecondaryTerminal.IsChecked);
-        Preferences.Set("ManualWeight", CheckBoxManualWeight.IsChecked);
         Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
         Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
         Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);

@@ -1,5 +1,6 @@
 using BasculaTerminalTest.TestDoubles;
 using Core.Application.DTOs;
+using Core.Application.Services;
 using Core.Domain.Entities.Behaviors;
 using Core.Domain.Entities.ProviderOrders;
 using Core.Domain.Entities.Weight;
@@ -34,6 +35,8 @@ namespace BasculaTerminalTest.Unit.Infrastructure
             _pedidoLineRepo,
             _weightRepo,
             _behaviorRepo,
+            Substitute.For<IGateAuthorizationService>(),
+            Substitute.For<IAuditLogService>(),
             Options.Create(TestData.WeightSettings()));
 
         private static PedidoLine Line(decimal requiredAmount, bool manuallyClosed = false, params WeightDetail[] details) => new()

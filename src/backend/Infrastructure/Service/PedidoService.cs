@@ -15,6 +15,8 @@ namespace Infrastructure.Service
         private readonly IPedidoLineRepo _pedidoLineRepo;
         private readonly IWeightRepo _weightRepo;
         private readonly IExternalTargetBehaviorRepo _externalTargetBehaviorRepo;
+        private readonly IGateAuthorizationService _gateAuthorizationService;
+        private readonly IAuditLogService _auditLogService;
         private readonly WeightSettings _weightSettings;
 
         public PedidoService(
@@ -22,12 +24,16 @@ namespace Infrastructure.Service
             IPedidoLineRepo pedidoLineRepo,
             IWeightRepo weightRepo,
             IExternalTargetBehaviorRepo externalTargetBehaviorRepo,
+            IGateAuthorizationService gateAuthorizationService,
+            IAuditLogService auditLogService,
             IOptions<WeightSettings> weightSettingsOptions)
         {
             _pedidoRepo = pedidoRepo;
             _pedidoLineRepo = pedidoLineRepo;
             _weightRepo = weightRepo;
             _externalTargetBehaviorRepo = externalTargetBehaviorRepo;
+            _gateAuthorizationService = gateAuthorizationService;
+            _auditLogService = auditLogService;
             _weightSettings = weightSettingsOptions.Value;
         }
 
@@ -62,18 +68,20 @@ namespace Infrastructure.Service
             await _pedidoRepo.UpdateAsync(dto.ToEntity());
         }
 
-        public async Task<bool> DeleteSafelyAsync(int id, string passwordHash)
+        public async Task<bool> DeleteSafelyAsync(int id, GateCredential gateCredential)
         {
-            // Reuses the same shared "manager override" password as every WeightDetail guarded
-            // mutation (see design.md Decision 3 of extend-delete-password-gate) — Pedido has no
-            // password setting of its own.
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            // Self-authorize gate (issue #134 / design.md Decision 6 of
+            // add-user-authentication-and-audit-log) — replaces the old shared
+            // ChangeProductPasswordHash gate this action used to reuse.
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
-            return await _pedidoRepo.DeleteAsync(id);
+            bool deleted = await _pedidoRepo.DeleteAsync(id);
+            if (deleted)
+                await _auditLogService.RecordAsync("Pedido.DeleteSafely", nameof(Pedido), id);
+            return deleted;
         }
 
         public async Task<PedidoLineDto> CreateLineAsync(PedidoLineDto dto)
@@ -88,17 +96,18 @@ namespace Infrastructure.Service
             await _pedidoLineRepo.UpdateAsync(dto.ToEntity());
         }
 
-        public async Task<bool> DeleteLineSafelyAsync(int id, string passwordHash)
+        public async Task<bool> DeleteLineSafelyAsync(int id, GateCredential gateCredential)
         {
-            // Same shared password as DeleteSafelyAsync above. Gated even though no UI caller
-            // exists yet, so the gap can't resurface silently when one is added.
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            // Same self-authorize gate as DeleteSafelyAsync above.
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
-            return await _pedidoLineRepo.DeleteAsync(id);
+            bool deleted = await _pedidoLineRepo.DeleteAsync(id);
+            if (deleted)
+                await _auditLogService.RecordAsync("PedidoLine.DeleteSafely", nameof(PedidoLine), id);
+            return deleted;
         }
 
         public async Task CloseLineAsync(int lineId)

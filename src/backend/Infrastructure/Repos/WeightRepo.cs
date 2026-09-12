@@ -39,6 +39,25 @@ namespace Infrastructure.Repos
             return entry;
         }
 
+        public async Task<WeightEntry> GetByIdIncludingDeletedAsync(int id)
+        {
+            // No IsDeleted filter anywhere in this query, on either the entry or its details —
+            // the radiography endpoint needs to see the full history including soft-deleted rows.
+            WeightEntry? entry = await _context.WeightEntries
+                .AsNoTracking()
+                .Include(w => w.WeightDetails)
+                    .ThenInclude(wd => wd.PedidoLine)
+                .Include(w => w.ExternalTargetBehavior)
+                .FirstOrDefaultAsync(w => w.Id == id);
+
+            if (entry == null)
+            {
+                throw new KeyNotFoundException($"WeightEntry with ID {id} not found.");
+            }
+
+            return entry;
+        }
+
         public async Task<IEnumerable<WeightEntry>> GetByDateRange(DateOnly startDate, DateOnly endDate, int top = 30, uint page = 1)
         {
             DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);

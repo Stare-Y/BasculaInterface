@@ -683,7 +683,7 @@ public partial class DetailedWeightView : ContentPage
         // Unlike product/partner, there's no picker step here — go straight to the
         // value + password confirmation popup.
         double currentValue = row.IsGranel ? row.Weight : (row.RequiredAmount ?? 0);
-        (double NewValue, string Password)? result = await ChangeAmountPopUp.ShowAsync(currentValue, row.IsGranel);
+        (double NewValue, string Identifier, string Password)? result = await ChangeAmountPopUp.ShowAsync(currentValue, row.IsGranel);
 
         if (result is null)
             return; // cancelled
@@ -691,7 +691,7 @@ public partial class DetailedWeightView : ContentPage
         WaitPopUp.Show("Cambiando peso...");
         try
         {
-            await viewModel.ChangeDetailAmountAsync(row.Id, row.IsGranel, result.Value.NewValue, result.Value.Password);
+            await viewModel.ChangeDetailAmountAsync(row.Id, row.IsGranel, result.Value.NewValue, result.Value.Identifier, result.Value.Password);
             _entriesChanged = true;
         }
         catch (Exception ex)
@@ -709,17 +709,17 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
-        // No picker/value step here — go straight to the description + password confirmation
-        // popup, mirroring StartChangeAmountFlow's shape but with only a password to capture.
-        string? password = await DeleteDetailPopUp.ShowAsync(row.Description);
+        // No picker/value step here — go straight to the description + gate-credential
+        // confirmation popup, mirroring StartChangeAmountFlow's shape.
+        (string Identifier, string Password)? credential = await DeleteDetailPopUp.ShowAsync(row.Description);
 
-        if (string.IsNullOrEmpty(password))
+        if (credential is null)
             return; // cancelled
 
         WaitPopUp.Show("Eliminando pesada, espere...");
         try
         {
-            await viewModel.DeleteWeightDetailSafelyAsync(row.Id, password);
+            await viewModel.DeleteWeightDetailSafelyAsync(row.Id, credential.Value.Identifier, credential.Value.Password);
             _entriesChanged = true;
         }
         catch (Exception ex)
@@ -752,15 +752,15 @@ public partial class DetailedWeightView : ContentPage
         if (BindingContext is not DetailedWeightViewModel viewModel || viewModel.WeightEntry is null)
             return;
 
-        string? password = await ChangePartnerPopUp.ShowAsync(newPartner.RazonSocial);
+        (string Identifier, string Password)? credential = await ChangePartnerPopUp.ShowAsync(newPartner.RazonSocial);
 
-        if (string.IsNullOrEmpty(password))
+        if (credential is null)
             return; // cancelled
 
         WaitPopUp.Show("Cambiando socio...");
         try
         {
-            await viewModel.ChangePartnerAsync(newPartner.Id, password);
+            await viewModel.ChangePartnerAsync(newPartner.Id, credential.Value.Identifier, credential.Value.Password);
             _entriesChanged = true;
         }
         catch (Exception ex)
@@ -781,15 +781,15 @@ public partial class DetailedWeightView : ContentPage
         if (row is null || BindingContext is not DetailedWeightViewModel viewModel)
             return;
 
-        string? password = await ChangeProductPopUp.ShowAsync(newProduct.Nombre);
+        (string Identifier, string Password)? credential = await ChangeProductPopUp.ShowAsync(newProduct.Nombre);
 
-        if (string.IsNullOrEmpty(password))
+        if (credential is null)
             return; // cancelled
 
         WaitPopUp.Show("Cambiando producto...");
         try
         {
-            await viewModel.ChangeDetailProductAsync(row.Id, newProduct.Id, password);
+            await viewModel.ChangeDetailProductAsync(row.Id, newProduct.Id, credential.Value.Identifier, credential.Value.Password);
             _entriesChanged = true;
         }
         catch (Exception ex)
@@ -1003,19 +1003,20 @@ public partial class DetailedWeightView : ContentPage
             return;
         }
 
-        // No separate yes/no dialog — the password prompt itself is the confirmation, mirroring
-        // StartDeleteDetailFlow's shape (issue #133 / extend-delete-password-gate).
-        string? password = await DeleteDetailPopUp.ShowAsync(
+        // No separate yes/no dialog — the gate-credential prompt itself is the confirmation,
+        // mirroring StartDeleteDetailFlow's shape (issue #134, superseding issue #133 /
+        // extend-delete-password-gate).
+        (string Identifier, string Password)? credential = await DeleteDetailPopUp.ShowAsync(
             $"Folio #{viewModel.WeightEntry.Id}",
             "Eliminar entrada de peso:");
 
-        if (string.IsNullOrEmpty(password))
+        if (credential is null)
             return; // cancelled
 
         WaitPopUp.Show("Eliminando entrada de peso, espere...");
         try
         {
-            await viewModel.DeleteWeightEntry(password);
+            await viewModel.DeleteWeightEntry(credential.Value.Identifier, credential.Value.Password);
 
             await Shell.Current.Navigation.PopAsync();
         }

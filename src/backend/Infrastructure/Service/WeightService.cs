@@ -17,9 +17,11 @@ namespace Infrastructure.Service
         private readonly IApiService _apiService;
         private readonly IClienteProveedorService _clienteProveedorService;
         private readonly IProductService _productService;
+        private readonly IGateAuthorizationService _gateAuthorizationService;
+        private readonly IAuditLogService _auditLogService;
         private readonly ComercialSDKClientSettings _comercialSDKSettings;
         private readonly WeightSettings _weightSettings;
-        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IOptions<ComercialSDKClientSettings> options, IOptions<WeightSettings> weightSettingsOptions)
+        public WeightService(IWeightRepo weightRepo, IExternalTargetBehaviorService targetBehaviorService, IProductService productService, IClienteProveedorService clienteProveedorService, IApiService apiService, IGateAuthorizationService gateAuthorizationService, IAuditLogService auditLogService, IOptions<ComercialSDKClientSettings> options, IOptions<WeightSettings> weightSettingsOptions)
         {
             _weightRepo = weightRepo;
 
@@ -34,6 +36,10 @@ namespace Infrastructure.Service
             _productService = productService;
 
             _targetBehaviorService = targetBehaviorService;
+
+            _gateAuthorizationService = gateAuthorizationService;
+
+            _auditLogService = auditLogService;
         }
         public async Task<WeightEntryDto> CreateAsync(WeightEntryDto weightEntry)
         {
@@ -181,15 +187,16 @@ namespace Infrastructure.Service
             }
         }
 
-        public async Task DeleteSafelyAsync(int id, string passwordHash)
+        public async Task DeleteSafelyAsync(int id, GateCredential gateCredential)
         {
-            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync/
-            // ChangeDetailAmountAsync/DeleteDetailSafelyAsync (see design.md Decision 3 of
-            // extend-delete-password-gate).
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            // Self-authorize gate (issue #134 / design.md Decision 6 of
+            // add-user-authentication-and-audit-log) — replaces the old shared, unsalted
+            // ChangeProductPasswordHash. The authorizer need not be the currently logged-in
+            // operator; any user resolving from the credential with CanSelfAuthorizeGate (or Sudo)
+            // may pass the gate.
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
             // Propagates KeyNotFoundException if the entry doesn't exist (or is already deleted).
@@ -204,6 +211,8 @@ namespace Infrastructure.Service
             }
 
             await _weightRepo.DeleteAsync(id);
+
+            await _auditLogService.RecordAsync("WeightEntry.DeleteSafely", nameof(WeightEntry), id);
         }
 
         public Task<bool> DeleteDetailAsync(int id)
@@ -391,14 +400,11 @@ namespace Infrastructure.Service
             };
         }
 
-        public async Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordHash)
+        public async Task ChangeDetailProductAsync(int detailId, int newProductId, GateCredential gateCredential)
         {
-            // An empty configured hash means the feature hasn't been set up yet — never allow it to
-            // be satisfied by an equally-empty submitted hash.
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
             WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
@@ -438,16 +444,15 @@ namespace Infrastructure.Service
             // Deliberately not checking WeightEntry.ConcludeDate here — the password is the
             // intended override to correct a product after conclusion (see design.md Decision 3).
             await _weightRepo.UpdateDetailAsync(detail);
+
+            await _auditLogService.RecordAsync("WeightDetail.ChangeProduct", nameof(WeightDetail), detailId);
         }
 
-        public async Task ChangePartnerAsync(int weightId, int newPartnerId, string passwordHash)
+        public async Task ChangePartnerAsync(int weightId, int newPartnerId, GateCredential gateCredential)
         {
-            // Same shared password as ChangeDetailProductAsync — a single "manager override"
-            // secret gates both actions (see design.md Decision 2).
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
             WeightEntry entry = await _weightRepo.GetByIdAsync(weightId);
@@ -495,17 +500,15 @@ namespace Infrastructure.Service
             // force:true bypasses the concluded-entry lock, same as ChangeTargetDocumentBehavior —
             // the ConptaqiComercialFK check above is the real gate for this action.
             await _weightRepo.UpdateAsync(entry, force: true);
+
+            await _auditLogService.RecordAsync("WeightEntry.ChangePartner", nameof(WeightEntry), weightId);
         }
 
-        public async Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, string passwordHash)
+        public async Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, GateCredential gateCredential)
         {
-            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync — a single
-            // "manager override" secret gates all three actions (see design.md Decision 2 of
-            // change-weight-detail-product, reused as-is here).
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
             // Exactly one of the two fields must be supplied — an ambiguous request (both or
@@ -582,17 +585,15 @@ namespace Infrastructure.Service
             {
                 await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
             }
+
+            await _auditLogService.RecordAsync("WeightDetail.ChangeAmount", nameof(WeightDetail), detailId);
         }
 
-        public async Task DeleteDetailSafelyAsync(int detailId, string passwordHash)
+        public async Task DeleteDetailSafelyAsync(int detailId, GateCredential gateCredential)
         {
-            // Same shared password as ChangeDetailProductAsync/ChangePartnerAsync/
-            // ChangeDetailAmountAsync — a single "manager override" secret gates all four actions
-            // (see design.md Decision 2 of change-weight-detail-product, reused as-is here).
-            if (string.IsNullOrEmpty(_weightSettings.ChangeProductPasswordHash) ||
-                !string.Equals(passwordHash, _weightSettings.ChangeProductPasswordHash, StringComparison.OrdinalIgnoreCase))
+            if (!await _gateAuthorizationService.TryAuthorizeAsync(gateCredential.GateIdentifier, gateCredential.GatePassword))
             {
-                throw new UnauthorizedAccessException("Contraseña incorrecta.");
+                throw new UnauthorizedAccessException("Credenciales inválidas o sin autorización.");
             }
 
             WeightDetail detail = await _weightRepo.GetDetailByIdAsync(detailId);
@@ -621,6 +622,8 @@ namespace Infrastructure.Service
             {
                 await _weightRepo.RecomputeBruteWeightAsync(entryId);
             }
+
+            await _auditLogService.RecordAsync("WeightDetail.DeleteSafely", nameof(WeightDetail), detailId);
         }
     }
 }

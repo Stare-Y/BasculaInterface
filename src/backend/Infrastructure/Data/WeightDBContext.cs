@@ -1,4 +1,6 @@
-﻿using Core.Domain.Entities.Behaviors;
+﻿using Core.Domain.Entities.Audit;
+using Core.Domain.Entities.Behaviors;
+using Core.Domain.Entities.Identity;
 using Core.Domain.Entities.ProviderOrders;
 using Core.Domain.Entities.Turns;
 using Core.Domain.Entities.Weight;
@@ -15,6 +17,8 @@ namespace Infrastructure.Data
         public DbSet<Turn> Turns { get; set; } = null!;
         public DbSet<Pedido> Pedidos { get; set; } = null!;
         public DbSet<PedidoLine> PedidoLines { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<AuditLogEntry> AuditLogEntries { get; set; } = null!;
         public WeightDBContext(DbContextOptions<WeightDBContext> options)
             : base(options)
         {
@@ -42,6 +46,14 @@ namespace Infrastructure.Data
                     .HasColumnType("xid")
                     .ValueGeneratedOnAddOrUpdate()
                     .IsConcurrencyToken();
+            });
+
+            // add-user-authentication-and-audit-log: Username/UserCode must be unique so login's
+            // UserCode-then-Username resolution (design.md Decision 6) can never be ambiguous.
+            modelBuilder.Entity<User>(u =>
+            {
+                u.HasIndex(x => x.Username).IsUnique();
+                u.HasIndex(x => x.UserCode).IsUnique();
             });
         }
     }

@@ -5,11 +5,11 @@ using BasculaTerminalApi.Controllers;
 namespace BasculaTerminalTest.Integration
 {
     /// <summary>
-    /// The manager-override password gate extended to Pedido/PedidoLine deletion (issue #133 /
-    /// extend-delete-password-gate), exercised through the real HTTP surface: a wrong hash must
-    /// come back as <c>400 "Contraseña incorrecta."</c> and leave the record untouched; the
-    /// configured hash must go through. PATCH .../{id}/Delete replaces the old unguarded
-    /// DELETE ?id= routes, which must no longer resolve.
+    /// The self-authorize gate extended to Pedido/PedidoLine deletion (issue #134, superseding
+    /// issue #133 / extend-delete-password-gate), exercised through the real HTTP surface: an
+    /// unresolvable/wrong credential must come back as <c>400</c> and leave the record untouched;
+    /// the seeded Sudo user's credential must go through. PATCH .../{id}/Delete replaces the old
+    /// unguarded DELETE ?id= routes, which must no longer resolve.
     /// </summary>
     [Collection(IntegrationCollection.Name)]
     [Trait("Category", "Integration")]
@@ -25,27 +25,27 @@ namespace BasculaTerminalTest.Integration
         }
 
         [Fact]
-        public async Task Deleting_a_pedido_with_the_wrong_password_is_rejected_with_400()
+        public async Task Deleting_a_pedido_with_an_unresolvable_credential_is_rejected_with_400()
         {
             (int pedidoId, _) = await PedidoFlow.CreatePedidoWithLineAsync(_client, requiredAmount: 10m);
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Pedido/{pedidoId}/Delete",
-                new DeletePedidoRequest(PasswordHash: "not-the-password"));
+                new DeletePedidoRequest(GateIdentifier: "nobody", GatePassword: "wrong"));
 
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             string body = await resp.Content.ReadAsStringAsync();
-            Assert.Contains("Contraseña incorrecta.", body);
+            Assert.Contains("Credenciales inválidas o sin autorización.", body);
         }
 
         [Fact]
-        public async Task Deleting_a_pedido_with_the_configured_password_succeeds()
+        public async Task Deleting_a_pedido_with_the_Sudo_credential_succeeds()
         {
             (int pedidoId, _) = await PedidoFlow.CreatePedidoWithLineAsync(_client, requiredAmount: 10m);
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Pedido/{pedidoId}/Delete",
-                new DeletePedidoRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeletePedidoRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             await resp.EnsureOk();
         }
@@ -55,7 +55,7 @@ namespace BasculaTerminalTest.Integration
         {
             var resp = await _client.PatchAsJsonAsync(
                 "/api/Pedido/999999/Delete",
-                new DeletePedidoRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeletePedidoRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
         }
@@ -73,27 +73,27 @@ namespace BasculaTerminalTest.Integration
         }
 
         [Fact]
-        public async Task Deleting_a_pedido_line_with_the_wrong_password_is_rejected_with_400()
+        public async Task Deleting_a_pedido_line_with_an_unresolvable_credential_is_rejected_with_400()
         {
             (_, int lineId) = await PedidoFlow.CreatePedidoWithLineAsync(_client, requiredAmount: 10m);
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Pedido/Line/{lineId}/Delete",
-                new DeletePedidoLineRequest(PasswordHash: "not-the-password"));
+                new DeletePedidoLineRequest(GateIdentifier: "nobody", GatePassword: "wrong"));
 
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             string body = await resp.Content.ReadAsStringAsync();
-            Assert.Contains("Contraseña incorrecta.", body);
+            Assert.Contains("Credenciales inválidas o sin autorización.", body);
         }
 
         [Fact]
-        public async Task Deleting_a_pedido_line_with_the_configured_password_succeeds()
+        public async Task Deleting_a_pedido_line_with_the_Sudo_credential_succeeds()
         {
             (_, int lineId) = await PedidoFlow.CreatePedidoWithLineAsync(_client, requiredAmount: 10m);
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Pedido/Line/{lineId}/Delete",
-                new DeletePedidoLineRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeletePedidoLineRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             await resp.EnsureOk();
         }
@@ -103,7 +103,7 @@ namespace BasculaTerminalTest.Integration
         {
             var resp = await _client.PatchAsJsonAsync(
                 "/api/Pedido/Line/999999/Delete",
-                new DeletePedidoLineRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeletePedidoLineRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
         }

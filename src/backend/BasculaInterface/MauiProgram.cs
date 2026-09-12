@@ -1,4 +1,5 @@
-﻿using BasculaInterface.ViewModels;
+﻿using BasculaInterface.Services;
+using BasculaInterface.ViewModels;
 using CommunityToolkit.Maui;
 using Core.Application.Services;
 using Infrastructure.Service;
@@ -78,13 +79,20 @@ public static class MauiProgram
         builder.Services.AddTransient<FinishedWeightsViewModel>();
         builder.Services.AddTransient<ReadOnlyDetailedViewModel>();
         builder.Services.AddTransient<PedidoListViewModel>();
+
+        // Auth (issue #134): one singleton session backs the whole app; AuthHeaderHandler attaches
+        // its token to every request through IApiService without touching existing call sites.
+        builder.Services.AddSingleton<ISessionService, SessionService>();
+        builder.Services.AddSingleton<InactivityWatcherService>();
+        builder.Services.AddTransient<AuthHeaderHandler>();
+
         builder.Services.AddTransient<IApiService, ApiService>();
         builder.Services.AddHttpClient<IApiService, ApiService>(client =>
         {
             client.BaseAddress = new Uri(Preferences.Get("HostUrl", "http://bascula.cpe/"));
             client.Timeout = TimeSpan.FromSeconds(30);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-        });
+        }).AddHttpMessageHandler<AuthHeaderHandler>();
         //build service provider
         MauiApp app = builder.Build();
 

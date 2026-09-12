@@ -88,27 +88,9 @@
                                     Text="Usar terminal secundaria" />
                             </Grid>
 
-                            <Grid
-                                ColumnDefinitions="*,*"
-                                ColumnSpacing="35"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center">
-
-                                <CheckBox
-                                    x:Name="CheckBoxManualWeight"
-                                    Grid.Column="0"
-                                    CheckedChanged="CheckBoxManualWeight_CheckedChanged"
-                                    HorizontalOptions="Start" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
-                                    HorizontalOptions="End"
-                                    Style="{StaticResource Label}"
-                                    Text="Capturar peso manualmente" />
-
-                            </Grid>
+                            <!--  "Capturar peso manualmente" removed (issue #134) — manual-weight
+                                  capture is now gated solely by the logged-in user's
+                                  CanCaptureWeightManually permission, not a device setting.  -->
 
 
                             <Grid

@@ -1,4 +1,5 @@
 using BasculaTerminalTest.TestDoubles;
+using Core.Application.DTOs;
 using Core.Application.Services;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
@@ -9,23 +10,32 @@ using NSubstitute;
 namespace BasculaTerminalTest.Unit.Infrastructure
 {
     /// <summary>
-    /// Behavior specific to <see cref="WeightService.DeleteSafelyAsync"/> beyond the shared
-    /// password gate (covered by <see cref="WeightServicePasswordGateTests"/>): the
-    /// Contpaqi-document block (new for this action — design.md Decision 2 of
-    /// extend-delete-password-gate), the concluded-entry bypass, and not-found propagation.
+    /// Behavior specific to <see cref="WeightService.DeleteSafelyAsync"/> beyond the self-authorize
+    /// gate (covered by <see cref="WeightServicePasswordGateTests"/>): the Contpaqi-document block
+    /// (new for this action — design.md Decision 2 of extend-delete-password-gate), the
+    /// concluded-entry bypass, and not-found propagation.
     /// </summary>
     public class WeightServiceDeleteSafelyAsyncTests
     {
-        private readonly IWeightRepo _weightRepo = Substitute.For<IWeightRepo>();
+        private static readonly GateCredential Credential = new("some-user", "some-password");
 
-        private WeightService CreateSut() => new(
-            _weightRepo,
-            Substitute.For<IExternalTargetBehaviorService>(),
-            Substitute.For<IProductService>(),
-            Substitute.For<IClienteProveedorService>(),
-            Substitute.For<IApiService>(),
-            Options.Create(TestData.ComercialSdkSettings()),
-            Options.Create(TestData.WeightSettings()));
+        private readonly IWeightRepo _weightRepo = Substitute.For<IWeightRepo>();
+        private readonly IGateAuthorizationService _gateAuthorizationService = Substitute.For<IGateAuthorizationService>();
+
+        private WeightService CreateSut()
+        {
+            _gateAuthorizationService.TryAuthorizeAsync(Credential.GateIdentifier, Credential.GatePassword).Returns(true);
+            return new(
+                _weightRepo,
+                Substitute.For<IExternalTargetBehaviorService>(),
+                Substitute.For<IProductService>(),
+                Substitute.For<IClienteProveedorService>(),
+                Substitute.For<IApiService>(),
+                _gateAuthorizationService,
+                Substitute.For<IAuditLogService>(),
+                Options.Create(TestData.ComercialSdkSettings()),
+                Options.Create(TestData.WeightSettings()));
+        }
 
         [Fact]
         public async Task Rejects_when_the_entry_already_has_a_Contpaqi_document()
@@ -35,7 +45,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
             WeightService sut = CreateSut();
 
             await Assert.ThrowsAsync<InvalidOperationException>(
-                () => sut.DeleteSafelyAsync(1, TestData.PasswordHash));
+                () => sut.DeleteSafelyAsync(1, Credential));
 
             await _weightRepo.DidNotReceive().DeleteAsync(Arg.Any<int>());
         }
@@ -48,7 +58,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
 
             WeightService sut = CreateSut();
 
-            await sut.DeleteSafelyAsync(1, TestData.PasswordHash);
+            await sut.DeleteSafelyAsync(1, Credential);
 
             await _weightRepo.Received(1).DeleteAsync(1);
         }
@@ -60,7 +70,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
 
             WeightService sut = CreateSut();
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.DeleteSafelyAsync(1, TestData.PasswordHash));
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => sut.DeleteSafelyAsync(1, Credential));
 
             await _weightRepo.DidNotReceive().DeleteAsync(Arg.Any<int>());
         }

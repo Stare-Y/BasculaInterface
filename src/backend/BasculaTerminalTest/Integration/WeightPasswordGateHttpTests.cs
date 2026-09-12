@@ -6,9 +6,9 @@ using Core.Application.DTOs;
 namespace BasculaTerminalTest.Integration
 {
     /// <summary>
-    /// The manager-override password gate, exercised through the real HTTP surface: a wrong hash
-    /// must come back as <c>400 "Contraseña incorrecta."</c> and leave the detail untouched; the
-    /// configured hash must go through.
+    /// The self-authorize gate, exercised through the real HTTP surface (issue #134): an
+    /// unresolvable/wrong credential must come back as <c>400</c> and leave the detail untouched;
+    /// the seeded Sudo user's credential (which bypasses the permission check) must go through.
     /// </summary>
     [Collection(IntegrationCollection.Name)]
     [Trait("Category", "Integration")]
@@ -38,27 +38,27 @@ namespace BasculaTerminalTest.Integration
         }
 
         [Fact]
-        public async Task Wrong_password_is_rejected_with_400_and_the_spanish_message()
+        public async Task Unresolvable_gate_credential_is_rejected_with_400()
         {
             int detailId = await CreateDetailAsync();
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Weight/Detail/{detailId}/Amount",
-                new ChangeDetailAmountRequest(NewWeight: null, NewRequiredAmount: 30, PasswordHash: "not-the-password"));
+                new ChangeDetailAmountRequest(NewWeight: null, NewRequiredAmount: 30, GateIdentifier: "nobody", GatePassword: "wrong"));
 
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             string body = await resp.Content.ReadAsStringAsync();
-            Assert.Contains("Contraseña incorrecta.", body);
+            Assert.Contains("Credenciales inválidas o sin autorización.", body);
         }
 
         [Fact]
-        public async Task Configured_password_is_accepted_and_updates_the_amount()
+        public async Task Sudo_gate_credential_is_accepted_and_updates_the_amount()
         {
             int detailId = await CreateDetailAsync();
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Weight/Detail/{detailId}/Amount",
-                new ChangeDetailAmountRequest(NewWeight: null, NewRequiredAmount: 30, PasswordHash: TestDoubles.TestData.PasswordHash));
+                new ChangeDetailAmountRequest(NewWeight: null, NewRequiredAmount: 30, GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             await resp.EnsureOk();
         }
@@ -67,27 +67,27 @@ namespace BasculaTerminalTest.Integration
         // unguarded DELETE /api/Weight?id=.
 
         [Fact]
-        public async Task Deleting_a_weight_entry_with_the_wrong_password_is_rejected_with_400()
+        public async Task Deleting_a_weight_entry_with_an_unresolvable_credential_is_rejected_with_400()
         {
             int entryId = await CreateWeightEntryAsync();
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Weight/{entryId}/Delete",
-                new DeleteWeightEntryRequest(PasswordHash: "not-the-password"));
+                new DeleteWeightEntryRequest(GateIdentifier: "nobody", GatePassword: "wrong"));
 
             Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
             string body = await resp.Content.ReadAsStringAsync();
-            Assert.Contains("Contraseña incorrecta.", body);
+            Assert.Contains("Credenciales inválidas o sin autorización.", body);
         }
 
         [Fact]
-        public async Task Deleting_a_weight_entry_with_the_configured_password_succeeds()
+        public async Task Deleting_a_weight_entry_with_the_Sudo_credential_succeeds()
         {
             int entryId = await CreateWeightEntryAsync();
 
             var resp = await _client.PatchAsJsonAsync(
                 $"/api/Weight/{entryId}/Delete",
-                new DeleteWeightEntryRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeleteWeightEntryRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             await resp.EnsureOk();
         }
@@ -97,7 +97,7 @@ namespace BasculaTerminalTest.Integration
         {
             var resp = await _client.PatchAsJsonAsync(
                 "/api/Weight/999999/Delete",
-                new DeleteWeightEntryRequest(PasswordHash: TestDoubles.TestData.PasswordHash));
+                new DeleteWeightEntryRequest(GateIdentifier: TestDoubles.TestData.SudoUserCode, GatePassword: TestDoubles.TestData.SudoPassword));
 
             Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
         }

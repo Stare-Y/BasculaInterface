@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Needed for IHttpContextAccessor (CurrentUserService) — this project isn't Sdk.Web, so the
+         ASP.NET Core shared framework isn't referenced implicitly (issue #134). -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Migrations\ContpaqiSQL\**" />
     <EmbeddedResource Remove="Migrations\ContpaqiSQL\**" />
     <None Remove="Migrations\ContpaqiSQL\**" />
@@ -19,6 +25,7 @@
     <PackageReference Include="itext.bouncy-castle-fips-adapter" Version="9.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
     <PackageReference Include="System.IO.Ports" Version="9.0.9" />
   </ItemGroup>
 

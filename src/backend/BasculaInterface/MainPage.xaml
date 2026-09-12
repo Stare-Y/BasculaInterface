@@ -31,99 +31,116 @@
                 Style="{StaticResource Label}"
                 Text="Control de basculas y pedidos" />
 
-            <!--  Botón de login gigante  -->
+            <!--  Formulario de inicio de sesión real (issue #134) — reemplaza el botón de
+                  presión-larga anterior, que no pedía ninguna credencial.  -->
             <Grid
                 Grid.Row="2"
                 HorizontalOptions="Center"
-                VerticalOptions="Center">
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowSpacing="15"
+                VerticalOptions="Center"
+                WidthRequest="{OnPlatform Android=280, WinUI=450}">
+
+                <Entry
+                    x:Name="IdentifierEntry"
+                    Grid.Row="0"
+                    HorizontalOptions="Fill"
+                    Placeholder="Usuario o código..."
+                    ReturnType="Next" />
+
+                <Entry
+                    x:Name="PasswordEntry"
+                    Grid.Row="1"
+                    Completed="PasswordEntry_Completed"
+                    HorizontalOptions="Fill"
+                    IsPassword="True"
+                    Placeholder="Contraseña..."
+                    ReturnType="Done" />
+
+                <Label
+                    x:Name="LoginErrorLabel"
+                    Grid.Row="2"
+                    HorizontalOptions="Center"
+                    IsVisible="False"
+                    Text="Credenciales inválidas."
+                    TextColor="Red" />
 
                 <Button
                     x:Name="BtnLogIn"
+                    Grid.Row="3"
                     FontSize="{OnPlatform Android=24,
                                           WinUI=36}"
-                    HeightRequest="{OnPlatform Android=120,
-                                               WinUI=180}"
-                    Pressed="BtnLogin_Pressed"
-                    Released="BtnLogin_Released"
+                    HeightRequest="{OnPlatform Android=90,
+                                               WinUI=120}"
+                    Clicked="BtnLogin_Clicked"
                     Shadow="{StaticResource DefaultShadow}"
                     Style="{StaticResource Boton}"
-                    Text="Login"
+                    Text="Ingresar"
                     WidthRequest="{OnPlatform Android=280,
                                               WinUI=450}" />
             </Grid>
 
-            <!--  Elementos ocultos opcionales  -->
+            <!--  Acceso a configuración — siempre visible ahora que ya no depende de la
+                  presión-larga del botón de login.  -->
             <StackLayout
                 Grid.Row="3"
                 Spacing="10"
                 VerticalOptions="End">
 
-                <ScrollView
-                    x:Name="ScrollCheckBox"
-                    IsVisible="False"
-                    Orientation="Horizontal">
+                <HorizontalStackLayout HorizontalOptions="Center">
 
-                    <HorizontalStackLayout
-                        x:Name="StackCheckBox"
+                    <Border
+                        x:Name="BtnSettings"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
+                                                          Dark={StaticResource BlackGray}}"
+                        HeightRequest="{OnPlatform Android=75,
+                                                   WinUI=100}"
                         HorizontalOptions="Center"
-                        IsVisible="False"
-                        Spacing="{OnPlatform Android=10,
-                                             WinUI=20}">
+                        Stroke="{StaticResource 1}"
+                        StrokeShape="RoundRectangle 30"
+                        Style="{StaticResource RoundedBorderStyle}"
+                        WidthRequest="{OnPlatform Android=75,
+                                                  WinUI=100}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="BtnSettings_Tapped" />
+                        </Border.GestureRecognizers>
 
 
-                        <Border
-                            x:Name="BtnSettings"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
-                                                              Dark={StaticResource BlackGray}}"
-                            HeightRequest="{OnPlatform Android=75,
-                                                       WinUI=100}"
-                            HorizontalOptions="Center"
-                            Stroke="{StaticResource 1}"
-                            StrokeShape="RoundRectangle 30"
-                            Style="{StaticResource RoundedBorderStyle}"
-                            WidthRequest="{OnPlatform Android=75,
-                                                      WinUI=100}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="BtnSettings_Tapped" />
-                            </Border.GestureRecognizers>
+                        <Image
+                            x:Name="imgSettings"
+                            Aspect="AspectFit"
+                            HeightRequest="{OnPlatform Android=50,
+                                                       WinUI=60}"
+                            Source="{AppThemeBinding Light='settings.png',
+                                                     Dark='settings.png'}"
+                            WidthRequest="{OnPlatform Android=50,
+                                                      WinUI=60}" />
 
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
 
-                            <Image
-                                x:Name="imgSettings"
-                                Aspect="AspectFit"
-                                HeightRequest="{OnPlatform Android=50,
-                                                           WinUI=60}"
-                                Source="{AppThemeBinding Light='settings.png',
-                                                         Dark='settings.png'}"
-                                WidthRequest="{OnPlatform Android=50,
-                                                          WinUI=60}" />
+                                    <VisualState x:Name="Normal" />
 
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
+                                            <Setter Property="Stroke" Value="{StaticResource 2}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
 
-                                        <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
 
-                                        <VisualState x:Name="PointerOver">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource 4}}" />
-                                                <Setter Property="Stroke" Value="{StaticResource 2}" />
-                                            </VisualState.Setters>
-                                        </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
 
-                                        <VisualState x:Name="Pressed">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="{StaticResource 2}" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </Border>
-
-                    </HorizontalStackLayout>
-                </ScrollView>
+                </HorizontalStackLayout>
             </StackLayout>
 
         </Grid>

@@ -15,6 +15,10 @@ namespace BasculaTerminalApi.Service
         {
             services.Configure<WeightSettings>(configuration.GetSection("WeightSettings"));
 
+            services.Configure<AuthSettings>(configuration.GetSection("AuthSettings"));
+
+            services.AddHttpContextAccessor();
+
             services.AddPersistency(configuration);
 
             services.AddBasculaService();
@@ -83,6 +87,10 @@ namespace BasculaTerminalApi.Service
 
             services.AddScoped<IPedidoLineRepo, PedidoLineRepo>();
 
+            services.AddScoped<IUserRepo, UserRepo>();
+
+            services.AddScoped<IAuditLogRepo, AuditLogRepo>();
+
             services.AddTransient<IApiService, ApiService>();
             services.AddHttpClient<IApiService, ApiService>(client =>
             {
@@ -106,6 +114,18 @@ namespace BasculaTerminalApi.Service
             services.AddScoped<IExternalTargetBehaviorService, ExternalTargetBehaviorService>();
 
             services.AddScoped<IPedidoService, PedidoService>();
+
+            services.AddScoped<IPermissionService, PermissionService>();
+
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            services.AddScoped<IAuthService, AuthService>();
+
+            services.AddScoped<IGateAuthorizationService, GateAuthorizationService>();
+
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<IAuditLogService, AuditLogService>();
 
             return services;
         }

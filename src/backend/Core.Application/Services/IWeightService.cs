@@ -18,14 +18,14 @@ namespace Core.Application.Services
         Task RecordWeightAsync(int detailId, double weight, string weightedBy);
         Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId);
         Task ConcludeAsync(int weightEntryId);
-        Task DeleteSafelyAsync(int id, string passwordHash);
+        Task DeleteSafelyAsync(int id, GateCredential gateCredential);
         Task<bool> DeleteDetailAsync(int id);
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
         Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
         Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId);
-        Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordHash);
-        Task ChangePartnerAsync(int weightId, int newPartnerId, string passwordHash);
-        Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, string passwordHash);
-        Task DeleteDetailSafelyAsync(int detailId, string passwordHash);
+        Task ChangeDetailProductAsync(int detailId, int newProductId, GateCredential gateCredential);
+        Task ChangePartnerAsync(int weightId, int newPartnerId, GateCredential gateCredential);
+        Task ChangeDetailAmountAsync(int detailId, double? newWeight, double? newRequiredAmount, GateCredential gateCredential);
+        Task DeleteDetailSafelyAsync(int detailId, GateCredential gateCredential);
     }
 }

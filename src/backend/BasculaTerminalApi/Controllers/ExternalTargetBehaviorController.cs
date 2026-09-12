@@ -1,9 +1,13 @@
 ﻿using Core.Application.DTOs;
 using Core.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
+    // All-GET controller — every action stays open under the fallback-authenticated policy
+    // (design.md Decision 3 of add-user-authentication-and-audit-log).
+    [AllowAnonymous]
     [ApiController]
     [Route("api/[Controller]")]
     public class ExternalTargetBehaviorController : ControllerBase

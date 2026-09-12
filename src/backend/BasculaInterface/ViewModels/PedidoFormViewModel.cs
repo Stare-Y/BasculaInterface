@@ -160,18 +160,14 @@ namespace BasculaInterface.ViewModels
         }
 
         /// <summary>
-        /// Deletes the whole Pedido via the password-gated endpoint (issue #133 /
-        /// extend-delete-password-gate). Requires the manager password (plaintext here — hashed
-        /// before it ever reaches the API, see PasswordHasher). Reuses the same shared password as
-        /// every WeightEntry/WeightDetail guarded mutation.
+        /// Deletes the whole Pedido via the self-authorize gate (issue #134, superseding the
+        /// shared password from issue #133 / extend-delete-password-gate).
         /// </summary>
-        public async Task DeletePedidoAsync(string passwordPlaintext, CancellationToken cancellationToken = default)
+        public async Task DeletePedidoAsync(string gateIdentifier, string gatePassword, CancellationToken cancellationToken = default)
         {
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Pedido/{Pedido.Id}/Delete",
-                new { PasswordHash = passwordHash },
+                new { GateIdentifier = gateIdentifier, GatePassword = gatePassword },
                 cancellationToken);
         }
 

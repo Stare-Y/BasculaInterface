@@ -2,7 +2,7 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class DeleteDetailConfirmPopUp : ContentView
 {
-    private TaskCompletionSource<string?> _tcs = null!;
+    private TaskCompletionSource<(string Identifier, string Password)?> _tcs = null!;
 
     public DeleteDetailConfirmPopUp()
     {
@@ -47,29 +47,31 @@ public partial class DeleteDetailConfirmPopUp : ContentView
     }
 #endif
 
-    // Returns the plaintext password entered, or null if the user cancelled.
-    // Hashing happens in the caller (ViewModel), keeping this popup a plain input control.
+    // Returns the self-authorize gate credential (UserCode-or-Username + plaintext password), or
+    // null if the user cancelled. The plaintext travels to the server, which verifies it against
+    // the resolved user's salted hash — this popup stays a plain input control (issue #134).
     // `title` lets this same control be reused for deleting a WeightEntry or a Pedido, not just
     // a WeightDetail (issue #133 / extend-delete-password-gate) — defaults to the original
     // wording so the existing detail-delete call site doesn't need to change.
-    public Task<string?> ShowAsync(string detailDescription, string title = "Eliminar producto:")
+    public Task<(string Identifier, string Password)?> ShowAsync(string detailDescription, string title = "Eliminar producto:")
     {
-        _tcs = new TaskCompletionSource<string?>();
+        _tcs = new TaskCompletionSource<(string Identifier, string Password)?>();
 
         TitleLabel.Text = title;
         DetailDescriptionLabel.Text = string.IsNullOrWhiteSpace(detailDescription) ? "Producto" : detailDescription;
 
         this.IsVisible = true;
-        PasswordEntry.Focus();
+        IdentifierEntry.Focus();
 
         return _tcs.Task;
     }
 
-    private void CloseWithResult(string? password)
+    private void CloseWithResult((string Identifier, string Password)? result)
     {
         this.IsVisible = false;
+        IdentifierEntry.Text = string.Empty;
         PasswordEntry.Text = string.Empty;
-        _tcs?.TrySetResult(password);
+        _tcs?.TrySetResult(result);
     }
 
     private async void OnPopupCancelClicked(object sender, EventArgs e)
@@ -82,13 +84,13 @@ public partial class DeleteDetailConfirmPopUp : ContentView
 
     private async void OnPopupAcceptClicked(object sender, EventArgs e)
     {
-        if (string.IsNullOrEmpty(PasswordEntry.Text))
+        if (string.IsNullOrEmpty(IdentifierEntry.Text) || string.IsNullOrEmpty(PasswordEntry.Text))
             return;
 
         await btnConfirm.ScaleTo(1.1, 100);
         await btnConfirm.ScaleTo(1.0, 100);
 
-        CloseWithResult(PasswordEntry.Text);
+        CloseWithResult((IdentifierEntry.Text, PasswordEntry.Text));
     }
 
     private void PasswordEntry_Completed(object sender, EventArgs e)

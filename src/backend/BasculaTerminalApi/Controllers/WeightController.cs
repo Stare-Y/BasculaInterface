@@ -2,17 +2,33 @@
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Services;
 using Core.Domain.Entities.Weight;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
     public record SetSecondaryTareRequest(double SecondaryTare);
     public record RecordWeightRequest(double Weight, string WeightedBy);
-    public record ChangeDetailProductRequest(int NewProductId, string PasswordHash);
-    public record ChangePartnerRequest(int NewPartnerId, string PasswordHash);
-    public record ChangeDetailAmountRequest(double? NewWeight, double? NewRequiredAmount, string PasswordHash);
-    public record DeleteDetailRequest(string PasswordHash);
-    public record DeleteWeightEntryRequest(string PasswordHash);
+    public record ChangeDetailProductRequest(int NewProductId, string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
+    public record ChangePartnerRequest(int NewPartnerId, string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
+    public record ChangeDetailAmountRequest(double? NewWeight, double? NewRequiredAmount, string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
+    public record DeleteDetailRequest(string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
+    public record DeleteWeightEntryRequest(string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -35,36 +51,42 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("ById")]
+        [AllowAnonymous]
         public async Task<ActionResult<WeightEntryDto>> GetById([FromQuery] int id)
         {
             return Ok(await _weightService.GetByIdAsync(id));
         }
 
         [HttpGet("Pending")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetPendingWeights([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetPendingWeights(top, page));
         }
 
         [HttpGet("All")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetAllAsync(top, page));
         }
 
         [HttpGet("All/Completed")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllComplete([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetAllComplete(top, page));
         }
 
         [HttpGet("All/ByPartner")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllByPartner([FromQuery] int partnerId, [FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetAllByPartnerAsync(partnerId, top, page));
         }
 
         [HttpGet("All/ByDateRange")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<WeightEntryDto>>> GetAllByDateRange([FromBody] GetByDateRangeCommand command, [FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             return Ok(await _weightService.GetByDateRange(command.startDate, command.endDate, top, page));
@@ -177,7 +199,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                await _weightService.DeleteSafelyAsync(id, request.PasswordHash);
+                await _weightService.DeleteSafelyAsync(id, request.ToGateCredential());
                 return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
             }
             catch (KeyNotFoundException)
@@ -186,7 +208,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
@@ -287,6 +309,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("ValidateCredit")]
+        [AllowAnonymous]
         public async Task<ActionResult<CreditValidationResponse>> ValidatePartnerCredit(
             [FromQuery] int partnerId,
             [FromQuery] double requestedAmount)
@@ -340,7 +363,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                await _weightService.ChangeDetailProductAsync(id, request.NewProductId, request.PasswordHash);
+                await _weightService.ChangeDetailProductAsync(id, request.NewProductId, request.ToGateCredential());
                 return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
             }
             catch (WeightConcurrencyException)
@@ -349,7 +372,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
@@ -363,7 +386,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                await _weightService.ChangePartnerAsync(id, request.NewPartnerId, request.PasswordHash);
+                await _weightService.ChangePartnerAsync(id, request.NewPartnerId, request.ToGateCredential());
                 return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
             }
             catch (WeightConcurrencyException)
@@ -372,7 +395,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
@@ -386,7 +409,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                await _weightService.ChangeDetailAmountAsync(id, request.NewWeight, request.NewRequiredAmount, request.PasswordHash);
+                await _weightService.ChangeDetailAmountAsync(id, request.NewWeight, request.NewRequiredAmount, request.ToGateCredential());
                 return Ok(new GenericResponse<string> { Data = "Updated", Message = "Success" });
             }
             catch (WeightConcurrencyException)
@@ -395,7 +418,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
@@ -409,7 +432,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                await _weightService.DeleteDetailSafelyAsync(id, request.PasswordHash);
+                await _weightService.DeleteDetailSafelyAsync(id, request.ToGateCredential());
                 return Ok(new GenericResponse<string> { Data = "Deleted", Message = "Success" });
             }
             catch (WeightConcurrencyException)
@@ -418,12 +441,25 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting detail entry with ID {Id}", id);
                 return BadRequest(new GenericResponse<string> { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/Radiography")]
+        public async Task<ActionResult<WeightEntryRadiographyDto>> GetRadiography(int id, [FromServices] IAuditLogService auditLogService)
+        {
+            try
+            {
+                return Ok(await auditLogService.GetWeightEntryRadiographyAsync(id));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Weight entry with ID {id} not found.");
             }
         }
     }

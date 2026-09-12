@@ -1,3 +1,4 @@
+using BasculaInterface.Services;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
@@ -9,12 +10,21 @@ public partial class WeightingScreen : ContentPage
     public double Tara { get; set; }
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
+    private readonly ISessionService _sessionService;
+
+    // Server-side CanCaptureWeightManually permission replaces the old device-local "Capturar
+    // peso manualmente" Preferences toggle outright (issue #134 / design.md Decision 8).
+    private bool CanCaptureWeightManually => _sessionService.CurrentUser?.CanCaptureWeightManually ?? false;
+
     public WeightingScreen(BasculaViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
 
-        GridManualToggle.IsVisible = Preferences.Get("ManualWeight", false);
+        _sessionService = MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService
+            ?? throw new InvalidOperationException("ISessionService not registered.");
+
+        GridManualToggle.IsVisible = CanCaptureWeightManually;
 
         if (Preferences.Get("SecondaryTerminal", false))
         {
@@ -444,7 +454,7 @@ public partial class WeightingScreen : ContentPage
 
     private void PesoLabel_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (!Preferences.Get("ManualWeight", false))
+        if (!CanCaptureWeightManually)
             return;
 
         Entry entry = (Entry)sender;

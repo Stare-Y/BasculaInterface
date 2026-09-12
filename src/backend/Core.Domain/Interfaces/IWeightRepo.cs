@@ -6,6 +6,11 @@ namespace Core.Domain.Interfaces
     {
         Task<WeightEntry> CreateAsync(WeightEntry weightEntry);
         Task<WeightEntry> GetByIdAsync(int id);
+
+        /// <summary>Like <see cref="GetByIdAsync"/> but ignores IsDeleted on both the entry and its
+        /// details — used by the audit radiography endpoint (design.md Decision 12 of
+        /// add-user-authentication-and-audit-log).</summary>
+        Task<WeightEntry> GetByIdIncludingDeletedAsync(int id);
         Task<WeightDetail> GetDetailByIdAsync(int detailId);
         Task<IEnumerable<WeightEntry>> GetAllAsync(int top = 30, uint page = 1);
         Task<IEnumerable<WeightEntry>> GetAllComplete(int top = 30, uint page = 1);

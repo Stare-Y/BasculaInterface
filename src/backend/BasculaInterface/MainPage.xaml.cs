@@ -1,52 +1,89 @@
-﻿using BasculaInterface.Views;
+using BasculaInterface.Services;
+using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
+using Core.Application.DTOs;
+using Core.Application.Services;
 using System.ComponentModel;
 
 namespace BasculaInterface
 {
     public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
-        private CancellationTokenSource? _cancellationTokenSource = null;
+        private readonly IApiService _apiService;
+        private readonly ISessionService _sessionService;
+        private readonly InactivityWatcherService _inactivityWatcher;
+
         public MainPage()
         {
             InitializeComponent();
 
             BindingContext = this;
+
+            _apiService = MauiProgram.ServiceProvider.GetService(typeof(IApiService)) as IApiService
+                ?? throw new InvalidOperationException("IApiService not registered.");
+            _sessionService = MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService
+                ?? throw new InvalidOperationException("ISessionService not registered.");
+            _inactivityWatcher = MauiProgram.ServiceProvider.GetService(typeof(InactivityWatcherService)) as InactivityWatcherService
+                ?? throw new InvalidOperationException("InactivityWatcherService not registered.");
+
+            _inactivityWatcher.OnTimeout += OnInactivityTimeout;
         }
 
+        /// <summary>
+        /// Real login (issue #134) — replaces the old press-and-hold gesture that collected no
+        /// credential. Resolves the identifier by UserCode then Username server-side; on success
+        /// starts the inactivity watch and navigates in, mirroring the old LogIn() destination
+        /// choice (Preferences "OnlyFinished").
+        /// </summary>
         private async Task LogIn()
         {
-            if(Preferences.Get("OnlyFinished", false))
+            if (Preferences.Get("OnlyFinished", false))
                 await Shell.Current.Navigation.PushModalAsync(new FinishedWeights());
             else
                 await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());
-
-            StackCheckBox.IsVisible = false;
-            ScrollCheckBox.IsVisible = false;
         }
 
-        private async void BtnLogin_Released(object sender, EventArgs e)
+        private async void BtnLogin_Clicked(object sender, EventArgs e)
         {
             await BtnLogIn.ScaleTo(1.1, 100);
             await BtnLogIn.ScaleTo(1.0, 100);
 
+            LoginErrorLabel.IsVisible = false;
+
+            string identifier = IdentifierEntry.Text ?? string.Empty;
+            string password = PasswordEntry.Text ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(identifier) || string.IsNullOrWhiteSpace(password))
+            {
+                LoginErrorLabel.Text = "Ingrese usuario/código y contraseña.";
+                LoginErrorLabel.IsVisible = true;
+                return;
+            }
+
+            WaitPopUp.Show("Iniciando sesión...");
             try
             {
-                if (_cancellationTokenSource != null)
-                {
-                    _cancellationTokenSource.Cancel();
-                    _cancellationTokenSource.Dispose();
-                    _cancellationTokenSource = null;
+                LoginResponse response = await _apiService.PostAsync<LoginResponse>(
+                    "api/Auth/Login",
+                    new LoginRequest(identifier, password));
 
-                    await LogIn();
+                await _sessionService.LoginAsync(response);
 
-                    StackCheckBox.IsVisible = false;
-                    ScrollCheckBox.IsVisible = false;
-                }
+                PasswordEntry.Text = string.Empty;
+
+                _inactivityWatcher.RegisterActivity();
+                // A fixed default here; the client re-reads the server-configured value once an
+                // authenticated config endpoint exists (design.md Open Questions notes this as a
+                // parameter to confirm, not a scope boundary).
+                _inactivityWatcher.Start(TimeSpan.FromMinutes(10));
+
+                await LogIn();
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
+                LoginErrorLabel.Text = "Usuario o contraseña incorrectos.";
+                LoginErrorLabel.IsVisible = true;
+                System.Diagnostics.Debug.WriteLine($"Login failed: {ex.Message}");
             }
             finally
             {
@@ -54,33 +91,21 @@ namespace BasculaInterface
             }
         }
 
-        private async void BtnLogin_Pressed(object sender, EventArgs e)
+        private void PasswordEntry_Completed(object sender, EventArgs e)
         {
-            WaitPopUp.Show("Cargando, por favor espere...");
-            _cancellationTokenSource = new CancellationTokenSource();
-            try
-            {
-                await Task.Delay(4444, _cancellationTokenSource.Token);
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    StackCheckBox.IsVisible = true;
-                    ScrollCheckBox.IsVisible = true;
+            BtnLogin_Clicked(BtnLogIn, EventArgs.Empty);
+        }
 
-                    _cancellationTokenSource?.Cancel();
-                    _cancellationTokenSource?.Dispose();
-                    _cancellationTokenSource = null;
-                });
-            }
-            catch (TaskCanceledException)
+        private void OnInactivityTimeout()
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                // La tarea fue cancelada, no hacer nada
-                WaitPopUp.Hide();
-            }
-            catch (Exception ex)
-            {
-                // Manejar cualquier otra excepción
-                await DisplayAlert("Error", "Error al tratar de cambiar el host: " + ex.Message, "OK");
-            }
+                await _sessionService.LogoutAsync();
+                _inactivityWatcher.Stop();
+
+                // Pop back to this login page from wherever the operator was.
+                await Shell.Current.Navigation.PopToRootAsync();
+            });
         }
 
         private async void BtnSettings_Tapped(object sender, TappedEventArgs e)
@@ -89,9 +114,6 @@ namespace BasculaInterface
             await BtnSettings.ScaleTo(1.0, 100);
 
             await Shell.Current.Navigation.PushModalAsync(new EditSettingsView());
-
-            StackCheckBox.IsVisible = false;
-            ScrollCheckBox.IsVisible = false;
         }
     }
 }

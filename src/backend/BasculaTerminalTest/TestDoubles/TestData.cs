@@ -9,13 +9,17 @@ namespace BasculaTerminalTest.TestDoubles
     /// </summary>
     internal static class TestData
     {
-        /// <summary>SHA-256 (hex, lowercase) of the plaintext <c>"password"</c>.</summary>
-        public const string PasswordHash = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8";
+        /// <summary>The seeded Sudo test user's credentials (see <see cref="BasculaTerminalTest.Integration.BasculaApiFactory"/>).
+        /// Sudo bypasses every authorization/permission check, so this identity is the right
+        /// default "correct" gate credential in tests that aren't specifically exercising a
+        /// non-Sudo permission boundary.</summary>
+        public const string SudoUsername = "sudo-test";
+        public const string SudoUserCode = "SUDO1";
+        public const string SudoPassword = "test-password";
 
-        public static WeightSettings WeightSettings(string changeProductPasswordHash = PasswordHash) => new()
+        public static WeightSettings WeightSettings() => new()
         {
             CompanyName = "Test Co.",
-            ChangeProductPasswordHash = changeProductPasswordHash,
         };
 
         public static ComercialSDKClientSettings ComercialSdkSettings() => new()

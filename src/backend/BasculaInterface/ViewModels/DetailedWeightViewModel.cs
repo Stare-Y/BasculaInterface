@@ -101,14 +101,15 @@ namespace BasculaInterface.ViewModels
         public DetailedWeightViewModel() { }
 
         /// <summary>
-        /// Deletes the whole WeightEntry via the password-gated endpoint (issue #133 /
-        /// extend-delete-password-gate). Requires the manager password (plaintext here — hashed
-        /// before it ever reaches the API, see PasswordHasher). Reuses the same shared password as
-        /// every other guarded mutation. Throws on wrong password, an entry that already has a
-        /// Contpaqi document, or a missing entry; the caller (View code-behind) is responsible for
-        /// surfacing that to the user.
+        /// Deletes the whole WeightEntry via the self-authorize gate (issue #134, superseding the
+        /// shared password from issue #133 / extend-delete-password-gate). The authorizer's
+        /// identifier (UserCode or Username) and plaintext password travel to the server, which
+        /// verifies the password against that user's salted hash and checks their
+        /// CanSelfAuthorizeGate permission. Throws on an unresolved/unauthorized credential, an
+        /// entry that already has a Contpaqi document, or a missing entry; the caller (View
+        /// code-behind) is responsible for surfacing that to the user.
         /// </summary>
-        public async Task DeleteWeightEntry(string passwordPlaintext)
+        public async Task DeleteWeightEntry(string gateIdentifier, string gatePassword)
         {
             if (WeightEntry == null)
             {
@@ -119,11 +120,9 @@ namespace BasculaInterface.ViewModels
                 throw new InvalidOperationException("WeightEntry.Id must be a valid positive integer.");
             }
 
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/{WeightEntry.Id}/Delete",
-                new { PasswordHash = passwordHash });
+                new { GateIdentifier = gateIdentifier, GatePassword = gatePassword });
 
             WeightEntry = null;
             Partner = null;
@@ -306,43 +305,37 @@ namespace BasculaInterface.ViewModels
         }
 
         /// <summary>
-        /// Changes the product on an existing WeightDetail. Requires the manager password
-        /// (plaintext here — hashed before it ever reaches the API, see PasswordHasher).
-        /// Throws on wrong password, insufficient credit, or a concurrency conflict; the caller
-        /// (View code-behind) is responsible for surfacing that to the user.
+        /// Changes the product on an existing WeightDetail via the self-authorize gate (issue
+        /// #134). Throws on an unresolved/unauthorized credential, insufficient credit, or a
+        /// concurrency conflict; the caller (View code-behind) is responsible for surfacing that
+        /// to the user.
         /// </summary>
-        public async Task ChangeDetailProductAsync(int detailId, int newProductId, string passwordPlaintext)
+        public async Task ChangeDetailProductAsync(int detailId, int newProductId, string gateIdentifier, string gatePassword)
         {
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Product",
-                new { NewProductId = newProductId, PasswordHash = passwordHash });
+                new { NewProductId = newProductId, GateIdentifier = gateIdentifier, GatePassword = gatePassword });
 
             await FetchNewWeightDetails();
         }
 
         /// <summary>
-        /// Changes the partner on the current WeightEntry. Requires the manager password
-        /// (plaintext here — hashed before it ever reaches the API, see PasswordHasher). Reuses
-        /// the same shared password as ChangeDetailProductAsync (issue #122's stopgap gate
-        /// covers both actions — see design.md Decision 2 of change-weight-entry-partner).
-        /// Throws on wrong password, an entry that already has a Contpaqi document, insufficient
-        /// credit, or a concurrency conflict; the caller (View code-behind) is responsible for
-        /// surfacing that to the user.
+        /// Changes the partner on the current WeightEntry via the self-authorize gate (issue
+        /// #134, superseding the shared password from issue #122's stopgap). Throws on an
+        /// unresolved/unauthorized credential, an entry that already has a Contpaqi document,
+        /// insufficient credit, or a concurrency conflict; the caller (View code-behind) is
+        /// responsible for surfacing that to the user.
         /// </summary>
-        public async Task ChangePartnerAsync(int newPartnerId, string passwordPlaintext)
+        public async Task ChangePartnerAsync(int newPartnerId, string gateIdentifier, string gatePassword)
         {
             if (WeightEntry == null)
             {
                 throw new InvalidOperationException("WeightEntry must be set before changing its partner.");
             }
 
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/{WeightEntry.Id}/Partner",
-                new { NewPartnerId = newPartnerId, PasswordHash = passwordHash });
+                new { NewPartnerId = newPartnerId, GateIdentifier = gateIdentifier, GatePassword = gatePassword });
 
             // Also refreshes Partner, since WeightEntry.PartnerId will now differ from the
             // previously cached Partner.Id (see FetchNewWeightDetails).
@@ -351,23 +344,19 @@ namespace BasculaInterface.ViewModels
 
         /// <summary>
         /// Overrides the captured Weight (granel products) or RequiredAmount (non-granel
-        /// products) on an existing WeightDetail. Requires the manager password (plaintext here —
-        /// hashed before it ever reaches the API, see PasswordHasher). Reuses the same shared
-        /// password as ChangeDetailProductAsync/ChangePartnerAsync (issue #122's stopgap gate
-        /// covers this action too — see design.md Decision 2 of change-weight-detail-amount).
-        /// Throws on wrong password, an ERP document already existing on the entry, insufficient
-        /// credit, or a concurrency conflict; the caller (View code-behind) is responsible for
-        /// surfacing that to the user.
+        /// products) on an existing WeightDetail via the self-authorize gate (issue #134,
+        /// superseding the shared password from issue #122's stopgap). Throws on an
+        /// unresolved/unauthorized credential, an ERP document already existing on the entry,
+        /// insufficient credit, or a concurrency conflict; the caller (View code-behind) is
+        /// responsible for surfacing that to the user.
         /// </summary>
-        public async Task ChangeDetailAmountAsync(int detailId, bool isGranel, double newValue, string passwordPlaintext)
+        public async Task ChangeDetailAmountAsync(int detailId, bool isGranel, double newValue, string gateIdentifier, string gatePassword)
         {
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Amount",
                 isGranel
-                    ? new { NewWeight = newValue, NewRequiredAmount = (double?)null, PasswordHash = passwordHash }
-                    : new { NewWeight = (double?)null, NewRequiredAmount = newValue, PasswordHash = passwordHash });
+                    ? new { NewWeight = newValue, NewRequiredAmount = (double?)null, GateIdentifier = gateIdentifier, GatePassword = gatePassword }
+                    : new { NewWeight = (double?)null, NewRequiredAmount = newValue, GateIdentifier = gateIdentifier, GatePassword = gatePassword });
 
             // Also refreshes TotalWeight/BruteWeight, since a Weight override may have changed
             // the server-recomputed total.
@@ -375,22 +364,18 @@ namespace BasculaInterface.ViewModels
         }
 
         /// <summary>
-        /// Soft-deletes an existing WeightDetail via the password-gated endpoint (issue #125).
-        /// Requires the manager password (plaintext here — hashed before it ever reaches the API,
-        /// see PasswordHasher). Reuses the same shared password as ChangeDetailProductAsync/
-        /// ChangePartnerAsync/ChangeDetailAmountAsync — see design.md Decision 2 of
-        /// delete-weight-detail. Throws on wrong password, an entry that already has a Contpaqi
-        /// document, or a concurrency conflict; the caller (View code-behind) is responsible for
-        /// surfacing that to the user. Distinct from the existing unguarded DeleteWeightDetail,
-        /// which stays reserved for the empty-row "✕" button.
+        /// Soft-deletes an existing WeightDetail via the self-authorize gate (issue #134,
+        /// superseding the shared password from issue #125's stopgap). Throws on an
+        /// unresolved/unauthorized credential, an entry that already has a Contpaqi document, or a
+        /// concurrency conflict; the caller (View code-behind) is responsible for surfacing that
+        /// to the user. Distinct from the existing unguarded DeleteWeightDetail, which stays
+        /// reserved for the empty-row "✕" button.
         /// </summary>
-        public async Task DeleteWeightDetailSafelyAsync(int detailId, string passwordPlaintext)
+        public async Task DeleteWeightDetailSafelyAsync(int detailId, string gateIdentifier, string gatePassword)
         {
-            string passwordHash = PasswordHasher.HashSha256Hex(passwordPlaintext);
-
             await _apiService.PatchAsync<GenericResponse<string>>(
                 $"api/Weight/Detail/{detailId}/Delete",
-                new { PasswordHash = passwordHash });
+                new { GateIdentifier = gateIdentifier, GatePassword = gatePassword });
 
             // Also refreshes TotalWeight/BruteWeight, since deleting a loaded detail changes the
             // server-recomputed total.

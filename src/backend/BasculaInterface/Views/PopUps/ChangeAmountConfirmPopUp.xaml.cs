@@ -4,8 +4,9 @@ namespace BasculaInterface.Views.PopUps;
 
 public partial class ChangeAmountConfirmPopUp : ContentView
 {
-    // Null result = cancelled. Otherwise (NewValue, Password) — both required to confirm.
-    private TaskCompletionSource<(double NewValue, string Password)?> _tcs = null!;
+    // Null result = cancelled. Otherwise (NewValue, Identifier, Password) — all required to
+    // confirm; Identifier+Password are the self-authorize gate credential (issue #134).
+    private TaskCompletionSource<(double NewValue, string Identifier, string Password)?> _tcs = null!;
 
     public ChangeAmountConfirmPopUp()
     {
@@ -54,17 +55,18 @@ public partial class ChangeAmountConfirmPopUp : ContentView
     /// Shows the popup. <paramref name="currentValue"/> is displayed for reference only.
     /// <paramref name="isGranel"/> switches the title/current-value labels between "peso" (kg)
     /// and "cantidad" (piece count) phrasing, mirroring RowActionMenuPopUp's same switch.
-    /// Returns (NewValue, Password) on confirm, or null if the operator cancelled.
+    /// Returns (NewValue, Identifier, Password) on confirm, or null if the operator cancelled.
     /// </summary>
-    public Task<(double NewValue, string Password)?> ShowAsync(double currentValue, bool isGranel = true)
+    public Task<(double NewValue, string Identifier, string Password)?> ShowAsync(double currentValue, bool isGranel = true)
     {
-        _tcs = new TaskCompletionSource<(double NewValue, string Password)?>();
+        _tcs = new TaskCompletionSource<(double NewValue, string Identifier, string Password)?>();
 
         TitleLabel.Text = isGranel ? "Cambiar peso a:" : "Cambiar cantidad a:";
         CurrentValueLabel.Text = isGranel
             ? $"Actual: {currentValue:F2} kg"
             : $"Actual: {currentValue:F2}";
         NewValueEntry.Text = string.Empty;
+        IdentifierEntry.Text = string.Empty;
         PasswordEntry.Text = string.Empty;
 
         this.IsVisible = true;
@@ -73,10 +75,11 @@ public partial class ChangeAmountConfirmPopUp : ContentView
         return _tcs.Task;
     }
 
-    private void CloseWithResult((double NewValue, string Password)? result)
+    private void CloseWithResult((double NewValue, string Identifier, string Password)? result)
     {
         this.IsVisible = false;
         NewValueEntry.Text = string.Empty;
+        IdentifierEntry.Text = string.Empty;
         PasswordEntry.Text = string.Empty;
         _tcs?.TrySetResult(result);
     }
@@ -97,13 +100,13 @@ public partial class ChangeAmountConfirmPopUp : ContentView
             return;
         }
 
-        if (string.IsNullOrEmpty(PasswordEntry.Text))
+        if (string.IsNullOrEmpty(IdentifierEntry.Text) || string.IsNullOrEmpty(PasswordEntry.Text))
             return;
 
         await btnConfirm.ScaleTo(1.1, 100);
         await btnConfirm.ScaleTo(1.0, 100);
 
-        CloseWithResult((newValue, PasswordEntry.Text));
+        CloseWithResult((newValue, IdentifierEntry.Text, PasswordEntry.Text));
     }
 
     private void PasswordEntry_Completed(object sender, EventArgs e)

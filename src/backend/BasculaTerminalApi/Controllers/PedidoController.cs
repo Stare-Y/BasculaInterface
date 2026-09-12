@@ -1,12 +1,19 @@
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasculaTerminalApi.Controllers
 {
     public record ConvertLineToWeightRequest(int? WeightEntryId, decimal? TargetAmount, string? ExternalTarget);
-    public record DeletePedidoRequest(string PasswordHash);
-    public record DeletePedidoLineRequest(string PasswordHash);
+    public record DeletePedidoRequest(string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
+    public record DeletePedidoLineRequest(string GateIdentifier, string GatePassword)
+    {
+        public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
+    }
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -36,6 +43,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<PedidoDto>> GetById(int id)
         {
             try
@@ -55,6 +63,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("All")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<PedidoDto>>> GetAll([FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             try
@@ -69,6 +78,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpGet("All/ByProvider")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<PedidoDto>>> GetByProviderId([FromQuery] int providerId, [FromQuery] int top = 30, [FromQuery] uint page = 1)
         {
             try
@@ -107,7 +117,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                bool deleted = await _pedidoService.DeleteSafelyAsync(id, request.PasswordHash);
+                bool deleted = await _pedidoService.DeleteSafelyAsync(id, request.ToGateCredential());
                 if (!deleted)
                 {
                     return NotFound(new GenericResponse<string> { Message = $"Pedido with ID {id} not found." });
@@ -117,7 +127,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
@@ -170,7 +180,7 @@ namespace BasculaTerminalApi.Controllers
         {
             try
             {
-                bool deleted = await _pedidoService.DeleteLineSafelyAsync(id, request.PasswordHash);
+                bool deleted = await _pedidoService.DeleteLineSafelyAsync(id, request.ToGateCredential());
                 if (!deleted)
                 {
                     return NotFound(new GenericResponse<string> { Message = $"PedidoLine with ID {id} not found." });
@@ -180,7 +190,7 @@ namespace BasculaTerminalApi.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                return BadRequest(new GenericResponse<string> { Message = "Contraseña incorrecta." });
+                return BadRequest(new GenericResponse<string> { Message = "Credenciales inválidas o sin autorización." });
             }
             catch (Exception ex)
             {
