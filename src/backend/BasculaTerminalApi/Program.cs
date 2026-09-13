@@ -40,6 +40,20 @@ builder.Services.AddBusinessServices(builder.Configuration);
 // requires a valid token with no per-endpoint opt-in needed.
 AuthSettings authSettings = builder.Configuration.GetSection("AuthSettings").Get<AuthSettings>() ?? new AuthSettings();
 
+// Fail fast outside local development if the signing key was never overridden (env var or
+// appsettings) — signing every token with a public, known placeholder is worse than crashing on
+// startup. Gated on IsDevelopment() (not just "is the placeholder set") because AuthSettings.cs's
+// own C# default is that same placeholder — local `dotnet run`/tests rely on it being usable
+// without extra setup (ASPNETCORE_ENVIRONMENT=Development via launchSettings.json for the former,
+// WebApplicationFactory's own Development default for the latter). A real deployment (no
+// ASPNETCORE_ENVIRONMENT set → defaults to Production) is not exempt.
+if (!builder.Environment.IsDevelopment() && authSettings.JwtSigningKey == "REPLACE_WITH_A_REAL_SECRET_IN_CONFIGURATION")
+{
+    throw new InvalidOperationException(
+        "AuthSettings:JwtSigningKey is still the placeholder value. Set the AuthSettings__JwtSigningKey " +
+        "environment variable to a real secret before running outside Development.");
+}
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

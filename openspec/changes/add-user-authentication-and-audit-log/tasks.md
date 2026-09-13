@@ -15,7 +15,7 @@
 - [x] 2.1 Registered `DbSet<User>`, `DbSet<AuditLogEntry>` on `WeightDBContext`; unique indexes on `User.Username` and `User.UserCode` via `OnModelCreating`
 - [x] 2.2 Generated `Infrastructure/Migrations/20260912085412_AddUserAuthAndAuditLog.cs` (`dotnet ef migrations add`, throwaway connection string — same pattern as prior changes in this repo, migrations add never connects). Verified contents: `CreateTable(Users)` + 2 unique indexes, `CreateTable(AuditLogEntries)`, no seed rows.
 - [x] 2.3 Removed `WeightSettings.ChangeProductPasswordHash` (property + doc comment) from the settings model and from `appsettings.json`
-- [ ] 2.4 **Owner action required**: apply this migration against the real DB (`db.Database.Migrate()` runs automatically on next deploy per existing `Program.cs` startup code — no manual step needed beyond deploying). Then manually insert the `Sudo` row (design.md Decision 9) — no seeding exists for this or any account.
+- [x] 2.4 **Done** — owner deployed (migration applied automatically) and manually inserted the `Sudo` row (design.md Decision 9), confirmed working.
 
 ## 3. Backend — password hashing & JWT issuance
 
@@ -23,7 +23,7 @@
 - [x] 3.2 New `Core.Application/Security/UserPasswordHasher.cs`: PBKDF2 (HMACSHA256, 100k iterations), self-describing `iterations.salt.subkey` format — `PasswordHasher.cs` untouched
 - [x] 3.3 Added `Core.Application/Settings/AuthSettings.cs`: `JwtSigningKey`, `JwtIssuer`, `JwtAudience`, `JwtLifetimeHours` (default 12), `InactivityLogoutMinutes` (default 10). Registered in `appsettings.json` with a placeholder signing key.
 - [x] 3.4 `Program.cs`: `AddAuthentication().AddJwtBearer(...)`, `AddAuthorization` with `FallbackPolicy = RequireAuthenticatedUser()`, `app.UseAuthentication()` before `app.UseAuthorization()` (both moved before `MapHub`/`MapControllers` for clarity, though endpoint routing order doesn't strictly require it)
-- [ ] 3.3a **Owner action required**: `AuthSettings.JwtSigningKey` in `appsettings.json` is still the placeholder `"REPLACE_WITH_A_REAL_SECRET_IN_CONFIGURATION"` — must be replaced with a real secret before deploy (e.g. via environment-specific config or a secret store), same handling as the DB connection strings.
+- [x] 3.3a Owner set a real secret via the `AuthSettings__JwtSigningKey` environment variable (`AuthSettings:JwtSigningKey` in `appsettings.json` can stay or be deleted — the env var overrides it either way; confirmed by running the built DLL directly with/without the env var set). Also added a fail-fast guard in `Program.cs`: startup now throws outside `Development` if `JwtSigningKey` still equals the placeholder, so a missed env var on a future deploy fails loudly instead of silently signing tokens with a public string. Verified: throws when run as the production DLL (bypassing `launchSettings.json`, which forces `Development` under `dotnet run`) with the placeholder and no override; proceeds past the check once the env var is set; the 106 non-integration/non-Live tests (which run under the `Development`-default `WebApplicationFactory`/`dotnet test` environment and rely on the placeholder as a usable shared key) are unaffected.
 
 ## 4. Backend — auth & permission services
 
