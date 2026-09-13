@@ -31,7 +31,7 @@ namespace BasculaTerminalTest.Integration
         [InlineData(Role.DispatchingOperator, 20)]
         public async Task Creating_a_user_without_an_explicit_value_persists_the_role_default(Role role, int expectedMinutes)
         {
-            CreateUserRequest request = new($"user-{role}", $"CODE-{role}", "s3cretpw1", role);
+            CreateUserRequest request = new($"user-{role}", $"CODE-{role}", "s3cretpw1", role, "Nombre", "Apellido");
 
             var resp = await _authenticatedClient.PostAsJsonAsync("/api/Users", request);
 
@@ -42,7 +42,7 @@ namespace BasculaTerminalTest.Integration
         [Fact]
         public async Task Creating_a_user_with_an_explicit_value_overrides_the_role_default()
         {
-            CreateUserRequest request = new("user-explicit-timeout", "CODEEXPT", "s3cretpw1", Role.Operator, InactivityTimeoutMinutes: 42);
+            CreateUserRequest request = new("user-explicit-timeout", "CODEEXPT", "s3cretpw1", Role.Operator, "Nombre", "Apellido", InactivityTimeoutMinutes: 42);
 
             var resp = await _authenticatedClient.PostAsJsonAsync("/api/Users", request);
 

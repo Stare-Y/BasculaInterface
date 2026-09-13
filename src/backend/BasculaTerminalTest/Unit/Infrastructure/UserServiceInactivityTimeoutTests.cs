@@ -26,7 +26,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         }
 
         private static CreateUserRequest MakeCreateRequest(Role role, int? inactivityTimeoutMinutes = null) =>
-            new("someuser", "CODE1", "password123", role, inactivityTimeoutMinutes);
+            new("someuser", "CODE1", "password123", role, "Nombre", "Apellido", inactivityTimeoutMinutes);
 
         [Theory]
         [InlineData(Role.Sudo, 2)]

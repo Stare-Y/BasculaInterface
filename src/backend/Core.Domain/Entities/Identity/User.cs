@@ -35,5 +35,16 @@ namespace Core.Domain.Entities.Identity
         /// <c>UserService</c> when not explicitly supplied, and backed by a database-level default of
         /// 5 for any row inserted outside the app (e.g. a manually-seeded <see cref="Role.Sudo"/> row).</summary>
         public int InactivityTimeoutMinutes { get; set; }
+
+        /// <summary>Person's given name (add-user-name-fields design.md Decision 1). Nullable at the
+        /// database level on purpose — unlike <see cref="InactivityTimeoutMinutes"/>, nothing computes
+        /// off this value, so there's no reason to force a placeholder onto rows created before this
+        /// field existed. <c>UserService</c> requires it to be non-blank for every user created or
+        /// updated through the API from this change forward; a pre-existing row simply reads <c>null</c>
+        /// until explicitly backfilled.</summary>
+        public string? Name { get; set; }
+
+        /// <summary>Person's surname — see <see cref="Name"/> for the nullability rationale.</summary>
+        public string? LastName { get; set; }
     }
 }

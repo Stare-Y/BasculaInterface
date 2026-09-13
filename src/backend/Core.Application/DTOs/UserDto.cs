@@ -21,6 +21,14 @@ namespace Core.Application.DTOs
         /// design.md Decision 3). Never null by the time it reaches the client.</summary>
         public int InactivityTimeoutMinutes { get; set; }
 
+        /// <summary>Person's given name (add-user-name-fields design.md Decision 3). Reported exactly
+        /// as stored, including <c>null</c> for a row created before this field existed — never
+        /// coalesced to an empty string.</summary>
+        public string? Name { get; set; }
+
+        /// <summary>Person's surname — see <see cref="Name"/>.</summary>
+        public string? LastName { get; set; }
+
         public UserDto() { }
 
         public UserDto(User entity)
@@ -32,9 +40,14 @@ namespace Core.Application.DTOs
             CanSelfAuthorizeGateOverride = entity.CanSelfAuthorizeGateOverride;
             CanCaptureWeightManuallyOverride = entity.CanCaptureWeightManuallyOverride;
             InactivityTimeoutMinutes = entity.InactivityTimeoutMinutes;
+            Name = entity.Name;
+            LastName = entity.LastName;
         }
     }
 
+    /// <param name="Name">Required, non-blank (add-user-name-fields design.md Decision 2) — enforced
+    /// by <c>UserService.CreateAsync</c>, not by this record's nullability alone.</param>
+    /// <param name="LastName">Required, non-blank — see <paramref name="Name"/>.</param>
     /// <param name="InactivityTimeoutMinutes">Explicit override; when null, UserService seeds a
     /// role-based default (fix-session-inactivity-timeout design.md Decision 3).</param>
     public record CreateUserRequest(
@@ -42,8 +55,13 @@ namespace Core.Application.DTOs
         string UserCode,
         string Password,
         Role Role,
+        string Name,
+        string LastName,
         int? InactivityTimeoutMinutes = null);
 
+    /// <param name="Name">Optional (add-user-name-fields design.md Decision 2) — omitted leaves the
+    /// stored value (including a pre-existing null) unchanged; supplied-but-blank is rejected.</param>
+    /// <param name="LastName">Optional — see <paramref name="Name"/>.</param>
     public record UpdateUserRequest(
         string? Username,
         string? UserCode,
@@ -53,7 +71,9 @@ namespace Core.Application.DTOs
         bool ResetCanSelfAuthorizeGateOverride,
         bool? CanCaptureWeightManuallyOverride,
         bool ResetCanCaptureWeightManuallyOverride,
-        int? InactivityTimeoutMinutes = null);
+        int? InactivityTimeoutMinutes = null,
+        string? Name = null,
+        string? LastName = null);
 
     public record LoginRequest(string Identifier, string Password);
 

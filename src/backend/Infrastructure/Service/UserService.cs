@@ -38,6 +38,10 @@ namespace Infrastructure.Service
                 throw new ArgumentException("El código de usuario debe ser alfanumérico.");
             if (string.IsNullOrWhiteSpace(request.Password))
                 throw new ArgumentException("La contraseña es requerida.");
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new ArgumentException("El nombre es requerido.");
+            if (string.IsNullOrWhiteSpace(request.LastName))
+                throw new ArgumentException("El apellido es requerido.");
 
             if (await _userRepo.GetByUsernameAsync(request.Username) != null)
                 throw new InvalidOperationException("Ya existe un usuario con ese nombre de usuario.");
@@ -52,6 +56,8 @@ namespace Infrastructure.Service
                 Role = request.Role,
                 InactivityTimeoutMinutes = request.InactivityTimeoutMinutes
                     ?? (InactivityTimeoutDefaults.TryGetValue(request.Role, out int roleDefault) ? roleDefault : 5),
+                Name = request.Name,
+                LastName = request.LastName,
             };
 
             User created = await _userRepo.CreateAsync(user);
@@ -98,6 +104,20 @@ namespace Infrastructure.Service
 
             if (request.InactivityTimeoutMinutes.HasValue)
                 user.InactivityTimeoutMinutes = request.InactivityTimeoutMinutes.Value;
+
+            if (request.Name != null)
+            {
+                if (string.IsNullOrWhiteSpace(request.Name))
+                    throw new ArgumentException("El nombre es requerido.");
+                user.Name = request.Name;
+            }
+
+            if (request.LastName != null)
+            {
+                if (string.IsNullOrWhiteSpace(request.LastName))
+                    throw new ArgumentException("El apellido es requerido.");
+                user.LastName = request.LastName;
+            }
 
             await _userRepo.UpdateAsync(user);
             return ToDto(user);
