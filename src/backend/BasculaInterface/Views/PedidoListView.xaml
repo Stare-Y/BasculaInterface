@@ -11,21 +11,19 @@
 
     <Grid>
         <Grid
-            Padding="{OnPlatform WinUI=30}"
+            Padding="30"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
-            ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
-            ColumnSpacing="{OnPlatform WinUI=30}"
-            RowDefinitions="{OnPlatform Android='50,*,10,75'}">
+            ColumnDefinitions="*,3*"
+            ColumnSpacing="30" >
 
             <!-- Side panel (WinUI) / Bottom bar (Android) -->
             <Border
                 Padding="10"
                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                   Dark={StaticResource BlackGray}}"
-                IsVisible="{OnPlatform Android=False,
-                                       WinUI=True}"
-                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                IsVisible="True"
+                Shadow="{StaticResource DefaultShadow}"
                 StrokeShape="RoundRectangle 30"
                 StrokeThickness="0">
 
@@ -57,19 +55,13 @@
             </Border>
 
             <!-- Content area -->
-            <Grid
-                Grid.Row="{OnPlatform Android=1}"
-                Grid.Column="{OnPlatform WinUI=1}"
-                Padding="{OnPlatform Android=15}"
-                HorizontalOptions="{OnPlatform Android='Center'}"
-                RowDefinitions="Auto,*,Auto"
-                RowSpacing="20"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+            <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto"
+                RowSpacing="20" >
 
                 <Label
                     Grid.Row="0"
                     FontAttributes="Bold"
-                    FontSize="{OnPlatform WinUI=28, Android=18}"
+                    FontSize="28"
                     HorizontalOptions="Start"
                     Style="{StaticResource Label}"
                     Text="Pedidos a Proveedores"
@@ -78,9 +70,8 @@
 
                 <Border
                     Grid.Row="1"
-                    Padding="{OnPlatform WinUI=15}"
-                    Stroke="{OnPlatform Android={StaticResource 1},
-                                        WinUI={StaticResource BlackTheme}}"
+                    Padding="15"
+                    Stroke="{StaticResource BlackTheme}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0">
 
@@ -101,10 +92,9 @@
                                     Padding="15"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                       Dark={StaticResource BlackGray}}"
-                                    MaximumHeightRequest="{OnPlatform Android=200, WinUI=200}"
-                                    MinimumHeightRequest="{OnPlatform Android=80, WinUI=90}"
-                                    Stroke="{OnPlatform Android={StaticResource 4},
-                                                        WinUI={StaticResource 1}}"
+                                    MaximumHeightRequest="200"
+                                    MinimumHeightRequest="90"
+                                    Stroke="{StaticResource 1}"
                                     StrokeShape="RoundRectangle 30"
                                     StrokeThickness="0">
                                     <Grid
@@ -117,7 +107,7 @@
                                             Spacing="8">
                                             <Label
                                                 FontAttributes="Bold"
-                                                FontSize="{OnPlatform WinUI=24, Android=15}"
+                                                FontSize="24"
                                                 HorizontalOptions="Start"
                                                 HorizontalTextAlignment="Start"
                                                 Style="{StaticResource Label}"
@@ -126,7 +116,7 @@
                                                                             Dark={StaticResource 2}}" />
 
                                             <Label
-                                                FontSize="{OnPlatform WinUI=20, Android=12}"
+                                                FontSize="20"
                                                 HorizontalOptions="Start"
                                                 HorizontalTextAlignment="Start"
                                                 Style="{StaticResource Label}"
@@ -137,7 +127,7 @@
 
                                         <VerticalStackLayout Grid.Column="1" Spacing="6">
                                             <Label
-                                                FontSize="{OnPlatform WinUI=18, Android=11}"
+                                                FontSize="18"
                                                 HorizontalOptions="End"
                                                 Style="{StaticResource Label}"
                                                 Text="{Binding ExpectedArrivalText, StringFormat='Llegada: {0}'}"
@@ -145,7 +135,7 @@
 
                                             <Label
                                                 FontAttributes="Italic"
-                                                FontSize="{OnPlatform WinUI=16, Android=11}"
+                                                FontSize="16"
                                                 HorizontalOptions="End"
                                                 Style="{StaticResource Label}"
                                                 Text="{Binding StatusText}"
@@ -182,7 +172,7 @@
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center">
                                 <Label
-                                    FontSize="{OnPlatform WinUI=24, Android=16}"
+                                    FontSize="24"
                                     HorizontalOptions="Center"
                                     Style="{StaticResource Label}"
                                     Text="No hay pedidos registrados"
@@ -206,10 +196,10 @@
                         IsEnabled="False"
                         Style="{StaticResource Boton}"
                         Text="◀ Anterior"
-                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                        WidthRequest="160" />
                     <Label
                         x:Name="LblPage"
-                        FontSize="{OnPlatform WinUI=20, Android=14}"
+                        FontSize="20"
                         HorizontalOptions="Center"
                         Style="{StaticResource Label}"
                         Text="Página 1"
@@ -222,16 +212,14 @@
                         IsEnabled="False"
                         Style="{StaticResource Boton}"
                         Text="Siguiente ▶"
-                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                        WidthRequest="160" />
                 </HorizontalStackLayout>
             </Grid>
 
             <!-- Android bottom bar -->
-            <Grid
-                Grid.Row="{OnPlatform Android=3}"
-                ColumnDefinitions="*,*,*"
+            <Grid ColumnDefinitions="*,*,*"
                 ColumnSpacing="10"
-                IsVisible="{OnPlatform Android=True, WinUI=False}"
+                IsVisible="False"
                 Padding="10,0">
 
                 <Button

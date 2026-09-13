@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!-- Windows-only. The app has only ever been deployed to the Windows terminal / VM;
-		     the Android head was dropped when net8.0-android went out of support. -->
+		     the Android/iOS/MacCatalyst/Tizen heads were dropped. -->
 		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
 		<EnableWindowsTargeting Condition="$([MSBuild]::IsOSPlatform('linux'))">true</EnableWindowsTargeting>
 		<!-- GUI subsystem. A console Exe makes the WinUI window flash and close on launch. -->
@@ -13,51 +13,27 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- Display name -->
+		<!-- Display name / identity -->
 		<ApplicationTitle>BasculaInterface</ApplicationTitle>
-
-		<!-- App Identifier -->
 		<ApplicationId>com.companyname.basculainterface</ApplicationId>
-
-		<!-- Versions -->
 		<ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-		<!--<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>-->
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<PackageCertificateThumbprint>58425F7F5906EEB122EACA629D3BCEAEFF83DB33</PackageCertificateThumbprint>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>True</GenerateTestArtifacts>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-	</PropertyGroup>
+		<!-- Minimum / target Windows version -->
+		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net8.0-windows10.0.19041.0'">
+		<!-- Unpackaged Win32 exe: no MSIX/Store identity. Needed for both IDE debugging
+		     (the "Windows Machine" launch profile runs it as a plain Project, not MsixPackage)
+		     and for `dotnet publish`, which produces a self-contained single-file exe below. -->
+		<WindowsPackageType>None</WindowsPackageType>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-	
-		<!-- Publish as single file and self-contained -->
 		<SelfContained>true</SelfContained>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-		
-		 <!--avoid MSIX--> 
-		<!--<WindowsPackageType>None</WindowsPackageType>
-		<PublishSingleFile>true</PublishSingleFile>-->
-
-		<!--Name and title-->
+		<PublishSingleFile>true</PublishSingleFile>
 		<AssemblyName>BasculaInterface</AssemblyName>
-		<ApplicationTitle>BasculaInterface</ApplicationTitle>
-
-		<!-- Icon -->
-		<!--<ApplicationIcon>Resources\AppIcon\appicon.ico< /ApplicationIcon>-->
 	</PropertyGroup>
-	
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
@@ -75,7 +51,7 @@
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 	  <Compile Remove="Views\Controls\**" />
 	  <EmbeddedResource Remove="Views\Controls\**" />

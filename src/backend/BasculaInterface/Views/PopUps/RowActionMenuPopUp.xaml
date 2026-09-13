@@ -46,8 +46,7 @@
                                                   Dark={StaticResource BlackGray}}"
                 Clicked="OnChangeProductClicked"
                 CornerRadius="20"
-                FontSize="{OnPlatform Android=12,
-                                      WinUI=16}"
+                FontSize="16"
                 HeightRequest="50"
                 HorizontalOptions="Center"
                 Style="{StaticResource Boton}"
@@ -61,8 +60,7 @@
                                                   Dark={StaticResource BlackGray}}"
                 Clicked="OnChangePartnerClicked"
                 CornerRadius="20"
-                FontSize="{OnPlatform Android=12,
-                                      WinUI=16}"
+                FontSize="16"
                 HeightRequest="50"
                 HorizontalOptions="Center"
                 Style="{StaticResource Boton}"
@@ -76,8 +74,7 @@
                                                   Dark={StaticResource BlackGray}}"
                 Clicked="OnChangeAmountClicked"
                 CornerRadius="20"
-                FontSize="{OnPlatform Android=12,
-                                      WinUI=16}"
+                FontSize="16"
                 HeightRequest="50"
                 HorizontalOptions="Center"
                 Style="{StaticResource Boton}"
@@ -90,8 +87,7 @@
                 BackgroundColor="Red"
                 Clicked="OnDeleteClicked"
                 CornerRadius="20"
-                FontSize="{OnPlatform Android=12,
-                                      WinUI=16}"
+                FontSize="16"
                 HeightRequest="50"
                 HorizontalOptions="Center"
                 Style="{StaticResource Boton}"
@@ -106,8 +102,7 @@
                 BackgroundColor="Transparent"
                 Clicked="OnCancelClicked"
                 CornerRadius="20"
-                FontSize="{OnPlatform Android=12,
-                                      WinUI=16}"
+                FontSize="16"
                 HeightRequest="45"
                 HorizontalOptions="Center"
                 Style="{StaticResource Boton}"

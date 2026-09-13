@@ -26,8 +26,7 @@
             <Label
                 Grid.Row="1"
                 FontAttributes="Bold"
-                FontFamily="{OnPlatform Android=28,
-                                        WinUI=42}"
+                FontFamily="42"
                 Style="{StaticResource Label}"
                 Text="Control de basculas y pedidos" />
 
@@ -39,7 +38,7 @@
                 RowDefinitions="Auto,Auto,Auto,Auto"
                 RowSpacing="15"
                 VerticalOptions="Center"
-                WidthRequest="{OnPlatform Android=280, WinUI=450}">
+                WidthRequest="450">
 
                 <Entry
                     x:Name="IdentifierEntry"
@@ -68,16 +67,13 @@
                 <Button
                     x:Name="BtnLogIn"
                     Grid.Row="3"
-                    FontSize="{OnPlatform Android=24,
-                                          WinUI=36}"
-                    HeightRequest="{OnPlatform Android=90,
-                                               WinUI=120}"
+                    FontSize="36"
+                    HeightRequest="120"
                     Clicked="BtnLogin_Clicked"
                     Shadow="{StaticResource DefaultShadow}"
                     Style="{StaticResource Boton}"
                     Text="Ingresar"
-                    WidthRequest="{OnPlatform Android=280,
-                                              WinUI=450}" />
+                    WidthRequest="450" />
             </Grid>
 
             <!--  Acceso a configuración — siempre visible ahora que ya no depende de la
@@ -93,14 +89,12 @@
                         x:Name="BtnSettings"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                           Dark={StaticResource BlackGray}}"
-                        HeightRequest="{OnPlatform Android=75,
-                                                   WinUI=100}"
+                        HeightRequest="100"
                         HorizontalOptions="Center"
                         Stroke="{StaticResource 1}"
                         StrokeShape="RoundRectangle 30"
                         Style="{StaticResource RoundedBorderStyle}"
-                        WidthRequest="{OnPlatform Android=75,
-                                                  WinUI=100}">
+                        WidthRequest="100">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="BtnSettings_Tapped" />
                         </Border.GestureRecognizers>
@@ -109,12 +103,10 @@
                         <Image
                             x:Name="imgSettings"
                             Aspect="AspectFit"
-                            HeightRequest="{OnPlatform Android=50,
-                                                       WinUI=60}"
+                            HeightRequest="60"
                             Source="{AppThemeBinding Light='settings.png',
                                                      Dark='settings.png'}"
-                            WidthRequest="{OnPlatform Android=50,
-                                                      WinUI=60}" />
+                            WidthRequest="60" />
 
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList>

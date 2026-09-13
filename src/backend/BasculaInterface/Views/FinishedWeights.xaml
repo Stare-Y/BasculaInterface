@@ -12,21 +12,16 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid
-            Padding="{OnPlatform WinUI=10,
-                                 Android=15}"
+            Padding="10"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
-            ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
-            ColumnSpacing="{OnPlatform WinUI=30}"
-            RowDefinitions="{OnPlatform Android='50,*,10,75'}">
+            ColumnDefinitions="*,3*"
+            ColumnSpacing="30" >
 
 
-            <BoxView
-                Grid.Row="{OnPlatform Android=2}"
-                HeightRequest="2"
+            <BoxView HeightRequest="2"
                 HorizontalOptions="Fill"
-                IsVisible="{OnPlatform Android=True,
-                                       WinUI=False}"
+                IsVisible="False"
                 VerticalOptions="Start"
                 Color="{AppThemeBinding Light={StaticResource 4},
                                         Dark={StaticResource Gray}}" />
@@ -36,27 +31,20 @@
                 Padding="10"
                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                   Dark={StaticResource BlackGray}}"
-                IsVisible="{OnPlatform Android=False,
-                                       WinUI=True}"
-                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                IsVisible="True"
+                Shadow="{StaticResource DefaultShadow}"
                 StrokeShape="RoundRectangle 30"
                 StrokeThickness="0">
 
 
-                <Grid
-                    Grid.Row="{OnPlatform Android=3}"
-                    Grid.Column="{OnPlatform WinUI=0}"
-                    ColumnDefinitions="{OnPlatform Android='*,*,*'}"
-                    ColumnSpacing="15"
-                    RowDefinitions="{OnPlatform WinUI='*,*,*,*'}"
+                <Grid Grid.Column="0" ColumnSpacing="15"
+                    RowDefinitions="*,*,*,*"
                     RowSpacing="15">
 
 
                     <Button
                         x:Name="BtnReconnect"
-                        Grid.Row="{OnPlatform WinUI=2}"
-                        Grid.Column="{OnPlatform Android=0}"
-                        IsVisible="False"
+                        Grid.Row="2" IsVisible="False"
                         Pressed="BtnReconnect_Pressed"
                         Released="BtnReconnect_Released"
                         Style="{StaticResource Boton}"
@@ -64,9 +52,7 @@
 
                     <Button
                         x:Name="BtnRefresh"
-                        Grid.Row="{OnPlatform WinUI=1}"
-                        Grid.Column="{OnPlatform Android=1}"
-                        IsVisible="True"
+                        Grid.Row="1" IsVisible="True"
                         Pressed="BtnReconnect_Pressed"
                         Released="BtnReconnect_Released"
                         Style="{StaticResource Boton}"
@@ -75,30 +61,21 @@
 
                     <Button
                         x:Name="BtnExit"
-                        Grid.Row="{OnPlatform WinUI=3}"
-                        Clicked="BtnExit_Clicked"
-                        IsVisible="{OnPlatform Android=False}"
-                        Style="{StaticResource Boton}"
+                        Grid.Row="3"
+                        Clicked="BtnExit_Clicked" Style="{StaticResource Boton}"
                         Text="Volver" />
 
                 </Grid>
             </Border>
 
-            <Grid
-                Grid.Row="{OnPlatform Android=1}"
-                Grid.Column="{OnPlatform WinUI=1}"
-                Padding="{OnPlatform Android=30}"
-                HorizontalOptions="{OnPlatform Android='Center'}"
-                RowDefinitions="*,Auto"
-                RowSpacing="10"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+            <Grid Grid.Column="1" RowDefinitions="*,Auto"
+                RowSpacing="10" >
 
 
                 <Border
                     Grid.Row="0"
-                    Padding="{OnPlatform WinUI=15}"
-                    Stroke="{OnPlatform Android={StaticResource 1},
-                                        WinUI={StaticResource BlackTheme}}"
+                    Padding="15"
+                    Stroke="{StaticResource BlackTheme}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0">
 
@@ -126,11 +103,9 @@
                                         Padding="15"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                           Dark={StaticResource BlackGray}}"
-                                        HeightRequest="{OnPlatform Android=75,
-                                                                   WinUI=110}"
+                                        HeightRequest="110"
                                         InputTransparent="False"
-                                        Stroke="{OnPlatform Android={StaticResource 4},
-                                                            WinUI={StaticResource 1}}"
+                                        Stroke="{StaticResource 1}"
                                         StrokeShape="RoundRectangle 30"
                                         StrokeThickness="0">
                                         <Grid ColumnDefinitions="2.5*,*">
@@ -138,8 +113,7 @@
                                                 <Label
                                                     x:Name="lblRazonSocial"
                                                     FontAttributes="Bold"
-                                                    FontSize="{OnPlatform WinUI=26,
-                                                                          Android=15}"
+                                                    FontSize="26"
                                                     HorizontalOptions="Start"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding Partner.RazonSocial}"
@@ -149,8 +123,7 @@
                                                 <HorizontalStackLayout>
                                                     <Label
                                                         x:Name="lblPlacas"
-                                                        FontSize="{OnPlatform WinUI=26,
-                                                                              Android=12}"
+                                                        FontSize="26"
                                                         HorizontalOptions="Start"
                                                         Style="{StaticResource Label}"
                                                         Text="{Binding WeightEntry.VehiclePlate, StringFormat='Placas: {0} | '}"
@@ -158,8 +131,7 @@
                                                                                     Dark={StaticResource 1}}" />
                                                     <Label
                                                         x:Name="lblNotas"
-                                                        FontSize="{OnPlatform WinUI=26,
-                                                                              Android=12}"
+                                                        FontSize="26"
                                                         HorizontalOptions="Start"
                                                         Style="{StaticResource Label}"
                                                         Text="{Binding WeightEntry.Notes, StringFormat=' Chofer: {0}.'}"
@@ -174,8 +146,7 @@
                                                     x:Name="lblTara"
                                                     Margin="0,0,0,0"
                                                     FontAttributes="Bold"
-                                                    FontSize="{OnPlatform WinUI=22,
-                                                                          Android=12}"
+                                                    FontSize="22"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding WeightEntry.TareWeight, StringFormat='Tara: {0} kg'}"
@@ -184,8 +155,7 @@
 
                                                 <Label
                                                     x:Name="lblHistory"
-                                                    FontSize="{OnPlatform WinUI=22,
-                                                                          Android=10}"
+                                                    FontSize="22"
                                                     HorizontalOptions="End"
                                                     Style="{StaticResource Label}"
                                                     Text="{Binding HistoryText}"
@@ -251,10 +221,10 @@
                         IsEnabled="False"
                         Style="{StaticResource Boton}"
                         Text="◀ Anterior"
-                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                        WidthRequest="160" />
                     <Label
                         x:Name="LblPage"
-                        FontSize="{OnPlatform WinUI=20, Android=14}"
+                        FontSize="20"
                         HorizontalOptions="Center"
                         Style="{StaticResource Label}"
                         Text="Página 1"
@@ -267,75 +237,8 @@
                         IsEnabled="False"
                         Style="{StaticResource Boton}"
                         Text="Siguiente ▶"
-                        WidthRequest="{OnPlatform WinUI=160, Android=120}" />
+                        WidthRequest="160" />
                 </HorizontalStackLayout>
-            </Grid>
-
-            <Grid
-                Grid.Row="{OnPlatform Android=0}"
-                Padding="10"
-                BackgroundColor="{AppThemeBinding Light={StaticResource 4},
-                                                  Dark={StaticResource 2}}"
-                ColumnDefinitions="Auto, Auto"
-                ColumnSpacing="90"
-                HorizontalOptions="Fill"
-                IsVisible="{OnPlatform Android=True,
-                                       WinUI=False}">
-
-                <Label
-                    x:Name="lblRazonSocial"
-                    Grid.Column="1"
-                    FontAttributes="Bold"
-                    FontSize="18"
-                    HorizontalOptions="Center"
-                    Style="{StaticResource Label}"
-                    Text="Lista de Pedidos "
-                    TextColor="{AppThemeBinding Light={StaticResource 4},
-                                                Dark={StaticResource 1}}" />
-
-
-                <Border
-                    x:Name="BtnExitAndroid"
-                    Grid.Column="0"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource 4},
-                                                      Dark={StaticResource 2}}"
-                    HeightRequest="40"
-                    HorizontalOptions="Start"
-                    Stroke="{AppThemeBinding Light={StaticResource 4},
-                                             Dark={StaticResource 2}}"
-                    StrokeShape="RoundRectangle 60"
-                    StrokeThickness="2"
-                    VerticalOptions="Center"
-                    WidthRequest="40">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="BtnExit_Clicked" />
-                    </Border.GestureRecognizers>
-
-                    <Image
-                        x:Name="BtnBack"
-                        Aspect="AspectFit"
-                        HeightRequest="30"
-                        Source="back.png"
-                        WidthRequest="30" />
-
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroupList>
-                            <VisualStateGroup x:Name="CommonStates">
-
-                                <VisualState x:Name="Normal" />
-
-                                <VisualState x:Name="Pressed">
-                                    <VisualState.Setters>
-                                        <Setter TargetName="BtnBack" Property="Image.Source" Value="back2.png" />
-                                        <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
-                                    </VisualState.Setters>
-                                </VisualState>
-
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </VisualStateManager.VisualStateGroups>
-                </Border>
-
             </Grid>
         </Grid>
         <components:WaitPopUp x:Name="WaitPopUp" />

@@ -275,17 +275,6 @@ public partial class DetailedWeightView : ContentPage
         });
     }
 
-    /// <summary>
-    /// Handles the Loaded event for the CollectionView.
-    /// Forces a re-layout to fix first item sizing issues.
-    /// </summary>
-    private async void CollectionViewWeightDetails_Loaded(object? sender, EventArgs e)
-    {
-#if ANDROID
-        await ForceCollectionViewRelayout();
-#endif
-    }
-
     protected override void OnDisappearing()
     {
         base.OnDisappearing();

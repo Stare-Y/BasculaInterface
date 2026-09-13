@@ -147,11 +147,6 @@ public partial class PendingWeightsView : ContentPage
                 PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
             }
 
-            // Workaround for MAUI CollectionView first item sizing bug
-#if ANDROID
-            await ForceCollectionViewRelayout();
-#endif
-
             if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
             {
                 GridListTab.IsVisible = false;
@@ -166,9 +161,6 @@ public partial class PendingWeightsView : ContentPage
                     BtnFinished.IsVisible = true;
                 }
             }
-#if ANDROID
-            BtnRefresh.IsVisible = false;
-#endif
             BtnReconnect.IsVisible = false;
         }
         catch (OperationCanceledException)
@@ -195,24 +187,6 @@ public partial class PendingWeightsView : ContentPage
         _cts?.Cancel();
         _cts?.Dispose();
         _cts = null;
-    }
-
-    /// <summary>
-    /// Forces the CollectionView to re-measure all items.
-    /// Workaround for MAUI bug where items render with incorrect dimensions on first load.
-    /// </summary>
-    private async Task ForceCollectionViewRelayout()
-    {
-        await Task.Delay(50);
-
-        await Dispatcher.DispatchAsync(() =>
-        {
-            // Use ScrollTo to force re-render without breaking compiled bindings
-            if (PendingWeightsCollectionView.ItemsSource is System.Collections.IList list && list.Count > 0)
-            {
-                PendingWeightsCollectionView.ScrollTo(0, position: ScrollToPosition.Start, animate: false);
-            }
-        });
     }
 
     private async void PendingWeightsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -401,9 +375,6 @@ public partial class PendingWeightsView : ContentPage
 
     private async void BtnExit_Clicked(object sender, EventArgs e)
     {
-        await BtnExitAndroid.ScaleTo(1.1, 100);
-        await BtnExitAndroid.ScaleTo(1.0, 100);
-
         await BtnExit.ScaleTo(1.1, 100);
         await BtnExit.ScaleTo(1.0, 100);
 

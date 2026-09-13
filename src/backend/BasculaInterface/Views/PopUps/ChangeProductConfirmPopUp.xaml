@@ -68,8 +68,7 @@
                                                       Dark={StaticResource BlackGray}}"
                     Clicked="OnPopupCancelClicked"
                     CornerRadius="20"
-                    FontSize="{OnPlatform Android=12,
-                                          WinUI=18}"
+                    FontSize="18"
                     HeightRequest="50"
                     Style="{StaticResource Boton}"
                     Text="Cancelar"
@@ -81,8 +80,7 @@
                                                       Dark={StaticResource BlackGray}}"
                     Clicked="OnPopupAcceptClicked"
                     CornerRadius="20"
-                    FontSize="{OnPlatform Android=12,
-                                          WinUI=18}"
+                    FontSize="18"
                     HeightRequest="50"
                     Style="{StaticResource Boton}"
                     Text="Confirmar"
