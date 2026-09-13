@@ -14,8 +14,7 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid
-            Padding="{OnPlatform Android=15,
-                                 WinUI=35}"
+            Padding="35"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
             HorizontalOptions="Fill"
@@ -47,8 +46,7 @@
                 VerticalOptions="Center">
 
                 <Label
-                    FontSize="{OnPlatform Android=12,
-                                          WinUI=32}"
+                    FontSize="32"
                     HorizontalOptions="Center"
                     Style="{StaticResource Label}"
                     Text="Socio seleccionado: "
@@ -58,8 +56,7 @@
 
                 <Label
                     x:Name="LabelResultado"
-                    FontSize="{OnPlatform Android=12,
-                                          WinUI=32}"
+                    FontSize="32"
                     HorizontalOptions="Center"
                     Style="{StaticResource Label}"
                     TextColor="{AppThemeBinding Light={StaticResource 4},
@@ -71,9 +68,7 @@
 
             <Grid
                 Grid.Row="2"
-                Padding="10"
-                HorizontalOptions="{OnPlatform Android='Center'}"
-                VerticalOptions="{OnPlatform Android='StartAndExpand'}">
+                Padding="10" >
                 <CollectionView
                     x:Name="ResultsCollectionView"
                     ItemsSource="{Binding Partners}"
@@ -90,12 +85,9 @@
                                 Padding="15"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                   Dark={StaticResource BlackGray}}"
-                                HeightRequest="{OnPlatform Android=50,
-                                                           WinUI=75}"
-                                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                                    Android={StaticResource AndroidShadow}}"
-                                Stroke="{OnPlatform Android={StaticResource 4},
-                                                    WinUI={StaticResource 1}}"
+                                HeightRequest="75"
+                                Shadow="{StaticResource DefaultShadow}"
+                                Stroke="{StaticResource 1}"
                                 StrokeShape="RoundRectangle 30"
                                 StrokeThickness="0">
                                 <Grid ColumnDefinitions="30,*,Auto">
@@ -103,8 +95,7 @@
                                     <Label
                                         x:Name="LabelNombre"
                                         Grid.Column="1"
-                                        FontSize="{OnPlatform Android=11,
-                                                              WinUI=25}"
+                                        FontSize="25"
                                         HorizontalOptions="Start"
                                         Style="{StaticResource Label}"
                                         Text="{Binding RazonSocial}"
@@ -162,17 +153,14 @@
                     Grid.Column="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
-                    HeightRequest="{OnPlatform Android=50,
-                                               WinUI=100}"
+                    HeightRequest="100"
                     HorizontalOptions="Center"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                        Android={StaticResource AndroidShadowButton}}"
+                    Shadow="{StaticResource DefaultShadow}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
-                                              WinUI=250}">
+                    WidthRequest="250">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnBackClicked" />
                     </Border.GestureRecognizers>
@@ -185,21 +173,16 @@
                         <Image
                             x:Name="BackIcon"
                             Aspect="AspectFit"
-                            HeightRequest="{OnPlatform Android=25,
-                                                       WinUI=50}"
+                            HeightRequest="50"
                             HorizontalOptions="Fill"
                             Source="{AppThemeBinding Light='back2.png',
                                                      Dark='back.png'}"
                             VerticalOptions="Fill"
-                            WidthRequest="{OnPlatform Android=25,
-                                                      WinUI=50}" />
+                            WidthRequest="50" />
 
                         <Label
-                            x:Name="BackLabel"
-                            Margin="{OnPlatform Android='0,-5,0,0'}"
-                            FontAttributes="Bold"
-                            FontSize="{OnPlatform Android=8,
-                                                  WinUI=16}"
+                            x:Name="BackLabel" FontAttributes="Bold"
+                            FontSize="16"
                             Style="{StaticResource Label}"
                             Text="Volver"
                             TextColor="{AppThemeBinding Light={StaticResource Black},
@@ -242,18 +225,15 @@
                     Grid.Column="1"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
-                    HeightRequest="{OnPlatform Android=50,
-                                               WinUI=100}"
+                    HeightRequest="100"
                     HorizontalOptions="Center"
                     IsVisible="False"
-                    Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                        Android={StaticResource AndroidShadowButton}}"
+                    Shadow="{StaticResource DefaultShadow}"
                     Stroke="{StaticResource 1}"
                     StrokeShape="RoundRectangle 30"
                     StrokeThickness="0"
                     Style="{StaticResource RoundedBorderStyle}"
-                    WidthRequest="{OnPlatform Android=100,
-                                              WinUI=250}">
+                    WidthRequest="250">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnConfirmClicked" />
                     </Border.GestureRecognizers>
@@ -266,21 +246,16 @@
                         <Image
                             x:Name="AddIcon"
                             Aspect="AspectFit"
-                            HeightRequest="{OnPlatform Android=25,
-                                                       WinUI=50}"
+                            HeightRequest="50"
                             HorizontalOptions="Fill"
                             Source="{AppThemeBinding Light='addsuer.png',
                                                      Dark='addsuer2.png'}"
                             VerticalOptions="Fill"
-                            WidthRequest="{OnPlatform Android=25,
-                                                      WinUI=50}" />
+                            WidthRequest="50" />
 
                         <Label
-                            x:Name="AddLabel"
-                            Margin="{OnPlatform Android='0,-5,0,0'}"
-                            FontAttributes="Bold"
-                            FontSize="{OnPlatform Android=8,
-                                                  WinUI=16}"
+                            x:Name="AddLabel" FontAttributes="Bold"
+                            FontSize="16"
                             Style="{StaticResource Label}"
                             Text="Confirmar Socio"
                             TextColor="{AppThemeBinding Light={StaticResource Black},

@@ -43,7 +43,7 @@
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
 
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=250, WinUI=400}" />
+                <Setter Property="WidthRequest" Value="400" />
 
             </Style>
 
@@ -54,7 +54,7 @@
                 <Setter Property="VerticalTextAlignment" Value="Center" />
                 <Setter Property="HorizontalTextAlignment" Value="Center" />
                 <Setter Property="TextColor" Value="{StaticResource 1}" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=24, WinUI=32}" />
+                <Setter Property="FontSize" Value="32" />
 
 
             </Style>
@@ -65,9 +65,9 @@
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource 1}, Dark={StaticResource BlackTheme}}" />
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                 <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=280}" />
-                <Setter Property="HeightRequest" Value="{OnPlatform Android=60, WinUI=80}" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="WidthRequest" Value="280" />
+                <Setter Property="HeightRequest" Value="80" />
                 <Setter Property="CornerRadius" Value="30" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
@@ -112,9 +112,9 @@
                 <Setter Property="BackgroundColor" Value="{StaticResource 4}" />
                 <Setter Property="TextColor" Value="{StaticResource 1}" />
                 <Setter Property="FontAttributes" Value="Bold" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=15, WinUI=24}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=100, WinUI=280}" />
-                <Setter Property="HeightRequest" Value="{OnPlatform Android=60, WinUI=80}" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="WidthRequest" Value="280" />
+                <Setter Property="HeightRequest" Value="80" />
                 <Setter Property="CornerRadius" Value="30" />
                 <Setter Property="VerticalOptions" Value="Center" />
                 <Setter Property="HorizontalOptions" Value="Center" />
@@ -159,9 +159,9 @@
                 behavior, smaller footprint.
             -->
             <Style x:Key="BotonChico" TargetType="Button" BasedOn="{StaticResource Boton}">
-                <Setter Property="FontSize" Value="{OnPlatform Android=13, WinUI=16}" />
-                <Setter Property="WidthRequest" Value="{OnPlatform Android=80, WinUI=120}" />
-                <Setter Property="HeightRequest" Value="{OnPlatform Android=40, WinUI=48}" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="WidthRequest" Value="120" />
+                <Setter Property="HeightRequest" Value="48" />
                 <Setter Property="CornerRadius" Value="12" />
                 <Setter Property="BorderWidth" Value="2" />
             </Style>
@@ -309,7 +309,7 @@
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                 <Setter Property="FontFamily" Value="Montserrat" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=18, WinUI=24}" />
+                <Setter Property="FontSize" Value="24" />
 
 
                 <Style.Triggers>
@@ -341,7 +341,7 @@
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource BlackGray}}" />
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                 <Setter Property="FontFamily" Value="Montserrat" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=18, WinUI=24}" />
+                <Setter Property="FontSize" Value="24" />
 
 
                 <Style.Triggers>
@@ -372,7 +372,7 @@
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
                 <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource BlackGray}, Dark={StaticResource 1}}" />
                 <Setter Property="FontFamily" Value="Montserrat" />
-                <Setter Property="FontSize" Value="{OnPlatform Android=18, WinUI=24}" />
+                <Setter Property="FontSize" Value="24" />
                 <Setter Property="CancelButtonColor" Value="{AppThemeBinding Light={StaticResource 4}, Dark={StaticResource 1}}" />
 
                 <Style.Triggers>

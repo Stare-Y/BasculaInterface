@@ -10,13 +10,13 @@
 
         <Image Aspect="AspectFill" Source="background.png" />
 
-        <Grid Padding="{OnPlatform Android=30, WinUI=125}">
+        <Grid Padding="125">
 
             <Border
                 Padding="30"
                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                   Dark={StaticResource BlackGray}}"
-                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                Shadow="{StaticResource DefaultShadow}"
                 StrokeShape="RoundRectangle 30"
                 StrokeThickness="0">
 
@@ -63,8 +63,7 @@
                             x:Name="StackCheckBox"
                             HorizontalOptions="Center"
                             IsVisible="True"
-                            Spacing="{OnPlatform Android=10,
-                                                 WinUI=20}"
+                            Spacing="20"
                             VerticalOptions="Center">
 
                             <Grid
@@ -81,8 +80,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Usar terminal secundaria" />
@@ -107,8 +105,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Forzar elegir socio" />
@@ -130,8 +127,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Solo Pedidos" />
@@ -152,8 +148,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Omitir Turno de Bascula" />
@@ -174,8 +169,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Ver solo Terminados" />
@@ -196,8 +190,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Mostrar filtro de tipos de documento" />
@@ -217,8 +210,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Filtrar Nulos (si marcado, al filtrar, los nulos no apareceran)" />
@@ -229,7 +221,7 @@
                                 ColumnDefinitions="*,*"
                                 ColumnSpacing="35"
                                 HorizontalOptions="Fill"
-                                IsVisible="{OnPlatform WinUI=True, Android=False}"
+                                IsVisible="True"
                                 VerticalOptions="Center">
 
                                 <CheckBox
@@ -240,8 +232,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Ocultar barra de tareas al maximizar" />
@@ -263,8 +254,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Id de tipo de documento por default" />
@@ -286,8 +276,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Id de tipo de documento para compras" />
@@ -305,7 +294,7 @@
                                     Grid.Column="0"
                                     HorizontalOptions="Start"
                                     SelectedIndexChanged="PickerTheme_SelectedIndexChanged"
-                                    WidthRequest="{OnPlatform Android=120, WinUI=200}">
+                                    WidthRequest="200">
                                     <Picker.ItemsSource>
                                         <x:Array Type="{x:Type x:String}">
                                             <x:String>Sistema</x:String>
@@ -317,8 +306,7 @@
 
                                 <Label
                                     Grid.Column="1"
-                                    FontSize="{OnPlatform Android=12,
-                                                          WinUI=22}"
+                                    FontSize="22"
                                     HorizontalOptions="End"
                                     Style="{StaticResource Label}"
                                     Text="Tema de la aplicación" />
@@ -343,16 +331,13 @@
                             Grid.Column="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"
-                            HeightRequest="{OnPlatform Android=75,
-                                                       WinUI=80}"
+                            HeightRequest="80"
                             HorizontalOptions="Center"
-                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                                Android={StaticResource AndroidShadowButton}}"
+                            Shadow="{StaticResource DefaultShadow}"
                             Stroke="Transparent"
                             StrokeShape="RoundRectangle 30"
                             Style="{StaticResource RoundedBorderStyle}"
-                            WidthRequest="{OnPlatform Android=75,
-                                                      WinUI=250}">
+                            WidthRequest="250">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="BtnCancel_Clicked" />
                             </Border.GestureRecognizers>
@@ -362,18 +347,15 @@
                                 <Image
                                     x:Name="BackIcon"
                                     Aspect="AspectFit"
-                                    HeightRequest="{OnPlatform Android=40,
-                                                               WinUI=50}"
+                                    HeightRequest="50"
                                     Source="{AppThemeBinding Light='back2.png',
                                                              Dark='back.png'}"
-                                    WidthRequest="{OnPlatform Android=40,
-                                                              WinUI=50}" />
+                                    WidthRequest="50" />
 
                                 <Label
                                     x:Name="BackLabel"
                                     FontAttributes="Bold"
-                                    FontSize="{OnPlatform Android=10,
-                                                          WinUI=16}"
+                                    FontSize="16"
                                     Style="{StaticResource Label}"
                                     Text="Volver"
                                     TextColor="{AppThemeBinding Light={StaticResource Black},
@@ -415,18 +397,15 @@
                             Grid.Column="1"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"
-                            HeightRequest="{OnPlatform Android=75,
-                                                       WinUI=80}"
+                            HeightRequest="80"
                             HorizontalOptions="Center"
-                            Shadow="{OnPlatform WinUI={StaticResource DefaultShadow},
-                                                Android={StaticResource AndroidShadowButton}}"
+                            Shadow="{StaticResource DefaultShadow}"
                             Stroke="{AppThemeBinding Light={StaticResource 4},
                                                      Dark={StaticResource 2}}"
                             StrokeShape="RoundRectangle 30"
                             StrokeThickness="3"
                             Style="{StaticResource RoundedBorderStyle}"
-                            WidthRequest="{OnPlatform Android=75,
-                                                      WinUI=250}">
+                            WidthRequest="250">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="BtnSaveSettings_Clicked" />
                             </Border.GestureRecognizers>
@@ -439,20 +418,17 @@
                                 <Image
                                     x:Name="CaptureSettingsImage"
                                     Aspect="AspectFit"
-                                    HeightRequest="{OnPlatform Android=30,
-                                                               WinUI=40}"
+                                    HeightRequest="40"
                                     HorizontalOptions="Fill"
                                     Source="{AppThemeBinding Light='confirm.png',
                                                              Dark='confirm2.png'}"
                                     VerticalOptions="Fill"
-                                    WidthRequest="{OnPlatform Android=30,
-                                                              WinUI=40}" />
+                                    WidthRequest="40" />
 
                                 <Label
                                     x:Name="CaptureSettingsLabel"
                                     FontAttributes="Bold"
-                                    FontSize="{OnPlatform Android=7,
-                                                          WinUI=16}"
+                                    FontSize="16"
                                     Style="{StaticResource Label}"
                                     Text="Guardar Configuracion"
                                     TextColor="{AppThemeBinding Light={StaticResource Black},

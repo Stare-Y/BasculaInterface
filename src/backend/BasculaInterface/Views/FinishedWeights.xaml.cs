@@ -34,9 +34,6 @@ public partial class FinishedWeights : ContentPage
                 await viewModel.LoadPendingWeightsAsync(token);
                 UpdatePaginationControls(viewModel);
 
-#if ANDROID
-                BtnRefresh.IsVisible = false;
-#endif
                 BtnReconnect.IsVisible = false;
 
                 return;
@@ -86,9 +83,6 @@ public partial class FinishedWeights : ContentPage
     }
     private async void BtnExit_Clicked(object sender, EventArgs e)
     {
-        await BtnExitAndroid.ScaleTo(1.1, 100);
-        await BtnExitAndroid.ScaleTo(1.0, 100);
-
         await BtnExit.ScaleTo(1.1, 100);
         await BtnExit.ScaleTo(1.0, 100);
 

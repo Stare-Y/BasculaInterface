@@ -11,21 +11,19 @@
 
     <Grid>
         <Grid
-            Padding="{OnPlatform WinUI=30}"
+            Padding="30"
             BackgroundColor="{AppThemeBinding Light={StaticResource 1},
                                               Dark={StaticResource BlackTheme}}"
-            ColumnDefinitions="{OnPlatform WinUI='*,3*'}"
-            ColumnSpacing="{OnPlatform WinUI=30}"
-            RowDefinitions="{OnPlatform Android='50,*,10,75'}">
+            ColumnDefinitions="*,3*"
+            ColumnSpacing="30" >
 
             <!-- Side panel (WinUI) / Bottom bar (Android) -->
             <Border
                 Padding="10"
                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                   Dark={StaticResource BlackGray}}"
-                IsVisible="{OnPlatform Android=False,
-                                       WinUI=True}"
-                Shadow="{OnPlatform WinUI={StaticResource DefaultShadow}}"
+                IsVisible="True"
+                Shadow="{StaticResource DefaultShadow}"
                 StrokeShape="RoundRectangle 30"
                 StrokeThickness="0">
 
@@ -63,9 +61,7 @@
             </Border>
 
             <!-- Content area -->
-            <Grid
-                Grid.Row="{OnPlatform Android=1}"
-                Grid.Column="{OnPlatform WinUI=1}">
+            <Grid Grid.Column="1">
 
                 <ScrollView
                     Padding="20">
@@ -374,11 +370,9 @@
             </Grid>
 
             <!-- Android bottom bar -->
-            <Grid
-                Grid.Row="{OnPlatform Android=3}"
-                ColumnDefinitions="*,*,*"
+            <Grid ColumnDefinitions="*,*,*"
                 ColumnSpacing="10"
-                IsVisible="{OnPlatform Android=True, WinUI=False}"
+                IsVisible="False"
                 Padding="10,0">
 
                 <Button
