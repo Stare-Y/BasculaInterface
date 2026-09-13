@@ -20,11 +20,13 @@ The click-freeze's exact mechanism is not confirmed. `WindowsPackageType` is `No
 
 ## Decisions
 
-### Decision 1: Global activity hook via `AppShell` root gesture + successful API responses
+### Decision 1: Global activity hook via a native-window pointer observer + successful API responses
 
-**Chosen:** Add a `TapGestureRecognizer` (covering pointer/touch press) to the root layout in `AppShell.xaml`, calling `InactivityWatcherService.RegisterActivity()` on every recognized tap without consuming or altering existing input handling (`Cancelled`/normal bubbling unaffected — MAUI gesture recognizers observe rather than intercept unless a child explicitly handles the same gesture). Also call `RegisterActivity()` from `AuthHeaderHandler.SendAsync` after any response with `IsSuccessStatusCode == true`, so background API activity (e.g. a scale-polling call) counts as activity too, matching the original design.md Decision 7 intent ("reset also on every successful API response").
+**Chosen (revised after an XAML compile error — see below):** `GestureRecognizers` is a `View`-only member in .NET MAUI; `Shell`/`Page` never exposes it, so a `<Shell.GestureRecognizers>` hook doesn't compile ("No property, BindableProperty, or event found for GestureRecognizers"). Since `BasculaInterface` targets only Windows and `MauiProgram.cs` already reaches into the native WinUI window in its `OnWindowCreated` lifecycle callback (for title-bar/presenter setup), the activity hook is added there instead: `window.Content.AddHandler(UIElement.PointerPressedEvent, handler, handledEventsToo: true)`. This observes every pointer press across the whole native window — modal-stack pages included, unlike any single MAUI view could reach — without consuming the event (`handledEventsToo: true` means it still fires even when a control, e.g. a `Button`, marks the press handled internally). Also call `RegisterActivity()` from `AuthHeaderHandler.SendAsync` after any response with `IsSuccessStatusCode == true`, so background API activity (e.g. a scale-polling call) counts as activity too, matching the original design.md Decision 7 intent ("reset also on every successful API response").
 
-**Rejected — per-page gesture recognizers:** would require touching every `ContentPage` in the app individually and would miss any page added later; a single root-level hook covers the whole app by construction.
+**Rejected — per-page gesture recognizers:** would require touching every `ContentPage` in the app individually and would miss any page added later; a single root-level hook covers the whole app by construction. (Also moot now that `Shell` itself can't carry one at all.)
+
+**Rejected — `Shell.GestureRecognizers` (original Decision 1, does not compile):** kept here as a record of the mistake — `Shell : Page`, and `Page` was never a `GestureRecognizers` host in MAUI, only `View`/`Layout` types are. Caught via a real build error on the owner's machine, not in this sandbox (this project's MAUI/WinUI target cannot be built here at all).
 
 ### Decision 2: `OnInactivityTimeout` drains the modal stack, guarded against concurrent navigation
 

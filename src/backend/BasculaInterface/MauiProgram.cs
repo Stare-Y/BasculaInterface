@@ -61,6 +61,25 @@ public static class MauiProgram
                             overlappedPresenter.Maximize();
                         }
                     }
+
+                    // fix-session-inactivity-timeout design.md Decision 1 (revised): Page (and
+                    // therefore Shell) has no GestureRecognizers property in MAUI — that's a
+                    // View-only member, so a <Shell.GestureRecognizers> hook in XAML doesn't
+                    // compile. Observing pointer presses at the native WinUI window root instead
+                    // sees every page — modal stack included — through one registration, unlike any
+                    // single MAUI view could; handledEventsToo means a control marking its own
+                    // press "handled" (e.g. a Button) still counts as activity here.
+                    if (window.Content is not null)
+                    {
+                        window.Content.AddHandler(
+                            Microsoft.UI.Xaml.UIElement.PointerPressedEvent,
+                            new Microsoft.UI.Xaml.Input.PointerEventHandler((_, _) =>
+                            {
+                                (ServiceProvider.GetService(typeof(InactivityWatcherService)) as InactivityWatcherService)
+                                    ?.RegisterActivity();
+                            }),
+                            handledEventsToo: true);
+                    }
                 });
             });
         });
