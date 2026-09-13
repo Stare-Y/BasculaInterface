@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator change the partner (`Socio`) on an existing `WeightEntry`, with credit re-validated against the new partner and a hard block once the entry already has a related Contpaqi document. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a misassigned partner without discarding work already captured on the entry. Also covers the themed row-menu popup that surfaces this action alongside the existing product-change action.
+Defines the gated endpoint that lets an operator change the partner (`Socio`) on an existing `WeightEntry`, with credit re-validated against the new partner and a hard block once the entry already has a related Contpaqi document. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a misassigned partner without discarding work already captured on the entry. Also covers the themed row-menu popup that surfaces this action alongside the existing product-change action. Originally a single shared password, superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Defines the password-gated endpoint that lets an operator change the partner (`S
 The system SHALL expose `PATCH /api/Weight/{id}/Partner` to change `WeightEntry.PartnerId` to a new partner. No other field on the entry or its details SHALL be modified by this endpoint.
 
 #### Scenario: Successfully change the partner on an entry with no captured cost yet
-- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a valid `NewPartnerId` and the correct `PasswordHash`, for an entry with no weight details
+- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a valid `NewPartnerId` and a valid `GateIdentifier`/`GatePassword` credential, for an entry with no weight details
 - **THEN** `entry.PartnerId` is set to `NewPartnerId` and the server returns `200 OK`
 
 #### Scenario: Successfully change the partner on an entry with captured cost
-- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a valid `NewPartnerId` and the correct `PasswordHash`, for an entry whose details have captured weight/cost, and the new partner has enough available credit for that cost
+- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a valid `NewPartnerId` and a valid `GateIdentifier`/`GatePassword` credential, for an entry whose details have captured weight/cost, and the new partner has enough available credit for that cost
 - **THEN** `entry.PartnerId` is updated, no detail fields are changed, and the server returns `200 OK`
 
-### Requirement: Password gate on partner change
-The system SHALL require a `PasswordHash` in the request body, compared against the same shared password hash configured for changing a weight detail's product. The client SHALL hash the operator-entered plaintext password before sending it; the server SHALL never receive or need the plaintext.
+### Requirement: Self-authorize gate on partner change
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability.
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and `entry.PartnerId` is unchanged
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Partner` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and `entry.PartnerId` is unchanged
 
 ### Requirement: Blocked once the entry has a related Contpaqi document
 The system SHALL reject a partner change when the entry's `ConptaqiComercialFK` is greater than 0 (a Contpaqi document already exists for this entry), regardless of whether `ConcludeDate` is set.

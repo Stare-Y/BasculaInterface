@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator soft-delete an existing `WeightDetail` after it has captured data (weight, tare, or loaded status), with `WeightEntry.BruteWeight` recomputed when the deleted detail was counted toward it. This is separate from the pre-existing unguarded `DELETE /api/Weight/Detail` endpoint, which remains reserved for discarding a still-empty row with no password friction. Reuses the same shared password as `weight-detail-product-change`, `weight-entry-partner-change`, and `weight-detail-amount-change`, and the same "blocked once an ERP document exists" boundary.
+Defines the gated endpoint that lets an operator soft-delete an existing `WeightDetail` after it has captured data (weight, tare, or loaded status), with `WeightEntry.BruteWeight` recomputed when the deleted detail was counted toward it. This is separate from the pre-existing unguarded `DELETE /api/Weight/Detail` endpoint, which remains reserved for discarding a still-empty row with no password friction. Shares the same gate mechanism as `weight-detail-product-change`, `weight-entry-partner-change`, and `weight-detail-amount-change`, and the same "blocked once an ERP document exists" boundary. Originally a single shared password, superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Defines the password-gated endpoint that lets an operator soft-delete an existin
 The system SHALL expose `PATCH /api/Weight/Detail/{id}/Delete` to soft-delete an existing `WeightDetail` (`IsDeleted=true`), separate from the existing unguarded `DELETE /api/Weight/Detail?id=` endpoint. This endpoint SHALL NOT modify any other `WeightDetail` field besides `IsDeleted` and `LastUpdated`.
 
 #### Scenario: Successfully delete a captured detail
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Delete` with the correct `PasswordHash`, for an existing, not-yet-deleted `WeightDetail`
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Delete` with a valid `GateIdentifier`/`GatePassword` credential, for an existing, not-yet-deleted `WeightDetail`
 - **THEN** `detail.IsDeleted` is set to `true`, the detail no longer appears in the parent `WeightEntry`'s detail list, and the server returns `200 OK`
 
 #### Scenario: Reject deleting a detail that does not exist or is already deleted
 - **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Delete` for an `id` with no matching non-deleted `WeightDetail`
 - **THEN** the server returns `404 Not Found`
 
-### Requirement: Password gate on guarded detail deletion
-The system SHALL require a `PasswordHash` in the request body, compared against the same shared password hash used for changing a weight detail's product, partner, and amount (`WeightSettings.ChangeProductPasswordHash`). The client SHALL hash the operator-entered plaintext password before sending it; the server SHALL never receive or need the plaintext.
+### Requirement: Self-authorize gate on guarded detail deletion
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability.
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Delete` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and the detail is not deleted
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Delete` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and the detail is not deleted
 
 ### Requirement: BruteWeight recomputed only when the deleted detail was loaded
 The system SHALL recompute `WeightEntry.BruteWeight` after a successful guarded deletion, if and only if the deleted detail had `IsLoaded == true` at the time of deletion. Deleting a never-loaded detail SHALL NOT trigger a `BruteWeight` recomputation.

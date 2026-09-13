@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator override the captured `Weight` or `RequiredAmount` on an existing `WeightDetail`, even after capture, with `WeightEntry.BruteWeight` recomputed when `Weight` changes and credit re-validated when the edit increases cost. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a mis-captured quantity without discarding work already captured on the detail. Reuses the same shared password as `weight-detail-product-change` and `weight-entry-partner-change`, and the same "blocked once an ERP document exists" boundary.
+Defines the gated endpoint that lets an operator override the captured `Weight` or `RequiredAmount` on an existing `WeightDetail`, even after capture, with `WeightEntry.BruteWeight` recomputed when `Weight` changes and credit re-validated when the edit increases cost. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a mis-captured quantity without discarding work already captured on the detail. Shares the same gate mechanism as `weight-detail-product-change` and `weight-entry-partner-change`, and the same "blocked once an ERP document exists" boundary. Originally a single shared password, superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,11 +10,11 @@ Defines the password-gated endpoint that lets an operator override the captured 
 The system SHALL expose `PATCH /api/Weight/Detail/{id}/Amount` to override `Weight` or `RequiredAmount` on an existing `WeightDetail`. The request SHALL supply exactly one of `NewWeight` or `NewRequiredAmount`, each greater than 0. `Tare`, `SecondaryTare`, `FK_WeightedProductId`, `ProductPrice`, `Costales`, `Notes`, `WeightedBy`, and `IsLoaded` on the detail SHALL remain unchanged.
 
 #### Scenario: Successfully override the captured Weight
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with `NewWeight > 0` and the correct `PasswordHash`, for a detail with a previously captured `Weight`
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with `NewWeight > 0` and a valid `GateIdentifier`/`GatePassword` credential, for a detail with a previously captured `Weight`
 - **THEN** `detail.Weight` is updated to `NewWeight`, all other detail fields are unchanged, and the server returns `200 OK`
 
 #### Scenario: Successfully override RequiredAmount
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with `NewRequiredAmount > 0` and the correct `PasswordHash`, for a detail with a previously captured `RequiredAmount`
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with `NewRequiredAmount > 0` and a valid `GateIdentifier`/`GatePassword` credential, for a detail with a previously captured `RequiredAmount`
 - **THEN** `detail.RequiredAmount` is updated to `NewRequiredAmount`, all other detail fields are unchanged, and the server returns `200 OK`
 
 #### Scenario: Reject when both NewWeight and NewRequiredAmount are supplied
@@ -29,12 +29,12 @@ The system SHALL expose `PATCH /api/Weight/Detail/{id}/Amount` to override `Weig
 - **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with the supplied field (`NewWeight` or `NewRequiredAmount`) `<= 0`
 - **THEN** the server returns `400 Bad Request` and no fields on the detail are changed
 
-### Requirement: Password gate on amount change
-The system SHALL require a `PasswordHash` in the request body, compared against the same shared password hash used for changing a weight detail's product (`WeightSettings.ChangeProductPasswordHash`). The client SHALL hash the operator-entered plaintext password before sending it; the server SHALL never receive or need the plaintext.
+### Requirement: Self-authorize gate on amount change
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability.
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and no fields on the detail are changed
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Amount` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and no fields on the detail are changed
 
 ### Requirement: BruteWeight recomputed only when Weight changes
 The system SHALL recompute `WeightEntry.BruteWeight` after a successful `Weight` override, if and only if the detail is currently `IsLoaded == true` — the same condition `RecordWeightAsync` already uses. A `RequiredAmount`-only change SHALL NOT trigger a `BruteWeight` recomputation.

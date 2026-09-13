@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator change the product on an existing `WeightDetail`, even after weight/quantity has been captured or the parent `WeightEntry` has concluded. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a mis-selected product without discarding work already captured on the detail.
+Defines the gated endpoint that lets an operator change the product on an existing `WeightDetail`, even after weight/quantity has been captured or the parent `WeightEntry` has concluded. This is a deliberate, explicit override — not a general-purpose edit path — intended to correct a mis-selected product without discarding work already captured on the detail. Originally a single shared password, superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Defines the password-gated endpoint that lets an operator change the product on 
 The system SHALL expose `PATCH /api/Weight/Detail/{id}/Product` to change `FK_WeightedProductId` and replace `ProductPrice` on an existing `WeightDetail` with the new product's current price. `Weight`, `Tare`, `SecondaryTare`, `RequiredAmount`, `Costales`, `Notes`, `WeightedBy`, and `IsLoaded` on the detail SHALL remain unchanged. The endpoint SHALL apply regardless of how much weight or required amount has already been captured on the detail.
 
 #### Scenario: Successfully change product on a detail with no weight captured yet
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a valid `NewProductId` and the correct `PasswordHash`, for a detail with `Weight == 0`
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a valid `NewProductId` and a valid `GateIdentifier`/`GatePassword` credential, for a detail with `Weight == 0`
 - **THEN** `detail.FK_WeightedProductId` is set to `NewProductId`, `detail.ProductPrice` is set to the new product's current price, all other detail fields are unchanged, and the server returns `200 OK`
 
 #### Scenario: Successfully change product on a detail with weight already captured
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a valid `NewProductId` and the correct `PasswordHash`, for a detail with `Weight > 0`
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a valid `NewProductId` and a valid `GateIdentifier`/`GatePassword` credential, for a detail with `Weight > 0`
 - **THEN** `detail.FK_WeightedProductId` and `detail.ProductPrice` are updated; `Weight`, `Tare`, and `WeightedBy` are unchanged; the server returns `200 OK`
 
-### Requirement: Password gate on product change
-The system SHALL require a `PasswordHash` in the request body, compared against a single shared password hash configured in application settings. The client SHALL be responsible for hashing the operator-entered plaintext password before sending it; the server SHALL never receive or need the plaintext.
+### Requirement: Self-authorize gate on product change
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability.
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and no fields on the detail are changed
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Weight/Detail/{id}/Product` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and no fields on the detail are changed
 
 ### Requirement: Credit re-validation on product change
 The system SHALL re-validate the parent `WeightEntry`'s partner credit using the existing partner-credit validation whenever the new product's price would increase the detail's cost. The `requestedAmount` passed to that validation SHALL be the incremental increase only — `(newProduct.Precio - detail.ProductPrice) * quantity`, where `quantity` is `Weight` if captured (`> 0`) else `RequiredAmount` — never the full new cost, to avoid double-counting the detail's existing cost already included in the partner's pending-entries total. If the new price is equal to or lower than the current price, credit SHALL NOT be re-validated. A partner's `CreditLimit <= 0` (or `IgnoreCreditLimit`) means unlimited credit, not blocked.

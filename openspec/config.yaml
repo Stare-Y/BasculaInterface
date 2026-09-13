@@ -22,12 +22,17 @@ context: |
   - Pedidos-only terminal (OnlyPedidos=true): creates empty WeightEntries, adds product slots
 
   ### Core Entities
-  - WeightEntry: one truck visit. Has TareWeight (empty truck), BruteWeight (running accumulated total),
-    ConcludeDate (null = in progress). One-to-many with WeightDetail.
+  - WeightEntry: one truck visit. Has TareWeight (empty truck), BruteWeight (running accumulated total,
+    counts down instead of up when IsDischarge), ConcludeDate (null = in progress). One-to-many with WeightDetail.
   - WeightDetail: one product slot on a WeightEntry. Has Weight (measured net), Tare (truck BruteWeight
     at weigh time), SecondaryTare (empty tarima weight), RequiredAmount (expected qty), IsLoaded (bool).
-  - ProviderPurchase: purchase order from a provider; linked to a WeightEntry when truck arrives.
-  - ExternalTargetBehavior: config for ContpaqiComercial document routing (serie, almacen, concept).
+  - Pedido / PedidoLine: a provider purchase order (header) with one or more product lines, each convertible
+    to weight repeatedly (partial fulfillment) — replaced the old single-product-per-row ProviderPurchase.
+  - ExternalTargetBehavior: config for ContpaqiComercial document routing (serie, almacen, concept); hidden
+    rows also serve as the almacén-target catalog for pedido conversions.
+  - User: custom entity (no ASP.NET Identity) — Username/UserCode login, salted password hash, one of five
+    roles, two ABAC permission flags with per-user overrides, per-role-defaulted inactivity timeout, optional
+    Name/LastName. No account is seeded; the first Sudo user is inserted directly against the database.
 
   ### Known Invariants
   - IsLoaded on WeightDetail must start FALSE (product not yet physically on truck).
@@ -38,7 +43,9 @@ context: |
   - A concluded WeightEntry (ConcludeDate != null) is immutable.
 
   ### Conventions
-  - No user management yet (future work). Terminal identity = device name (DeviceInfo.Name).
+  - JWT-authenticated API (fallback-authenticated by default; GETs and the bascula websocket stay open).
+    Terminal identity for weighing purposes is still the device name (DeviceInfo.Name); user identity is
+    separate and only governs auth/permissions/audit attribution.
   - Soft delete everywhere (IsDeleted flag).
   - All timestamps UTC.
   - Spanish UI strings, English code identifiers.

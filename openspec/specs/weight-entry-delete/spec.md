@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator soft-delete an entire `WeightEntry`, replacing the previous unguarded `DELETE /api/Weight?id=`. Reuses the same shared password as `weight-detail-product-change`, `weight-entry-partner-change`, `weight-detail-amount-change`, and `weight-detail-delete`, and extends the same "blocked once an ERP document exists" boundary those already enforce to this bigger, previously-unguarded action (issue #133 / extend-delete-password-gate).
+Defines the gated endpoint that lets an operator soft-delete an entire `WeightEntry`, replacing the previous unguarded `DELETE /api/Weight?id=`. Shares the same gate mechanism as `weight-detail-product-change`, `weight-entry-partner-change`, `weight-detail-amount-change`, and `weight-detail-delete`, and extends the same "blocked once an ERP document exists" boundary those already enforce to this bigger, previously-unguarded action (issue #133 / extend-delete-password-gate). Originally a single shared password, superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Defines the password-gated endpoint that lets an operator soft-delete an entire 
 The system SHALL expose `PATCH /api/Weight/{id}/Delete` to soft-delete an existing `WeightEntry` (`IsDeleted=true`), replacing the previous unguarded `DELETE /api/Weight?id=`. This endpoint SHALL NOT modify any `WeightEntry` field besides `IsDeleted`.
 
 #### Scenario: Successfully delete a WeightEntry
-- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Delete` with the correct `PasswordHash`, for an existing, not-yet-deleted `WeightEntry` with no Contpaqi document
+- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Delete` with a valid `GateIdentifier`/`GatePassword` credential, for an existing, not-yet-deleted `WeightEntry` with no Contpaqi document
 - **THEN** `entry.IsDeleted` is set to `true` and the server returns `200 OK`
 
 #### Scenario: Reject deleting an entry that does not exist or is already deleted
 - **WHEN** a terminal sends `PATCH /api/Weight/{id}/Delete` for an `id` with no matching non-deleted `WeightEntry`
 - **THEN** the server returns `404 Not Found`
 
-### Requirement: Password gate on WeightEntry deletion
-The system SHALL require a `PasswordHash` in the request body, compared against the same shared password hash used for the other guarded weight-detail mutations (`WeightSettings.ChangeProductPasswordHash`). The client SHALL hash the operator-entered plaintext password before sending it; the server SHALL never receive or need the plaintext.
+### Requirement: Self-authorize gate on WeightEntry deletion
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability.
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Delete` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and the entry is not deleted
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Weight/{id}/Delete` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and the entry is not deleted
 
 ### Requirement: Blocked once an ERP document exists; still applies to a concluded entry
 `PATCH /api/Weight/{id}/Delete` SHALL NOT reject the request when `WeightEntry.ConcludeDate` is set. It SHALL reject the request when `WeightEntry.ConptaqiComercialFK > 0`, regardless of `ConcludeDate`.

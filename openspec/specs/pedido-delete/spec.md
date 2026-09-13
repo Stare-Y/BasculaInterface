@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the password-gated endpoint that lets an operator soft-delete an entire `Pedido` (cascading to its non-deleted `Lines`, unchanged from the pre-existing repo behavior), replacing the previous unguarded `DELETE /api/Pedido?id=`. Reuses the exact same shared password as every WeightEntry/WeightDetail guarded mutation — `PedidoService` takes on an `IOptions<WeightSettings>` dependency for this rather than introducing a separate setting (issue #133 / extend-delete-password-gate).
+Defines the guarded endpoint that lets an operator soft-delete an entire `Pedido` (cascading to its non-deleted `Lines`, unchanged from the pre-existing repo behavior), replacing the previous unguarded `DELETE /api/Pedido?id=` (issue #133 / extend-delete-password-gate). Originally gated by a single shared password (`WeightSettings.ChangeProductPasswordHash`); superseded by the per-user `GateIdentifier`/`GatePassword` self-authorize gate once `add-user-authentication-and-audit-log` introduced real user identity — see `self-authorize-gate`.
 
 ## Requirements
 
@@ -10,19 +10,19 @@ Defines the password-gated endpoint that lets an operator soft-delete an entire 
 The system SHALL expose `PATCH /api/Pedido/{id}/Delete` to soft-delete an existing `Pedido` (`IsDeleted=true`, cascading to its `Lines` exactly as the existing repo logic already does), replacing the previous unguarded `DELETE /api/Pedido?id=`.
 
 #### Scenario: Successfully delete a Pedido
-- **WHEN** a terminal sends `PATCH /api/Pedido/{id}/Delete` with the correct `PasswordHash`, for an existing, not-yet-deleted `Pedido`
+- **WHEN** a terminal sends `PATCH /api/Pedido/{id}/Delete` with a valid `GateIdentifier`/`GatePassword` credential, for an existing, not-yet-deleted `Pedido`
 - **THEN** the pedido and its non-deleted lines are marked `IsDeleted=true` and the server returns `200 OK`
 
 #### Scenario: Reject deleting a pedido that does not exist or is already deleted
 - **WHEN** a terminal sends `PATCH /api/Pedido/{id}/Delete` for an `id` with no matching non-deleted `Pedido`
 - **THEN** the server returns `404 Not Found`
 
-### Requirement: Password gate on Pedido deletion
-The system SHALL require a `PasswordHash` in the request body, compared against the same shared password hash used for the weight-side guarded mutations (`WeightSettings.ChangeProductPasswordHash`). The client SHALL hash the operator-entered plaintext password before sending it.
+### Requirement: Self-authorize gate on Pedido deletion
+**Updated by `add-user-authentication-and-audit-log`**: the system SHALL require a `GateIdentifier`/`GatePassword` credential in the request body, resolved and verified per the `self-authorize-gate` capability (superseding the original shared `PasswordHash`/`WeightSettings.ChangeProductPasswordHash` mechanism this requirement first shipped with).
 
-#### Scenario: Reject on incorrect password
-- **WHEN** a terminal sends `PATCH /api/Pedido/{id}/Delete` with a `PasswordHash` that does not match the configured hash
-- **THEN** the server returns `400 Bad Request` with a message indicating an incorrect password, and the pedido is not deleted
+#### Scenario: Reject an unauthorized gate credential
+- **WHEN** a terminal sends `PATCH /api/Pedido/{id}/Delete` with a `GateIdentifier`/`GatePassword` that fails to resolve to a user, fails password verification, or resolves to a user whose effective `CanSelfAuthorizeGate` is `false`
+- **THEN** the server returns `400 Bad Request` and the pedido is not deleted
 
 ### Requirement: Previous unguarded route is removed
 The pre-existing `DELETE /api/Pedido?id={id}` endpoint SHALL no longer exist.
