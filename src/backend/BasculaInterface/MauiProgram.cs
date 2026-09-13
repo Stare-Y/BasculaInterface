@@ -80,6 +80,17 @@ public static class MauiProgram
                             }),
                             handledEventsToo: true);
                     }
+
+                    // fix-session-inactivity-timeout follow-up: navigating (e.g. the inactivity
+                    // timeout's forced logout) while the window lacks OS focus has been observed to
+                    // leave the app stuck — visible and hoverable, but unresponsive to clicks/keys.
+                    // We can't fix Windows' own input-focus handling, so callers instead defer such
+                    // navigation until this fires with the window active again.
+                    window.Activated += (_, e) =>
+                    {
+                        (ServiceProvider.GetService(typeof(InactivityWatcherService)) as InactivityWatcherService)
+                            ?.NotifyWindowActivationChanged(e.WindowActivationState != Microsoft.UI.Xaml.WindowActivationState.Deactivated);
+                    };
                 });
             });
         });

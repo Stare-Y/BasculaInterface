@@ -15,6 +15,27 @@ namespace BasculaInterface.Services
 
         public event Action? OnTimeout;
 
+        /// <summary>Whether the native window currently holds OS focus/activation — updated from
+        /// <c>MauiProgram.cs</c>'s native window hook (Windows-only). Defaults to true so nothing
+        /// relying on it misbehaves before that hook has fired at least once.</summary>
+        public bool IsWindowActive { get; private set; } = true;
+
+        /// <summary>Fires when the window regains activation, after having lost it. Lets a caller
+        /// defer an action (e.g. the logout navigation) that has been observed to leave the app
+        /// stuck when performed while unfocused, until focus actually returns.</summary>
+        public event Action? OnWindowActivated;
+
+        public void NotifyWindowActivationChanged(bool isActive)
+        {
+            bool wasActive = IsWindowActive;
+            IsWindowActive = isActive;
+
+            if (isActive && !wasActive)
+            {
+                OnWindowActivated?.Invoke();
+            }
+        }
+
         public InactivityWatcherService()
         {
             _timer = new System.Timers.Timer { AutoReset = false };

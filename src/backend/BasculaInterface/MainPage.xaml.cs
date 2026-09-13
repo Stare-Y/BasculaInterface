@@ -17,6 +17,10 @@ namespace BasculaInterface
         // navigation from firing concurrently with a user-triggered one already in flight.
         private readonly SemaphoreSlim _navigationGate = new(1, 1);
 
+        // Set when a timeout fires while the window is unfocused — the logout navigation is
+        // deferred until OnWindowActivated fires (see the constructor and PerformLogoutNavigationAsync).
+        private bool _logoutNavigationPending;
+
         public MainPage()
         {
             InitializeComponent();
@@ -31,6 +35,23 @@ namespace BasculaInterface
                 ?? throw new InvalidOperationException("InactivityWatcherService not registered.");
 
             _inactivityWatcher.OnTimeout += OnInactivityTimeout;
+
+            // A timeout that fired while unfocused left its navigation pending — run it now that
+            // focus is back (see OnInactivityTimeout's comment).
+            _inactivityWatcher.OnWindowActivated += () =>
+            {
+                if (!_logoutNavigationPending)
+                    return;
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    if (!_logoutNavigationPending)
+                        return;
+
+                    _logoutNavigationPending = false;
+                    await PerformLogoutNavigationAsync();
+                });
+            };
         }
 
         /// <summary>
@@ -103,32 +124,51 @@ namespace BasculaInterface
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                // fix-session-inactivity-timeout design.md Decision 2: if a user-triggered
-                // navigation is already in flight, skip this cycle rather than collide with it —
-                // safe, since whatever is holding the gate already just reset the watcher.
-                if (!await _navigationGate.WaitAsync(0))
-                    return;
+                // Clearing the session happens immediately regardless of window focus — this is
+                // the actual security boundary. Any API call made before the deferred navigation
+                // below runs will already fail (unauthenticated) against the server.
+                await _sessionService.LogoutAsync();
+                _inactivityWatcher.Stop();
 
-                try
+                if (_inactivityWatcher.IsWindowActive)
                 {
-                    await _sessionService.LogoutAsync();
-                    _inactivityWatcher.Stop();
-
-                    // Almost every screen in this app is opened via PushModalAsync onto the
-                    // ModalStack, not the plain NavigationStack — PopToRootAsync alone never reaches
-                    // them. Drain the modal stack first, then pop back to the root of whatever
-                    // regular stack remains (e.g. a PushAsync-based page opened inside a modal).
-                    INavigation navigation = Shell.Current.Navigation;
-                    while (navigation.ModalStack.Count > 0)
-                        await navigation.PopModalAsync(animated: false);
-
-                    await navigation.PopToRootAsync(animated: false);
+                    await PerformLogoutNavigationAsync();
                 }
-                finally
+                else
                 {
-                    _navigationGate.Release();
+                    // Navigating while the window lacks OS focus has been observed to leave the
+                    // app stuck (visible/hoverable but unresponsive to clicks/keys) — a WinUI-level
+                    // focus issue we can't fix directly. Defer instead: OnWindowActivated (wired in
+                    // the constructor) runs this the moment focus actually returns.
+                    _logoutNavigationPending = true;
                 }
             });
+        }
+
+        private async Task PerformLogoutNavigationAsync()
+        {
+            // fix-session-inactivity-timeout design.md Decision 2: if a user-triggered navigation
+            // is already in flight, skip this cycle rather than collide with it — safe, since
+            // whatever is holding the gate already just reset the watcher.
+            if (!await _navigationGate.WaitAsync(0))
+                return;
+
+            try
+            {
+                // Almost every screen in this app is opened via PushModalAsync onto the
+                // ModalStack, not the plain NavigationStack — PopToRootAsync alone never reaches
+                // them. Drain the modal stack first, then pop back to the root of whatever regular
+                // stack remains (e.g. a PushAsync-based page opened inside a modal).
+                INavigation navigation = Shell.Current.Navigation;
+                while (navigation.ModalStack.Count > 0)
+                    await navigation.PopModalAsync(animated: false);
+
+                await navigation.PopToRootAsync(animated: false);
+            }
+            finally
+            {
+                _navigationGate.Release();
+            }
         }
 
         private async void BtnSettings_Tapped(object sender, TappedEventArgs e)

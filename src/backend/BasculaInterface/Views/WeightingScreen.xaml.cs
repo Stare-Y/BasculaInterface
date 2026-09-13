@@ -10,6 +10,12 @@ public partial class WeightingScreen : ContentPage
     public double Tara { get; set; }
     private CancellationTokenSource? _cancellationTokenSource = null;
     private CancellationTokenSource? _cancellationTokenKeepAlive = null;
+
+    // fix-weight-lock-race: tracks the currently in-flight heartbeat renewal call, if any, so
+    // OnDisappearing can wait for it before releasing — otherwise a renewal already in flight when
+    // the screen closes can land AFTER ReleaseWeight and silently re-grant the turn to a session
+    // that has already ended (the phantom "bascula ocupada" report).
+    private Task? _keepAliveInFlight;
     private readonly ISessionService? _sessionService;
 
     // Server-side CanCaptureWeightManually permission replaces the old device-local "Capturar
@@ -187,7 +193,9 @@ public partial class WeightingScreen : ContentPage
         {
             while (!token.IsCancellationRequested)
             {
-                await KeepWeightAlive();
+                _keepAliveInFlight = KeepWeightAlive();
+                await _keepAliveInFlight;
+                _keepAliveInFlight = null;
                 await Task.Delay(TimeSpan.FromSeconds(4), token);
             }
         }
@@ -209,6 +217,15 @@ public partial class WeightingScreen : ContentPage
                 _cancellationTokenKeepAlive.Dispose();
                 _cancellationTokenKeepAlive = null;
             }
+
+            // Cancelling the token above only stops the loop's NEXT iteration — a renewal call
+            // already in flight keeps running. Wait for it (bounded, so a hung request can't trap
+            // us here) before releasing, so ReleaseWeight is always the last word (fix-weight-lock-race).
+            if (_keepAliveInFlight is not null)
+            {
+                await Task.WhenAny(_keepAliveInFlight, Task.Delay(TimeSpan.FromSeconds(5)));
+            }
+
             await viewModel.ReleaseSocket();
             await viewModel.ReleaseWeight();
         }
