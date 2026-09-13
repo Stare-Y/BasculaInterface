@@ -29,5 +29,11 @@ namespace Core.Domain.Entities.Identity
 
         /// <summary>Tri-state ABAC override — see <see cref="CanSelfAuthorizeGateOverride"/>.</summary>
         public bool? CanCaptureWeightManuallyOverride { get; set; }
+
+        /// <summary>Client-side inactivity auto-logout duration for this user (fix-session-inactivity-timeout
+        /// design.md Decision 3). Never null: seeded from <see cref="Role"/> at creation time by
+        /// <c>UserService</c> when not explicitly supplied, and backed by a database-level default of
+        /// 5 for any row inserted outside the app (e.g. a manually-seeded <see cref="Role.Sudo"/> row).</summary>
+        public int InactivityTimeoutMinutes { get; set; }
     }
 }

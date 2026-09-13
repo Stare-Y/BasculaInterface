@@ -13,6 +13,10 @@ namespace BasculaInterface
         private readonly ISessionService _sessionService;
         private readonly InactivityWatcherService _inactivityWatcher;
 
+        // fix-session-inactivity-timeout design.md Decision 2: prevents OnInactivityTimeout's own
+        // navigation from firing concurrently with a user-triggered one already in flight.
+        private readonly SemaphoreSlim _navigationGate = new(1, 1);
+
         public MainPage()
         {
             InitializeComponent();
@@ -72,10 +76,9 @@ namespace BasculaInterface
                 PasswordEntry.Text = string.Empty;
 
                 _inactivityWatcher.RegisterActivity();
-                // A fixed default here; the client re-reads the server-configured value once an
-                // authenticated config endpoint exists (design.md Open Questions notes this as a
-                // parameter to confirm, not a scope boundary).
-                _inactivityWatcher.Start(TimeSpan.FromMinutes(10));
+                // Per-role, per-user value from the server (fix-session-inactivity-timeout design.md
+                // Decision 3) — replaces the previous hardcoded 10-minute constant.
+                _inactivityWatcher.Start(TimeSpan.FromMinutes(response.User.InactivityTimeoutMinutes));
 
                 await LogIn();
             }
@@ -100,11 +103,31 @@ namespace BasculaInterface
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                await _sessionService.LogoutAsync();
-                _inactivityWatcher.Stop();
+                // fix-session-inactivity-timeout design.md Decision 2: if a user-triggered
+                // navigation is already in flight, skip this cycle rather than collide with it —
+                // safe, since whatever is holding the gate already just reset the watcher.
+                if (!await _navigationGate.WaitAsync(0))
+                    return;
 
-                // Pop back to this login page from wherever the operator was.
-                await Shell.Current.Navigation.PopToRootAsync();
+                try
+                {
+                    await _sessionService.LogoutAsync();
+                    _inactivityWatcher.Stop();
+
+                    // Almost every screen in this app is opened via PushModalAsync onto the
+                    // ModalStack, not the plain NavigationStack — PopToRootAsync alone never reaches
+                    // them. Drain the modal stack first, then pop back to the root of whatever
+                    // regular stack remains (e.g. a PushAsync-based page opened inside a modal).
+                    INavigation navigation = Shell.Current.Navigation;
+                    while (navigation.ModalStack.Count > 0)
+                        await navigation.PopModalAsync(animated: false);
+
+                    await navigation.PopToRootAsync(animated: false);
+                }
+                finally
+                {
+                    _navigationGate.Release();
+                }
             });
         }
 

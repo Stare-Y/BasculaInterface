@@ -54,6 +54,10 @@ namespace Infrastructure.Data
             {
                 u.HasIndex(x => x.Username).IsUnique();
                 u.HasIndex(x => x.UserCode).IsUnique();
+
+                // fix-session-inactivity-timeout: database-level default so a row inserted outside
+                // the app (e.g. a manually-seeded Sudo row) never ends up with an unset value.
+                u.Property(x => x.InactivityTimeoutMinutes).HasDefaultValue(5);
             });
         }
     }

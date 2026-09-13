@@ -10,20 +10,31 @@ namespace BasculaInterface.Services
     public class AuthHeaderHandler : DelegatingHandler
     {
         private readonly ISessionService _sessionService;
+        private readonly InactivityWatcherService _inactivityWatcher;
 
-        public AuthHeaderHandler(ISessionService sessionService)
+        public AuthHeaderHandler(ISessionService sessionService, InactivityWatcherService inactivityWatcher)
         {
             _sessionService = sessionService;
+            _inactivityWatcher = inactivityWatcher;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (_sessionService.IsAuthenticated)
             {
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _sessionService.Token);
             }
 
-            return base.SendAsync(request, cancellationToken);
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+
+            // fix-session-inactivity-timeout design.md Decision 1: a successful API response counts
+            // as activity too, not just direct user input.
+            if (response.IsSuccessStatusCode)
+            {
+                _inactivityWatcher.RegisterActivity();
+            }
+
+            return response;
         }
     }
 }

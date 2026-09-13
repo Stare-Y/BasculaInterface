@@ -8,6 +8,19 @@ namespace Infrastructure.Service
 {
     public class UserService : IUserService
     {
+        /// <summary>Role-based default inactivity timeout, applied only at user creation when the
+        /// request doesn't supply an explicit value (fix-session-inactivity-timeout design.md
+        /// Decision 3). Not consulted again afterward — the stored value on the user is what counts
+        /// from then on, editable per-user like any other field.</summary>
+        private static readonly Dictionary<Role, int> InactivityTimeoutDefaults = new()
+        {
+            [Role.Sudo] = 2,
+            [Role.Admin] = 5,
+            [Role.Supervisor] = 5,
+            [Role.Operator] = 10,
+            [Role.DispatchingOperator] = 20,
+        };
+
         private readonly IUserRepo _userRepo;
         private readonly IPermissionService _permissionService;
 
@@ -37,6 +50,8 @@ namespace Infrastructure.Service
                 UserCode = request.UserCode,
                 PasswordHash = UserPasswordHasher.Hash(request.Password),
                 Role = request.Role,
+                InactivityTimeoutMinutes = request.InactivityTimeoutMinutes
+                    ?? (InactivityTimeoutDefaults.TryGetValue(request.Role, out int roleDefault) ? roleDefault : 5),
             };
 
             User created = await _userRepo.CreateAsync(user);
@@ -80,6 +95,9 @@ namespace Infrastructure.Service
                 user.CanCaptureWeightManuallyOverride = null;
             else if (request.CanCaptureWeightManuallyOverride.HasValue)
                 user.CanCaptureWeightManuallyOverride = request.CanCaptureWeightManuallyOverride;
+
+            if (request.InactivityTimeoutMinutes.HasValue)
+                user.InactivityTimeoutMinutes = request.InactivityTimeoutMinutes.Value;
 
             await _userRepo.UpdateAsync(user);
             return ToDto(user);

@@ -17,6 +17,10 @@ namespace Core.Application.DTOs
         /// <summary>Resolved role-default-or-override value, computed via IPermissionService.</summary>
         public bool CanCaptureWeightManually { get; set; }
 
+        /// <summary>Client-side inactivity auto-logout duration, in minutes (fix-session-inactivity-timeout
+        /// design.md Decision 3). Never null by the time it reaches the client.</summary>
+        public int InactivityTimeoutMinutes { get; set; }
+
         public UserDto() { }
 
         public UserDto(User entity)
@@ -27,10 +31,18 @@ namespace Core.Application.DTOs
             Role = entity.Role;
             CanSelfAuthorizeGateOverride = entity.CanSelfAuthorizeGateOverride;
             CanCaptureWeightManuallyOverride = entity.CanCaptureWeightManuallyOverride;
+            InactivityTimeoutMinutes = entity.InactivityTimeoutMinutes;
         }
     }
 
-    public record CreateUserRequest(string Username, string UserCode, string Password, Role Role);
+    /// <param name="InactivityTimeoutMinutes">Explicit override; when null, UserService seeds a
+    /// role-based default (fix-session-inactivity-timeout design.md Decision 3).</param>
+    public record CreateUserRequest(
+        string Username,
+        string UserCode,
+        string Password,
+        Role Role,
+        int? InactivityTimeoutMinutes = null);
 
     public record UpdateUserRequest(
         string? Username,
@@ -40,7 +52,8 @@ namespace Core.Application.DTOs
         bool? CanSelfAuthorizeGateOverride,
         bool ResetCanSelfAuthorizeGateOverride,
         bool? CanCaptureWeightManuallyOverride,
-        bool ResetCanCaptureWeightManuallyOverride);
+        bool ResetCanCaptureWeightManuallyOverride,
+        int? InactivityTimeoutMinutes = null);
 
     public record LoginRequest(string Identifier, string Password);
 
