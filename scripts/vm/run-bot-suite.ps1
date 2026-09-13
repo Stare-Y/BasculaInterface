@@ -39,15 +39,15 @@ New-Item -ItemType Directory -Force -Path $ArtifactsDir | Out-Null
 
 Write-Host "== Publishing BasculaInterface ($Configuration / $TargetFramework) ==" -ForegroundColor Cyan
 $appProj = Join-Path $backend "BasculaInterface\BasculaInterface.csproj"
-# Must be `publish`, not `build`: your normal path packages a signed MSIX, but FlaUI drives a
-# bare .exe. An UNPACKAGED, WinAppSDK-self-contained *publish* is the only flavour that starts
-# standalone - `dotnet build` output for an unpackaged app opens then immediately exits. Your
-# MSIX deploy path is untouched (it rebuilds with its own props).
+# Must be `publish`, not `build`: `dotnet build` output for an unpackaged app opens then
+# immediately exits. An unpackaged, WinAppSDK-self-contained *publish* is the only flavour
+# that starts standalone. This is the same unpackaged shape as the normal deploy
+# (WindowsPackageType=None lives permanently in BasculaInterface.csproj) - the bot just needs
+# its own fresh publish output, separate from wherever the normal deploy's exe lands.
 $pubDir = Join-Path $backend "BasculaInterface\bin\bot-publish"
 if (Test-Path $pubDir) { Remove-Item $pubDir -Recurse -Force }
-# Unpackaged (README's "avoid MSIX" recipe), passed as flags so the csproj stays the single
-# source of truth for the signed-MSIX deploy. (OutputType=WinExe can't go here - it would hit
-# the class libraries too - it lives in BasculaInterface.csproj.)
+# WindowsPackageType=None below is redundant with the csproj default - kept as
+# belt-and-suspenders in case that default ever changes.
 #   WindowsPackageType=None      -> unpackaged, no MSIX identity
 #   WindowsAppSDKSelfContained   -> bundle the Windows App Runtime so the VM needs nothing
 dotnet publish $appProj -c $Configuration -f $TargetFramework -r win-x64 --self-contained true `

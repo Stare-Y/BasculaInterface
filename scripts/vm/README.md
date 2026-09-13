@@ -49,15 +49,17 @@ scenarios that need it — the launch smoke test doesn't.
 
 ## How the app is built for the bot
 
-Your normal deploy produces a **signed MSIX package**. FlaUI drives a plain `.exe`, so the script
-publishes the repo README's "avoid MSIX" recipe instead, passed as command-line flags so the
-csproj stays the single source of truth for the MSIX build:
+The normal deploy is already unpackaged too — `BasculaInterface.csproj` sets
+`WindowsPackageType=None` (and `OutputType=WinExe`) permanently, so there's no separate signed
+MSIX path to avoid. FlaUI still needs its own publish output though (a fresh, self-contained
+build dropped in `bin\bot-publish`), so the script passes a few flags on top of the csproj
+defaults:
 
 | flag | why |
 | --- | --- |
-| `-p:WindowsPackageType=None` | unpackaged — no MSIX identity (`REGDB_E_CLASSNOTREG` otherwise) |
-| `-p:OutputType=WinExe` | GUI subsystem — the csproj default is console `Exe`, which makes the window open then immediately close |
+| `-p:WindowsPackageType=None` | belt-and-suspenders — already the csproj default, kept here in case that ever changes |
 | `-p:WindowsAppSDKSelfContained=true` | bundle the Windows App Runtime so the VM needs nothing installed |
+| `-p:AppxPackageSigningEnabled=false` | no-op today (nothing gets signed once unpackaged) — harmless to keep |
 | `--self-contained true -r win-x64` | bundle the .NET runtime too |
 
 If the self-contained Windows App Runtime ever misbehaves, the alternative is
