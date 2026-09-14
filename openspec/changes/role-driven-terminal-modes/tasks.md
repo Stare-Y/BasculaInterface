@@ -64,4 +64,4 @@ Discovered on-device immediately after deploying this change: a fresh first-time
 - [x] 8.1 Added `[AllowAnonymous]` to `WeightController.RequestWeight` (`CanWeight`) and `ReleaseWeight`.
 - [x] 8.2 Updated `openspec/specs/authorization-policy/spec.md` — new ADDED-equivalent requirement documenting these two endpoints are unauthenticated, since the master spec's existing "every GET endpoint" requirement didn't cover these (they're PUT).
 - [x] 8.3 138/138 tests still passing after the fix.
-- [ ] 8.4 Owner to redeploy and confirm a fresh first-time login no longer needs a second log-in/out cycle to reach the weighing screen.
+- [x] 8.4 Confirmed by the owner on-device: a fresh first-time login no longer needs a second log-in/out cycle to reach the weighing screen.
