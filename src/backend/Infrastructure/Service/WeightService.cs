@@ -55,6 +55,8 @@ namespace Infrastructure.Service
             entity.BruteWeight = entity.TareWeight;
             WeightEntry newEntry = await _weightRepo.CreateAsync(entity);
 
+            await _auditLogService.RecordAsync("WeightEntry.Create", nameof(WeightEntry), newEntry.Id);
+
             return new WeightEntryDto(newEntry);
         }
 
@@ -122,6 +124,8 @@ namespace Infrastructure.Service
             if (detail.IsLoaded && detail.Weight > 0)
                 await _weightRepo.RecomputeBruteWeightAsync(dto.FK_WeightEntryId);
 
+            await _auditLogService.RecordAsync("WeightDetail.Create", nameof(WeightDetail), created.Id);
+
             return new WeightDetailDto(created);
         }
 
@@ -155,17 +159,24 @@ namespace Infrastructure.Service
 
             if (detail.IsLoaded)
                 await _weightRepo.RecomputeBruteWeightAsync(detail.FK_WeightEntryId);
+
+            await _auditLogService.RecordAsync("WeightDetail.RecordWeight", nameof(WeightDetail), detailId);
         }
 
         public async Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId)
         {
             WeightEntry entry = await _weightRepo.MarkDetailLoadedAsync(detailId);
+
+            await _auditLogService.RecordAsync("WeightDetail.MarkLoaded", nameof(WeightDetail), detailId);
+
             return new WeightEntryDto(entry);
         }
 
         public async Task ConcludeAsync(int weightEntryId)
         {
             await _weightRepo.ConcludeEntryAsync(weightEntryId);
+
+            await _auditLogService.RecordAsync("WeightEntry.Conclude", nameof(WeightEntry), weightEntryId);
 
             // Note: PedidoLine.Concluded is computed from received/pending amounts
             // (RequiredAmount - Σ loaded WeightDetail.Weight), not a stored flag tied
@@ -215,11 +226,6 @@ namespace Infrastructure.Service
             await _auditLogService.RecordAsync("WeightEntry.DeleteSafely", nameof(WeightEntry), id);
         }
 
-        public Task<bool> DeleteDetailAsync(int id)
-        {
-            return _weightRepo.DeleteDetailAsync(id);
-        }
-
         public async Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id)
         {
             WeightEntry weightEntry = await _weightRepo.GetByIdAsync(id);
@@ -257,6 +263,8 @@ namespace Infrastructure.Service
             weightEntry.Notes += " " + result.Message;
 
             await UpdateAsync(weightEntry, force: true);
+
+            await _auditLogService.RecordAsync("WeightEntry.SendToContpaqiComercial", nameof(WeightEntry), id);
 
             return result;
         }

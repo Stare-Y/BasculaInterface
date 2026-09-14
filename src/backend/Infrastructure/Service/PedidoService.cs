@@ -43,6 +43,9 @@ namespace Infrastructure.Service
             Pedido created = await _pedidoRepo.CreateAsync(entity);
             // Reload so computed navigation/Line data is consistent with GetByIdAsync's shape.
             Pedido reloaded = await _pedidoRepo.GetByIdAsync(created.Id);
+
+            await _auditLogService.RecordAsync("Pedido.Create", nameof(Pedido), created.Id);
+
             return new PedidoDto(reloaded);
         }
 
@@ -88,6 +91,9 @@ namespace Infrastructure.Service
         {
             PedidoLine created = await _pedidoLineRepo.CreateAsync(dto.ToEntity());
             PedidoLine reloaded = await _pedidoLineRepo.GetByIdAsync(created.Id);
+
+            await _auditLogService.RecordAsync("PedidoLine.Create", nameof(PedidoLine), created.Id);
+
             return new PedidoLineDto(reloaded);
         }
 
@@ -113,6 +119,8 @@ namespace Infrastructure.Service
         public async Task CloseLineAsync(int lineId)
         {
             await _pedidoLineRepo.CloseAsync(lineId);
+
+            await _auditLogService.RecordAsync("PedidoLine.Close", nameof(PedidoLine), lineId);
         }
 
         public async Task<WeightEntryDto> ConvertLineToWeightAsync(int lineId, int? weightEntryId, decimal? targetAmount, string? externalTarget)
@@ -153,8 +161,12 @@ namespace Infrastructure.Service
                     throw new InvalidOperationException("No se pueden agregar productos a un proceso ya finalizado.");
 
                 newDetail.FK_WeightEntryId = existingEntry.Id;
-                await _weightRepo.CreateDetailAsync(newDetail);
+                WeightDetail createdDetail = await _weightRepo.CreateDetailAsync(newDetail);
                 resultEntry = await _weightRepo.GetByIdAsync(existingEntry.Id);
+
+                // This bypasses WeightService.CreateDetailAsync (which records its own
+                // WeightDetail.Create), so the audit call is made explicitly here.
+                await _auditLogService.RecordAsync("WeightDetail.Create", nameof(WeightDetail), createdDetail.Id);
             }
             else
             {
@@ -183,7 +195,15 @@ namespace Infrastructure.Service
                 };
 
                 resultEntry = await _weightRepo.CreateAsync(newEntry);
+
+                // This bypasses WeightService.CreateAsync (which records its own
+                // WeightEntry.Create), so the audit call is made explicitly here (design.md
+                // Decision 5: a WeightEntry.Create row alongside PedidoLine.ConvertToWeight below
+                // is two rows for one user action, and that's correct).
+                await _auditLogService.RecordAsync("WeightEntry.Create", nameof(WeightEntry), resultEntry.Id);
             }
+
+            await _auditLogService.RecordAsync("PedidoLine.ConvertToWeight", nameof(PedidoLine), lineId);
 
             return new WeightEntryDto(resultEntry);
         }

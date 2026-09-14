@@ -160,6 +160,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         {
             GivenLine(Line(requiredAmount: 100m, false, LoadedDetail(60)));
             _weightRepo.GetByIdAsync(7).Returns(new WeightEntry { Id = 7, ConcludeDate = null });
+            _weightRepo.CreateDetailAsync(Arg.Any<WeightDetail>()).Returns(ci => ci.Arg<WeightDetail>());
 
             await CreateSut().ConvertLineToWeightAsync(LineId, weightEntryId: 7, targetAmount: null, externalTarget: null);
 

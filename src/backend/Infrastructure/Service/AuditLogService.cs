@@ -3,6 +3,7 @@ using Core.Application.Services;
 using Core.Domain.Entities.Audit;
 using Core.Domain.Entities.Weight;
 using Core.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Service
 {
@@ -11,12 +12,14 @@ namespace Infrastructure.Service
         private readonly IAuditLogRepo _auditLogRepo;
         private readonly IWeightRepo _weightRepo;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ILogger<AuditLogService> _logger;
 
-        public AuditLogService(IAuditLogRepo auditLogRepo, IWeightRepo weightRepo, ICurrentUserService currentUserService)
+        public AuditLogService(IAuditLogRepo auditLogRepo, IWeightRepo weightRepo, ICurrentUserService currentUserService, ILogger<AuditLogService> logger)
         {
             _auditLogRepo = auditLogRepo;
             _weightRepo = weightRepo;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task RecordAsync(string action, string entityType, int entityId)
@@ -28,14 +31,24 @@ namespace Infrastructure.Service
             if (userId is null)
                 return;
 
-            await _auditLogRepo.CreateAsync(new AuditLogEntry
+            // Failure-isolated (design.md Decision 1 of expand-audit-log-coverage): every call site
+            // places this after its real mutation already committed, so a failure writing the audit
+            // row itself must never propagate and turn a successful action into an apparent 500.
+            try
             {
-                UserId = userId.Value,
-                Timestamp = DateTime.UtcNow,
-                Action = action,
-                EntityType = entityType,
-                EntityId = entityId,
-            });
+                await _auditLogRepo.CreateAsync(new AuditLogEntry
+                {
+                    UserId = userId.Value,
+                    Timestamp = DateTime.UtcNow,
+                    Action = action,
+                    EntityType = entityType,
+                    EntityId = entityId,
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to record audit log entry for action {Action} on {EntityType} {EntityId}", action, entityType, entityId);
+            }
         }
 
         public async Task<WeightEntryRadiographyDto> GetWeightEntryRadiographyAsync(int weightEntryId)

@@ -1,10 +1,4 @@
-# Audit Log — Spec
-
-## Purpose
-
-Defines audit trail recording for mutating actions against the core weighing/pedido entities and `User` management, and the `Radiography` endpoint that surfaces a `WeightEntry`'s full history (including soft-deleted details) alongside its audit trail. Introduced by issue #134 once user identity existed to attribute actions to.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Every mutating action is recorded
 Each mutating action against `WeightEntry`, `WeightDetail`, `Pedido`, `PedidoLine`, or `User` SHALL write an `AuditLogEntry` recording the acting user's id, a UTC timestamp, an action name, and the target entity's type and id. This applies to the full weighing lifecycle (creation, adding a detail, recording a weight, marking a detail loaded, concluding, ERP submission), the full pedido lifecycle (creation, creating a line, closing a line, converting a line to a weight entry), and user management (creation, update, disable) — not only the delete/change actions that also require the self-authorize gate.
@@ -46,18 +40,3 @@ The system SHALL expose exactly one way to delete a `WeightDetail`, and it SHALL
 #### Scenario: No ungated delete path exists
 - **WHEN** a client attempts to delete a `WeightDetail`
 - **THEN** the only available endpoint requires a `GateIdentifier`/`GatePassword` credential, verified the same way as every other gated action
-
-### Requirement: Radiography endpoint returns a WeightEntry with its details and audit trail
-`GET /api/Weight/{id}/Radiography` SHALL return the `WeightEntry` regardless of its `IsDeleted` state, all of its `WeightDetail`s including logically-deleted ones, and every `AuditLogEntry` recorded against that entry or any of its details, ordered by timestamp.
-
-#### Scenario: Radiography includes soft-deleted details
-- **WHEN** a `WeightEntry` has one `WeightDetail` with `IsDeleted == true`
-- **THEN** the radiography response includes that detail alongside the non-deleted ones
-
-#### Scenario: Radiography includes the full audit trail for the entry and its details
-- **WHEN** a `WeightEntry` and one of its details have three combined audit entries recorded against them
-- **THEN** the radiography response includes all three, ordered by timestamp
-
-#### Scenario: Radiography for a nonexistent entry
-- **WHEN** `GET /api/Weight/{id}/Radiography` is called with an id matching no `WeightEntry` at all (deleted or not)
-- **THEN** the server returns `404 Not Found`

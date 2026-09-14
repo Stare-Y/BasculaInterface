@@ -224,26 +224,6 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
-        [HttpDelete("Detail")]
-        public async Task<IActionResult> DeleteDetail([FromQuery] int id)
-        {
-            try
-            {
-
-                bool deleted = await _weightService.DeleteDetailAsync(id);
-                if (!deleted)
-                {
-                    return NotFound($"Weight detail with ID {id} not found.");
-                }
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting detail entry with ID {Id}", id);
-                return BadRequest($"Error deleting weight detail: {ex.Message}");
-            }
-        }
-
         // AllowAnonymous (bug fix, 2026-09-13): this is a pure device-coordination primitive keyed
         // by deviceId — which physical terminal currently owns the single scale — with no
         // association to any user or record, same in spirit as SerialPortHub's websocket

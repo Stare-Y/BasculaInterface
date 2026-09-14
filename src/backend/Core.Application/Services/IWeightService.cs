@@ -19,7 +19,6 @@ namespace Core.Application.Services
         Task<WeightEntryDto> MarkDetailLoadedAsync(int detailId);
         Task ConcludeAsync(int weightEntryId);
         Task DeleteSafelyAsync(int id, GateCredential gateCredential);
-        Task<bool> DeleteDetailAsync(int id);
         Task<GenericResponse<ContpaqiComercialResult>> SendToContpaqiComercial(int id);
         Task<CreditValidationResponse> ValidatePartnerCreditAsync(int partnerId, double requestedAmount);
         Task ChangeTargetDocumentBehavior(int weightId, int targetDocumentBehaviorId);

@@ -24,11 +24,13 @@ namespace Infrastructure.Service
 
         private readonly IUserRepo _userRepo;
         private readonly IPermissionService _permissionService;
+        private readonly IAuditLogService _auditLogService;
 
-        public UserService(IUserRepo userRepo, IPermissionService permissionService)
+        public UserService(IUserRepo userRepo, IPermissionService permissionService, IAuditLogService auditLogService)
         {
             _userRepo = userRepo;
             _permissionService = permissionService;
+            _auditLogService = auditLogService;
         }
 
         public async Task<UserDto> CreateAsync(CreateUserRequest request)
@@ -63,6 +65,9 @@ namespace Infrastructure.Service
             };
 
             User created = await _userRepo.CreateAsync(user);
+
+            await _auditLogService.RecordAsync("User.Create", nameof(User), created.Id);
+
             return ToDto(created);
         }
 
@@ -127,6 +132,9 @@ namespace Infrastructure.Service
                 user.TerminalModeOverride = request.TerminalModeOverride;
 
             await _userRepo.UpdateAsync(user);
+
+            await _auditLogService.RecordAsync("User.Update", nameof(User), id);
+
             return ToDto(user);
         }
 
@@ -145,6 +153,8 @@ namespace Infrastructure.Service
             User user = await _userRepo.GetByIdAsync(id);
             user.IsDeleted = true;
             await _userRepo.UpdateAsync(user);
+
+            await _auditLogService.RecordAsync("User.Disable", nameof(User), id);
         }
 
         private UserDto ToDto(User user) => new(user)

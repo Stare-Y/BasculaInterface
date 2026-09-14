@@ -948,11 +948,19 @@ public partial class DetailedWeightView : ContentPage
             if (BindingContext is not DetailedWeightViewModel viewModel)
                 return;
 
+            // Empty-row delete now goes through the same gated+audited path as every other
+            // destructive action (expand-audit-log-coverage design.md Decision 3), mirroring
+            // StartDeleteDetailFlow's shape.
+            (string Identifier, string Password)? credential = await DeleteDetailPopUp.ShowAsync(selectedRow.Description);
+
+            if (credential is null)
+                return; // cancelled
+
             WaitPopUp.Show("Eliminando pesada, espere...");
             try
             {
 
-                await viewModel.RemoveWeightEntryDetail(selectedRow);
+                await viewModel.DeleteWeightDetailSafelyAsync(selectedRow.Id, credential.Value.Identifier, credential.Value.Password);
 
                 if (viewModel.WeightEntryDetailRows.Count > 0)
                 {

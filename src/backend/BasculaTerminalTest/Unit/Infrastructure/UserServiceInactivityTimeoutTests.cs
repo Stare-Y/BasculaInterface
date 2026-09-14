@@ -17,7 +17,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         private readonly IUserRepo _userRepo = Substitute.For<IUserRepo>();
         private readonly IPermissionService _permissionService = Substitute.For<IPermissionService>();
 
-        private UserService CreateSut() => new(_userRepo, _permissionService);
+        private UserService CreateSut() => new(_userRepo, _permissionService, Substitute.For<IAuditLogService>());
 
         public UserServiceInactivityTimeoutTests()
         {

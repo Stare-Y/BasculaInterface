@@ -139,31 +139,6 @@ namespace BasculaInterface.ViewModels
             OnCollectionChanged(nameof(WeightEntryDetailRows));
         }
 
-        public async Task RemoveWeightEntryDetail(WeightEntryDetailRow selectedRow)
-        {
-            if (WeightEntry == null)
-            {
-                throw new InvalidOperationException("Cannot remove an item that doesn't exist");
-            }
-            if (selectedRow == null)
-            {
-                throw new ArgumentNullException(nameof(selectedRow), "Selected row cannot be null.");
-            }
-            WeightDetailDto? detailToRemove = WeightEntry.WeightDetails.FirstOrDefault(d => d.Id == selectedRow.Id);
-            if (detailToRemove != null)
-            {
-
-
-                await DeleteWeightDetail(selectedRow.Id);
-
-                WeightEntry.WeightDetails.Remove(detailToRemove);
-                WeightEntryDetailRows.Remove(selectedRow);
-
-                OnCollectionChanged(nameof(WeightEntryDetailRows));
-                OnPropertyChanged(nameof(TotalWeight));
-            }
-        }
-
         public async Task FetchNewWeightDetails(CancellationToken cancellationToken = default)
         {
             if (WeightEntry == null)
@@ -375,8 +350,9 @@ namespace BasculaInterface.ViewModels
         /// superseding the shared password from issue #125's stopgap). Throws on an
         /// unresolved/unauthorized credential, an entry that already has a Contpaqi document, or a
         /// concurrency conflict; the caller (View code-behind) is responsible for surfacing that
-        /// to the user. Distinct from the existing unguarded DeleteWeightDetail, which stays
-        /// reserved for the empty-row "✕" button.
+        /// to the user. Now the single delete path for a WeightDetail (expand-audit-log-coverage
+        /// design.md Decision 3) — the empty-row "✕" button calls this too, rather than the
+        /// retired ungated DeleteWeightDetail.
         /// </summary>
         public async Task DeleteWeightDetailSafelyAsync(int detailId, string gateIdentifier, string gatePassword)
         {
@@ -425,20 +401,6 @@ namespace BasculaInterface.ViewModels
             row.IsLoaded = true;
             OnPropertyChanged(nameof(WeightEntry));
             OnPropertyChanged(nameof(TotalWeight));
-        }
-
-        public async Task DeleteWeightDetail(int detailId)
-        {
-            if (WeightEntry == null)
-            {
-                throw new InvalidOperationException("WeightEntry must be set before deleting a detail.");
-            }
-            if (detailId <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(detailId), "Detail ID must be a positive integer.");
-            }
-            // Send delete request to the API
-            await _apiService.DeleteAsync($"api/Weight/Detail?id={detailId}");
         }
 
         public async Task ConcludeWeightProcess()
