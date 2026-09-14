@@ -129,6 +129,30 @@ public partial class PendingWeightsView : ContentPage
 
         WaitPopUp.Show("Cargando pesos pendientes, espere");
 
+        // Applied unconditionally, before any network call below — this only depends on
+        // CurrentTerminalMode (a local, synchronous value), never on data fetched afterward. If
+        // any of the data-loading steps in the try block below throws (most commonly on a cold
+        // app start, on the very first authenticated request racing AuthHeaderHandler attaching
+        // the token — see the AllowAnonymous comment on WeightController's CanWeight/ReleaseWeight),
+        // the catch block never reached this restriction and the page was left showing every
+        // control, "Main"-style, regardless of the logged-in user's actual TerminalMode. A second
+        // login in the same running app rarely hit the race (the connection/token path was
+        // already warmed up), which made the bug look like it "fixed itself" after logout+login.
+        if (CurrentTerminalMode == TerminalMode.Secondary || CurrentTerminalMode == TerminalMode.PedidosOnly)
+        {
+            GridListTab.IsVisible = false;
+
+            BtnNewWeighProcess.IsVisible = false;
+
+            BtnFinished.IsVisible = false;
+
+            if (CurrentTerminalMode == TerminalMode.PedidosOnly)
+            {
+                BtnNewWeightLessPedido.IsVisible = true;
+                BtnFinished.IsVisible = true;
+            }
+        }
+
         try
         {
             EntryHost.Text = Preferences.Get("HostUrl", "bascula.cpe");
@@ -171,20 +195,6 @@ public partial class PendingWeightsView : ContentPage
                 PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
             }
 
-            if (CurrentTerminalMode == TerminalMode.Secondary || CurrentTerminalMode == TerminalMode.PedidosOnly)
-            {
-                GridListTab.IsVisible = false;
-
-                BtnNewWeighProcess.IsVisible = false;
-
-                BtnFinished.IsVisible = false;
-
-                if (CurrentTerminalMode == TerminalMode.PedidosOnly)
-                {
-                    BtnNewWeightLessPedido.IsVisible = true;
-                    BtnFinished.IsVisible = true;
-                }
-            }
             BtnReconnect.IsVisible = false;
         }
         catch (OperationCanceledException)
