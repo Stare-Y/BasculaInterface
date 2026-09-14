@@ -19,6 +19,7 @@ namespace Infrastructure.Service
             [Role.Supervisor] = 5,
             [Role.Operator] = 10,
             [Role.DispatchingOperator] = 20,
+            [Role.PurchasingOperator] = 10,
         };
 
         private readonly IUserRepo _userRepo;
@@ -58,6 +59,7 @@ namespace Infrastructure.Service
                     ?? (InactivityTimeoutDefaults.TryGetValue(request.Role, out int roleDefault) ? roleDefault : 5),
                 Name = request.Name,
                 LastName = request.LastName,
+                TerminalModeOverride = request.TerminalModeOverride,
             };
 
             User created = await _userRepo.CreateAsync(user);
@@ -119,6 +121,11 @@ namespace Infrastructure.Service
                 user.LastName = request.LastName;
             }
 
+            if (request.ResetTerminalModeOverride)
+                user.TerminalModeOverride = null;
+            else if (request.TerminalModeOverride.HasValue)
+                user.TerminalModeOverride = request.TerminalModeOverride;
+
             await _userRepo.UpdateAsync(user);
             return ToDto(user);
         }
@@ -144,6 +151,7 @@ namespace Infrastructure.Service
         {
             CanSelfAuthorizeGate = _permissionService.HasPermission(user, Permission.CanSelfAuthorizeGate),
             CanCaptureWeightManually = _permissionService.HasPermission(user, Permission.CanCaptureWeightManually),
+            TerminalMode = _permissionService.GetEffectiveTerminalMode(user),
         };
     }
 }

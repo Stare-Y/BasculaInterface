@@ -11,59 +11,14 @@ public partial class EditSettingsView : ContentPage
         LoadPreferences();
     }
 
-    private void CheckBoxSecondaryTerminal_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        Preferences.Set("SecondaryTerminal", e.Value);
-    }
-
-    private void CheckBoxRequirePartner_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        Preferences.Set("RequirePartner", e.Value);
-    }
-
-    private void CheckBoxOnlyPedidos_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        Preferences.Set("OnlyPedidos", e.Value);
-    }
-
     private void CheckBoxBypasTurn_CheckedChanged(object sender, CheckedChangedEventArgs e)
     {
         Preferences.Set("BypasTurn", e.Value);
     }
-    private void CheckBoxOnlyFinished_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        Preferences.Set("OnlyFinished", e.Value);
-        if (e.Value)
-        {
-            //uncheck everything else
-            CheckBoxSecondaryTerminal.IsChecked = false;
-            CheckBoxRequirePartner.IsChecked = false;
-            CheckBoxOnlyPedidos.IsChecked = false;
-            CheckBoxBypasTurn.IsChecked = false;
-
-            //disable everything else
-            CheckBoxSecondaryTerminal.IsEnabled = false;
-            CheckBoxRequirePartner.IsEnabled = false;
-            CheckBoxOnlyPedidos.IsEnabled = false;
-            CheckBoxBypasTurn.IsEnabled = false;
-        }
-        else
-        {
-            //enable everything else
-            CheckBoxSecondaryTerminal.IsEnabled = true;
-            CheckBoxRequirePartner.IsEnabled = true;
-            CheckBoxOnlyPedidos.IsEnabled = true;
-            CheckBoxBypasTurn.IsEnabled = true;
-        }
-    }
 
     private void LoadPreferences()
     {
-        CheckBoxSecondaryTerminal.IsChecked = Preferences.Get("SecondaryTerminal", false);
-        CheckBoxRequirePartner.IsChecked = Preferences.Get("RequirePartner", false);
-        CheckBoxOnlyPedidos.IsChecked = Preferences.Get("OnlyPedidos", false);
         CheckBoxBypasTurn.IsChecked = Preferences.Get("BypasTurn", false);
-        CheckBoxOnlyFinished.IsChecked = Preferences.Get("OnlyFinished", false);
         CheckBoxShowDocumentTypes.IsChecked = Preferences.Get("ShowDocumentTypeFilter", false);
         EntryDocumentTypes.Text = Preferences.Get("PreferedDocumentType", string.Empty);
         EntryPurchaseExternalTarget.Text = Preferences.Get("PurchaseExternalTarget", string.Empty);
@@ -80,11 +35,7 @@ public partial class EditSettingsView : ContentPage
 
     private void SetPreferences()
     {
-        Preferences.Set("SecondaryTerminal", CheckBoxSecondaryTerminal.IsChecked);
-        Preferences.Set("RequirePartner", CheckBoxRequirePartner.IsChecked);
-        Preferences.Set("OnlyPedidos", CheckBoxOnlyPedidos.IsChecked);
         Preferences.Set("BypasTurn", CheckBoxBypasTurn.IsChecked);
-        Preferences.Set("OnlyFinished", CheckBoxOnlyFinished.IsChecked);
         Preferences.Set("ShowDocumentTypeFilter", CheckBoxShowDocumentTypes.IsChecked);
         Preferences.Set("PreferedDocumentType", EntryDocumentTypes.Text);
         Preferences.Set("PurchaseExternalTarget", EntryPurchaseExternalTarget.Text);

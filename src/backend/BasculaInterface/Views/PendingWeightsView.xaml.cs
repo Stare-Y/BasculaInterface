@@ -1,9 +1,11 @@
 using BasculaInterface.Exceptions;
 using BasculaInterface.Models;
+using BasculaInterface.Services;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Identity;
 
 namespace BasculaInterface.Views;
 
@@ -11,6 +13,28 @@ public partial class PendingWeightsView : ContentPage
 {
     private CancellationTokenSource? _cts = null;
     private bool _isFirstLoad = true;
+
+    // role-driven-terminal-modes: resolved statically, same pattern as MainPage/WeightingScreen —
+    // this class has a parameterless constructor too (design-time), so it isn't a plain DI param.
+    private readonly ISessionService? _sessionService =
+        MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService;
+
+    private TerminalMode CurrentTerminalMode => _sessionService?.CurrentUser?.TerminalMode ?? TerminalMode.Main;
+
+    /// <summary>
+    /// Shows the self-authorize gate credential popup and verifies it via AuthorizeTurnBypass
+    /// (role-driven-terminal-modes design.md Decision 3). Returns false — never throws — for a
+    /// cancelled popup, an unresolved identifier, wrong password, or a resolved user without the
+    /// CanSelfAuthorizeGate permission.
+    /// </summary>
+    private async Task<bool> TryAuthorizeTurnBypassAsync(BasculaViewModel basculaViewModel)
+    {
+        (string Identifier, string Password)? credential = await AuthorizeTurnBypassPopUp.ShowAsync();
+        if (credential is null)
+            return false; // cancelled
+
+        return await basculaViewModel.AuthorizeTurnBypassAsync(credential.Value.Identifier, credential.Value.Password);
+    }
 
     public PendingWeightsView(PendingWeightsViewModel viewModel)
     {
@@ -147,7 +171,7 @@ public partial class PendingWeightsView : ContentPage
                 PendingWeightsCollectionView.ItemsSource = viewModel.PendingWeightsDischarge;
             }
 
-            if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
+            if (CurrentTerminalMode == TerminalMode.Secondary || CurrentTerminalMode == TerminalMode.PedidosOnly)
             {
                 GridListTab.IsVisible = false;
 
@@ -155,7 +179,7 @@ public partial class PendingWeightsView : ContentPage
 
                 BtnFinished.IsVisible = false;
 
-                if (Preferences.Get("OnlyPedidos", false))
+                if (CurrentTerminalMode == TerminalMode.PedidosOnly)
                 {
                     BtnNewWeightLessPedido.IsVisible = true;
                     BtnFinished.IsVisible = true;
@@ -231,9 +255,11 @@ public partial class PendingWeightsView : ContentPage
         {
             BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
 
-            if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
+            if (!await basculaViewModel.CanWeight())
             {
-                throw new InvalidOperationException("Bascula ocupada");
+                bool authorized = Preferences.Get("BypasTurn", false) && await TryAuthorizeTurnBypassAsync(basculaViewModel);
+                if (!authorized)
+                    throw new InvalidOperationException("Bascula ocupada");
             }
 
             WeightingScreen weightingView = new(new WeightEntryDto(), providers: !BtnDescargas.IsEnabled);

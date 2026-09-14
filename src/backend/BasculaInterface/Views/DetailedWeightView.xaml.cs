@@ -1,7 +1,9 @@
 using BasculaInterface.Models;
+using BasculaInterface.Services;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
+using Core.Domain.Entities.Identity;
 
 namespace BasculaInterface.Views;
 
@@ -12,13 +14,20 @@ public partial class DetailedWeightView : ContentPage
     private bool _isInitializing = false;
     private CancellationTokenSource? _cts;
 
+    // role-driven-terminal-modes: resolved statically, same pattern as MainPage/WeightingScreen —
+    // this class has a parameterless constructor too (design-time), so it isn't a plain DI param.
+    private readonly ISessionService? _sessionService =
+        MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService;
+
+    private TerminalMode CurrentTerminalMode => _sessionService?.CurrentUser?.TerminalMode ?? TerminalMode.Main;
+
     public DetailedWeightView(DetailedWeightViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
         SubscribeToKeyboardEvents();
 
-        if (Preferences.Get("SecondaryTerminal", false))
+        if (CurrentTerminalMode == TerminalMode.Secondary)
         {
             BtnNuevoProducto.IsVisible = false;
             BtnNewEntry.IsVisible = false;
@@ -26,11 +35,26 @@ public partial class DetailedWeightView : ContentPage
             BtnPrintTicket.IsVisible = false;
             EntryNotes.IsEnabled = false;
         }
-        else if (Preferences.Get("OnlyPedidos", false))
+        else if (CurrentTerminalMode == TerminalMode.PedidosOnly)
         {
             BtnNuevoProducto.IsVisible = true;
             BtnNewEntry.IsVisible = false;
         }
+    }
+
+    /// <summary>
+    /// Shows the self-authorize gate credential popup and verifies it via AuthorizeTurnBypass
+    /// (role-driven-terminal-modes design.md Decision 3). Returns false — never throws — for a
+    /// cancelled popup, an unresolved identifier, wrong password, or a resolved user without the
+    /// CanSelfAuthorizeGate permission.
+    /// </summary>
+    private async Task<bool> TryAuthorizeTurnBypassAsync(BasculaViewModel basculaViewModel)
+    {
+        (string Identifier, string Password)? credential = await AuthorizeTurnBypassPopUp.ShowAsync();
+        if (credential is null)
+            return false; // cancelled
+
+        return await basculaViewModel.AuthorizeTurnBypassAsync(credential.Value.Identifier, credential.Value.Password);
     }
 
     public DetailedWeightView() { }
@@ -196,9 +220,9 @@ public partial class DetailedWeightView : ContentPage
             }
         }
 
-        if (Preferences.Get("SecondaryTerminal", false) || Preferences.Get("OnlyPedidos", false))
+        if (CurrentTerminalMode == TerminalMode.Secondary || CurrentTerminalMode == TerminalMode.PedidosOnly)
         {
-            if (Preferences.Get("OnlyPedidos", false))
+            if (CurrentTerminalMode == TerminalMode.PedidosOnly)
             {
                 if (!(viewModel.WeightEntryDetailRows.Count < 1 && viewModel.WeightEntryDetailRows.Any(row => row.Weight < 1 && row.IsGranel)))
                     BtnFinishWeight.IsVisible = true;
@@ -223,7 +247,7 @@ public partial class DetailedWeightView : ContentPage
 
         if (viewModel.WeightEntryDetailRows.Count < 1)
         {
-            if (Preferences.Get("SecondaryTerminal", false))
+            if (CurrentTerminalMode == TerminalMode.Secondary)
                 BtnFinishWeight.IsVisible = true;
 
             if (viewModel.Partner is null || viewModel.Partner.Id <= 0)
@@ -368,9 +392,11 @@ public partial class DetailedWeightView : ContentPage
                 if (weightingScreen.BindingContext is not BasculaViewModel basculaViewModel)
                     throw new InvalidOperationException("No se pudo validar el estado de la bascuila en el VM");
 
-                if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
+                if (!await basculaViewModel.CanWeight())
                 {
-                    throw new InvalidOperationException("Bascula ocupada");
+                    bool authorized = Preferences.Get("BypasTurn", false) && await TryAuthorizeTurnBypassAsync(basculaViewModel);
+                    if (!authorized)
+                        throw new InvalidOperationException("Bascula ocupada");
                 }
 
                 await Shell.Current.Navigation.PushModalAsync(weightingScreen);
@@ -833,7 +859,7 @@ public partial class DetailedWeightView : ContentPage
 
     private async void CollectionViewWeightDetails_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (Preferences.Get("OnlyPedidos", false))
+        if (CurrentTerminalMode == TerminalMode.PedidosOnly)
         {
             return;
         }
@@ -856,23 +882,30 @@ public partial class DetailedWeightView : ContentPage
             if (!row.IsGranel)
                 return;
 
-            if (
-                !Preferences.Get("BypasTurn", false) &&
-                ((!string.IsNullOrEmpty(row.WeightedBy) || !string.IsNullOrWhiteSpace(row.WeightedBy)) &&
-                row.WeightedBy.Trim().ToLower() != DeviceInfo.Name.Trim().ToLower()))
+            BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
+
+            bool rowClaimedByAnotherDevice =
+                (!string.IsNullOrEmpty(row.WeightedBy) || !string.IsNullOrWhiteSpace(row.WeightedBy)) &&
+                row.WeightedBy.Trim().ToLower() != DeviceInfo.Name.Trim().ToLower();
+
+            if (rowClaimedByAnotherDevice)
             {
-                await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
-                return;
+                bool rowAuthorized = Preferences.Get("BypasTurn", false) && await TryAuthorizeTurnBypassAsync(basculaViewModel);
+                if (!rowAuthorized)
+                {
+                    await DisplayAlert("Error", $"El pesaje ya lo esta llevando {row.WeightedBy}.", "Ok");
+                    return;
+                }
             }
 
             WaitPopUp.Show("Preparando bascula, espere...");
             try
             {
-                BasculaViewModel basculaViewModel = MauiProgram.ServiceProvider.GetRequiredService<BasculaViewModel>();
-
-                if (!Preferences.Get("BypasTurn", false) && !await basculaViewModel.CanWeight())
+                if (!await basculaViewModel.CanWeight())
                 {
-                    throw new InvalidOperationException("Bascula ocupada");
+                    bool authorized = Preferences.Get("BypasTurn", false) && await TryAuthorizeTurnBypassAsync(basculaViewModel);
+                    if (!authorized)
+                        throw new InvalidOperationException("Bascula ocupada");
                 }
 
                 ProductoDto? producto = null;

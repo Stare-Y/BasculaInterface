@@ -2,6 +2,7 @@ using BasculaInterface.Services;
 using BasculaInterface.ViewModels;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
+using Core.Domain.Entities.Identity;
 
 namespace BasculaInterface.Views;
 
@@ -26,6 +27,10 @@ public partial class WeightingScreen : ContentPage
     // below avoids that window, but this stays defensive in case any other timing path hits it.
     private bool CanCaptureWeightManually => _sessionService?.CurrentUser?.CanCaptureWeightManually ?? false;
 
+    // role-driven-terminal-modes: replaces the old device-local "SecondaryTerminal" Preferences
+    // toggle — same null-conditional-on-_sessionService-itself caution as CanCaptureWeightManually.
+    private TerminalMode CurrentTerminalMode => _sessionService?.CurrentUser?.TerminalMode ?? TerminalMode.Main;
+
     public WeightingScreen(BasculaViewModel viewModel)
     {
         // Resolved before InitializeComponent() deliberately — see CanCaptureWeightManually's
@@ -38,7 +43,7 @@ public partial class WeightingScreen : ContentPage
 
         GridManualToggle.IsVisible = CanCaptureWeightManually;
 
-        if (Preferences.Get("SecondaryTerminal", false))
+        if (CurrentTerminalMode == TerminalMode.Secondary)
         {
             EntryVehiclePlate.IsEnabled = false;
         }
@@ -98,7 +103,7 @@ public partial class WeightingScreen : ContentPage
             viewModel.Product = new ProductoDto { Nombre = detailNotes };
         }
 
-        if (useIncommingTara || !Preferences.Get("SecondaryTerminal", false))
+        if (useIncommingTara || CurrentTerminalMode != TerminalMode.Secondary)
         {
             if (weightEntry.BruteWeight > 0)
             {
@@ -172,7 +177,7 @@ public partial class WeightingScreen : ContentPage
             BtnPickPartner.IsVisible = viewModel.Partner is null || viewModel.Partner.Id == 0;
             BtnPickProduct.IsVisible = viewModel.Product is null && ((viewModel.WeightEntry?.TareWeight != 0) || viewModel.Providers);
             EntryVehiclePlate.IsEnabled = viewModel.WeightEntry is null || string.IsNullOrEmpty(viewModel.WeightEntry.VehiclePlate)
-                && !Preferences.Get("SecondaryTerminal", false);
+                && CurrentTerminalMode != TerminalMode.Secondary;
 
             if (Preferences.Get("BypasTurn", false))
                 return;

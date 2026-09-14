@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using BasculaInterface.Services;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Identity;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,6 +14,13 @@ namespace BasculaInterface.ViewModels
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     public class BasculaViewModel : ViewModelBase
     {
+        // role-driven-terminal-modes: resolved statically, same pattern as MainPage/WeightingScreen —
+        // this class has a parameterless constructor too (design-time), so it isn't a plain DI param.
+        private readonly ISessionService? _sessionService =
+            MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService;
+
+        private TerminalMode CurrentTerminalMode => _sessionService?.CurrentUser?.TerminalMode ?? TerminalMode.Main;
+
         public string? DetailNotes { get; set; } = null;
         public int? TargetWeightDetail { get; set; } = null;
         private WeightEntryDto? _weightEntry;
@@ -91,6 +100,26 @@ namespace BasculaInterface.ViewModels
             try
             {
                 return await _apiService.PutAsync<bool>($"api/Weight/CanWeight?deviceId={Preferences.Get("DeviceName", DeviceInfo.Name)}", null);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// The BypasTurn per-use self-authorize gate (role-driven-terminal-modes design.md Decision 3):
+        /// verifies a GateIdentifier/GatePassword credential via the server's AuthorizeTurnBypass
+        /// endpoint, without performing any mutation. Never throws for an unresolved identifier or
+        /// wrong password/permission — just returns false, same contract as CanWeight() above.
+        /// </summary>
+        public async Task<bool> AuthorizeTurnBypassAsync(string gateIdentifier, string gatePassword)
+        {
+            try
+            {
+                return await _apiService.PostAsync<bool>(
+                    "api/Weight/AuthorizeTurnBypass",
+                    new { GateIdentifier = gateIdentifier, GatePassword = gatePassword });
             }
             catch
             {
@@ -352,7 +381,9 @@ namespace BasculaInterface.ViewModels
 
         private void ValidateBeforePosting()
         {
-            if (Preferences.Get("RequirePartner", false) || Providers)
+            // role-driven-terminal-modes: RequirePartner (device Preference) confirmed dead in
+            // production and removed — the Providers rule below is unrelated and untouched.
+            if (Providers)
             {
                 if (Partner is null || Partner.Id < 1)
                     throw new InvalidOperationException("Es obligatorio especificar al socio.");
@@ -373,7 +404,7 @@ namespace BasculaInterface.ViewModels
             //{
             //    throw new InvalidOperationException("Tare weight must be set equal to the received before capturing a new weight entry.");
             //}
-            if (string.IsNullOrEmpty(WeightEntry.VehiclePlate) && !Preferences.Get("SecondaryTerminal", false))
+            if (string.IsNullOrEmpty(WeightEntry.VehiclePlate) && CurrentTerminalMode != TerminalMode.Secondary)
             {
                 throw new InvalidOperationException("Es obligatorio especificar la placa del vehiculo.");
             }
@@ -393,7 +424,7 @@ namespace BasculaInterface.ViewModels
                 return; // no product attached to this capture — nothing to validate
 
             if (Partner is null || Partner.Id <= 0)
-                return; // no partner assigned; ValidateBeforePosting already enforces RequirePartner/Providers
+                return; // no partner assigned; ValidateBeforePosting already enforces Providers requiring one
 
             if (Partner.IgnoreCreditLimit || Partner.CreditLimit <= 0)
                 return; // unlimited credit

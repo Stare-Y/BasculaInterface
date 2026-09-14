@@ -1,9 +1,11 @@
 ﻿using BasculaInterface.Models;
+using BasculaInterface.Services;
 using BasculaInterface.ViewModels.Base;
 using Core.Application.DTOs;
 using Core.Application.DTOs.ContpaqiComercial;
 using Core.Application.Security;
 using Core.Application.Services;
+using Core.Domain.Entities.Identity;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
@@ -12,7 +14,12 @@ namespace BasculaInterface.ViewModels
 {
     public class DetailedWeightViewModel : ViewModelBase
     {
-        public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
+        // role-driven-terminal-modes: resolved statically, same pattern as MainPage/WeightingScreen —
+        // this class has a parameterless constructor too (design-time), so it isn't a plain DI param.
+        private readonly ISessionService? _sessionService =
+            MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService;
+
+        public bool IsSecondaryTerminal => (_sessionService?.CurrentUser?.TerminalMode ?? TerminalMode.Main) == TerminalMode.Secondary;
         public WeightEntryDto? WeightEntry { get; private set; } = null;
         public ClienteProveedorDto? Partner { get; set; } = null;
         public double TotalWeight

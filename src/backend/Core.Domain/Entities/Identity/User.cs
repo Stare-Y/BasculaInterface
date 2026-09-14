@@ -46,5 +46,11 @@ namespace Core.Domain.Entities.Identity
 
         /// <summary>Person's surname — see <see cref="Name"/> for the nullability rationale.</summary>
         public string? LastName { get; set; }
+
+        /// <summary>Tri-state override for the resolved <see cref="TerminalMode"/> (role-driven-terminal-modes
+        /// design.md Decision 1): null = inherit the role default, otherwise forces the effective
+        /// value regardless of role — same shape as <see cref="CanSelfAuthorizeGateOverride"/>. The
+        /// only way to reach <see cref="TerminalMode.OnlyFinished"/>, since no role defaults to it.</summary>
+        public TerminalMode? TerminalModeOverride { get; set; }
     }
 }

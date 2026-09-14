@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using BasculaInterface.Services;
+using Core.Domain.Entities.Identity;
+using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -6,6 +8,13 @@ namespace BasculaInterface.Models
 {
     public class WeightEntryDetailRow : INotifyPropertyChanged
     {
+        // role-driven-terminal-modes: this is a plain POCO row, not DI-constructed (many instances
+        // per rendered list), so it resolves ISessionService statically, same pattern already used
+        // by MainPage/WeightingScreen for the same service.
+        private static TerminalMode CurrentTerminalMode =>
+            (MauiProgram.ServiceProvider.GetService(typeof(ISessionService)) as ISessionService)
+                ?.CurrentUser?.TerminalMode ?? TerminalMode.Main;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -87,7 +96,7 @@ namespace BasculaInterface.Models
         public string? WeightedBy => _weightedBy;
         private string _description = string.Empty;
         public int? FK_WeightedProductId { get; set; } = null;
-        public bool IsSecondaryTerminal => Preferences.Get("SecondaryTerminal", false);
+        public bool IsSecondaryTerminal => CurrentTerminalMode == TerminalMode.Secondary;
 
         /// <summary>
         /// Gates the row's "⋮" change-product menu (issue #122): allowed for the main terminal
@@ -96,8 +105,8 @@ namespace BasculaInterface.Models
         /// or an "OnlyFinished" ("Solo Concluidos") terminal.
         /// </summary>
         public bool CanChangeProductMenu =>
-            !Preferences.Get("SecondaryTerminal", false) &&
-            !Preferences.Get("OnlyFinished", false);
+            CurrentTerminalMode != TerminalMode.Secondary &&
+            CurrentTerminalMode != TerminalMode.OnlyFinished;
 
         private double? _requiredAmount = null;
         public double? RequiredAmount

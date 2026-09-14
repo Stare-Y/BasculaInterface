@@ -66,73 +66,17 @@
                             Spacing="20"
                             VerticalOptions="Center">
 
-                            <Grid
-                                ColumnDefinitions="*,*"
-                                ColumnSpacing="35"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center">
-
-                                <CheckBox
-                                    x:Name="CheckBoxSecondaryTerminal"
-                                    Grid.Column="0"
-                                    CheckedChanged="CheckBoxSecondaryTerminal_CheckedChanged"
-                                    HorizontalOptions="Start" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="22"
-                                    HorizontalOptions="End"
-                                    Style="{StaticResource Label}"
-                                    Text="Usar terminal secundaria" />
-                            </Grid>
-
                             <!--  "Capturar peso manualmente" removed (issue #134) — manual-weight
                                   capture is now gated solely by the logged-in user's
                                   CanCaptureWeightManually permission, not a device setting.  -->
 
-
-                            <Grid
-                                ColumnDefinitions="*,*"
-                                ColumnSpacing="35"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center">
-
-                                <CheckBox
-                                    x:Name="CheckBoxRequirePartner"
-                                    Grid.Column="0"
-                                    CheckedChanged="CheckBoxRequirePartner_CheckedChanged"
-                                    HorizontalOptions="Start" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="22"
-                                    HorizontalOptions="End"
-                                    Style="{StaticResource Label}"
-                                    Text="Forzar elegir socio" />
-
-                            </Grid>
-
-
-                            <Grid
-                                ColumnDefinitions="*,*"
-                                ColumnSpacing="35"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center">
-
-                                <CheckBox
-                                    x:Name="CheckBoxOnlyPedidos"
-                                    Grid.Column="0"
-                                    CheckedChanged="CheckBoxOnlyPedidos_CheckedChanged"
-                                    HorizontalOptions="Start" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="22"
-                                    HorizontalOptions="End"
-                                    Style="{StaticResource Label}"
-                                    Text="Solo Pedidos" />
-
-                            </Grid>
+                            <!--  "Usar terminal secundaria", "Solo Pedidos", "Ver solo Terminados", and
+                                  "Forzar elegir socio" removed (role-driven-terminal-modes, issue #135) —
+                                  terminal-mode behavior (Main/Secondary/PedidosOnly/OnlyFinished) is now
+                                  derived from the logged-in user's role/TerminalModeOverride, not a
+                                  per-device setting; RequirePartner was confirmed dead in production and
+                                  deleted outright. BypasTurn remains — see design.md Decision 3, it now
+                                  requires a self-authorize-gate credential at the moment of use.  -->
 
                             <Grid
                                 ColumnDefinitions="*,*"
@@ -155,27 +99,6 @@
 
                             </Grid>
 
-                            <Grid
-                                ColumnDefinitions="*,*"
-                                ColumnSpacing="35"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Center">
-
-                                <CheckBox
-                                    x:Name="CheckBoxOnlyFinished"
-                                    Grid.Column="0"
-                                    CheckedChanged="CheckBoxOnlyFinished_CheckedChanged"
-                                    HorizontalOptions="Start" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    FontSize="22"
-                                    HorizontalOptions="End"
-                                    Style="{StaticResource Label}"
-                                    Text="Ver solo Terminados" />
-
-                            </Grid>
-                            
                             <Grid
                                 ColumnDefinitions="*,*"
                                 ColumnSpacing="35"

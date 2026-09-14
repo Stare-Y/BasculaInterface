@@ -29,6 +29,7 @@ namespace BasculaTerminalApi.Controllers
     {
         public GateCredential ToGateCredential() => new(GateIdentifier, GatePassword);
     }
+    public record AuthorizeTurnBypassRequest(string GateIdentifier, string GatePassword);
 
     [ApiController]
     [Route("api/[Controller]")]
@@ -36,11 +37,17 @@ namespace BasculaTerminalApi.Controllers
     {
         private readonly IWeightService _weightService = null!;
         private readonly IWeightLogisticService _weightLogisticService = null!;
+        private readonly IGateAuthorizationService _gateAuthorizationService;
         private readonly ILogger<WeightController> _logger;
-        public WeightController(IWeightService weightService, IWeightLogisticService weightLogisticService, ILogger<WeightController> logger)
+        public WeightController(
+            IWeightService weightService,
+            IWeightLogisticService weightLogisticService,
+            IGateAuthorizationService gateAuthorizationService,
+            ILogger<WeightController> logger)
         {
             _weightService = weightService;
             _weightLogisticService = weightLogisticService;
+            _gateAuthorizationService = gateAuthorizationService;
             _logger = logger;
         }
 
@@ -263,6 +270,17 @@ namespace BasculaTerminalApi.Controllers
                 _logger.LogError(ex, "Error releasing weight with ID {Id}", deviceId);
                 return BadRequest($"Error releasing weight: {ex.Message}");
             }
+        }
+
+        /// <summary>Verify-only endpoint backing the device-local BypasTurn setting's per-use gate
+        /// (role-driven-terminal-modes design.md Decision 3) — reuses the same
+        /// IGateAuthorizationService resolution/verification/permission check as every other
+        /// self-authorize-gated action, but performs no mutation itself regardless of the
+        /// result.</summary>
+        [HttpPost("AuthorizeTurnBypass")]
+        public async Task<ActionResult<bool>> AuthorizeTurnBypass([FromBody] AuthorizeTurnBypassRequest request)
+        {
+            return Ok(await _gateAuthorizationService.TryAuthorizeAsync(request.GateIdentifier, request.GatePassword));
         }
 
         [HttpPost("ContpaqiComercial")]

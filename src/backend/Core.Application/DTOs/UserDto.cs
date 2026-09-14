@@ -29,6 +29,14 @@ namespace Core.Application.DTOs
         /// <summary>Person's surname — see <see cref="Name"/>.</summary>
         public string? LastName { get; set; }
 
+        /// <summary>Tri-state override (role-driven-terminal-modes design.md Decision 1) — raw
+        /// stored value, unlike <see cref="TerminalMode"/> below.</summary>
+        public TerminalMode? TerminalModeOverride { get; set; }
+
+        /// <summary>Resolved role-default-or-override value, computed via
+        /// <c>IPermissionService.GetEffectiveTerminalMode</c> — never null.</summary>
+        public TerminalMode TerminalMode { get; set; }
+
         public UserDto() { }
 
         public UserDto(User entity)
@@ -42,6 +50,7 @@ namespace Core.Application.DTOs
             InactivityTimeoutMinutes = entity.InactivityTimeoutMinutes;
             Name = entity.Name;
             LastName = entity.LastName;
+            TerminalModeOverride = entity.TerminalModeOverride;
         }
     }
 
@@ -50,6 +59,8 @@ namespace Core.Application.DTOs
     /// <param name="LastName">Required, non-blank — see <paramref name="Name"/>.</param>
     /// <param name="InactivityTimeoutMinutes">Explicit override; when null, UserService seeds a
     /// role-based default (fix-session-inactivity-timeout design.md Decision 3).</param>
+    /// <param name="TerminalModeOverride">Explicit override; when null, the effective TerminalMode
+    /// resolves from Role (role-driven-terminal-modes design.md Decision 1).</param>
     public record CreateUserRequest(
         string Username,
         string UserCode,
@@ -57,11 +68,16 @@ namespace Core.Application.DTOs
         Role Role,
         string Name,
         string LastName,
-        int? InactivityTimeoutMinutes = null);
+        int? InactivityTimeoutMinutes = null,
+        TerminalMode? TerminalModeOverride = null);
 
     /// <param name="Name">Optional (add-user-name-fields design.md Decision 2) — omitted leaves the
     /// stored value (including a pre-existing null) unchanged; supplied-but-blank is rejected.</param>
     /// <param name="LastName">Optional — see <paramref name="Name"/>.</param>
+    /// <param name="TerminalModeOverride">Sets the override when supplied (role-driven-terminal-modes
+    /// design.md Decision 1) — see <paramref name="ResetTerminalModeOverride"/> to clear it instead.</param>
+    /// <param name="ResetTerminalModeOverride">When true, clears the override back to null (inherit
+    /// the role default) — mirrors ResetCanSelfAuthorizeGateOverride's shape.</param>
     public record UpdateUserRequest(
         string? Username,
         string? UserCode,
@@ -73,7 +89,9 @@ namespace Core.Application.DTOs
         bool ResetCanCaptureWeightManuallyOverride,
         int? InactivityTimeoutMinutes = null,
         string? Name = null,
-        string? LastName = null);
+        string? LastName = null,
+        TerminalMode? TerminalModeOverride = null,
+        bool ResetTerminalModeOverride = false);
 
     public record LoginRequest(string Identifier, string Password);
 

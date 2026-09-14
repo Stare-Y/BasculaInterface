@@ -15,6 +15,22 @@ namespace Infrastructure.Service
             [Role.Supervisor] = [Permission.CanSelfAuthorizeGate, Permission.CanCaptureWeightManually],
             [Role.Admin] = [],
             [Role.Sudo] = [],
+            [Role.PurchasingOperator] = [],
+        };
+
+        /// <summary>Role default terminal modes (role-driven-terminal-modes design.md Decision 1).
+        /// Only <see cref="Role.DispatchingOperator"/> and <see cref="Role.PurchasingOperator"/>
+        /// differ from <see cref="TerminalMode.Main"/> — no role defaults to
+        /// <see cref="TerminalMode.OnlyFinished"/>, which is only reachable via
+        /// <see cref="User.TerminalModeOverride"/>.</summary>
+        private static readonly Dictionary<Role, TerminalMode> RoleTerminalModeDefaults = new()
+        {
+            [Role.Operator] = TerminalMode.Main,
+            [Role.DispatchingOperator] = TerminalMode.Secondary,
+            [Role.Supervisor] = TerminalMode.Main,
+            [Role.Admin] = TerminalMode.Main,
+            [Role.Sudo] = TerminalMode.Main,
+            [Role.PurchasingOperator] = TerminalMode.PedidosOnly,
         };
 
         public bool GetRoleDefault(Role role, Permission permission)
@@ -39,6 +55,17 @@ namespace Infrastructure.Service
             };
 
             return overrideValue ?? GetRoleDefault(user.Role, permission);
+        }
+
+        public TerminalMode GetEffectiveTerminalMode(User user)
+        {
+            ArgumentNullException.ThrowIfNull(user);
+
+            // No Sudo short-circuit here (unlike HasPermission) — terminal mode is a UI-behavior
+            // concept, not an authorization bypass; Sudo resolves via the same role-default lookup
+            // as everyone else (design.md Decision 1).
+            return user.TerminalModeOverride
+                ?? RoleTerminalModeDefaults.GetValueOrDefault(user.Role, TerminalMode.Main);
         }
     }
 }

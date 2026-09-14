@@ -3,6 +3,7 @@ using BasculaInterface.Views;
 using BasculaInterface.Views.PopUps;
 using Core.Application.DTOs;
 using Core.Application.Services;
+using Core.Domain.Entities.Identity;
 using System.ComponentModel;
 
 namespace BasculaInterface
@@ -57,12 +58,14 @@ namespace BasculaInterface
         /// <summary>
         /// Real login (issue #134) — replaces the old press-and-hold gesture that collected no
         /// credential. Resolves the identifier by UserCode then Username server-side; on success
-        /// starts the inactivity watch and navigates in, mirroring the old LogIn() destination
-        /// choice (Preferences "OnlyFinished").
+        /// starts the inactivity watch and navigates in, based on the logged-in user's resolved
+        /// TerminalMode (role-driven-terminal-modes design.md Decision 1 — replaces the old
+        /// device-local "OnlyFinished" Preferences toggle). Called after _sessionService.LoginAsync,
+        /// so CurrentUser is already populated here.
         /// </summary>
         private async Task LogIn()
         {
-            if (Preferences.Get("OnlyFinished", false))
+            if (_sessionService.CurrentUser?.TerminalMode == TerminalMode.OnlyFinished)
                 await Shell.Current.Navigation.PushModalAsync(new FinishedWeights());
             else
                 await Shell.Current.Navigation.PushModalAsync(new PendingWeightsView());

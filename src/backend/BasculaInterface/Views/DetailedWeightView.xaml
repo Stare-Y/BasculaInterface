@@ -1167,6 +1167,7 @@
         <components:ChangeAmountConfirmPopUp x:Name="ChangeAmountPopUp" />
         <components:DeleteDetailConfirmPopUp x:Name="DeleteDetailPopUp" />
         <components:RowActionMenuPopUp x:Name="RowMenuPopUp" />
+        <components:AuthorizeTurnBypassPopUp x:Name="AuthorizeTurnBypassPopUp" />
 
     </Grid>
 
