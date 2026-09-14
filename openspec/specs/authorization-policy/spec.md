@@ -30,3 +30,10 @@ Every GET action across `WeightController`, `PedidoController`, `ProductosContro
 #### Scenario: Websocket connects without a token
 - **WHEN** a client connects to `/basculaSocket` without any authentication credential
 - **THEN** the connection succeeds and weight readings are delivered exactly as before this change
+
+### Requirement: The single-scale device lock remains fully unauthenticated
+**Bug fix, 2026-09-13** (role-driven-terminal-modes): `WeightController.RequestWeight` (`PUT /api/Weight/CanWeight`) and `ReleaseWeight` (`PUT /api/Weight/ReleaseWeight`) SHALL carry `[AllowAnonymous]`. These are pure device-coordination primitives keyed by `deviceId` — which physical terminal currently holds the single scale — with no association to any user or record, the same in spirit as the bascula websocket. They never carried this attribute when the fallback-authenticated policy was originally introduced; any authentication hiccup (e.g. the very first request right after a fresh login, racing the client's token-attaching handler) surfaced as a misleading "bascula ocupada" instead of the real `401`.
+
+#### Scenario: Requesting or releasing the scale lock requires no login
+- **WHEN** a client calls `PUT /api/Weight/CanWeight?deviceId=...` or `PUT /api/Weight/ReleaseWeight?deviceId=...` without an `Authorization` header
+- **THEN** the server processes the request normally, based solely on the device lock's own state — never rejecting it for lack of authentication

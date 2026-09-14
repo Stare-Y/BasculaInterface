@@ -244,7 +244,16 @@ namespace BasculaTerminalApi.Controllers
             }
         }
 
+        // AllowAnonymous (bug fix, 2026-09-13): this is a pure device-coordination primitive keyed
+        // by deviceId — which physical terminal currently owns the single scale — with no
+        // association to any user or record, same in spirit as SerialPortHub's websocket
+        // (authorization-policy: "the bascula websocket remains fully unauthenticated"). It never
+        // had this attribute since the original fallback-authenticated policy was introduced, which
+        // meant any auth hiccup (e.g. the very first request right after a fresh login racing
+        // AuthHeaderHandler attaching the token) surfaced as a misleading "bascula ocupada" instead
+        // of the real 401.
         [HttpPut("CanWeight")]
+        [AllowAnonymous]
         public async Task<ActionResult<bool>> RequestWeight([FromQuery] string deviceId)
         {
             try
@@ -259,6 +268,7 @@ namespace BasculaTerminalApi.Controllers
         }
 
         [HttpPut("ReleaseWeight")]
+        [AllowAnonymous]
         public async Task<ActionResult<bool>> ReleaseWeight([FromQuery] string deviceId)
         {
             try
