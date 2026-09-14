@@ -130,12 +130,19 @@ public partial class DetailedWeightView : ContentPage
             }
             catch (OperationCanceledException)
             {
+                // A newer OnAppearing call (or page teardown) already superseded this one —
+                // bailing out here is intentional, unlike the generic catch below.
                 return;
             }
             catch (Exception ex)
             {
+                // A failed refresh (network/auth hiccup — HttpRequestException from
+                // ApiService.ValidateResponse, including the documented AuthHeaderHandler race on
+                // the first authenticated call — or a transient guard exception) must not skip the
+                // role-based UI restrictions below: TerminalMode is resolved purely from the local
+                // session, independent of whether this fetch succeeded. Mirrors the
+                // LoadExternalTargetBehaviors catch below, which already doesn't return here.
                 await DisplayAlert("Error", "No se pudieron actualizar los detalles del peso: " + ex.Message, "OK");
-                return;
             }
             finally
             {
