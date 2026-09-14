@@ -2,19 +2,23 @@
 
 ## Purpose
 
-Defines the five fixed roles introduced by issue #134, the two ABAC permission flags with role-based defaults and per-user tri-state overrides, `Sudo`'s unconditional bypass, and the deliberate absence of any account seeding.
+Defines the six fixed roles introduced by issue #134 and the `rename-customer-service-role` change, the two ABAC permission flags with role-based defaults and per-user tri-state overrides, `Sudo`'s unconditional bypass, and the deliberate absence of any account seeding.
 
 ## Requirements
 
-### Requirement: Five fixed roles
-The system SHALL define exactly five roles: `Operator`, `Dispatching Operator`, `Supervisor`, `Admin`, and `Sudo`.
+### Requirement: Six fixed roles
+The system SHALL define exactly six roles: `Operator`, `Dispatching Operator`, `Supervisor`, `Admin`, `Sudo`, and `Customer Service`. `Customer Service` SHALL be stored at the same underlying ordinal previously used for `Purchasing Operator` — a rename only, appended after `Sudo`, never inserted earlier, so every existing stored `Role` value is unaffected.
 
 #### Scenario: A user is assigned exactly one role
 - **WHEN** a user is created or edited
-- **THEN** it is assigned exactly one of the five defined roles
+- **THEN** it is assigned exactly one of the six defined roles
+
+#### Scenario: Existing stored roles are unaffected by the rename
+- **WHEN** a `User` row whose stored `Role` value previously resolved to `Purchasing Operator` is read after this change
+- **THEN** it resolves to `Customer Service`, with identical role-derived behavior (same `TerminalMode` default, same permission defaults, same inactivity timeout default)
 
 ### Requirement: Role-based default permissions
-Each role SHALL have a default value for two permission flags, `CanSelfAuthorizeGate` and `CanCaptureWeightManually`: `Operator` and `Dispatching Operator` default both to `false`; `Supervisor` defaults both to `true`; `Admin` defaults both to `false`.
+Each role SHALL have a default value for two permission flags, `CanSelfAuthorizeGate` and `CanCaptureWeightManually`: `Operator`, `Dispatching Operator`, `Admin`, and `Customer Service` default both to `false`; `Supervisor` defaults both to `true`; `Sudo` bypasses both checks unconditionally (see the separate bypass requirement).
 
 #### Scenario: A Supervisor has gate access by default
 - **WHEN** a `Supervisor` user with no explicit override is evaluated for `CanSelfAuthorizeGate`
@@ -22,6 +26,10 @@ Each role SHALL have a default value for two permission flags, `CanSelfAuthorize
 
 #### Scenario: An Operator lacks gate access by default
 - **WHEN** an `Operator` user with no explicit override is evaluated for `CanSelfAuthorizeGate`
+- **THEN** the effective value is `false`
+
+#### Scenario: A Customer Service user lacks gate access by default
+- **WHEN** a `Customer Service` user with no explicit override is evaluated for `CanSelfAuthorizeGate`
 - **THEN** the effective value is `false`
 
 ### Requirement: Per-user permission overrides regardless of role

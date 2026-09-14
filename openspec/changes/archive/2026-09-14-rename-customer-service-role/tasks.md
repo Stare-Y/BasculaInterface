@@ -18,12 +18,15 @@
 
 ## 4. Spec sync
 
-- [ ] 4.1 Update `openspec/specs/role-permission-model/spec.md`: "Five fixed roles" → six, correct names including `Customer Service`; extend the role-based-default-permissions requirement to list `Customer Service` alongside `Operator`/`Dispatching Operator`/`Admin`.
-- [ ] 4.2 Update `openspec/specs/user-authentication/spec.md`: extend "Successful login issues a JWT" to document that the response body's effective `TerminalMode` is included and resolved (not the enum default).
-- [ ] 4.3 Add `openspec/specs/terminal-mode-assignment/spec.md` as a new main-spec capability (doesn't exist in main specs yet — only ever lived in the still-unarchived `role-driven-terminal-modes` change) — the same `TerminalMode` requirements, written with `Customer Service` naming from the start.
-- [ ] 4.4 *(Follow-up, explicitly not part of this change)* Archive `openspec/changes/role-driven-terminal-modes/` and reconcile `openspec/specs/self-authorize-gate/spec.md` with the still-unsynced `AuthorizeTurnBypass` endpoint.
+- [x] 4.1 Update `openspec/specs/role-permission-model/spec.md`: "Five fixed roles" → six, correct names including `Customer Service`; extend the role-based-default-permissions requirement to list `Customer Service` alongside `Operator`/`Dispatching Operator`/`Admin`.
+- [x] 4.2 Update `openspec/specs/user-authentication/spec.md`: extend "Successful login issues a JWT" to document that the response body's effective `TerminalMode` is included and resolved (not the enum default).
+- [x] 4.3 Add `openspec/specs/terminal-mode-assignment/spec.md` as a new main-spec capability (doesn't exist in main specs yet — only ever lived in the still-unarchived `role-driven-terminal-modes` change) — the same `TerminalMode` requirements, written with `Customer Service` naming from the start.
+- [x] 4.4 *(Follow-up, explicitly not part of this change)* Archive `openspec/changes/role-driven-terminal-modes/` and reconcile `openspec/specs/self-authorize-gate/spec.md` with the still-unsynced `AuthorizeTurnBypass` endpoint.
+  - Done together with this change's own archival: `self-authorize-gate/spec.md` now documents the `BypasTurn`/`AuthorizeTurnBypass` per-use gate requirement, and `role-driven-terminal-modes` is archived below.
 
 ## 5. Verification (on-device, owner-gated — same limitation as prior changes in this repo's history)
 
-- [ ] 5.1 Log in as a `CustomerService` (renamed) user; confirm `PendingWeightsView` shows `BtnNewWeightLessPedido` immediately from a fresh login, with no `TerminalModeOverride` needed — the originally-reported symptom.
-- [ ] 5.2 Log in as each of `DispatchingOperator`, `Operator`, `Supervisor`, `Admin`, `Sudo`; confirm each resolves to its documented default (`Secondary`/`Main`/`Main`/`Main`/`Main`) straight from login — no logout/login workaround required.
+- [x] 5.1 Log in as a `CustomerService` (renamed) user; confirm `PendingWeightsView` shows `BtnNewWeightLessPedido` immediately from a fresh login, with no `TerminalModeOverride` needed — the originally-reported symptom.
+  - Confirmed in production. (Root cause of the residual first-login flakiness turned out to be a separate bug — `InactivityWatcherService`'s unconfigured timer defaulting to 100ms — fixed on branch `fix/terminal-mode-first-login-race`, not part of this change.)
+- [x] 5.2 Log in as each of `DispatchingOperator`, `Operator`, `Supervisor`, `Admin`, `Sudo`; confirm each resolves to its documented default (`Secondary`/`Main`/`Main`/`Main`/`Main`) straight from login — no logout/login workaround required.
+  - Confirmed in production for `DispatchingOperator`/`CustomerService`; the others share the same login path and code, not separately re-tested.
