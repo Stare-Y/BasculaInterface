@@ -34,8 +34,20 @@ namespace BasculaInterface.Services
             Token = response.Token;
             CurrentUser = response.User;
 
-            await SecureStorage.Default.SetAsync(TokenKey, response.Token);
-            await SecureStorage.Default.SetAsync(UserKey, JsonSerializer.Serialize(response.User));
+            try
+            {
+                // Persisting to SecureStorage is what lets a session survive an app restart
+                // (RestoreAsync) — it must not be able to undo the in-memory login that already
+                // succeeded above. Same defensive stance as RestoreAsync itself: SecureStorage can
+                // throw on some platforms/states (e.g. first-ever use provisioning a keystore).
+                await SecureStorage.Default.SetAsync(TokenKey, response.Token);
+                await SecureStorage.Default.SetAsync(UserKey, JsonSerializer.Serialize(response.User));
+            }
+            catch
+            {
+                // The in-memory session (Token/CurrentUser, set above) stays valid for this run;
+                // only cross-restart persistence is lost.
+            }
         }
 
         public Task LogoutAsync()
