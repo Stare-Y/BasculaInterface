@@ -13,6 +13,20 @@ namespace BasculaInterface.Services
     {
         private readonly System.Timers.Timer _timer;
 
+        // Tracks whether Start(timeout) has ever been called with a real, per-user timeout.
+        // RegisterActivity() must not arm the timer before that: System.Timers.Timer defaults
+        // Interval to 100ms when never explicitly set, and 100 still satisfies "> 0" — so a naive
+        // `_timer.Interval > 0` guard (what this used to check) doesn't actually protect against an
+        // unconfigured timer. Without this flag, any pointer press on the login screen (the global
+        // PointerPressedEvent hook in MauiProgram.cs calls RegisterActivity() on every press,
+        // including clicking into the login fields or the "Ingresar" button itself) armed a
+        // 100-millisecond countdown before the very first login ever completed, which then fired
+        // OnTimeout mid-login — logging the just-established session straight back out. Only the
+        // first login in a running app could ever race this way, since Start() permanently
+        // overwrites _timer.Interval with a real value (minutes, not milliseconds) the first time
+        // it succeeds.
+        private bool _hasStarted = false;
+
         public event Action? OnTimeout;
 
         /// <summary>Whether the native window currently holds OS focus/activation — updated from
@@ -47,16 +61,19 @@ namespace BasculaInterface.Services
         public void Start(TimeSpan timeout)
         {
             _timer.Interval = timeout.TotalMilliseconds;
+            _hasStarted = true;
             _timer.Stop();
             _timer.Start();
         }
 
         public void Stop() => _timer.Stop();
 
-        /// <summary>Call on any user input or successful API response to reset the countdown.</summary>
+        /// <summary>Call on any user input or successful API response to reset the countdown. A
+        /// no-op before the first real <see cref="Start"/> call — see the <see cref="_hasStarted"/>
+        /// comment for why that guard exists.</summary>
         public void RegisterActivity()
         {
-            if (_timer.Interval > 0)
+            if (_hasStarted)
             {
                 _timer.Stop();
                 _timer.Start();
