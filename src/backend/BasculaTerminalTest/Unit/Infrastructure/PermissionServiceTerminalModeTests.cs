@@ -27,7 +27,7 @@ namespace BasculaTerminalTest.Unit.Infrastructure
         [InlineData(Role.Supervisor, TerminalMode.Main)]
         [InlineData(Role.Admin, TerminalMode.Main)]
         [InlineData(Role.Sudo, TerminalMode.Main)]
-        [InlineData(Role.PurchasingOperator, TerminalMode.PedidosOnly)]
+        [InlineData(Role.CustomerService, TerminalMode.PedidosOnly)]
         public void Role_default_terminal_mode_matches_the_table(Role role, TerminalMode expected)
         {
             User user = MakeUser(role);

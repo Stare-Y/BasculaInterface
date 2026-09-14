@@ -15,11 +15,11 @@ namespace Infrastructure.Service
             [Role.Supervisor] = [Permission.CanSelfAuthorizeGate, Permission.CanCaptureWeightManually],
             [Role.Admin] = [],
             [Role.Sudo] = [],
-            [Role.PurchasingOperator] = [],
+            [Role.CustomerService] = [],
         };
 
         /// <summary>Role default terminal modes (role-driven-terminal-modes design.md Decision 1).
-        /// Only <see cref="Role.DispatchingOperator"/> and <see cref="Role.PurchasingOperator"/>
+        /// Only <see cref="Role.DispatchingOperator"/> and <see cref="Role.CustomerService"/>
         /// differ from <see cref="TerminalMode.Main"/> — no role defaults to
         /// <see cref="TerminalMode.OnlyFinished"/>, which is only reachable via
         /// <see cref="User.TerminalModeOverride"/>.</summary>
@@ -30,7 +30,7 @@ namespace Infrastructure.Service
             [Role.Supervisor] = TerminalMode.Main,
             [Role.Admin] = TerminalMode.Main,
             [Role.Sudo] = TerminalMode.Main,
-            [Role.PurchasingOperator] = TerminalMode.PedidosOnly,
+            [Role.CustomerService] = TerminalMode.PedidosOnly,
         };
 
         public bool GetRoleDefault(Role role, Permission permission)

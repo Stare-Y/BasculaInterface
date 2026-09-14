@@ -10,9 +10,11 @@ namespace Core.Domain.Entities.Identity
     /// unconditionally and is never seeded (design.md Decision 9) — but is NOT special-cased for
     /// terminal mode, which is a UI-behavior concept, not an authorization one.
     ///
-    /// <see cref="PurchasingOperator"/> was appended after <see cref="Sudo"/>, not inserted
-    /// earlier: <see cref="Role"/> is stored as a plain int with no string conversion, so adding
-    /// a member anywhere but the end would silently shift every later member's stored value.
+    /// <see cref="CustomerService"/> (originally named <c>PurchasingOperator</c>; renamed by
+    /// rename-customer-service-role — same stored ordinal, no migration) was appended after
+    /// <see cref="Sudo"/>, not inserted earlier: <see cref="Role"/> is stored as a plain int with
+    /// no string conversion, so adding a member anywhere but the end would silently shift every
+    /// later member's stored value.
     /// </summary>
     public enum Role
     {
@@ -21,6 +23,6 @@ namespace Core.Domain.Entities.Identity
         Supervisor,
         Admin,
         Sudo,
-        PurchasingOperator,
+        CustomerService,
     }
 }

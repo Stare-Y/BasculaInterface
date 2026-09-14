@@ -19,7 +19,7 @@ namespace Infrastructure.Service
             [Role.Supervisor] = 5,
             [Role.Operator] = 10,
             [Role.DispatchingOperator] = 20,
-            [Role.PurchasingOperator] = 10,
+            [Role.CustomerService] = 10,
         };
 
         private readonly IUserRepo _userRepo;

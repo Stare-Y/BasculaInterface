@@ -16,7 +16,7 @@ namespace Core.Domain.Entities.Identity
     public enum TerminalMode
     {
         /// <summary>Full flow: conclude, Contpaqi submission. The default for every role except
-        /// <see cref="Role.DispatchingOperator"/> and <see cref="Role.PurchasingOperator"/>.</summary>
+        /// <see cref="Role.DispatchingOperator"/> and <see cref="Role.CustomerService"/>.</summary>
         Main,
 
         /// <summary>Weighs products on the secondary scale, marks as loaded. Default for
@@ -24,7 +24,7 @@ namespace Core.Domain.Entities.Identity
         Secondary,
 
         /// <summary>Creates empty <c>WeightEntry</c>s / adds product slots from pedidos, no full
-        /// weighing flow. Default for <see cref="Role.PurchasingOperator"/>.</summary>
+        /// weighing flow. Default for <see cref="Role.CustomerService"/>.</summary>
         PedidosOnly,
 
         /// <summary>Only shows/operates on already-concluded entries. No role defaults to this —

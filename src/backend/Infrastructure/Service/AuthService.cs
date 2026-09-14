@@ -69,6 +69,7 @@ namespace Infrastructure.Service
         {
             CanSelfAuthorizeGate = _permissionService.HasPermission(user, Permission.CanSelfAuthorizeGate),
             CanCaptureWeightManually = _permissionService.HasPermission(user, Permission.CanCaptureWeightManually),
+            TerminalMode = _permissionService.GetEffectiveTerminalMode(user),
         };
     }
 }
