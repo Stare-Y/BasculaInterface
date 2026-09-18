@@ -21,3 +21,13 @@ by hand anymore before publishing, unlike the old recipe this section used to de
 
 just run:
 dotnet publish BasculaInterface\BasculaInterface.csproj -f net8.0-windows10.0.19041.0 -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=false
+
+publishing the API (with the admin portal):
+BasculaTerminalApi.csproj now bundles the admin portal (src/frontend/BasculaUi) automatically —
+`dotnet publish` alone builds the React app (npm ci && npm run build) and copies it into the
+API's wwwroot, so the portal is served by the API's own process with no extra step. Needs
+Node.js/npm available on the machine doing the publish. Plain `dotnet build`/`dotnet test` are
+untouched by this — only `dotnet publish` triggers the frontend build.
+
+just run:
+dotnet publish src/backend/BasculaTerminalApi -c Release

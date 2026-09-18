@@ -62,6 +62,7 @@
                     <Button
                         x:Name="BtnExit"
                         Grid.Row="3"
+                        AutomationProperties.AutomationId="BtnExit"
                         Clicked="BtnExit_Clicked" Style="{StaticResource Boton}"
                         Text="Volver" />
 
@@ -86,6 +87,7 @@
 
                         <CollectionView
                             x:Name="PendingWeightsCollectionView"
+                            AutomationProperties.AutomationId="PendingWeightsCollectionView"
                             HorizontalOptions="Center"
                             ItemsSource="{Binding FinishedWeights}"
                             SelectionChanged="PendingWeightsCollectionView_SelectionChanged"

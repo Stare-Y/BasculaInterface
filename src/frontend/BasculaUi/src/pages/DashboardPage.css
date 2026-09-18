@@ -1,0 +1,35 @@
+.dashboard-note {
+  color: #666;
+  font-size: 0.85rem;
+  max-width: 560px;
+}
+
+.dashboard-error {
+  color: #b3261e;
+}
+
+.dashboard-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dashboard-tile {
+  background: #fff;
+  border-radius: 6px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-tile span {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.dashboard-tile strong {
+  font-size: 1.6rem;
+}

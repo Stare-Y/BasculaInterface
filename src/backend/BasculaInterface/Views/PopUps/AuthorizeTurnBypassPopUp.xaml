@@ -45,6 +45,7 @@
             <Entry
                 x:Name="IdentifierEntry"
                 Grid.Row="2"
+                AutomationProperties.AutomationId="AuthorizeTurnBypass_IdentifierEntry"
                 HorizontalOptions="Fill"
                 Placeholder="Usuario o código..."
                 ReturnType="Next" />
@@ -53,6 +54,7 @@
             <Entry
                 x:Name="PasswordEntry"
                 Grid.Row="3"
+                AutomationProperties.AutomationId="AuthorizeTurnBypass_PasswordEntry"
                 HorizontalOptions="Fill"
                 IsPassword="True"
                 Placeholder="Contraseña..."
@@ -67,6 +69,7 @@
 
                 <Button
                     x:Name="btnCancel"
+                    AutomationProperties.AutomationId="btnCancel"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
                                                       Dark={StaticResource BlackGray}}"
                     Clicked="OnPopupCancelClicked"
@@ -79,6 +82,7 @@
 
                 <Button
                     x:Name="btnConfirm"
+                    AutomationProperties.AutomationId="btnConfirm"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
                                                       Dark={StaticResource BlackGray}}"
                     Clicked="OnPopupAcceptClicked"

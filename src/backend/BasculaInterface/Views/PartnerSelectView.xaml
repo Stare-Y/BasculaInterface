@@ -29,6 +29,7 @@
                 <!--  Barra de búsqueda  -->
                 <SearchBar
                     x:Name="SearchBar"
+                    AutomationProperties.AutomationId="SearchBar"
                     Grid.Row="1"
                     CancelButtonColor="Black"
                     HorizontalOptions="Fill"
@@ -56,6 +57,7 @@
 
                 <Label
                     x:Name="LabelResultado"
+                    AutomationProperties.AutomationId="LabelResultado"
                     FontSize="32"
                     HorizontalOptions="Center"
                     Style="{StaticResource Label}"
@@ -71,6 +73,7 @@
                 Padding="10" >
                 <CollectionView
                     x:Name="ResultsCollectionView"
+                    AutomationProperties.AutomationId="ResultsCollectionView"
                     ItemsSource="{Binding Partners}"
                     SelectionChanged="ResultsCollectionView_SelectionChanged"
                     SelectionMode="Single">
@@ -82,6 +85,7 @@
                         <DataTemplate>
                             <Border
                                 x:Name="selectedResult"
+                                AutomationProperties.AutomationId="selectedResult"
                                 Padding="15"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                   Dark={StaticResource BlackGray}}"

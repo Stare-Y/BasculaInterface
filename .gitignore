@@ -365,3 +365,7 @@ FodyWeavers.xsd
 # Claude Code — user-local settings and generated index
 .claude/settings.local.json
 .codegraph/
+
+# Admin portal (BasculaUi) build output copied here by BasculaTerminalApi's publish target
+# (add-admin-portal-frontend) — generated, not source.
+src/backend/BasculaTerminalApi/wwwroot/

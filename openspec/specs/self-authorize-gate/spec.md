@@ -34,3 +34,14 @@ The server SHALL resolve `GateIdentifier` using the same `UserCode`-then-`Userna
 #### Scenario: Old shared-password requests no longer authorize anything
 - **WHEN** a client sends a request carrying only the old `PasswordHash` field (no `GateIdentifier`/`GatePassword`)
 - **THEN** the request does not satisfy the gate (the field is no longer read for authorization purposes)
+
+### Requirement: The self-authorize-gate turn-bypass is a per-use gate, not a standing device permission
+The device-local `BypasTurn` setting SHALL remain a per-device `Preferences` value, but SHALL NOT silently skip the single-scale busy check on its own. Actually bypassing the check at weigh-time SHALL require a valid self-authorize-gate credential (`GateIdentifier`/`GatePassword`), verified the same way as every other gated action, via `POST /api/Weight/AuthorizeTurnBypass`.
+
+#### Scenario: BypasTurn enabled still requires a gate credential to actually bypass
+- **WHEN** a terminal with `BypasTurn` enabled attempts to weigh while the scale-lock reports busy
+- **THEN** the client prompts for a `GateIdentifier`/`GatePassword` credential before proceeding, and the bypass is only granted if that credential resolves to a user with `CanSelfAuthorizeGate` (or `Sudo`)
+
+#### Scenario: An invalid credential does not bypass the lock
+- **WHEN** the credential presented fails to resolve, fails password verification, or lacks the permission
+- **THEN** the scale-lock busy state is enforced exactly as if `BypasTurn` were disabled

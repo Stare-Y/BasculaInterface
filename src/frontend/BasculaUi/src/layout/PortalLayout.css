@@ -1,0 +1,74 @@
+.portal-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.portal-sidebar {
+  width: 220px;
+  flex: none;
+  background: #1e2430;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.portal-brand {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0 1.25rem 1.5rem;
+}
+
+.portal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.portal-nav-link {
+  color: #c7ccd6;
+  text-decoration: none;
+  padding: 0.6rem 1.25rem;
+}
+
+.portal-nav-link:hover {
+  background: #2a3140;
+}
+
+.portal-nav-link.active {
+  background: #35507a;
+  color: #fff;
+}
+
+.portal-user {
+  padding: 1rem 1.25rem 0;
+  border-top: 1px solid #333c4d;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.portal-role {
+  color: #98a2b3;
+}
+
+.portal-content {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  overflow-x: auto;
+}
+
+@media (max-width: 700px) {
+  .portal-shell {
+    flex-direction: column;
+  }
+  .portal-sidebar {
+    width: 100%;
+  }
+  .portal-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

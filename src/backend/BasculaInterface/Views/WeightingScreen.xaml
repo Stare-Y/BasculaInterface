@@ -205,6 +205,7 @@
                                                         Dark={StaticResource 2}}" />
                         <Entry
                             x:Name="EntryVehiclePlate"
+                            AutomationProperties.AutomationId="EntryVehiclePlate"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}" HeightRequest="80"
                             HorizontalOptions="Fill"
@@ -255,6 +256,7 @@
                         IsVisible="False">
                         <CheckBox
                             x:Name="CheckBoxUseManual"
+                            AutomationProperties.AutomationId="CheckBoxUseManual"
                             Grid.Column="0"
                             CheckedChanged="CheckBoxUseManual_CheckedChanged"
                             HorizontalOptions="End"
@@ -300,6 +302,7 @@
                                                         Dark={StaticResource 2}}" />
                         <Entry
                             x:Name="EntryNotes"
+                            AutomationProperties.AutomationId="EntryNotes"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"
                             FontSize="16"
@@ -364,6 +367,7 @@
 
                         <Entry
                             x:Name="EntryLabel"
+                            AutomationProperties.AutomationId="EntryLabel"
                             FontAttributes="Bold"
                             FontSize="48"
                             HorizontalOptions="Center"
@@ -427,6 +431,7 @@
                         <Grid x:Name="GridSetTaraInicial" IsVisible="False">
                             <Button
                                 x:Name="BtnSetTaraInicial"
+                                AutomationProperties.AutomationId="BtnSetTaraInicial"
                                 BackgroundColor="Orange"
                                 Clicked="BtnSetTaraInicial_Clicked"
                                 CornerRadius="20"
@@ -509,6 +514,7 @@
 
                 <Border
                     x:Name="BtnPickPartner"
+                    AutomationProperties.AutomationId="BtnPickPartner"
                     Grid.Column="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -577,6 +583,7 @@
 
                 <Border
                     x:Name="BtnPickProduct"
+                    AutomationProperties.AutomationId="BtnPickProduct"
                     Grid.Column="1"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -646,6 +653,7 @@
 
                 <Border
                     x:Name="BtnCaptureNewWeight"
+                    AutomationProperties.AutomationId="BtnCaptureNewWeight"
                     Grid.Column="2"
                     BackgroundColor="{AppThemeBinding Light=Green,
                                                       Dark={StaticResource BlackGray}}"

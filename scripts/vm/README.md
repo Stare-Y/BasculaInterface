@@ -19,9 +19,15 @@ convert line, enter a manual weight, verify).
 - MAUI Windows workload: `dotnet workload install maui`
 - The two DB connection strings already in the machine environment
   (`PostgresWeightConnection`, `ContpaqSQLConnection`) — same as for a normal run.
+- Bot bootstrap/role credentials, also as machine environment variables:
+  - `BasculaBotAdminIdentifier` / `BasculaBotAdminPassword` — an existing `Admin`/`Sudo` account
+    on the target DB; the suite logs in as it to provision the six `BOT*` test users.
+  - `BasculaBotRolePassword` — the single shared password used to log in as each `BOT*` user.
 
 No scale hardware needed: the app's serial-port failure is already handled, and the bot uses
-the app's **manual weight** mode (Settings → "Manual") to type weights into the UI.
+the app's **manual weight** capture — the `CheckBoxUseManual` toggle on `WeightingScreen`,
+gated by the `CanCaptureWeightManually` permission (Supervisor/Sudo by default) — to type
+weights into the UI instead of Settings.
 
 ## Run
 
@@ -44,8 +50,11 @@ powershell -ExecutionPolicy Bypass -File .\scripts\vm\run-bot-suite.ps1
 This builds `BasculaInterface` for `net8.0-windows`, runs the bot suite against the fresh exe,
 and drops a `bot-tests.trx` plus screenshots in `artifacts/bot-suite/`.
 
-Add `-StartApi` to also spin up `BasculaTerminalApi` on a dedicated port (5999) for the
-scenarios that need it — the launch smoke test doesn't.
+A live `BasculaTerminalApi` (on a dedicated port, 5999 by default) starts automatically — the
+roleplays need one to log in and provision the `BOT*` test users. Before publishing anything, the
+script checks that `BasculaBotAdminIdentifier`, `BasculaBotAdminPassword`, and
+`BasculaBotRolePassword` are set in the environment and fails fast with a clear message if not.
+Pass `-NoApi` to skip the API and go back to launch-only mode (no login, no provisioning).
 
 ## How the app is built for the bot
 

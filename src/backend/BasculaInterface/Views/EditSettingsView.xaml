@@ -86,6 +86,7 @@
 
                                 <CheckBox
                                     x:Name="CheckBoxBypasTurn"
+                                    AutomationProperties.AutomationId="CheckBoxBypasTurn"
                                     Grid.Column="0"
                                     CheckedChanged="CheckBoxBypasTurn_CheckedChanged"
                                     HorizontalOptions="Start" />
@@ -251,6 +252,7 @@
                         <!--  Button to go back  -->
                         <Border
                             x:Name="BtnCancel"
+                            AutomationProperties.AutomationId="EditSettings_BtnCancel"
                             Grid.Column="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"

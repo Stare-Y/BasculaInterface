@@ -43,6 +43,7 @@
                 <Entry
                     x:Name="IdentifierEntry"
                     Grid.Row="0"
+                    AutomationProperties.AutomationId="IdentifierEntry"
                     HorizontalOptions="Fill"
                     Placeholder="Usuario o código..."
                     ReturnType="Next" />
@@ -50,6 +51,7 @@
                 <Entry
                     x:Name="PasswordEntry"
                     Grid.Row="1"
+                    AutomationProperties.AutomationId="PasswordEntry"
                     Completed="PasswordEntry_Completed"
                     HorizontalOptions="Fill"
                     IsPassword="True"
@@ -59,6 +61,7 @@
                 <Label
                     x:Name="LoginErrorLabel"
                     Grid.Row="2"
+                    AutomationProperties.AutomationId="LoginErrorLabel"
                     HorizontalOptions="Center"
                     IsVisible="False"
                     Text="Credenciales inválidas."
@@ -67,6 +70,7 @@
                 <Button
                     x:Name="BtnLogIn"
                     Grid.Row="3"
+                    AutomationProperties.AutomationId="BtnLogIn"
                     FontSize="36"
                     HeightRequest="120"
                     Clicked="BtnLogin_Clicked"
@@ -87,6 +91,7 @@
 
                     <Border
                         x:Name="BtnSettings"
+                        AutomationProperties.AutomationId="BtnSettings"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                           Dark={StaticResource BlackGray}}"
                         HeightRequest="100"

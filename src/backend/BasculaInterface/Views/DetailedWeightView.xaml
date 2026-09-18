@@ -126,6 +126,7 @@
 
                     <Border
                         x:Name="BtnPickPartner"
+                        AutomationProperties.AutomationId="BtnPickPartner"
                         Grid.Column="1"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                   Dark={StaticResource BlackGray}}"
@@ -473,6 +474,7 @@
 
                     <Picker
                         x:Name="PickerTargetBehavior"
+                        AutomationProperties.AutomationId="PickerTargetBehavior"
                         Grid.Row="1"
                         BackgroundColor="{AppThemeBinding Light={StaticResource 4},
                                                   Dark={StaticResource 2}}"
@@ -502,6 +504,7 @@
 
                         <CollectionView
                             x:Name="CollectionViewWeightDetails"
+                            AutomationProperties.AutomationId="CollectionViewWeightDetails"
                             HorizontalOptions="Center"
                             ItemSizingStrategy="MeasureAllItems"
                             ItemsSource="{Binding WeightEntryDetailRows}"
@@ -735,6 +738,7 @@
                                                 WidthRequest="75">
 
                                                 <Button
+                                                    AutomationProperties.AutomationId="BtnMarkAsLoaded"
                                                     BackgroundColor="OrangeRed"
                                                     BorderWidth="0"
                                                     Clicked="MarkAsLoaded_Clicked"
@@ -945,6 +949,7 @@
 
                 <Border
                     x:Name="BtnNuevoProducto"
+                    AutomationProperties.AutomationId="BtnNuevoProducto"
                     Grid.Column="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -1016,6 +1021,7 @@
 
                 <Border
                     x:Name="BtnNewEntry"
+                    AutomationProperties.AutomationId="BtnNewEntry"
                     Grid.Column="1"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -1086,6 +1092,7 @@
 
                 <Border
                     x:Name="BtnFinishWeight"
+                    AutomationProperties.AutomationId="BtnFinishWeight"
                     Grid.Column="3"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"

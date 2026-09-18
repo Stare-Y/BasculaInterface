@@ -119,6 +119,15 @@ using (var scope = app.Services.CreateScope())
 
 app.MapControllers();
 
+// Admin portal (BasculaUi) static hosting — added after MapControllers/MapHub so an unmatched
+// /api/... or hub request still falls through to the normal 404 instead of index.html; this
+// ordering, not a route exclusion list, is what keeps existing API behavior untouched
+// (design.md Decision 1 of add-admin-portal-frontend). wwwroot missing (e.g. no frontend build
+// yet) is a supported no-op — these just 404 instead of serving the SPA (Decision 2).
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
+
 await app.RunAsync();
 
 /// <summary>
