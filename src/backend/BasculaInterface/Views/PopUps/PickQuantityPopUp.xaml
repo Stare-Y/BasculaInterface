@@ -44,6 +44,7 @@
                     Text="Kilos: " />
                 <Entry
                     x:Name="QuantityEntry"
+                    AutomationProperties.AutomationId="QuantityEntry"
                     HorizontalOptions="Fill"
                     Keyboard="Numeric"
                     Placeholder="Cantidad en kilos..."
@@ -92,6 +93,7 @@
 
                 <Button
                     x:Name="btnConfirm"
+                    AutomationProperties.AutomationId="PickQuantity_btnConfirm"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Tertiary},
                                                       Dark={StaticResource BlackGray}}"
                     Clicked="OnPopupAcceptClicked"

@@ -70,6 +70,7 @@
                         x:Name="BtnNewWeighProcess"
                         Grid.Row="0" BackgroundColor="{AppThemeBinding Light={StaticResource 4},
                                                           Dark={StaticResource 2}}"
+                        AutomationProperties.AutomationId="BtnNewWeighProcess"
                         Clicked="BtnNewWeighProcess_Clicked"
                         IsVisible="True"
                         Style="{StaticResource BotonPrincipal}"
@@ -79,6 +80,7 @@
                         x:Name="BtnNewWeightLessPedido"
                         Grid.Row="0" BackgroundColor="{AppThemeBinding Light={StaticResource 4},
                                                           Dark={StaticResource 2}}"
+                        AutomationProperties.AutomationId="BtnNewWeightLessPedido"
                         Clicked="OnBtnNewWeighlessProcess_clicked"
                         IsVisible="False"
                         Style="{StaticResource BotonPrincipal}"
@@ -97,6 +99,7 @@
                     <Button
                         x:Name="BtnFinished"
                         Grid.Row="3"
+                        AutomationProperties.AutomationId="BtnFinished"
                         Clicked="BtnFinished_Clicked" Style="{StaticResource Boton}"
                         Text="Ver Finalizados"
                         ToolTipProperties.Text="Ver Finalizados (F6)" />
@@ -186,6 +189,7 @@
 
                         <CollectionView
                             x:Name="PendingWeightsCollectionView"
+                            AutomationProperties.AutomationId="PendingWeightsCollectionView"
                             HorizontalOptions="Center"
                             SelectionChanged="PendingWeightsCollectionView_SelectionChanged"
                             SelectionMode="Single"
@@ -199,6 +203,7 @@
                                 <DataTemplate x:DataType="models:PendingWeightViewRow">
                                     <Border
                                         x:Name="BtnSeleccionar"
+                                        AutomationProperties.AutomationId="BtnSeleccionar"
                                         Padding="15"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                           Dark={StaticResource BlackGray}}"

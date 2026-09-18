@@ -4,6 +4,7 @@ using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Definitions;
+using FlaUI.Core.Input;
 using FlaUI.UIA3;
 
 namespace BasculaBotTests
@@ -178,6 +179,58 @@ namespace BasculaBotTests
         private static string Trim(string s) => string.IsNullOrWhiteSpace(s) ? "(empty)" : s.Trim();
         private static string Safe(Func<string> get) { try { return get() ?? ""; } catch { return "?"; } }
         private static int SafeInt(Func<int> get) { try { return get(); } catch { return 0; } }
+
+        /// <summary>Finds a descendant of <paramref name="window"/> by its <c>AutomationId</c>, or
+        /// null if not (yet) present. Roleplays should prefer <see cref="WaitForElement"/> when the
+        /// element may not exist the instant this is called (e.g. right after navigation).</summary>
+        public static AutomationElement? FindByAutomationId(Window window, string id) =>
+            window.FindFirstDescendant(cf => cf.ByAutomationId(id));
+
+        /// <summary>Polls for a descendant of <paramref name="window"/> with the given
+        /// <c>AutomationId</c> until it appears or <paramref name="timeout"/> elapses.</summary>
+        public static AutomationElement? WaitForElement(Window window, string id, TimeSpan? timeout = null)
+        {
+            DateTime deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(10));
+            while (DateTime.UtcNow < deadline)
+            {
+                AutomationElement? element = FindByAutomationId(window, id);
+                if (element is not null)
+                    return element;
+                Thread.Sleep(200);
+            }
+            return FindByAutomationId(window, id);
+        }
+
+        /// <summary>Invokes/clicks an element the way a real user would, preferring the
+        /// <c>Invoke</c> UIA pattern (works for Button/Border-with-tap-gesture alike) and falling
+        /// back to a mouse click on its center point.</summary>
+        public static void Click(AutomationElement element)
+        {
+            if (element.Patterns.Invoke.IsSupported)
+            {
+                element.Patterns.Invoke.Pattern.Invoke();
+                return;
+            }
+            element.Click();
+        }
+
+        /// <summary>Clears any existing text and types <paramref name="text"/> into an element
+        /// (Entry/SearchBar) by focusing it first.</summary>
+        public static void TypeText(AutomationElement element, string text)
+        {
+            element.Focus();
+            if (element.Patterns.Value.IsSupported)
+            {
+                element.Patterns.Value.Pattern.SetValue(string.Empty);
+            }
+            else
+            {
+                using (Keyboard.Pressing(VirtualKeyShort.CONTROL))
+                    Keyboard.Type(VirtualKeyShort.KEY_A);
+                Keyboard.Type(VirtualKeyShort.DELETE);
+            }
+            Keyboard.Type(text);
+        }
 
         public void Dispose()
         {

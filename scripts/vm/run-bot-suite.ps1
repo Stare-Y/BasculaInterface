@@ -4,12 +4,16 @@
   Builds the Windows BasculaInterface app and runs the FlaUI bot suite against it, on the VM.
 
 .DESCRIPTION
-  Step 1 of the bot suite is just proving FlaUI can drive the app. This script:
-    1. publishes BasculaInterface as an unpackaged, WinAppSDK-self-contained Windows app
-    2. points the bot suite at that exe (BASCULA_APP_EXE)
-    3. optionally starts BasculaTerminalApi on a dedicated test port (-StartApi)
-    4. runs `dotnet test BasculaBotTests`, writing a .trx + screenshots to -ArtifactsDir
-    5. tears the API back down
+  This script:
+    1. validates the bot bootstrap/role credential environment variables are set (fails fast,
+       before publishing anything, if they're not — the roleplays can't log in without them)
+    2. publishes BasculaInterface as an unpackaged, WinAppSDK-self-contained Windows app
+    3. points the bot suite at that exe (BASCULA_APP_EXE)
+    4. starts BasculaTerminalApi on a dedicated test port — the roleplays need a live API to log
+       in and provision test users against, so this is the default now, not the old -StartApi
+       opt-in (pass -NoApi to skip it and go back to launch-only mode)
+    5. runs `dotnet test BasculaBotTests`, writing a .trx + screenshots to -ArtifactsDir
+    6. tears the API back down
 
   The API reads BOTH database connection strings from machine environment variables
   (PostgresWeightConnection, ContpaqSQLConnection) - same as always. The ContpaqiSQL
@@ -20,13 +24,13 @@
   pwsh scripts/vm/run-bot-suite.ps1
 
 .EXAMPLE
-  pwsh scripts/vm/run-bot-suite.ps1 -StartApi -ApiPort 5999
+  pwsh scripts/vm/run-bot-suite.ps1 -NoApi
 #>
 [CmdletBinding()]
 param(
     [string]$Configuration = "Release",
     [string]$TargetFramework = "net8.0-windows10.0.19041.0",
-    [switch]$StartApi,
+    [switch]$NoApi,
     [int]$ApiPort = 5999,
     [string]$ArtifactsDir
 )
@@ -36,6 +40,17 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $backend  = Join-Path $repoRoot "src\backend"
 if (-not $ArtifactsDir) { $ArtifactsDir = Join-Path $repoRoot "artifacts\bot-suite" }
 New-Item -ItemType Directory -Force -Path $ArtifactsDir | Out-Null
+
+if (-not $NoApi) {
+    # Fail fast, before spending time on a publish, if the bootstrap/role credentials the
+    # provisioning routine needs aren't set (spec: "Missing bootstrap credentials fail fast").
+    $requiredVars = @("BasculaBotAdminIdentifier", "BasculaBotAdminPassword", "BasculaBotRolePassword")
+    $missing = $requiredVars | Where-Object { -not (Get-Item "Env:$_" -ErrorAction SilentlyContinue) }
+    if ($missing) {
+        throw "Missing required environment variable(s) for the bot suite: $($missing -join ', '). " +
+              "See scripts/vm/README.md. (Pass -NoApi to run launch-only, without provisioning.)"
+    }
+}
 
 Write-Host "== Publishing BasculaInterface ($Configuration / $TargetFramework) ==" -ForegroundColor Cyan
 $appProj = Join-Path $backend "BasculaInterface\BasculaInterface.csproj"
@@ -65,7 +80,7 @@ if (-not $appExe) { throw "Could not find BasculaInterface.exe under $pubDir." }
 Write-Host "   app: $($appExe.FullName)"
 
 $apiProc = $null
-if ($StartApi) {
+if (-not $NoApi) {
     Write-Host "== Starting BasculaTerminalApi on http://localhost:$ApiPort ==" -ForegroundColor Cyan
     $apiProj = Join-Path $backend "BasculaTerminalApi\BasculaTerminalApi.csproj"
     $apiProc = Start-Process -FilePath "dotnet" `
@@ -86,7 +101,10 @@ if ($StartApi) {
 
 $env:BASCULA_APP_EXE = $appExe.FullName
 $env:BASCULA_BOT_ARTIFACTS = $ArtifactsDir
-if ($StartApi) { $env:BASCULA_API_URL = "http://localhost:$ApiPort" }
+if (-not $NoApi) { $env:BASCULA_API_URL = "http://localhost:$ApiPort" }
+# BasculaBotAdminIdentifier / BasculaBotAdminPassword / BasculaBotRolePassword are read straight
+# from the machine/session environment by BotUserProvisioner - `dotnet test` below inherits them
+# from this process like any child process, no explicit pass-through needed.
 
 Write-Host "== Running bot suite ==" -ForegroundColor Cyan
 $trx = Join-Path $ArtifactsDir "bot-tests.trx"
