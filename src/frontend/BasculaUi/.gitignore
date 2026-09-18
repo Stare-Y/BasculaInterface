@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+
+# Build output (copied into BasculaTerminalApi/wwwroot at publish time)
+dist
+
+# Logs
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# OS
+.DS_Store

@@ -34,4 +34,50 @@
     </Content>
   </ItemGroup>
 
+  <!-- Admin portal (BasculaUi) build integration (add-admin-portal-frontend design.md
+       "Frontend build → publish integration"). Deliberately scoped to Publish only, NOT Build:
+       hooking Build would make every `dotnet build`/`dotnet test` (including CI, which builds
+       this project via BasculaInterface.CI.slnf with no Node.js setup step) silently require npm
+       registry access — a behavior change to a currently offline-safe, passing pipeline, which
+       violates this change's non-disruption constraint. `dotnet publish` remains the single
+       command that produces a fully deployable output, matching the design's actual intent. -->
+  <ItemGroup>
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\src\**\*.*" />
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\package.json" />
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\package-lock.json" />
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\index.html" />
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\vite.config.ts" />
+    <FrontendSourceFiles Include="$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi\tsconfig*.json" />
+  </ItemGroup>
+
+  <!-- Runs after ComputeFilesToPublish (not just "BeforeTargets=Publish"): the Web SDK's
+       implicit `wwwroot\**` content glob is evaluated at MSBuild project-evaluation time, before
+       any target runs, so on a machine where wwwroot doesn't exist yet (fresh checkout, no prior
+       frontend build) that glob matches nothing and a plain BeforeTargets="Publish" hook is too
+       late to affect it — the publish output would build successfully but silently ship without
+       the SPA. Appending straight to @(ResolvedFileToPublish) — the standard ASP.NET Core
+       SPA-publish pattern — sidesteps the glob-timing issue entirely. -->
+  <Target Name="BuildFrontend" AfterTargets="ComputeFilesToPublish"
+          Inputs="@(FrontendSourceFiles)"
+          Outputs="$(MSBuildProjectDirectory)\obj\.frontend-build-stamp">
+    <PropertyGroup>
+      <FrontendDir>$(MSBuildProjectDirectory)\..\..\frontend\BasculaUi</FrontendDir>
+    </PropertyGroup>
+    <Exec Command="npm ci" WorkingDirectory="$(FrontendDir)" />
+    <Exec Command="npm run build" WorkingDirectory="$(FrontendDir)" />
+    <ItemGroup>
+      <FrontendDist Include="$(FrontendDir)\dist\**\*.*" />
+    </ItemGroup>
+    <MakeDir Directories="$(MSBuildProjectDirectory)\wwwroot" />
+    <Copy SourceFiles="@(FrontendDist)" DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)\obj" />
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)\obj\.frontend-build-stamp" Lines="built" Overwrite="true" />
+    <ItemGroup>
+      <ResolvedFileToPublish Include="@(FrontendDist->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
 </Project>
