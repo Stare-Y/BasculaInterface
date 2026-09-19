@@ -31,10 +31,12 @@ namespace BasculaBotTests
                 $"App window is up but has {descendants.Length} descendants - the MAUI tree isn't visible " +
                 $"to UI Automation. See {diag} and window-*.png.");
 
-            bool loginFound = descendants.Any(e =>
-                string.Equals(Name(e), "Login", StringComparison.OrdinalIgnoreCase));
+            // Was matching accessible Name == "Login", stale since the login form's own text is
+            // Spanish ("Ingresar") - AutomationId is what this whole suite is built to rely on
+            // instead of name/text matching, so use it here too.
+            bool loginFound = descendants.Any(e => Id(e) == "BtnLogIn");
             Assert.True(loginFound,
-                $"Window readable ({descendants.Length} elements) but no 'Login' button by name. See {diag}.");
+                $"Window readable ({descendants.Length} elements) but no BtnLogIn by AutomationId. See {diag}.");
         }
 
         private static AutomationElement[] SafeDescendants(Window w)
@@ -43,9 +45,9 @@ namespace BasculaBotTests
             catch { return Array.Empty<AutomationElement>(); }
         }
 
-        private static string Name(AutomationElement e)
+        private static string Id(AutomationElement e)
         {
-            try { return e.Name ?? string.Empty; }
+            try { return e.AutomationId ?? string.Empty; }
             catch { return string.Empty; }
         }
 

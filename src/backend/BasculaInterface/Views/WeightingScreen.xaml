@@ -515,6 +515,7 @@
                 <Border
                     x:Name="BtnPickPartner"
                     AutomationProperties.AutomationId="BtnPickPartner"
+                    AutomationProperties.IsInAccessibleTree="True"
                     Grid.Column="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -584,6 +585,7 @@
                 <Border
                     x:Name="BtnPickProduct"
                     AutomationProperties.AutomationId="BtnPickProduct"
+                    AutomationProperties.IsInAccessibleTree="True"
                     Grid.Column="1"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                       Dark={StaticResource BlackGray}}"
@@ -654,6 +656,7 @@
                 <Border
                     x:Name="BtnCaptureNewWeight"
                     AutomationProperties.AutomationId="BtnCaptureNewWeight"
+                    AutomationProperties.IsInAccessibleTree="True"
                     Grid.Column="2"
                     BackgroundColor="{AppThemeBinding Light=Green,
                                                       Dark={StaticResource BlackGray}}"

@@ -82,6 +82,7 @@
                             <Border
                                 x:Name="selectedResult"
                                 AutomationProperties.AutomationId="selectedResult"
+                                AutomationProperties.IsInAccessibleTree="True"
                                 Padding="15"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource WhiteGray},
                                                                   Dark={StaticResource BlackGray}}"

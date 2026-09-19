@@ -92,6 +92,7 @@
                     <Border
                         x:Name="BtnSettings"
                         AutomationProperties.AutomationId="BtnSettings"
+                        AutomationProperties.IsInAccessibleTree="True"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                           Dark={StaticResource BlackGray}}"
                         HeightRequest="100"

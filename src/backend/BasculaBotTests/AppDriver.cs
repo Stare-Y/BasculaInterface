@@ -215,21 +215,24 @@ namespace BasculaBotTests
             element.Click();
         }
 
-        /// <summary>Clears any existing text and types <paramref name="text"/> into an element
-        /// (Entry/SearchBar) by focusing it first.</summary>
+        /// <summary>Clears any existing text and sets <paramref name="text"/> into an element
+        /// (Entry/SearchBar) by focusing it first. Prefers setting the whole string in one atomic
+        /// UIA Value-pattern call over simulating keystrokes: several bound Entries in this app
+        /// validate/reformat on every TextChanged (e.g. WeightingScreen's manual-weight EntryLabel
+        /// reverts the whole field on an invalid intermediate value), which character-by-character
+        /// typing can trip over mid-string and corrupt.</summary>
         public static void TypeText(AutomationElement element, string text)
         {
             element.Focus();
             if (element.Patterns.Value.IsSupported)
             {
-                element.Patterns.Value.Pattern.SetValue(string.Empty);
+                element.Patterns.Value.Pattern.SetValue(text);
+                return;
             }
-            else
-            {
-                using (Keyboard.Pressing(VirtualKeyShort.CONTROL))
-                    Keyboard.Type(VirtualKeyShort.KEY_A);
-                Keyboard.Type(VirtualKeyShort.DELETE);
-            }
+
+            using (Keyboard.Pressing(VirtualKeyShort.CONTROL))
+                Keyboard.Type(VirtualKeyShort.KEY_A);
+            Keyboard.Type(VirtualKeyShort.DELETE);
             Keyboard.Type(text);
         }
 

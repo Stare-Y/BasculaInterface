@@ -253,6 +253,7 @@
                         <Border
                             x:Name="BtnCancel"
                             AutomationProperties.AutomationId="EditSettings_BtnCancel"
+                            AutomationProperties.IsInAccessibleTree="True"
                             Grid.Column="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray},
                                                               Dark={StaticResource BlackGray}}"
