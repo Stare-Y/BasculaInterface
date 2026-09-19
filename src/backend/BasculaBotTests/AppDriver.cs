@@ -231,6 +231,11 @@ namespace BasculaBotTests
                 Keyboard.Type(VirtualKeyShort.KEY_A);
             Keyboard.Type(VirtualKeyShort.DELETE);
             Keyboard.Type(text);
+            // Keyboard.Type returns once the OS input events are dispatched, not once MAUI's UI
+            // thread has actually processed the last one's TextChanged. Callers that immediately
+            // click/navigate right after typing (e.g. the login form) can race that and lose the
+            // final character. Give it a moment to settle before handing control back.
+            Thread.Sleep(150);
         }
 
         public void Dispose()
