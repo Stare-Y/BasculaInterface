@@ -216,24 +216,20 @@ namespace BasculaBotTests
         }
 
         /// <summary>Clears any existing text and types <paramref name="text"/> into an element
-        /// (Entry/SearchBar) by focusing it first, via real simulated keystrokes. Deliberately NOT
-        /// the UIA Value pattern's SetValue: on this app's unpackaged-Windows MAUI build, setting
-        /// the native control's value that way doesn't reliably drive MAUI's own Entry.Text
-        /// binding/TextChanged pipeline (the placeholder never hides, bound state never updates) -
-        /// real keystrokes are what MAUI's handler actually listens to.</summary>
+        /// (Entry/SearchBar) by focusing it first, via real simulated keystrokes for BOTH the
+        /// clear and the type. Deliberately never uses the UIA Value pattern's SetValue (not even
+        /// to clear to empty): on this app's unpackaged-Windows MAUI build, setting the native
+        /// control's value that way doesn't reliably drive MAUI's own Entry.Text binding/
+        /// TextChanged pipeline. Most fields in this suite start empty, so a broken SetValue("")
+        /// clear was an invisible no-op there — EntryLabel (bound to Peso, so it starts non-empty)
+        /// was the first field where it actually mattered, and left it typing into a control MAUI
+        /// still thought held the old value, racing/garbling the following keystrokes.</summary>
         public static void TypeText(AutomationElement element, string text)
         {
             element.Focus();
-            if (element.Patterns.Value.IsSupported)
-            {
-                element.Patterns.Value.Pattern.SetValue(string.Empty);
-            }
-            else
-            {
-                using (Keyboard.Pressing(VirtualKeyShort.CONTROL))
-                    Keyboard.Type(VirtualKeyShort.KEY_A);
-                Keyboard.Type(VirtualKeyShort.DELETE);
-            }
+            using (Keyboard.Pressing(VirtualKeyShort.CONTROL))
+                Keyboard.Type(VirtualKeyShort.KEY_A);
+            Keyboard.Type(VirtualKeyShort.DELETE);
             Keyboard.Type(text);
         }
 
