@@ -50,7 +50,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\vm\run-bot-suite.ps1
 This builds `BasculaInterface` for `net8.0-windows`, runs the bot suite against the fresh exe,
 and drops a `bot-tests.trx` plus screenshots in `artifacts/bot-suite/`.
 
-A live `BasculaTerminalApi` (on a dedicated port, 5999 by default) starts automatically — the
+A live `BasculaTerminalApi` (port 6969 — `appsettings.json`'s Kestrel config hardcodes that for
+every environment, overriding any `-ApiPort`/`--urls` value) starts automatically — the
 roleplays need one to log in and provision the `BOT*` test users. Before publishing anything, the
 script checks that `BasculaBotAdminIdentifier`, `BasculaBotAdminPassword`, and
 `BasculaBotRolePassword` are set in the environment and fails fast with a clear message if not.

@@ -31,7 +31,12 @@ param(
     [string]$Configuration = "Release",
     [string]$TargetFramework = "net8.0-windows10.0.19041.0",
     [switch]$NoApi,
-    [int]$ApiPort = 5999,
+    # BasculaTerminalApi/appsettings.json hardcodes Kestrel:Endpoints:Http:Url to
+    # "http://*:6969" for every environment, which overrides `dotnet run --urls` below (ASP.NET
+    # Core logs "Overriding address(es) ... Binding to endpoints defined via IConfiguration" and
+    # binds to 6969 regardless of what's passed here). Default matches that fixed port; the
+    # --urls flag is still passed below in case that appsettings.json override is ever removed.
+    [int]$ApiPort = 6969,
     [string]$ArtifactsDir
 )
 
