@@ -128,9 +128,13 @@ namespace BasculaBotTests
 
             AutomationElement entryLabel = AppDriver.WaitForElement(window, "EntryLabel", RoleplaySupport.DefaultWait)
                 ?? throw new InvalidOperationException("EntryLabel never appeared after enabling manual capture.");
-            AppDriver.TypeText(entryLabel, "123.45");
+            // A plain integer, not "123.45": WeightingScreen.PesoLabel_TextChanged double.TryParses
+            // and reverts the WHOLE field on every keystroke that doesn't parse - a trailing bare
+            // decimal point ("123.") mid-typing can fail that parse and corrupt character-by-
+            // character input. Every prefix of "123" parses fine, sidestepping it entirely.
+            AppDriver.TypeText(entryLabel, "123");
 
-            Assert.Contains("123.45", ReadText(entryLabel));
+            Assert.Contains("123", ReadText(entryLabel));
         }
 
         // Customer Service is intentionally excluded here: their PedidosOnly flow never opens
